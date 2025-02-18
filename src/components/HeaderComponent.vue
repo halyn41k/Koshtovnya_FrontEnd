@@ -48,9 +48,10 @@
       </div>
 
       <router-link to="/" class="logo">
-        <img src="@/assets/logo.png" alt="Logo" />
-        <h1>{{ $t('logo') }}</h1>
+      <img :src="siteSettings.site_logo" alt="Коштовня Лого" />
+      <h1>{{ $t('logo') }}</h1>
       </router-link>
+
 
       <div class="user-cart">
 
@@ -94,6 +95,9 @@ export default {
       searchQuery: '',
       isLanguageDropdownOpen: false,
       isCurrencyDropdownOpen: false,
+      siteSettings: {
+      site_logo: '',
+    },
     };
   },
   computed: {
@@ -136,10 +140,24 @@ export default {
       console.log("Currency dropdown toggled:", this.isCurrencyDropdownOpen);
       this.isCurrencyDropdownOpen = !this.isCurrencyDropdownOpen;
     },
+    async fetchSiteSettings() {
+    try {
+      const response = await axios.get('http://26.235.139.202:8080/api/site-settings');
+      const settings = response.data.data;
+      settings.forEach(setting => {
+        if (setting.setting_key === 'site_logo') {
+          this.siteSettings.site_logo = setting.setting_value;
+        }
+      });
+    } catch (error) {
+      console.error('Помилка завантаження логотипу:', error);
+    }
   },
-  mounted() {
-    this.fetchCartCount();
   },
+  async mounted() {
+  await this.fetchSiteSettings();
+  this.fetchCartCount();
+},
 };
 </script>
 

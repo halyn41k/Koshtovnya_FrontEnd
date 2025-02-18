@@ -1,4 +1,4 @@
-<template>
+<template> 
   <main class="settings-content">
     <header class="settings-header">
       <img loading="lazy"
@@ -7,13 +7,8 @@
       <h1 class="settings-title">Налаштування</h1>
     </header>
 
-    <section class="logo-section">
-      <h2 class="section-title">Змінити логотип:</h2>
-      <input type="url" id="logo" class="form-input" v-model="settings.logo" placeholder="Введіть URL логотипу" />
-    </section>
-
     <section class="contact-info-section">
-      <h2 class="section-title">Змінити контактну інформацію:</h2>
+      <h2 class="section-title">Загальна інформація:</h2>
       <div class="contact-info-container">
         <h3 class="contact-info-title">Контактна Інформація</h3>
         <form class="contact-form" @submit.prevent="saveSettings">
@@ -41,6 +36,13 @@
             <label for="tiktok" class="form-label">TikTok</label>
             <input type="url" id="tiktok" class="form-input" v-model="settings.tiktok" />
           </div>
+          <div class="form-group">
+            <label for="logo" class="form-label">Завантажити логотип</label>
+            <input type="file" id="logo" class="form-input" @change="handleFileUpload" accept="image/*" />
+            <div v-if="logoPreview" class="image-preview">
+              <img :src="logoPreview" alt="Прев'ю логотипу" class="logo-preview" />
+            </div>
+          </div>
           <button type="submit" class="submit-button">Зберегти зміни</button>
         </form>
       </div>
@@ -62,6 +64,7 @@ export default {
         facebook: "",
         tiktok: "",
       },
+      logoPreview: null,
       apiUrl: "http://26.235.139.202:8080/api/site-settings",
     };
   },
@@ -74,7 +77,6 @@ export default {
         }
         const { data } = await response.json();
 
-        // Маппінг налаштувань з API в модель
         const mappedSettings = data.reduce((acc, setting) => {
           acc[setting.setting_key] = setting.setting_value;
           return acc;
@@ -93,24 +95,31 @@ export default {
         console.error("Помилка завантаження налаштувань:", error);
       }
     },
+    handleFileUpload(event) {
+      const file = event.target.files[0];
+      if (file) {
+        this.settings.logo = file;
+        this.logoPreview = URL.createObjectURL(file);
+      }
+    },
+
     async saveSettings() {
       try {
-        const payload = [
-          { setting_key: "footer_address_info", setting_value: this.settings.address },
-          { setting_key: "footer_phone_number", setting_value: this.settings.phone },
-          { setting_key: "footer_email_info", setting_value: this.settings.email },
-          { setting_key: "site_logo", setting_value: this.settings.logo },
-          { setting_key: "footer_instagram", setting_value: this.settings.instagram },
-          { setting_key: "footer_facebook", setting_value: this.settings.facebook },
-          { setting_key: "footer_tiktok", setting_value: this.settings.tiktok },
-        ];
+        const formData = new FormData();
+        formData.append("footer_address_info", this.settings.address);
+        formData.append("footer_phone_number", this.settings.phone);
+        formData.append("footer_email_info", this.settings.email);
+        formData.append("footer_instagram", this.settings.instagram);
+        formData.append("footer_facebook", this.settings.facebook);
+        formData.append("footer_tiktok", this.settings.tiktok);
+
+        if (this.settings.logo instanceof File) {
+          formData.append("site_logo", this.settings.logo);
+        }
 
         const response = await fetch(this.apiUrl, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ data: payload }),
+          method: "POST", 
+          body: formData,
         });
 
         if (!response.ok) {
@@ -128,7 +137,6 @@ export default {
   },
 };
 </script>
-
 
 <style scoped>
 .settings-content {

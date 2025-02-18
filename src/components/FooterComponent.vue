@@ -1,9 +1,9 @@
-<template>
+<template> 
   <footer class="footer">
     <div class="footer-content">
       <div class="logo-section">
         <router-link to="/" class="logo-wrapper">
-          <img src="@/assets/logo.svg" alt="Коштовня Лого" class="logo-image" />
+          <img :src="siteSettings.site_logo" alt="Коштовня Лого" class="logo-image" />
           <h1 class="logo-title">{{ $t('logo') }}</h1>
         </router-link>
         <p class="description">{{ $t('description') }}</p>
@@ -38,17 +38,17 @@
           <address class="contact-info">
             <div class="contact-item">
               <img src="@/assets/mark.png" class="icon-left" alt="address" />
-              <p class="address">{{ $t('address') }}</p>
+              <p class="address">{{ siteSettings.footer_address_info }}</p>
             </div>
             <div class="divider"></div>
             <div class="contact-item">
               <img src="@/assets/telephone.png" class="icon-left" alt="phone" />
-              <p class="phone">+380123456789</p>
+              <p class="phone">{{ siteSettings.footer_phone_number }}</p>
             </div>
             <div class="divider"></div>
             <div class="contact-item">
               <img src="@/assets/list.png" class="icon-left" alt="email" />
-              <p class="email">koshtovnya@mail.com</p>
+              <p class="email">{{ siteSettings.footer_email_info }}</p>
             </div>
           </address>
         </div>
@@ -72,13 +72,39 @@
   </footer>
 </template>
 
-
-
 <script>
+import axios from 'axios';
+
 export default {
-  name: 'FooterComponent',
+  data() {
+    return {
+      siteSettings: {
+        site_logo: '',
+        footer_email_info: '',
+        footer_address_info: '',
+        footer_phone_number: ''
+      }
+    };
+  },
+  mounted() {
+    this.fetchSiteSettings();
+  },
+  methods: {
+    async fetchSiteSettings() {
+      try {
+        const response = await axios.get('http://26.235.139.202:8080/api/site-settings');
+        const settings = response.data.data;
+        settings.forEach(setting => {
+          this.siteSettings[setting.setting_key] = setting.setting_value;
+        });
+      } catch (error) {
+        console.error('Помилка завантаження налаштувань сайту:', error);
+      }
+    }
+  }
 };
 </script>
+
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
@@ -126,14 +152,14 @@ export default {
 }
 
 .logo-image {
-  margin-top: -40px;
-  margin-left: -30px;
-  width: 140px;
-  height: 160px;
+  margin-top: 0px;
+  margin-left: 0px;
+  width: 80px;
+  height: 70px;
 }
 
 .logo-title {
-  margin-top: -20px;
+  margin-top: 10px;
   margin-left: -20px;
   font-family: 'KyivType Titling', sans-serif;
   font-weight: 900;
@@ -141,6 +167,7 @@ export default {
   color: black;
   transition: transform 0.3s ease;
   text-decoration: none;
+  margin-left: 5px;
 }
 
 .logo-wrapper:hover .logo-title {
@@ -162,11 +189,12 @@ export default {
   justify-content: space-between;
   width: 60%;
   margin-top: 20px;
+  position: relative;
 }
 
 .nav-section {
-  display: flex;
-  flex-direction: column;
+  flex: 1;
+  min-width: 200px; /* Забезпечує нормальне вирівнювання */
 }
 
 .nav-title {
@@ -175,9 +203,7 @@ export default {
   font-family: 'Montserrat', sans-serif;
   font-weight: 700;
   text-align: center;
-  position: relative;
   margin-bottom: 10px;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .footer-list {
@@ -224,6 +250,7 @@ export default {
   font-size: 16px;
   font-family: 'Montserrat', serif;
   font-style: normal;
+  margin-left: auto; /* Вирівнює контактну інформацію праворуч */
 }
 
 .contact-item {
@@ -240,7 +267,7 @@ export default {
 }
 
 .social-links {
-  margin-left: 45px;
+  margin-left: 65px;
   display: flex;
   gap: 15px;
 }
