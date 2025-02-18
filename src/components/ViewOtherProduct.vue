@@ -1,6 +1,6 @@
 <template>
   <section class="view-other-products">
-    <h2 class="specifications-title">{{ $t('Переглянути інші товари') }}</h2>
+    <h2 class="specifications-title">{{ $t('Перегляньте інші товари') }}</h2>
     <div class="arrow-container">
       <img src="@/assets/left_arrow.png" alt="left-arrow" class="arrow left-arrow" @click="showPreviousProducts" />
       <div class="product-grid">
@@ -55,20 +55,20 @@ export default {
       currentPage: 0,
       productsPerPage: 3,
       totalPages: 0,
-      wishlist: [], // Store IDs of products in the wishlist
+      wishlist: [],
     };
   },
   methods: {
     async fetchProducts() {
       try {
-        const response = await fetch("http://26.235.139.202:8080/api/popular-products");
+        const response = await fetch("http://26.235.139.202:8080/api/popular-products?page=1");
         if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
+
         const data = await response.json();
         this.products = data.data;
+        this.totalPages = data.totalPages || Math.ceil(this.products.length / this.productsPerPage);
         this.updateVisibleProducts();
-        this.totalPages = Math.ceil(this.products.length / this.productsPerPage);
 
-        // Fetch the wishlist after products are fetched
         await this.fetchWishlist();
       } catch (error) {
         console.error("Error fetching popular products:", error.message);
@@ -81,20 +81,23 @@ export default {
         console.warn('Користувач не авторизований');
         return;
       }
+
+      const cachedWishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
+      this.wishlist = cachedWishlist;
+
       try {
         const response = await axios.get('http://26.235.139.202:8080/api/wishlist', {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        // Ensure the response contains products
         if (response.data && response.data.products) {
           this.wishlist = response.data.products.map((item) => item.id);
+          localStorage.setItem('wishlist', JSON.stringify(this.wishlist));
         } else {
           console.warn('Некоректна структура відповіді API для списку бажаного:', response.data);
           this.wishlist = [];
         }
 
-        // Sync product states with the wishlist
         this.products.forEach((product) => {
           product.is_in_wishlist = this.isInWishlist(product.id);
         });
@@ -102,12 +105,23 @@ export default {
         console.error('Помилка завантаження списку бажаного:', error);
       }
     },
+    async fetchAdditionalProducts(page) {
+      try {
+        const response = await fetch(`http://26.235.139.202:8080/api/new-arrivals?page=${page}`);
+        if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
+        const data = await response.json();
+        this.products.push(...data.data);
+      } catch (error) {
+        console.error("Error pre-fetching additional products:", error.message);
+      }
+    },
+
 
     isInWishlist(productId) {
       return this.wishlist.includes(productId);
     },
 
-    async toggleWishlist(product) {
+    async toggleWishlist(product, size = null) {
       const token = localStorage.getItem('token');
       if (!token) {
         alert('Будь ласка, увійдіть у свій обліковий запис.');
@@ -116,27 +130,32 @@ export default {
       }
       try {
         if (this.isInWishlist(product.id)) {
-          // Remove from wishlist
+          // Видалення зі списку бажаного
           await axios.delete(`http://26.235.139.202:8080/api/wishlist/${product.id}`, {
             headers: { Authorization: `Bearer ${token}` },
           });
           this.wishlist = this.wishlist.filter((id) => id !== product.id);
         } else {
-          // Add to wishlist
+          // Додавання до списку бажаного
+          const requestData = { product_id: product.id };
+          if (size) {
+            requestData.size = size; // Додаємо поле size, якщо воно передане
+          }
+
           await axios.post(
             'http://26.235.139.202:8080/api/wishlist',
-            { product_id: product.id },
+            requestData,
             { headers: { Authorization: `Bearer ${token}` } }
           );
           this.wishlist.push(product.id);
         }
-
-        // Immediately update product's wishlist state
+        // Оновлюємо стан продукту напряму
         product.is_in_wishlist = this.isInWishlist(product.id);
       } catch (error) {
         console.error('Помилка при оновленні списку бажаного:', error);
       }
     },
+
 
     updateVisibleProducts() {
       const start = this.currentPage * this.productsPerPage;
@@ -215,6 +234,16 @@ export default {
   position: relative;
 }
 
+.arrow-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 90%;
+  margin: 0 auto;
+  padding: 20px 0;
+  position: relative;
+}
+
 .arrow {
   cursor: pointer;
   width: 40px;
@@ -238,19 +267,21 @@ export default {
 }
 
 .product-grid {
-  display: flex;
-  justify-content: center;
-  gap: 40px;
-  flex-wrap: nowrap;
-  padding: 0;
-  max-width: 900px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  /* Три картки в ряд */
+  gap: 20px;
+  /* Відстань між картками */
+  max-width: 100%;
+  /* Максимальна ширина 100% для адаптивності */
   margin: 0 auto;
+  /* Вирівнювання по центру */
+  padding: 0 20px;
 }
 
 .product-column {
-  flex-grow: 1;
-  flex-basis: 280px;
   max-width: 280px;
+  margin: 0 auto;
 }
 
 .product-card {
@@ -401,19 +432,97 @@ export default {
   justify-content: center;
   align-items: center;
   gap: 10px;
-  margin-top: 15px;
+  margin-bottom: 10px;
 }
 
 .dot {
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background-color: #480b0b;
+  background-color: #480B0B;
   opacity: 75%;
 }
 
 .dot.light {
-  background-color: #480b0b;
+  background-color: #480B0B;
   opacity: 25%;
+}
+
+.wishlist-icon {
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.wishlist-icon:hover {
+  transform: scale(1.1);
+}
+
+.filled-heart {
+  fill: #A01212;
+}
+
+.empty-heart {
+  stroke: #B3B3B3;
+  stroke-width: 2;
+  fill: none;
+}
+
+.view-products-button {
+  font-family: 'Merriweather', sans-serif;
+  color: #fff;
+  background-color: #6B1F1F;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 18px;
+  margin-top: 50px;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+
+}
+
+.view-products-button:hover {
+  background-color: #a01212;
+}
+
+
+
+
+.material-wishlist {
+  display: flex;
+  justify-content: space-between;
+  /* Розташування тексту і сердечка */
+  align-items: center;
+  margin-left: 13px;
+  margin-right: 13px;
+}
+
+.product-material {
+  font-size: 18px;
+  color: #808080;
+}
+
+.wishlist-icon {
+  width: 24px;
+  /* Розмір іконки */
+  height: 24px;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.wishlist-icon:hover {
+  transform: scale(1.1);
+}
+
+.filled-heart {
+  fill: #A01212;
+}
+
+.empty-heart {
+  stroke: #B3B3B3;
+  stroke-width: 2;
+  fill: none;
 }
 </style>

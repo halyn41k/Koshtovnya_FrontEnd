@@ -235,7 +235,7 @@ export default {
 }
 
 .footer-link:hover::after {
-  width: 100%;
+  width: 70%;
 }
 
 .footer-link:hover {

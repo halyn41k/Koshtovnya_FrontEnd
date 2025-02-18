@@ -45,8 +45,8 @@
           {{ $t('dontMissTheMost') }} <!-- Текст на другому рядку -->
         </p>
         <p class="instagram-handle fade-in">
-          <span class="instagram-handle-link fade-in">@koshtovnya_jewelry</span>
-        </p>
+  <a href="https://www.instagram.com/koshtovnya_jewelry/" class="instagram-handle-link fade-in" target="_blank" style="text-decoration: none;">@koshtovnya_jewelry</a>
+</p>
       </div>
 
       <div class="instagram-grid fade-in">
