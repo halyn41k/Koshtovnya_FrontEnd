@@ -188,7 +188,7 @@ export default {
 }
 
 .report-title {
-  font-size: 40px;
+  font-size: 32px;
   font-weight: 700;
 }
 

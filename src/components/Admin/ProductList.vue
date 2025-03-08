@@ -142,7 +142,7 @@ export default {
 
 .product-title {
   font-family: Montserrat, sans-serif;
-  font-size: 40px;
+  font-size: 32px;
   font-weight: 700;
   color: #000;
   margin-bottom: 16px;

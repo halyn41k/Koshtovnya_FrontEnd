@@ -1,13 +1,17 @@
 <template>
   <main class="client-list">
     <h1 class="client-list__title">Клієнти</h1>
+
+    <!-- Блок із фільтрами й кнопкою "Додати" -->
     <div class="client-list__controls">
       <div class="controls-left">
         <div class="filter">
           <span class="filter__text">Фільтр</span>
           <img
             src="https://cdn.builder.io/api/v1/image/assets/c3e46d0a629546c7a48302a5db3297d5/4b09284ab367fa70a05a4a4f59e91721443ad7e8e783dfd2c26fb681ebacd30f?apiKey=c3e46d0a629546c7a48302a5db3297d5"
-            alt="Filter icon" class="filter__icon" />
+            alt="Filter icon"
+            class="filter__icon"
+          />
         </div>
         <div class="search-form">
           <input
@@ -15,64 +19,69 @@
             type="text"
             placeholder="Пошук"
             v-model="searchQuery"
-            @input="onSearch" />
+            @input="onSearch"
+          />
         </div>
       </div>
       <div class="controls-right">
         <button class="add-button" @click="openAddModal">
           <img
             src="https://cdn.builder.io/api/v1/image/assets/c3e46d0a629546c7a48302a5db3297d5/a27ea7f8a293148ec591123dc3120b25f531a1f574adc4774e1503c5d2772fcb?apiKey=c3e46d0a629546c7a48302a5db3297d5"
-            alt="Add icon" class="add-button__icon" />
+            alt="Add icon"
+            class="add-button__icon"
+          />
           <span class="add-button__text">Додати</span>
         </button>
       </div>
     </div>
-    <section class="client-table">
+
+    <!--
+      Горизонтальний контейнер для "таблиці":
+      всередині нього лежить шапка (header) і список (<ul>).
+      Якщо екран надто вузький, з’явиться горизонтальний скрол.
+    -->
+    <div class="client-table-container">
+      <!-- Шапка (7 колонок) -->
       <header class="client-table__header">
-        <div class="client-table__header-left">
-          <span class="client-table__header-id">ID</span>
-          <span class="client-table__header-name">Ім'я/Email</span>
-        </div>
-        <div class="client-table__header-right">
-          <span class="client-table__header-order">№ Замовлення</span>
-          <span class="client-table__header-phone">Телефон</span>
-          <span class="client-table__header-date">Додано</span>
-          <span class="client-table__header-actions">Керування</span>
-        </div>
+        <span>ID</span>
+        <span>Ім'я</span>
+        <span>Email</span>
+        <span>№ Замовлення</span>
+        <span>Телефон</span>
+        <span>Додано</span>
+        <span>Керування</span>
       </header>
+
+      <!-- Список клієнтів (кожен li – 7 колонок) -->
       <ul class="client-list__items">
         <li v-for="(client, index) in clients" :key="client.id" class="client-item">
-          <div class="client-item__info">
-            <div class="client-item__main">
-              <span class="client-item__id">{{ index + 1 }}.</span>
-              <div class="client-item__name-email">
-                <span class="client-item__name">{{ client.first_name }} {{ client.last_name }}</span>
-                <span class="client-item__email">{{ client.email }}</span>
-              </div>
-            </div>
-            <div class="client-item__details">
-              <span class="client-item__order">{{ client.order ? client.order : '—' }}</span>
-              <span class="client-item__phone">{{ client.phone_number }}</span>
-              <span class="client-item__date">{{ client.created_at }}</span>
-            </div>
-          </div>
+          <span class="client-item__id">{{ index + 1 }}</span>
+          <span class="client-item__name">{{ client.first_name }} {{ client.last_name }}</span>
+          <span class="client-item__email">{{ client.email }}</span>
+          <span class="client-item__order">{{ client.order_id ? client.order_id : '—' }}</span>
+          <span class="client-item__phone">{{ client.phone_number }}</span>
+          <span class="client-item__date">{{ client.date }}</span>
           <div class="client-item__actions">
             <button class="action-button action-button--delete" @click="deleteUser(client.id)">
               <img
                 src="https://cdn.builder.io/api/v1/image/assets/c3e46d0a629546c7a48302a5db3297d5/ba078f16c37c9f7f4a38bffc3903a0783959b7a0f9fc95368926f1c2df1ef2a7?apiKey=c3e46d0a629546c7a48302a5db3297d5"
-                alt="Delete icon" class="action-button__icon" />
+                alt="Delete icon"
+                class="action-button__icon"
+              />
               <span class="action-button__text">Видалити</span>
             </button>
             <button class="action-button action-button--update" @click="openUpdateModal(client)">
               <img
                 src="https://via.placeholder.com/24"
-                alt="Update icon" class="action-button__icon" />
+                alt="Update icon"
+                class="action-button__icon"
+              />
               <span class="action-button__text">Оновити</span>
             </button>
           </div>
         </li>
       </ul>
-    </section>
+    </div>
 
     <!-- Модальне вікно для додавання/оновлення користувача -->
     <div v-if="showModal" class="modal-overlay">
@@ -154,23 +163,35 @@ export default {
     async fetchUsers() {
       try {
         const response = await axios.get('http://26.235.139.202:8080/api/admin/users', {
-          params: { role: 'user' }
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+            Accept: 'application/json'
+          }
         });
-        this.clients = response.data;
+        this.clients = response.data.data;
       } catch (error) {
         console.error('Помилка отримання користувачів:', error);
       }
     },
     async addUser() {
       try {
-        const response = await axios.post('http://26.235.139.202:8080/api/admin/user', {
-          first_name: this.form.first_name,
-          second_name: this.form.second_name,
-          last_name: this.form.last_name,
-          email: this.form.email,
-          phone_number: this.form.phone_number,
-          role: this.form.role
-        });
+        const response = await axios.post(
+          'http://26.235.139.202:8080/api/admin/user',
+          {
+            first_name: this.form.first_name,
+            second_name: this.form.second_name,
+            last_name: this.form.last_name,
+            email: this.form.email,
+            phone_number: this.form.phone_number,
+            role: this.form.role
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('token')}`,
+              Accept: 'application/json'
+            }
+          }
+        );
         console.log('Користувача додано:', response.data);
         this.fetchUsers();
         this.closeModal();
@@ -180,13 +201,22 @@ export default {
     },
     async updateUser() {
       try {
-        const response = await axios.patch(`http://26.235.139.202:8080/api/admin/user/${this.form.id}`, {
-          first_name: this.form.first_name,
-          second_name: this.form.second_name,
-          last_name: this.form.last_name,
-          email: this.form.email,
-          phone_number: this.form.phone_number
-        });
+        const response = await axios.patch(
+          `http://26.235.139.202:8080/api/admin/user/${this.form.id}`,
+          {
+            first_name: this.form.first_name,
+            second_name: this.form.second_name,
+            last_name: this.form.last_name,
+            email: this.form.email,
+            phone_number: this.form.phone_number
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('token')}`,
+              Accept: 'application/json'
+            }
+          }
+        );
         console.log('Дані користувача оновлено:', response.data);
         this.fetchUsers();
         this.closeModal();
@@ -196,7 +226,15 @@ export default {
     },
     async deleteUser(id) {
       try {
-        const response = await axios.delete(`http://26.235.139.202:8080/api/admin/users/${id}`);
+        const response = await axios.delete(
+          `http://26.235.139.202:8080/api/admin/users/${id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('token')}`,
+              Accept: 'application/json'
+            }
+          }
+        );
         console.log('Користувача видалено:', response.data);
         this.fetchUsers();
       } catch (error) {
@@ -235,28 +273,28 @@ export default {
     },
     onSearch() {
       console.log('Пошук:', this.searchQuery);
+      // Додайте власну логіку пошуку, якщо потрібно
     }
   }
 };
 </script>
 
 <style scoped>
-/* Загальні стилі */
+/* Контейнер сторінки */
 .client-list {
-  transform: scale(0.9);
-  transform-origin: top left;
+  max-width: 1200px;
+  margin: 20px auto;
   font-family: Montserrat, sans-serif;
-  width: 1200px;
-  margin-left: 20px;
+  padding: 0 20px;
 }
 
 .client-list__title {
   color: #000;
-  font-size: 40px;
+  font-size: 32px;
   font-weight: 700;
 }
 
-/* Контролери розбиті на ліву та праву частини */
+/* Блок із фільтрами й кнопкою "Додати" */
 .client-list__controls {
   display: flex;
   justify-content: space-between;
@@ -268,26 +306,30 @@ export default {
   gap: 20px;
   align-items: center;
 }
+.filter {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
 .search-form {
   background-color: #F1E9E9;
   border-radius: 8px;
   padding: 8px 20px;
-  border: 1px solid transparent;
 }
 .search-input {
   border: none;
   background: transparent;
-  font-size: 17px;
+  font-size: 16px;
   color: #000;
   outline: none;
 }
-.controls-right {
-  /* окремий блок для кнопки "Додати" */
-}
+.controls-right {}
+
+/* Кнопка "Додати" */
 .add-button {
   display: flex;
   align-items: center;
-  gap: 17px;
+  gap: 10px;
   padding: 8px 15px;
   border-radius: 12px;
   background-color: #C4AEAC;
@@ -302,113 +344,97 @@ export default {
   object-fit: contain;
 }
 
-.client-table {
-  margin-top: 22px;
+/* Контейнер для таблиці + горизонтальний скрол */
+.client-table-container {
+  width: 100%;
+  overflow-x: auto; /* Горизонтальний скрол, якщо екран замалий */
+  margin-top: 20px;
 }
 
+/* Шапка (7 колонок) */
 .client-table__header {
-  display: flex;
-  justify-content: space-between;
-  padding: 26px 35px;
-  border-radius: 24px;
+  display: grid;
+  grid-template-columns: 5% 15% 20% 10% 15% 15% 20%;
+  column-gap: 16px; /* Проміжок між колонками */
+  align-items: center;
+  padding: 16px;
+  border-radius: 12px;
   background-color: #FFF7F6;
   border: 2px solid #E6E6E6;
-  font-size: 20px;
+  font-size: 16px;
   color: #000;
-}
-
-.client-table__header-left,
-.client-table__header-right {
-  display: flex;
-  gap: 130px;
-}
-
-.client-list__items {
-  list-style-type: none;
-  padding: 0;
-}
-
-.client-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 27px 28px;
-  border-radius: 24px;
-  background-color: #FFF7F6;
-  border: 2px solid #E6E6E6;
-  margin-top: 22px;
-}
-
-.client-item__info {
-  display: flex;
-  gap: 78px;
-}
-
-.client-item__main {
-  display: flex;
-  align-items: center;
-  gap: 44px;
-}
-
-.client-item__id {
-  color: #000;
-  font-size: 50px;
   font-weight: 600;
-  line-height: 1.3;
-  letter-spacing: -2.5px;
-  text-shadow: 0px 4px 4px rgba(99, 2, 2, 0.22);
+  min-width: 800px; /* Мінімальна ширина, щоб не “стискалося” */
 }
 
-.client-item__name-email {
-  display: flex;
-  flex-direction: column;
+/* Список */
+.client-list__items {
+  list-style: none;
+  padding: 0;
+  margin: 0;
 }
 
+/* Кожен рядок (7 колонок) */
+.client-item {
+  display: grid;
+  grid-template-columns: 5% 15% 20% 10% 15% 15% 20%;
+  column-gap: 16px; /* Проміжок між колонками */
+  align-items: center;
+  padding: 16px;
+  margin-top: 12px;
+  border-radius: 12px;
+  background-color: #FFF7F6;
+  border: 2px solid #E6E6E6;
+  min-width: 800px; /* Щоб колонки не “з’їжджалися” */
+}
+
+/* Окремі стилі для кожної колонки (необов’язково) */
+.client-item__id {
+  font-size: 16px;
+  font-weight: 600;
+  color: #000;
+  text-align: center;
+}
 .client-item__name {
+  font-size: 16px;
+  font-weight: 600;
   color: #000;
-  font-size: 24px;
-  font-weight: 700;
 }
-
-.client-item__email {
-  color: #000;
-  font-size: 20px;
-  margin-top: 18px;
-}
-
-.client-item__details {
-  display: flex;
-  gap: 80px;
-  font-size: 20px;
+.client-item__email,
+.client-item__order,
+.client-item__phone,
+.client-item__date {
+  font-size: 14px;
   color: #000;
 }
 
+/* Колонка з діями (кнопки "Видалити", "Оновити") */
 .client-item__actions {
   display: flex;
-  flex-direction: column;
-  gap: 16px;
+  gap: 6px;
+  justify-content: flex-start;
 }
 
+/* Кнопки */
 .action-button {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-  border-radius: 12px;
+  gap: 4px;
+  padding: 6px 10px;
+  border-radius: 8px;
   background-color: #C4AEAC;
-  font-size: 16px;
+  font-size: 14px;
   color: #000;
   border: none;
   cursor: pointer;
 }
-
 .action-button__icon {
-  width: 24px;
-  height: 29px;
+  width: 16px;
+  height: 16px;
   object-fit: contain;
 }
 
-/* Стилі модального вікна */
+/* Модальне вікно */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -421,7 +447,6 @@ export default {
   justify-content: center;
   z-index: 1000;
 }
-
 .modal-dialog {
   background: #fff;
   border-radius: 8px;
@@ -431,7 +456,6 @@ export default {
   box-shadow: 0 2px 10px rgba(0,0,0,0.3);
   animation: fadeIn 0.3s ease-out;
 }
-
 .modal-header {
   display: flex;
   justify-content: space-between;
@@ -440,24 +464,20 @@ export default {
   padding-bottom: 10px;
   margin-bottom: 20px;
 }
-
 .close-button {
   background: transparent;
   border: none;
   font-size: 24px;
   cursor: pointer;
 }
-
 .user-form .form-group {
   margin-bottom: 15px;
 }
-
 .user-form .form-group label {
   display: block;
   margin-bottom: 5px;
   font-weight: bold;
 }
-
 .user-form .form-group input,
 .user-form .form-group select {
   width: 100%;
@@ -465,13 +485,11 @@ export default {
   border: 1px solid #ccc;
   border-radius: 4px;
 }
-
 .form-actions {
   display: flex;
   justify-content: flex-end;
   gap: 10px;
 }
-
 .btn-primary {
   background-color: #C4AEAC;
   border: none;
@@ -480,7 +498,6 @@ export default {
   border-radius: 4px;
   cursor: pointer;
 }
-
 .btn-secondary {
   background-color: #aaa;
   border: none;
@@ -490,24 +507,29 @@ export default {
   cursor: pointer;
 }
 
+/* Анімація */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-/* Media query для адаптивності */
+/* 
+  Якщо ви не хочете, щоб на малих екранах все 
+  перетворювалося на вертикальні блоки — просто 
+  видаліть або закоментуйте цей медіа-запит 
+*/
 @media (max-width: 991px) {
-  .client-item__id {
-    font-size: 40px;
-  }
-  .client-table__header,
+  /* Можна прибрати, якщо потрібен лише горизонтальний скрол */
+  /* .client-table__header,
   .client-item {
-    padding-left: 20px;
-    padding-right: 20px;
-  }
-  .client-item__info,
-  .client-item__details {
-    flex-wrap: wrap;
-  }
+    grid-template-columns: 1fr 1fr;
+    min-width: auto;
+  } */
 }
 </style>

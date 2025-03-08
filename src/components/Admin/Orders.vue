@@ -1,351 +1,376 @@
 <template>
-  <main class="order-management">
-    <h1 class="order-title">Замовлення</h1>
-    <section class="filter-section">
-      <h2 class="filter-title">Фільтр</h2>
-      <img
-        src="https://cdn.builder.io/api/v1/image/assets/c3e46d0a629546c7a48302a5db3297d5/4b09284ab367fa70a05a4a4f59e91721443ad7e8e783dfd2c26fb681ebacd30f?apiKey=c3e46d0a629546c7a48302a5db3297d5"
-        alt="Filter icon" class="filter-icon" />
-    </section>
-    <form class="search-form" @submit.prevent="handleSearch">
-      <label for="searchInput" class="visually-hidden">Пошук</label>
-      <input type="text" id="searchInput" class="search-input" placeholder="Пошук" aria-label="Пошук" />
-      <img
-        src="https://cdn.builder.io/api/v1/image/assets/c3e46d0a629546c7a48302a5db3297d5/d5c4873b11c69bccf0067abe1ce038edad573eb5f56d874777e45978e309d1df?apiKey=c3e46d0a629546c7a48302a5db3297d5"
-        alt="Search icon" class="search-icon" />
-    </form>
-    <section class="order-header">
-      <div class="order-header-left">
-        <h3 class="order-header-item">ID</h3>
-        <h3 class="order-header-item">Номер/Деталі</h3>
-      </div>
-      <div class="order-header-right">
-        <h3 class="order-header-item">Статус</h3>
-        <h3 class="order-header-item">Телефон</h3>
-        <h3 class="order-header-item">Додано</h3>
-        <h3 class="order-header-item">Керування</h3>
-      </div>
-    </section>
-    <ul class="order-list">
-      <li v-for="(order, index) in orders" :key="index" class="order-item">
-        <div class="order-details">
-          <div class="order-id-name">
-            <span class="order-id">{{ index + 1 }}.</span>
-            <div class="order-name">
-              <h4 class="order-number">Замовлення №{{ index + 1 }}</h4>
-              <p class="order-description">Гердан "Гуцулка"</p>
-            </div>
-          </div>
-          <div class="order-info">
-            <span class="order-status">{{ order.status }}</span>
-            <span class="order-phone">{{ order.phone }}</span>
-            <span class="order-date">{{ order.date }}</span>
-          </div>
-        </div>
-        <div class="order-actions">
-          <button class="action-button delete-button" @click="deleteOrder(index)">
-            <img
-              src="https://cdn.builder.io/api/v1/image/assets/c3e46d0a629546c7a48302a5db3297d5/fd9b15981ca264bc0f4746a9acc8dbbd74d669751270302ca2c8bc000258d798?apiKey=c3e46d0a629546c7a48302a5db3297d5"
-              alt="Delete icon" class="action-icon" />
-            <span>Видалити</span>
-          </button>
-          <button class="action-button update-button" @click="showUpdateModal(index)">
-            <img :src="'http://b.io/ext_' + (index + 4) + '-'" alt="Update icon" class="action-icon" />
-            <span>Оновити</span>
-          </button>
-        </div>
-      </li>
-    </ul>
+  <main class="order-list">
+    <h1 class="order-list__title">Замовлення</h1>
 
-    <div v-if="isUpdateModalVisible" class="modal">
-      <div class="modal-content">
-        <h3>Оновити замовлення</h3>
-        <form @submit.prevent="updateOrder">
-          <label>
-            Статус:
-            <input type="text" v-model="updatedOrder.status" />
-          </label>
-          <label>
-            Телефон:
-            <input type="text" v-model="updatedOrder.phone" />
-          </label>
-          <label>
-            Дата:
-            <input type="text" v-model="updatedOrder.date" />
-          </label>
-          <button type="submit">Зберегти</button>
-          <button type="button" @click="closeModal">Скасувати</button>
-        </form>
+    <!-- Блок із фільтрами (пошук) -->
+    <div class="order-list__controls">
+      <div class="controls-left">
+        <div class="filter">
+          <span class="filter__text">Фільтр</span>
+          <img
+            src="https://cdn.builder.io/api/v1/image/assets/c3e46d0a629546c7a48302a5db3297d5/4b09284ab367fa70a05a4a4f59e91721443ad7e8e783dfd2c26fb681ebacd30f?apiKey=c3e46d0a629546c7a48302a5db3297d5"
+            alt="Filter icon"
+            class="filter__icon"
+          />
+        </div>
+        <div class="search-form">
+          <input
+            class="search-input"
+            type="text"
+            placeholder="Пошук"
+            v-model="searchQuery"
+            @input="onSearch"
+          />
+        </div>
+      </div>
+      <div class="controls-right">
+        <!-- Якщо потрібне додавання замовлень, можна розкоментувати -->
+        <!-- <button class="add-button" @click="openAddModal">
+          <img src="..." alt="Add icon" class="add-button__icon" />
+          <span class="add-button__text">Додати</span>
+        </button> -->
+      </div>
+    </div>
+
+    <!-- Контейнер для таблиці замовлень з горизонтальним скролом -->
+    <div class="order-table-container">
+      <!-- Заголовок таблиці (7 колонок) -->
+      <header class="order-table__header">
+        <span>ID</span>
+        <span>Дата</span>
+        <span>Статус</span>
+        <span>Вартість</span>
+        <span>Оплата</span>
+        <span>Доставка</span>
+        <span>Дії</span>
+      </header>
+
+      <!-- Список замовлень -->
+      <ul class="order-list__items">
+        <li
+          v-for="(orderItem) in filteredOrders"
+          :key="orderItem.order.id"
+          class="order-item"
+        >
+          <span class="order-item__id">{{ orderItem.order.id }}</span>
+          <span class="order-item__date">{{ orderItem.order.order_date }}</span>
+          <span class="order-item__status">{{ orderItem.order.status }}</span>
+          <span class="order-item__total">{{ orderItem.total_cost }}</span>
+          <span class="order-item__payment">{{ orderItem.payment_method }}</span>
+          <span class="order-item__delivery">{{ orderItem.delivery.delivery_name }}</span>
+          <div class="order-item__actions">
+            <button
+              class="action-button detail-button"
+              @click="showOrderDetails(orderItem.order.id)"
+            >
+              <span>Деталі</span>
+            </button>
+            <button
+              class="action-button delete-button"
+              @click="deleteOrder(orderItem.order.id)"
+            >
+              <span>Видалити</span>
+            </button>
+          </div>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Модальне вікно з деталями замовлення -->
+    <div v-if="showDetailsModal" class="modal-overlay">
+      <div class="modal-dialog">
+        <div class="modal-header">
+          <h2>Деталі замовлення #{{ orderDetails.order.id }}</h2>
+          <button class="close-button" @click="closeDetailsModal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p><strong>Дата:</strong> {{ orderDetails.order.order_date }}</p>
+          <p><strong>Статус:</strong> {{ orderDetails.order.status }}</p>
+          <p><strong>Вартість:</strong> {{ orderDetails.total_cost }}</p>
+          <p><strong>Метод оплати:</strong> {{ orderDetails.payment_method }}</p>
+          <h3>Доставка</h3>
+          <p><strong>Спосіб доставки:</strong> {{ orderDetails.delivery.delivery_name }}</p>
+          <p><strong>Адреса:</strong> {{ orderDetails.delivery.delivery_address }}</p>
+          <p><strong>Вартість доставки:</strong> {{ orderDetails.delivery.delivery_cost }}</p>
+          <p><strong>Користувач:</strong> {{ orderDetails.delivery.user }}</p>
+          <p><strong>Телефон:</strong> {{ orderDetails.delivery.phone_number }}</p>
+          <h3>Продукти</h3>
+          <ul>
+            <li
+              v-for="product in orderDetails.order.products"
+              :key="product.id"
+            >
+              {{ product.name }} – {{ product.quantity }} шт. по {{ product.price }} грн.
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
   </main>
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
   name: 'OrderList',
   data() {
     return {
-      orders: [
-        { status: 'В очікуванні', phone: '+380981234567', date: '01.01.2024' },
-        { status: 'В очікуванні', phone: '+380981234567', date: '01.01.2024' },
-        { status: 'Відправлено', phone: '+380981234567', date: '01.01.2024' },
-        { status: 'Доставлено', phone: '+380981234567', date: '01.01.2024' },
-        { status: 'В очікуванні', phone: '+380981234567', date: '01.01.2024' },
-        { status: 'В очікуванні', phone: '+380981234567', date: '01.01.2024' },
-      ],
-      isUpdateModalVisible: false,
-      updatedOrder: { status: '', phone: '', date: '' },
-      orderIndexToUpdate: null
+      orders: [], // Список замовлень із API
+      searchQuery: '',
+      showDetailsModal: false,
+      orderDetails: {} // Деталі одного замовлення
     };
   },
+  computed: {
+    // Фільтруємо замовлення за пошуковим запитом (пошук за ID, датою або статусом)
+    filteredOrders() {
+      const query = this.searchQuery.toLowerCase();
+      return this.orders.filter(orderItem => {
+        return (
+          orderItem.order.id.toString().includes(query) ||
+          orderItem.order.order_date.toLowerCase().includes(query) ||
+          orderItem.order.status.toLowerCase().includes(query)
+        );
+      });
+    }
+  },
+  mounted() {
+    this.fetchOrders();
+  },
   methods: {
-    handleSearch() {
+    async fetchOrders() {
+      try {
+        const response = await axios.get(
+          'http://26.235.139.202:8080/api/admin/orders',
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('token')}`,
+              Accept: 'application/json'
+            }
+          }
+        );
+        // Припускаємо, що API повертає масив замовлень у response.data.data
+        this.orders = response.data.data;
+      } catch (error) {
+        console.error('Помилка отримання замовлень:', error);
+      }
     },
-    deleteOrder(index) {
-      this.orders.splice(index, 1);
+    async showOrderDetails(orderId) {
+      try {
+        const response = await axios.get(
+          `http://26.235.139.202:8080/api/orders/${orderId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('token')}`,
+              Accept: 'application/json'
+            }
+          }
+        );
+        // Припускаємо, що деталі замовлення знаходяться в response.data.data
+        this.orderDetails = response.data.data;
+        this.showDetailsModal = true;
+      } catch (error) {
+        console.error('Помилка отримання деталей замовлення:', error);
+      }
     },
-    showUpdateModal(index) {
-      this.orderIndexToUpdate = index;
-      this.updatedOrder = { ...this.orders[index] };
-      this.isUpdateModalVisible = true;
+    async deleteOrder(orderId) {
+      try {
+        const response = await axios.delete(
+          `http://26.235.139.202:8080/api/admin/orders/${orderId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('token')}`,
+              Accept: 'application/json'
+            }
+          }
+        );
+        console.log('Замовлення видалено:', response.data);
+        this.fetchOrders();
+      } catch (error) {
+        console.error('Помилка видалення замовлення:', error);
+      }
     },
-    updateOrder() {
-      this.$set(this.orders, this.orderIndexToUpdate, this.updatedOrder);
-      this.closeModal();
+    closeDetailsModal() {
+      this.showDetailsModal = false;
+      this.orderDetails = {};
     },
-    closeModal() {
-      this.isUpdateModalVisible = false;
-      this.updatedOrder = { status: '', phone: '', date: '' };
-      this.orderIndexToUpdate = null;
+    onSearch() {
+      console.log('Пошук:', this.searchQuery);
+      // Додаткова логіка пошуку, якщо потрібно
     }
   }
 };
 </script>
 
 <style scoped>
-.order-management {
+/* Загальний контейнер */
+.order-list {
+  max-width: 1200px;
+  margin: 20px auto;
   font-family: Montserrat, sans-serif;
-  transform: scale(0.9);
-  transform-origin: top left;
-  font-family: Montserrat, sans-serif;
-  width: 1200px;
-  margin-left: 20px;
+  padding: 0 20px;
 }
 
-.order-title {
+.order-list__title {
   color: #000;
-  font-size: 40px;
+  font-size: 32px;
   font-weight: 700;
 }
 
-.filter-section {
+/* Блок із фільтрами */
+.order-list__controls {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 9px;
   margin-top: 32px;
 }
-
-.filter-title {
-  color: #000;
-  font-size: 30px;
-  font-weight: 400;
-}
-
-.filter-icon {
-  width: 37px;
-  height: 39px;
-  object-fit: contain;
-}
-
-
-.search-form {
+.controls-left {
   display: flex;
+  gap: 20px;
   align-items: center;
-  background-color: #F1E9E9;
-  border-radius: 8px;
-  padding: 8px 20px;
-  border: 1px solid transparent;
-  width: 400px;
 }
-
-.search-input {
-  flex: 1;
-  border: none;
-  background: transparent;
-  font-family: Montserrat, sans-serif;
-  font-size: 17px;
-  color: #000;
-  outline: none;
-}
-
-.search-icon {
-  width: 30px;
-  height: 30px;
-  margin-left: 8px;
-}
-
-.order-header {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 22px;
-  padding: 24px 35px;
-  border-radius: 24px;
-  background-color: #FFF7F6;
-  border: 2px solid #E6E6E6;
-}
-
-.order-header-left,
-.order-header-right {
-  display: flex;
-  gap: 40px;
-}
-
-.order-header-item {
-  font-size: 20px;
-  font-weight: 400;
-  color: #000;
-}
-
-.order-list {
-  list-style-type: none;
-  padding: 0;
-}
-
-.order-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 16px;
-  padding: 27px 28px;
-  border-radius: 24px;
-  background-color: #FFF7F6;
-  border: 2px solid #E6E6E6;
-}
-
-.order-details {
-  display: flex;
-  gap: 156px;
-}
-
-.order-id-name {
-  display: flex;
-  align-items: center;
-  gap: 44px;
-}
-
-.order-id {
-  font-size: 50px;
-  font-weight: 600;
-  color: #000;
-  text-shadow: 0px 4px 4px rgba(99, 2, 2, 0.22);
-}
-
-.order-name {
-  display: flex;
-  flex-direction: column;
-}
-
-.order-number {
-  font-size: 24px;
-  font-weight: 700;
-  color: #000;
-  margin: 0;
-}
-
-.order-description {
-  font-size: 20px;
-  font-weight: 400;
-  color: #000;
-  margin: 18px 0 0;
-}
-
-.order-info {
-  display: flex;
-  gap: 64px;
-}
-
-.order-status,
-.order-phone,
-.order-date {
-  font-size: 20px;
-  font-weight: 400;
-  color: #000;
-}
-
-.order-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.action-button {
+.filter {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 12px;
-  border-radius: 12px;
-  background-color: #C4AEAC;
+}
+.search-form {
+  background-color: #F1E9E9;
+  border-radius: 8px;
+  padding: 8px 20px;
+}
+.search-input {
   border: none;
-  cursor: pointer;
+  background: transparent;
   font-size: 16px;
+  color: #000;
+  outline: none;
+}
+.controls-right {}
+
+/* Контейнер таблиці з горизонтальним скролом */
+.order-table-container {
+  width: 100%;
+  overflow-x: auto;
+  margin-top: 20px;
+}
+
+/* Заголовок таблиці (7 колонок) */
+.order-table__header {
+  display: grid;
+  grid-template-columns: 5% 15% 15% 15% 15% 15% 20%;
+  column-gap: 16px;
+  align-items: center;
+  padding: 16px;
+  border-radius: 12px;
+  background-color: #FFF7F6;
+  border: 2px solid #E6E6E6;
+  font-size: 16px;
+  color: #000;
+  font-weight: 600;
+  min-width: 800px;
+}
+
+/* Список замовлень */
+.order-list__items {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* Кожен рядок замовлення (7 колонок) */
+.order-item {
+  display: grid;
+  grid-template-columns: 5% 15% 15% 15% 15% 15% 20%;
+  column-gap: 16px;
+  align-items: center;
+  padding: 16px;
+  margin-top: 12px;
+  border-radius: 12px;
+  background-color: #FFF7F6;
+  border: 2px solid #E6E6E6;
+  min-width: 800px;
+}
+
+/* Стилі для колонок */
+.order-item__id {
+  font-size: 16px;
+  font-weight: 600;
+  text-align: center;
+}
+.order-item__date,
+.order-item__status,
+.order-item__total,
+.order-item__payment,
+.order-item__delivery {
+  font-size: 14px;
   color: #000;
 }
 
-.action-icon {
-  width: 24px;
-  height: 24px;
+/* Колонка з діями */
+.order-item__actions {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-start;
 }
 
-.visually-hidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
+/* Кнопки дій */
+.action-button {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background-color: #C4AEAC;
+  font-size: 14px;
+  color: #000;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+.action-button:hover {
+  background-color: #b19694;
 }
 
-.modal {
+/* Модальне вікно */
+.modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.5);
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
+  z-index: 1000;
 }
-
-.modal-content {
+.modal-dialog {
   background: #fff;
-  padding: 20px;
   border-radius: 8px;
   width: 400px;
+  max-width: 90%;
+  padding: 20px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+  animation: fadeIn 0.3s ease-out;
 }
-
-@media (max-width: 991px) {
-
-  .order-header,
-  .order-item {
-    padding: 24px 20px;
-  }
-
-  .order-details {
-    flex-direction: column;
-    gap: 20px;
-  }
-
-  .order-id {
-    font-size: 40px;
-  }
-
-  .order-info {
-    flex-wrap: wrap;
-  }
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+}
+.close-button {
+  background: transparent;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 </style>
