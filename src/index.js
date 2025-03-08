@@ -108,14 +108,8 @@ const routes = [
     path: '/admin',
     name: 'AdminPanel',
     component: () => import('@/components/Admin/AdminPanel.vue'),
-    beforeEnter: (to, from, next) => {
-      const token = localStorage.getItem('token');
-      // Можна додати перевірку прав адміністратора, якщо така є
-      if (!token) {
-        next({ name: 'Login' });
-      } else {
-        next();
-      }
+    meta: {
+      requiresAdmin: true, // позначаємо, що цей маршрут потребує адмінських прав
     },
   },
   {
@@ -133,9 +127,28 @@ const routes = [
   },
 ];
 
+
 const router = createRouter({
   history: createWebHistory(),
   routes,
 });
+
+
+router.beforeEach((to, from, next) => {
+  if (to.meta.requiresAdmin) {
+    const storedUser = localStorage.getItem('user');
+    console.log("Stored user:", storedUser);
+    const user = storedUser ? JSON.parse(storedUser) : null;
+    console.log("Parsed user:", user);
+    if (user && (user.role === 'superadmin' || user.role === 'admin' || user.role === 'manager')) {
+      next();
+    } else {
+      next({ name: 'Home' });
+    }
+  } else {
+    next();
+  }
+});
+
 
 export default router;

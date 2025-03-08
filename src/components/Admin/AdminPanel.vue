@@ -71,6 +71,12 @@ export default {
       this.activeTab = index; // Встановлює активну вкладку
     },
   },
+  mounted() {
+  const user = JSON.parse(localStorage.getItem('user'));
+  if (!user || !['superadmin', 'admin', 'manager'].includes(user.role)) {
+    this.$router.push({ name: 'Home' });
+  }
+}
 };
 </script>
 

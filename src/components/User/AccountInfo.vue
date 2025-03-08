@@ -11,9 +11,15 @@
       <div class="account-sidebar">
         <nav class="profile-menu">
           <ul class="menu-list">
-            <li class="menu-item" v-for="(menuItem, index) in menuItems" :key="index" @click="selectTab(index)"
+            <li 
+              class="menu-item" 
+              v-for="(menuItem, index) in menuItems" 
+              :key="index" 
+              @click="selectTab(index)"
               :class="{ active: activeTab === index }">
-              <img :src="menuItem.icon" class="menu-icon"
+              <img 
+                :src="menuItem.icon" 
+                class="menu-icon"
                 :class="{ 'user-icon': menuItem.title === 'Інформація', 'heart-icon': menuItem.title === 'Список бажаного' }"
                 alt="Icon" />
               <h2 class="section-title">{{ menuItem.title }}</h2>
@@ -24,8 +30,14 @@
       </div>
 
       <div class="account-details">
-        <component :is="activeTabContent" :first_name="first_name" :last_name="last_name" :email="email"
-          :second_name="second_name" />
+        <!-- Передаємо також userId, якщо він потрібен у дочірньому компоненті -->
+        <component 
+          :is="activeTabContent" 
+          :userId="userId"
+          :first_name="first_name" 
+          :last_name="last_name" 
+          :second_name="second_name" 
+          :email="email" />
       </div>
     </section>
 
@@ -52,6 +64,7 @@ export default {
   data() {
     return {
       activeTab: 0,
+      userId: null,
       first_name: '', // Поля мають бути порожніми за замовчуванням
       last_name: '',
       second_name: '',
@@ -87,40 +100,62 @@ export default {
   },
   methods: {
     async fetchProfile() {
-      try {
-        const token = localStorage.getItem('token');
-        if (!token) {
-          this.setMessage('Ви не авторизовані. Увійдіть у систему.', 'error');
-          return;
-        }
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      this.setMessage('Ви не авторизовані. Увійдіть у систему.', 'error');
+      return;
+    }
 
-        const response = await fetch('http://26.235.139.202:8080/api/profile', {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-        });
+    const response = await fetch('http://26.235.139.202:8080/api/profile', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
-        if (!response.ok) {
-          if (response.status === 401) {
-            this.setMessage('Токен недійсний. Увійдіть знову.', 'error');
-            localStorage.removeItem('token');
-            this.$router.push({ name: 'Login' });
-          } else {
-            throw new Error(`Помилка: ${response.status}`);
-          }
-        }
-
-        const { user } = await response.json();
-        this.first_name = user.first_name || 'Невідоме ім’я';
-        this.last_name = user.last_name || 'Невідоме прізвище';
-        this.second_name = user.second_name || 'Невідоме по батькові'; // Отримуємо поле по батькові
-        this.email = user.email || 'Невідомий email';
-      } catch (error) {
-        this.setMessage('Сталася помилка.', 'error');
+    // Перевірка статусу відповіді
+    if (!response.ok) {
+      // Отримуємо текстову відповідь для додаткової діагностики
+      const errorText = await response.text();
+      console.error(`Помилка сервера. Статус: ${response.status}`, errorText);
+      if (response.status === 401) {
+        this.setMessage('Токен недійсний. Увійдіть знову.', 'error');
+        localStorage.removeItem('token');
+        this.$router.push({ name: 'Login' });
+      } else {
+        this.setMessage(`Помилка: ${response.status}`, 'error');
       }
-    },
+      return;
+    }
+
+    let jsonResponse;
+    try {
+      jsonResponse = await response.json();
+    } catch (jsonError) {
+      // Якщо не вдалося перетворити відповідь у JSON, отримуємо текст для налагодження
+      const errorText = await response.text();
+      console.error('Не вдалося розпарсити JSON:', jsonError, 'Отримано:', errorText);
+      this.setMessage('Не вдалося розпарсити відповідь від сервера.', 'error');
+      return;
+    }
+
+    console.log('Отриманий JSON:', jsonResponse);
+
+    const user = jsonResponse.user;
+    // Якщо id користувача присутній, зберігаємо його для подальших запитів
+    this.userId = user.id;
+    this.first_name = user.first_name || 'Невідоме ім’я';
+    this.last_name = user.last_name || 'Невідоме прізвище';
+    this.second_name = user.second_name || 'Невідоме по батькові';
+    this.email = user.email || 'Невідомий email';
+  } catch (error) {
+    console.error('Сталася помилка при завантаженні профілю:', error);
+    this.setMessage('Сталася помилка.', 'error');
+  }
+},
+
     async selectTab(index) {
       if (index === 4) {
         try {
@@ -171,7 +206,6 @@ export default {
   },
 };
 </script>
-
 
 
 

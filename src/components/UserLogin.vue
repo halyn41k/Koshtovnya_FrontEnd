@@ -86,38 +86,42 @@ export default {
             : "";
     },
     async submitLogin() {
-      try {
-        if (this.emailError || this.passwordError) {
-          alert("Виправте помилки у формі.");
-          return;
-        }
+  try {
+    if (this.emailError || this.passwordError) {
+      alert("Виправте помилки у формі.");
+      return;
+    }
 
-        const response = await fetch("http://26.235.139.202:8080/api/login", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            email: this.email,
-            password: this.password,
-          }),
-        });
+    const response = await fetch("http://26.235.139.202:8080/api/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email: this.email,
+        password: this.password,
+      }),
+    });
 
-        if (!response.ok) throw new Error("Помилка входу. Перевірте дані.");
+    // Розбираємо JSON-відповідь
+    const data = await response.json();
 
-        const data = await response.json();
-        console.log("Успішний вхід:", data);
+    if (response.ok) {
+      // Зберігаємо токен та інформацію про користувача
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify(data.user));
+      alert("Вхід успішний!");
+      this.$router.push('/account'); // Перенаправляємо на сторінку акаунта
+    } else {
+      console.error('Помилка авторизації:', data.message);
+      alert(data.message || "Помилка авторизації");
+    }
+  } catch (error) {
+    console.error('Помилка під час авторизації:', error);
+    alert("Сталася помилка. Спробуйте ще раз.");
+  }
+},
 
-        // Збереження токена
-        localStorage.setItem("token", data.token);
-
-        // Перехід до облікового запису
-        this.$router.push({ name: "AccountInfo" });
-      } catch (error) {
-        console.error("Помилка входу:", error.message);
-        alert("Не вдалося увійти. Перевірте ваші дані.");
-      }
-    },
     togglePasswordVisibility() {
       this.showPassword = !this.showPassword;
     },
