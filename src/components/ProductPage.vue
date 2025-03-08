@@ -946,4 +946,6 @@ export default {
   color: lightgray;
   /* Сірий для порожніх */
 }
+
+
 </style>

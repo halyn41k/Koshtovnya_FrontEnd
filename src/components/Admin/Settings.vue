@@ -1,4 +1,4 @@
-<template> 
+<template>
   <main class="settings-content">
     <header class="settings-header">
       <img loading="lazy"
@@ -10,31 +10,22 @@
     <section class="contact-info-section">
       <h2 class="section-title">Загальна інформація:</h2>
       <div class="contact-info-container">
-        <h3 class="contact-info-title">Контактна Інформація</h3>
+        <h3 class="contact-info-title">Контактна інформація</h3>
         <form class="contact-form" @submit.prevent="saveSettings">
           <div class="form-group">
             <label for="address" class="form-label">Адреса</label>
+            <!-- Передбачено мапінг на footer_address_info -->
             <input type="text" id="address" class="form-input" v-model="settings.address" />
           </div>
           <div class="form-group">
             <label for="phone" class="form-label">Телефон</label>
+            <!-- Передбачено мапінг на footer_phone_number -->
             <input type="tel" id="phone" class="form-input" v-model="settings.phone" />
           </div>
           <div class="form-group">
             <label for="email" class="form-label">Електронна пошта</label>
+            <!-- Передбачено мапінг на footer_email_info -->
             <input type="email" id="email" class="form-input" v-model="settings.email" />
-          </div>
-          <div class="form-group">
-            <label for="instagram" class="form-label">Instagram</label>
-            <input type="url" id="instagram" class="form-input" v-model="settings.instagram" />
-          </div>
-          <div class="form-group">
-            <label for="facebook" class="form-label">Facebook</label>
-            <input type="url" id="facebook" class="form-input" v-model="settings.facebook" />
-          </div>
-          <div class="form-group">
-            <label for="tiktok" class="form-label">TikTok</label>
-            <input type="url" id="tiktok" class="form-input" v-model="settings.tiktok" />
           </div>
           <div class="form-group">
             <label for="logo" class="form-label">Завантажити логотип</label>
@@ -60,12 +51,12 @@ export default {
         phone: "",
         email: "",
         logo: "",
-        instagram: "",
-        facebook: "",
-        tiktok: "",
+        // Інші поля (instagram, facebook, tiktok) можна додати за потреби,
+        // але для оновлення необхідні лише адреса, телефон, email і логотип.
       },
       logoPreview: null,
-      apiUrl: "http://26.235.139.202:8080/api/site-settings",
+      // Вказуємо endpoint для оновлення налаштувань
+      apiUrl: "http://26.235.139.202:8080/api/admin/site-settings",
     };
   },
   methods: {
@@ -87,9 +78,6 @@ export default {
           phone: mappedSettings.footer_phone_number || "",
           email: mappedSettings.footer_email_info || "",
           logo: mappedSettings.site_logo || "",
-          instagram: mappedSettings.footer_instagram || "",
-          facebook: mappedSettings.footer_facebook || "",
-          tiktok: mappedSettings.footer_tiktok || "",
         };
       } catch (error) {
         console.error("Помилка завантаження налаштувань:", error);
@@ -102,23 +90,22 @@ export default {
         this.logoPreview = URL.createObjectURL(file);
       }
     },
-
     async saveSettings() {
       try {
         const formData = new FormData();
+        // Потрібні поля
         formData.append("footer_address_info", this.settings.address);
         formData.append("footer_phone_number", this.settings.phone);
         formData.append("footer_email_info", this.settings.email);
-        formData.append("footer_instagram", this.settings.instagram);
-        formData.append("footer_facebook", this.settings.facebook);
-        formData.append("footer_tiktok", this.settings.tiktok);
-
+        // Логотип додається лише якщо це файл (нове завантаження)
         if (this.settings.logo instanceof File) {
           formData.append("site_logo", this.settings.logo);
         }
+        // Імітуємо PATCH методом POST
+        formData.append("_method", "PATCH");
 
         const response = await fetch(this.apiUrl, {
-          method: "POST", 
+          method: "POST",
           body: formData,
         });
 
@@ -178,48 +165,12 @@ export default {
   margin: auto 0;
 }
 
-.logo-section {
-  display: flex;
-  margin-top: 41px;
-  gap: 40px;
-  font-weight: 700;
-  flex-wrap: wrap;
-}
-
-@media (max-width: 991px) {
-  .logo-section {
-    margin-top: 40px;
-  }
-}
-
 .section-title {
   color: #000;
   font-size: 25px;
   line-height: 1;
   flex-grow: 1;
   margin: auto 0;
-}
-
-.upload-button,
-.submit-button {
-  font-family: Montserrat, sans-serif;
-  font-weight: 500;
-  border-radius: 8px;
-  background-color: #6b1f1f;
-  color: #fff;
-  font-size: 20px;
-  line-height: 1.3;
-  padding: 16px 28px;
-  border: none;
-  cursor: pointer;
-}
-
-@media (max-width: 991px) {
-
-  .upload-button,
-  .submit-button {
-    padding-left: 20px;
-  }
 }
 
 .contact-info-section {
@@ -294,6 +245,16 @@ export default {
 .submit-button {
   align-self: flex-start;
   margin-top: 15px;
+  font-family: Montserrat, sans-serif;
+  font-weight: 500;
+  border-radius: 8px;
+  background-color: #6b1f1f;
+  color: #fff;
+  font-size: 20px;
+  line-height: 1.3;
+  padding: 16px 28px;
+  border: none;
+  cursor: pointer;
 }
 
 @media (max-width: 991px) {
@@ -301,5 +262,14 @@ export default {
     max-width: 100%;
     padding: 14px 20px;
   }
+}
+
+.image-preview {
+  margin-top: 10px;
+}
+.logo-preview {
+  max-width: 150px;
+  max-height: 150px;
+  object-fit: contain;
 }
 </style>

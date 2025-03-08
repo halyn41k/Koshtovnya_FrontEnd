@@ -42,7 +42,7 @@
     "vue-router": "^4.3.2",
     "vue3-google-oauth2": "^1.0.7",
     "vue3-slider": "^1.10.1",
-    "vuex": "^4.1.0",
+    "vuex": "^4.0.2",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
