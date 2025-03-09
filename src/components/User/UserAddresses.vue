@@ -53,26 +53,23 @@
           </label>
           <label>
             <span>Місто:</span>
-            <div class="city-dropdown-wrapper">
+            <div class="city-dropdown-wrapper" style="position: relative;">
               <input
                 type="text"
                 v-model="formData.city"
                 @input="onCityInput"
                 @focus="showCityDropdown = true"
-                @blur="hideCityDropdown"
                 placeholder="Введіть назву міста"
                 :class="{ 'input-error': errors.city }"
                 required
               />
-              <ul v-if="showCityDropdown" class="city-dropdown">
-                <li v-if="cityLoading" class="loading-item">Пошук...</li>
-                <li v-else-if="!cityLoading && cities.length === 0">Нічого не знайдено</li>
+              <ul v-if="showCityDropdown && cities.length" class="city-dropdown">
                 <li
                   v-for="city in cities"
                   :key="city.Ref"
                   @mousedown.prevent="selectCity(city)"
                 >
-                  {{ city.Description }}
+                  {{ city.city }}
                 </li>
               </ul>
             </div>
@@ -80,16 +77,23 @@
           </label>
           <label>
             <span>Вулиця:</span>
-            <select
-              v-model="deliveryAddress.street"
-              :class="{ 'input-error': errors.street }"
-              required
-            >
-              <option disabled value="">Оберіть вулицю</option>
-              <option v-for="street in streets" :key="street" :value="street">
-                {{ street }}
-              </option>
-            </select>
+            <input
+              class="input-field"
+              v-model="formData.streetSearch"
+              placeholder="Введіть назву вулиці"
+              @input="handleStreetSearch"
+            />
+            <!-- Street Suggestions -->
+            <div v-if="streets.length > 0" class="street-suggestions">
+              <ul>
+                <li v-for="(street, index) in streets" :key="index" @click="selectStreet(street)">
+                  {{ street.street || street.Name }}
+                </li>
+              </ul>
+            </div>
+            <div v-else-if="formData.streetSearch">
+              <p>Немає вулиць для цього запиту.</p>
+            </div>
             <span v-if="errors.street" class="error-message">{{ errors.street }}</span>
           </label>
           <label>
@@ -131,30 +135,26 @@
             <p><strong>Адреса:</strong> вул. Степана Бандери 22, Коломия</p>
           </template>
 
-          <!-- Якщо вибрано "Самовивіз з нової пошти" -->
-          <template v-else-if="formData.selectedDeliveryMethod && formData.selectedDeliveryMethod.name === 'Самовивіз з нової пошти'">
+          <!-- Якщо вибрано "Самовивіз з Нової Пошти" -->
+          <template v-else-if="formData.selectedDeliveryMethod && formData.selectedDeliveryMethod.name === 'Самовивіз з Нової Пошти'">
             <label>
               <span>Місто:</span>
-              <div class="city-dropdown-wrapper">
+              <div class="city-dropdown-wrapper" style="position: relative;">
                 <input
-                  type="text"
+                  class="input-field"
                   v-model="formData.city"
-                  @input="onCityInput"
-                  @focus="showCityDropdown = true"
-                  @blur="hideCityDropdown"
                   placeholder="Введіть місто"
-                  :class="{ 'input-error': errors.city }"
+                  @input="handleCityInput"
+                  @focus="showCityDropdown = true"
                   required
                 />
-                <ul v-if="showCityDropdown" class="city-dropdown">
-                  <li v-if="cityLoading" class="loading-item">Пошук...</li>
-                  <li v-else-if="!cityLoading && cities.length === 0">Нічого не знайдено</li>
+                <ul v-if="showCityDropdown && cities.length" class="city-dropdown">
                   <li
                     v-for="city in cities"
                     :key="city.Ref"
                     @mousedown.prevent="selectCity(city)"
                   >
-                    {{ city.Description }}
+                    {{ city.city }}
                   </li>
                 </ul>
               </div>
@@ -176,30 +176,26 @@
             </label>
           </template>
 
-          <!-- Якщо вибрано "Самовивіз з поштоматів нової пошти" -->
-          <template v-else-if="formData.selectedDeliveryMethod && formData.selectedDeliveryMethod.name === 'Самовивіз з поштоматів нової пошти'">
+          <!-- Якщо вибрано "Самовивіз з поштоматів Нової Пошти" -->
+          <template v-else-if="formData.selectedDeliveryMethod && formData.selectedDeliveryMethod.name === 'Самовивіз з поштоматів Нової Пошти'">
             <label>
               <span>Місто:</span>
-              <div class="city-dropdown-wrapper">
+              <div class="city-dropdown-wrapper" style="position: relative;">
                 <input
-                  type="text"
+                  class="input-field"
                   v-model="formData.city"
-                  @input="onCityInput"
-                  @focus="showCityDropdown = true"
-                  @blur="hideCityDropdown"
                   placeholder="Введіть місто"
-                  :class="{ 'input-error': errors.city }"
+                  @input="handleCityInput"
+                  @focus="showCityDropdown = true"
                   required
                 />
-                <ul v-if="showCityDropdown" class="city-dropdown">
-                  <li v-if="cityLoading" class="loading-item">Пошук...</li>
-                  <li v-else-if="!cityLoading && cities.length === 0">Нічого не знайдено</li>
+                <ul v-if="showCityDropdown && cities.length" class="city-dropdown">
                   <li
                     v-for="city in cities"
                     :key="city.Ref"
                     @mousedown.prevent="selectCity(city)"
                   >
-                    {{ city.Description }}
+                    {{ city.city }}
                   </li>
                 </ul>
               </div>
@@ -232,7 +228,8 @@
     <!-- Відображення збереженої адреси -->
     <div v-else-if="addressAvailable && !loading && !showForm" class="address-card">
       <h2 class="card-title">Ваша адреса доставки</h2>
-      <p><strong>Телефон:</strong> {{ phoneNumber }}</p>
+      <p><strong>Телефон:</strong> {{ phoneNumber.phone_number }}</p>
+
       <p><strong>Тип доставки:</strong> {{ formData.deliveryName }}</p>
       <template v-if="formData.deliveryType === 'courier'">
         <p><strong>Місто:</strong> {{ formData.city }}</p>
@@ -272,7 +269,8 @@ export default {
         cityRef: "",
         deliveryType: "",
         selectedDeliveryMethod: null,
-        deliveryName: ""
+        deliveryName: "",
+        streetSearch: ""
       },
       deliveryAddress: {
         street: "",
@@ -296,8 +294,8 @@ export default {
     pickupOptions() {
       return [
         { id: 1, name: "Самовивіз з нашого магазину", is_store: true },
-        { id: 2, name: "Самовивіз з нової пошти" },
-        { id: 3, name: "Самовивіз з поштоматів нової пошти" }
+        { id: 2, name: "Самовивіз з Нової Пошти" },
+        { id: 3, name: "Самовивіз з поштоматів Нової Пошти" }
       ];
     }
   },
@@ -345,13 +343,11 @@ export default {
       }
     },
     onCityInput() {
-      // Виконуємо пошук міст лише якщо введено не менше 2 символів
       if (this.formData.city.trim().length < 2) {
         this.cities = [];
         this.showCityDropdown = false;
         return;
       }
-      // Для courier або pickup (не наш магазин) запускаємо пошук
       if (this.formData.deliveryType === "courier" || this.formData.deliveryType === "pickup") {
         this.debouncedFetchCities();
         this.showCityDropdown = true;
@@ -361,43 +357,53 @@ export default {
       }
     },
     async fetchCities() {
-  const token = localStorage.getItem("token"); // Define token here
-  console.log("Fetching cities with:", {
-    city: this.formData.city,
-    delivery_type: this.formData.deliveryType,
-  });
-
-  try {
-    const response = await axios.get(
-      "http://26.235.139.202:8080/api/nova-poshta/cities",
-      {
-        headers: { Authorization: `Bearer ${token}` },
-        params: {
-          city: this.formData.city,
-          delivery_type: this.formData.deliveryType,
-        },
+      const token = localStorage.getItem("token");
+      let deliveryTypeParam = "";
+      if (this.formData.deliveryType === "courier") {
+        deliveryTypeParam = "Кур'єр Нової Пошти";
+      } else if (this.formData.deliveryType === "pickup") {
+        if (this.formData.selectedDeliveryMethod && this.formData.selectedDeliveryMethod.name) {
+          deliveryTypeParam = this.formData.selectedDeliveryMethod.name;
+        } else {
+          deliveryTypeParam = "Самовивіз з Нової Пошти";
+        }
       }
-    );
-    console.log("Cities API Response:", response.data);
-
-    if (response.data.success && Array.isArray(response.data.data)) {
-      this.cities = response.data.data;
-    } else {
-      console.error("Incorrect response format:", response.data);
-      this.cities = [];
-    }
-  } catch (error) {
-    console.error("Error fetching cities:", error.response?.data || error.message);
-  }
-},
-
+      
+      console.log("Fetching cities with:", {
+        city: this.formData.city,
+        delivery_type: deliveryTypeParam,
+      });
+  
+      try {
+        const response = await axios.get(
+          "http://26.235.139.202:8080/api/nova-poshta/cities",
+          {
+            headers: { Authorization: `Bearer ${token}` },
+            params: {
+              city: this.formData.city,
+              delivery_type: deliveryTypeParam,
+            },
+          }
+        );
+        console.log("Cities API Response:", response.data);
+  
+        if (response.data.success && Array.isArray(response.data.data)) {
+          this.cities = response.data.data;
+        } else {
+          console.error("Incorrect response format:", response.data);
+          this.cities = [];
+        }
+      } catch (error) {
+        console.error("Error fetching cities:", error.response?.data || error.message);
+      }
+    },
     hideCityDropdown() {
       setTimeout(() => {
         this.showCityDropdown = false;
-      }, 200);
+      }, 300);
     },
     selectCity(city) {
-      this.formData.city = city.Description;
+      this.formData.city = city.city;
       this.formData.cityRef = city.Ref;
       this.showCityDropdown = false;
       this.fetchWarehouses();
@@ -431,13 +437,19 @@ export default {
       }
     },
     async fetchStreets() {
+      // Якщо місто не обране, припиняємо запит
+      if (!this.formData.city || !this.formData.cityRef) {
+        this.streets = [];
+        return;
+      }
+      const token = localStorage.getItem("token");
       try {
-        const token = localStorage.getItem("token");
         const response = await axios.get("http://26.235.139.202:8080/api/nova-poshta/streets", {
           headers: { Authorization: `Bearer ${token}` },
           params: {
             city: this.formData.city,
-            Ref: this.formData.cityRef
+            Ref: this.formData.cityRef,
+            street: this.formData.streetSearch // передаємо запит для пошуку
           }
         });
         if (response.status === 200 && Array.isArray(response.data?.data)) {
@@ -449,6 +461,21 @@ export default {
         console.error("Error fetching streets:", error.response?.data || error.message);
         this.streets = [];
       }
+    },
+    // Метод, що викликається при введенні в полі пошуку вулиць
+    handleStreetSearch() {
+      if (this.formData.streetSearch.trim().length < 2) {
+        this.streets = [];
+        return;
+      }
+      this.fetchStreets();
+    },
+    selectStreet(street) {
+      const streetName = street.street || street.Name;
+      this.deliveryAddress.street = streetName;
+      this.formData.streetSearch = streetName;
+      this.streets = [];
+      console.log("Вибрана вулиця:", this.deliveryAddress.street);
     },
     async fetchUserAddress() {
       const token = localStorage.getItem("token");
@@ -513,6 +540,12 @@ export default {
         console.error("Error fetching delivery types:", error);
       }
     },
+    handleCityInput() {
+      console.log("Введене місто:", this.formData.city);
+      if (this.formData.city.length >= 3) {
+        this.fetchCities();
+      }
+    },
     async submitAddress() {
       if (!this.validateForm()) return;
       const token = localStorage.getItem("token");
@@ -534,9 +567,9 @@ export default {
       } else if (this.formData.deliveryType === "pickup") {
         if (this.formData.selectedDeliveryMethod.is_store) {
           deliveryAddressValue = "вул. Степана Бандери 22, Коломия";
-        } else if (this.formData.selectedDeliveryMethod.name === "Самовивіз з нової пошти") {
+        } else if (this.formData.selectedDeliveryMethod.name === "Самовивіз з Нової Пошти") {
           deliveryAddressValue = this.deliveryAddress.branch;
-        } else if (this.formData.selectedDeliveryMethod.name === "Самовивіз з поштоматів нової пошти") {
+        } else if (this.formData.selectedDeliveryMethod.name === "Самовивіз з поштоматів Нової Пошти") {
           deliveryAddressValue = this.deliveryAddress.postomat;
         }
       }
@@ -576,6 +609,7 @@ export default {
       this.formData.cityRef = "";
       this.formData.deliveryType = "";
       this.formData.selectedDeliveryMethod = null;
+      this.formData.streetSearch = "";
       this.deliveryAddress = { street: "", number: "", branch: "", postomat: "", warehouse: "" };
       this.addressId = null;
     },
@@ -605,13 +639,13 @@ export default {
           if (!this.formData.city) {
             errors.city = "Місто є обов'язковим";
           }
-          if (this.formData.selectedDeliveryMethod.name === "Самовивіз з нової пошти") {
+          if (this.formData.selectedDeliveryMethod.name === "Самовивіз з Нової Пошти") {
             if (!this.deliveryAddress.branch) {
               errors.branch = "Введіть номер відділення";
             }
-          } else if (this.formData.selectedDeliveryMethod.name === "Самовивіз з поштоматів нової пошти") {
+          } else if (this.formData.selectedDeliveryMethod.name === "Самовивіз з поштоматів Нової Пошти") {
             if (!this.deliveryAddress.postomat) {
-              errors.postomat = "Введіть номер поштомута";
+              errors.postomat = "Введіть номер поштомата";
             }
           }
         }
@@ -653,353 +687,170 @@ export default {
 };
 </script>
 
-
-
 <style scoped>
-/* Стилі для кастомного випадаючого списку міст */
-.city-dropdown-wrapper {
-  position: relative;
-}
-.city-dropdown {
-  position: absolute;
-  z-index: 1000;
-  width: 100%;
-  max-height: 200px;
-  overflow-y: auto;
-  background-color: #fff;
-  border: 1px solid #ccc;
-  border-top: none;
-  border-radius: 0 0 4px 4px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-  margin-top: -1px;
-  padding: 0;
-}
-.city-dropdown li {
-  list-style: none;
-  padding: 8px 12px;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-}
-.city-dropdown li:hover,
-.city-dropdown li.active {
-  background-color: #f2f2f2;
-}
-
-.city-dropdown {
-  position: absolute;
-  z-index: 1000;
-  width: 100%;
-  max-height: 200px;
-  overflow-y: auto;
-  background-color: #fff;
-  border: 1px solid #ccc;
-  border-top: none;
-  border-radius: 0 0 4px 4px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-  margin-top: -1px;
-  padding: 0;
-}
-.city-dropdown li {
-  list-style: none;
-  padding: 8px 12px;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-}
-.city-dropdown li:hover,
-.city-dropdown li.active {
-  background-color: #f2f2f2;
-}
-
-.address-container {
-  padding: 20px;
-}
-
-.no-address {
-  margin-bottom: 20px;
-}
-
-.add-address-button {
-  background-color: #6b1f1f;
-  color: white;
-  border: none;
-  padding: 10px;
-  cursor: pointer;
-}
-
-.address-form,
-.address-card {
-  margin-top: 20px;
-}
-
-
-.address-container {
-  padding: 20px;
-}
-
-.no-address {
-  margin-bottom: 20px;
-}
-
-.add-address-button {
-  background-color: #6b1f1f;
-  color: white;
-  border: none;
-  padding: 10px;
-  cursor: pointer;
-}
-
-.address-form,
-.address-card {
-  margin-top: 20px;
-}
-
-.loader {
-  /* Loader styling here */
-  width: 100px;
-  height: 100px;
-  background-color: #6b1f1f;
-  animation: spin 1s infinite linear;
-}
-
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
+  /* Контейнер для форми та збереженої адреси */
+  .address-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    margin-left: -10px;
   }
 
-  100% {
-    transform: rotate(360deg);
+  /* Стилізація блоку, коли адреса відсутня */
+  .no-address {
+    margin-bottom: 20px;
+    font-family: 'Merriweather', sans-serif;
+    color: #555;
+    font-size: 18px;
+    margin-left: -10px;
   }
-}
 
+  .add-address-button {
+    background-color: #6b1f1f;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    margin-bottom: 20px;
+  }
 
-.address-container {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 20px;
-  margin-left: -10px;
-}
+  .plus-icon {
+    font-size: 24px;
+    margin-right: 8px;
+  }
 
-.no-address {
-  align-self: flex-start;
-  font-family: 'Merriweather', sans-serif;
-  color: #555;
-  font-size: 18px;
-}
+  /* Стилізація форми адреси */
+  .address-form form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px; /* Відстань між рядками форми */
+  }
 
-.add-address-button,
-.save-button,
-.cancel-button,
-.update-button,
-.delete-button {
-  font-family: 'Merriweather', sans-serif;
-}
+  .address-form label {
+    display: grid;
+    grid-template-columns: 30% 70%;
+    align-items: center;
+  }
 
-.add-address-button {
-  background: none;
-  border: 2px solid #6b1f1f;
-  border-radius: 8px;
-  color: #6b1f1f;
-  font-size: 18px;
-  padding: 10px 20px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  margin-bottom: 20px;
-}
+  .address-form input,
+  .address-form select {
+    width: 100%;
+    padding: 8px;
+    font-size: 16px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+  }
 
-.plus-icon {
-  font-size: 24px;
-  margin-right: 8px;
-}
+  .save-button,
+  .cancel-button {
+    width: 100%;
+    background-color: #6b1f1f;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 10px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-top: 10px;
+  }
 
-.address-form form {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-}
+  .save-button:hover {
+    background-color: #4f1414;
+  }
 
-.address-form label {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 16px;
-  color: #555;
-  margin-bottom: 15px;
-}
+  .cancel-button {
+    background-color: #888;
+  }
 
-.address-form label span {
-  flex-basis: 30%;
-}
+  /* Стилізація кнопок оновлення та видалення */
+  .button-group {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+  }
 
-.address-form input {
-  width: 65%;
-  padding: 8px;
-  font-size: 16px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-}
+  .update-button,
+  .delete-button {
+    background: none;
+    border: 2px solid #6b1f1f;
+    border-radius: 8px;
+    color: #6b1f1f;
+    font-size: 16px;
+    padding: 10px 20px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
 
-.save-button,
-.cancel-button {
-  width: 100%;
-  background: #6b1f1f;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  padding: 10px;
-  cursor: pointer;
-  font-size: 16px;
-  margin-top: 10px;
-}
+  .update-button:hover,
+  .delete-button:hover {
+    background-color: #6b1f1f;
+    color: white;
+  }
 
-.save-button:hover {
-  background: #4f1414;
-}
+  /* Стилізація збереженої адреси */
+  .address-card p {
+    margin-bottom: 10px;
+  }
 
-.cancel-button {
-  background: #888;
-}
+  /* Стилізація лоадера */
+  .loader {
+    width: 100px;
+    height: 100px;
+    background-color: #6b1f1f;
+    animation: spin 1s infinite linear;
+  }
 
-.button-group {
-  display: flex;
-  gap: 10px;
-  margin-top: 20px;
-}
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
 
-.update-button,
-.delete-button {
-  background: none;
-  border: 2px solid #6b1f1f;
-  border-radius: 8px;
-  color: #6b1f1f;
-  font-size: 16px;
-  padding: 10px 20px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  transition: background-color 0.3s ease, color 0.3s ease;
-}
+  /* Списки для випадаючих підказок (міста, вулиці) */
+  .city-dropdown,
+  .city-suggestions ul,
+  .street-suggestions ul {
+    position: absolute;
+    z-index: 1000;
+    width: 100%;
+    max-height: 200px;
+    overflow-y: auto;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-top: none;
+    border-radius: 0 0 4px 4px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    margin-top: -1px; /* Злиття з полем вводу */
+    list-style: none;
+    padding: 0;
+  }
 
-.update-button:hover,
-.delete-button:hover {
-  background-color: #6b1f1f;
-  color: white;
-}
+  .city-dropdown li,
+  .street-suggestions li,
+  .city-suggestions li {
+    padding: 8px 12px;
+    cursor: pointer;
+  }
 
-.icon {
-  width: 20px;
-  height: 20px;
-  margin-right: 8px;
-}
+  .city-dropdown li:hover,
+  .street-suggestions li:hover,
+  .city-suggestions li:hover,
+  .city-dropdown li.active {
+    background-color: #f2f2f2;
+  }
 
-.error-message {
-  color: red;
-  font-size: 14px;
-}
+  /* Додаткові стилі для помилок */
+  .error-message {
+    color: red;
+    font-size: 14px;
+  }
 
-.error {
-  border-color: red;
-}
-
-.city-suggestions {
-  border: 1px solid #ccc;
-  max-height: 200px;
-  overflow-y: auto;
-}
-
-.city-suggestions ul {
-  list-style-type: none;
-  padding: 0;
-}
-
-.city-suggestions li {
-  padding: 5px;
-  cursor: pointer;
-}
-
-.city-suggestions li:hover {
-  background-color: #f0f0f0;
-}
-
-.city-suggestions ul,
-.street-suggestions ul {
-  list-style-type: none;
-  margin: 0;
-  padding: 0;
-  border: 1px solid #ddd;
-  background-color: #fff;
-  max-height: 150px;
-  overflow-y: auto;
-}
-
-.city-suggestions li,
-.street-suggestions li {
-  padding: 8px 12px;
-  cursor: pointer;
-  border-bottom: 1px solid #ddd;
-}
-
-.city-suggestions li:hover,
-.street-suggestions li:hover {
-  background-color: #f0f0f0;
-}
-
-select {
-  font-family: 'Merriweather', sans-serif;
-  font-size: 15px;
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  background-color: #fff;
-  color: #333;
-  width: 548px;
-  box-sizing: border-box;
-}
-
-select:focus {
-  outline: none;
-  border-color: #4a90e2;
-}
-
-label span {
-  font-size: 16px;
-  font-weight: bold;
-  display: block;
-  margin-bottom: 5px;
-}
-
-/* Контейнер для випадаючого списку */
-.city-dropdown {
-  position: absolute;
-  z-index: 1000;
-  width: 100%;
-  max-height: 200px;
-  overflow-y: auto;
-  background-color: #fff;
-  border: 1px solid #ccc;
-  border-top: none;
-  border-radius: 0 0 4px 4px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-  margin-top: -1px; /* для злиття з полем вводу */
-}
-
-/* Список варіантів */
-.city-dropdown li {
-  list-style: none;
-  padding: 8px 12px;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-}
-
-/* Підсвічування при наведенні */
-.city-dropdown li:hover,
-.city-dropdown li.active {
-  background-color: #f2f2f2;
-}
-
-/* Приховування списку, коли він не потрібен */
-.city-dropdown.hidden {
-  display: none;
-}
-
+  .input-error {
+    border-color: red;
+  }
 </style>
