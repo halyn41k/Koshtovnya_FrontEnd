@@ -715,6 +715,7 @@ export default {
     display: inline-flex;
     align-items: center;
     margin-bottom: 20px;
+    font-family: 'Merriweather', sans-serif;
   }
 
   .plus-icon {
@@ -747,7 +748,8 @@ export default {
 
   .save-button,
   .cancel-button {
-    width: 100%;
+    width: 50%;
+    gap: 10px;
     background-color: #6b1f1f;
     color: white;
     border: none;
@@ -756,6 +758,7 @@ export default {
     cursor: pointer;
     font-size: 16px;
     margin-top: 10px;
+    font-family: 'Merriweather', sans-serif;
   }
 
   .save-button:hover {
@@ -785,6 +788,7 @@ export default {
     display: inline-flex;
     align-items: center;
     transition: background-color 0.3s ease, color 0.3s ease;
+    font-family: 'Merriweather', sans-serif;
   }
 
   .update-button:hover,

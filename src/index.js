@@ -105,6 +105,11 @@ const routes = [
     component: () => import('@/components/UserVerificationComponent.vue')
   },
   {
+    path: '/payment-confirmed',
+    name: 'Verify',
+    component: () => import('@/components/Payment/PaymentConfirmed.vue')
+  },
+  {
     path: '/admin',
     name: 'AdminPanel',
     component: () => import('@/components/Admin/AdminPanel.vue'),

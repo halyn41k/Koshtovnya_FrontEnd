@@ -140,8 +140,8 @@ export default {
     return {
       isModalOpen: false,
       product: {
-        review_count: 0, // Кількість відгуків
-        average_rating: 0, // Середній рейтинг (від 0 до 5)
+        review_count: 0,
+        average_rating: 0,
         variants: [],
         colors: [],
       },
@@ -163,7 +163,9 @@ export default {
   },
   computed: {
     isAvailable() {
-      const available = Array.isArray(this.product.variants) && this.product.variants.some((variant) => variant.is_available);
+      const available =
+        Array.isArray(this.product.variants) &&
+        this.product.variants.some((variant) => variant.is_available);
       console.log("isAvailable:", available);
       return available;
     },
@@ -185,9 +187,9 @@ export default {
         "is_in_wishlist",
         "is_in_cart",
         "notify_when_available",
-        "review_count",      // Додаємо це
-        "average_rating",     // І це
-        "rating"
+        "review_count",
+        "average_rating",
+        "rating",
       ];
 
       const result = {};
@@ -201,7 +203,7 @@ export default {
           } else if (key === "variants") {
             result[this.translations.size] = value.map((v) => v.size).join(", ");
           } else if (key === "type_of_fitting" && Array.isArray(value)) {
-            result[translatedKey] = value.join(", "); // Фурнітура без []
+            result[translatedKey] = value.join(", ");
           } else {
             result[translatedKey] = value || "Немає";
           }
@@ -209,9 +211,23 @@ export default {
 
       return result;
     },
-
   },
   methods: {
+    // Єдиний метод getAuthHeaders для формування заголовків запиту
+    getAuthHeaders() {
+      const token = localStorage.getItem("token");
+      let role = null;
+      const userStr = localStorage.getItem("user");
+      if (userStr) {
+        try {
+          const user = JSON.parse(userStr);
+          role = user.role; // Отримуємо роль з об'єкта користувача
+        } catch (error) {
+          console.error("Помилка при розборі даних користувача:", error);
+        }
+      }
+      return { Authorization: `Bearer ${token}`, Role: role };
+    },
     async fetchWishlist() {
       const token = localStorage.getItem("token");
       if (!token) {
@@ -221,9 +237,7 @@ export default {
 
       try {
         const response = await axios.get("http://26.235.139.202:8080/api/wishlist", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: this.getAuthHeaders(),
         });
         const wishlistItems = response.data.products || [];
         this.wishlist = wishlistItems.map((item) => item.id);
@@ -233,25 +247,21 @@ export default {
     },
     async fetchReviews() {
       try {
-        const response = await axios.get(`http://26.235.139.202:8080/api/products/${this.productId}`);
-        console.log("Відповідь API:", response.data); // Логування всієї відповіді
+        const response = await axios.get(`http://26.235.139.202:8080/api/products/${this.productId}`, {
+          headers: this.getAuthHeaders(),
+        });
+        console.log("Відповідь API:", response.data);
 
-        const { rating, review_count } = response.data.data; // Доступ до data.data (оскільки дані містяться в об'єкті data)
-        console.log("Рейтинг:", rating); // Перевірка наявності рейтингу
-        console.log("Кількість відгуків:", review_count); // Перевірка наявності кількості відгуків
+        const { rating, review_count } = response.data.data;
+        console.log("Рейтинг:", rating);
+        console.log("Кількість відгуків:", review_count);
 
         this.product.average_rating = rating || 0;
         this.product.review_count = review_count || 0;
       } catch (error) {
-        console.error('Помилка при завантаженні відгуків:', error);
+        console.error("Помилка при завантаженні відгуків:", error);
       }
     },
-
-
-
-
-
-
     async toggleWishlist(product) {
       const token = localStorage.getItem("token");
       if (!token) {
@@ -263,14 +273,16 @@ export default {
       try {
         if (this.isInWishlist(product.id)) {
           await axios.delete(`http://26.235.139.202:8080/api/wishlist/${product.id}`, {
-            headers: { Authorization: `Bearer ${token}` },
+            headers: this.getAuthHeaders(),
           });
           this.wishlist = this.wishlist.filter((id) => id !== product.id);
           alert(`${product.name} видалено зі списку бажаного.`);
         } else {
-          await axios.post("http://26.235.139.202:8080/api/wishlist", { product_id: product.id }, {
-            headers: { Authorization: `Bearer ${token}` },
-          });
+          await axios.post(
+            "http://26.235.139.202:8080/api/wishlist",
+            { product_id: product.id },
+            { headers: this.getAuthHeaders() }
+          );
           this.wishlist.push(product.id);
           alert(`${product.name} додано до списку бажаного.`);
         }
@@ -289,48 +301,41 @@ export default {
       this.isModalOpen = false;
     },
     async addToCart(item, size = null) {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       if (!token) {
-        alert('Будь ласка, увійдіть у свій обліковий запис.');
-        this.$router.push('/login');
+        alert("Будь ласка, увійдіть у свій обліковий запис.");
+        this.$router.push("/login");
         return;
       }
 
       try {
-        // Додаємо базові параметри для запиту
         const cartData = {
-
           product_id: item.id,
-          quantity: 1, // Ви можете змінити це значення, залежно від потреб
+          quantity: 1,
         };
 
-        // Додаємо size, якщо передано
         if (size) {
           cartData.size = this.selectedSize;
-
         }
 
         const response = await axios.post(
-          'http://26.235.139.202:8080/api/cart',
+          "http://26.235.139.202:8080/api/cart",
           cartData,
-          { headers: { Authorization: `Bearer ${token}` } }
+          { headers: this.getAuthHeaders() }
         );
 
-        console.log('Відповідь після додавання товару:', response.data); // Логування відповіді
+        console.log("Відповідь після додавання товару:", response.data);
 
-        // Перевірка, чи додавання успішне
-        if (response.data && response.data.message === 'Product added to cart') {
-          alert('Товар успішно додано до кошика.');
+        if (response.data && response.data.message === "Product added to cart") {
+          alert("Товар успішно додано до кошика.");
         } else {
-
-          console.error('Товар не був доданий:', response.data);
-          alert('Не вдалося додати товар до кошика.');
+          console.error("Товар не був доданий:", response.data);
+          alert("Не вдалося додати товар до кошика.");
         }
       } catch (error) {
-        alert('Не вдалося додати товар до кошика.');
+        alert("Не вдалося додати товар до кошика.");
       }
     },
-
     async notifyWhenAvailable() {
       const token = localStorage.getItem("token");
       if (!token) {
@@ -343,7 +348,7 @@ export default {
         await axios.post(
           "http://26.235.139.202:8080/api/notification",
           { product_id: this.productId },
-          { headers: { Authorization: `Bearer ${token}` } }
+          { headers: this.getAuthHeaders() }
         );
         alert(`Ви будете повідомлені, коли ${this.product.name} з'явиться в наявності.`);
       } catch (error) {
@@ -361,31 +366,31 @@ export default {
         this.quantity--;
       }
     },
-
   },
-
   watch: {
-    'product.variants': {
+    "product.variants": {
       handler(newVariants) {
         if (newVariants.length > 0 && !this.selectedSize) {
-          const firstAvailableVariant = newVariants.find(variant => variant.is_available);
+          const firstAvailableVariant = newVariants.find((variant) => variant.is_available);
           if (firstAvailableVariant) {
             this.selectedSize = firstAvailableVariant.size;
           }
         }
       },
-      immediate: true // Виконати одразу після завантаження компонента
-    }
+      immediate: true,
+    },
   },
-
   created() {
     const productIdFromRoute = this.$route.params.id;
     if (productIdFromRoute) {
       this.productId = productIdFromRoute;
-      axios.get(`http://26.235.139.202:8080/api/products/${this.productId}`)
+      axios
+        .get(`http://26.235.139.202:8080/api/products/${this.productId}`, {
+          headers: this.getAuthHeaders(),
+        })
         .then((response) => {
           this.product = response.data.data || {};
-          this.fetchReviews(); // Завантаження відгуків
+          this.fetchReviews();
         })
         .catch((error) => {
           console.error("Помилка при завантаженні продукту:", error);
@@ -395,9 +400,6 @@ export default {
   },
 };
 </script>
-
-
-
 
 
 

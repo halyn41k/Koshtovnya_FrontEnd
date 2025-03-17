@@ -1,9 +1,16 @@
 <template>
   <article class="product-card">
-    <img :src="product.image" :alt="product.name" class="product-image" />
+    <div class="image-container" v-if="hasValidImage">
+      <img 
+        :src="imageUrl" 
+        :alt="product.name" 
+        class="product-image" 
+        @error="handleImageError"
+      />
+    </div>
     <div class="product-details">
       <h2 class="product-name">{{ product.name }}</h2>
-      <p class="product-price">{{ product.price }}</p>
+      <p class="product-price">{{ product.price }} грн</p>
       <p class="product-material">{{ product.material }}</p>
       <div class="product-actions">
         <button
@@ -41,103 +48,169 @@ export default {
       type: Object,
       required: true
     }
+  },
+  computed: {
+    // Перевірка, чи існує коректний URL у product.image або product.image_url
+    hasValidImage() {
+      return (
+        (this.product.image && typeof this.product.image === 'string' && this.product.image.trim() !== '') ||
+        (this.product.image_url && typeof this.product.image_url === 'string' && this.product.image_url.trim() !== '')
+      );
+    },
+    // Повертає product.image, якщо воно існує, інакше product.image_url
+    imageUrl() {
+      if (this.product.image && typeof this.product.image === 'string' && this.product.image.trim() !== '') {
+        return this.product.image;
+      } else if (this.product.image_url && typeof this.product.image_url === 'string' && this.product.image_url.trim() !== '') {
+        return this.product.image_url;
+      }
+      return '';
+    }
+  },
+  methods: {
+    handleImageError(event) {
+      console.error(
+        `Не вдалося завантажити зображення для product ID ${this.product.id}. URL: ${this.imageUrl}`,
+        event
+      );
+    }
+  },
+  mounted() {
+    if (!this.hasValidImage) {
+      console.error(
+        `Product ID ${this.product.id}: Відсутнє поле image або image_url. Серверна відповідь:`,
+        this.product
+      );
+    }
   }
 };
 </script>
 
 <style scoped>
-/* Загальний стиль картки */
 .product-card {
   border-radius: 16px;
   background-color: #FFF7F6;
-  border: 2px solid #E6E6E6;
+  border: 1px solid #E6E6E6;
   overflow: hidden;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  margin: 16px 0;
   display: flex;
   flex-direction: column;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  margin: 16px;
 }
 
-/* Ховер-ефект */
 .product-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-4px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
 }
 
-/* Зображення в картці */
+/* Фіксовані розміри для зображення */
+.image-container {
+  width: 395px;
+  height: 303px;
+  overflow: hidden;
+  margin: 0 auto; /* Центрування блоку */
+}
+
 .product-image {
   width: 100%;
-  height: auto;
+  height: 100%;
   object-fit: cover;
   display: block;
 }
 
-/* Деталі товару */
 .product-details {
-  padding: 20px;
+  padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
 }
 
-/* Назва товару */
 .product-name {
-  font-family: Merriweather, serif;
-  font-size: 20px;
+  font-family: 'Merriweather', serif;
+  font-size: 1.2rem;
   font-weight: 700;
-  color: #000;
+  color: #333;
   margin: 0;
+  line-height: 1.2;
 }
 
-/* Ціна товару */
 .product-price {
-  font-family: Inter, sans-serif;
-  font-size: 20px;
+  font-family: 'Inter', sans-serif;
+  font-size: 1.1rem;
   font-weight: 600;
   color: #A01212;
   margin: 0;
 }
 
-/* Матеріал */
 .product-material {
-  font-family: Merriweather, serif;
-  font-size: 16px;
+  font-family: 'Merriweather', serif;
+  font-size: 1rem;
   color: #6D6D6D;
   margin: 0;
 }
 
-/* Контейнер для кнопок */
 .product-actions {
   display: flex;
-  gap: 10px;
+  gap: 12px;
   margin-top: 12px;
 }
 
-/* Кнопки */
 .action-button {
+  flex: 1;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
   background-color: #C4AEAC;
   border: none;
-  border-radius: 12px;
-  padding: 8px 15px;
+  border-radius: 8px;
+  padding: 8px;
   cursor: pointer;
-  font-family: Montserrat, sans-serif;
-  font-size: 16px;
-  color: #000;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.9rem;
+  color: #161616;
   transition: background-color 0.2s ease;
 }
 
-/* Ховер-ефект для кнопок */
 .action-button:hover {
   background-color: #b19694;
 }
 
-/* Іконки кнопок */
 .action-icon {
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
   object-fit: contain;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .image-container {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 395 / 303; /* Зберігаємо пропорції */
+  }
+  .product-card {
+    margin: 12px;
+  }
+  .product-details {
+    padding: 12px;
+  }
+  .product-name {
+    font-size: 1.1rem;
+  }
+  .product-price {
+    font-size: 1rem;
+  }
+  .product-material {
+    font-size: 0.9rem;
+  }
+  .action-button {
+    font-size: 0.8rem;
+    padding: 6px;
+  }
+  .action-icon {
+    width: 18px;
+    height: 18px;
+  }
 }
 </style>

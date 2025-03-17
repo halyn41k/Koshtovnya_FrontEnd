@@ -50,7 +50,11 @@
 
       <!-- Список працівників -->
       <ul class="employee-list__items">
-        <li v-for="(employee, index) in filteredEmployees" :key="employee.id" class="employee-item">
+        <li
+          v-for="(employee, index) in users"
+          :key="employee.id"
+          class="employee-item"
+        >
           <span class="employee-item__id">{{ index + 1 }}</span>
           <span class="employee-item__name">{{ employee.first_name }} {{ employee.last_name }}</span>
           <span class="employee-item__email">{{ employee.email }}</span>
@@ -58,7 +62,10 @@
           <span class="employee-item__date">{{ employee.date }}</span>
           <span class="employee-item__role">{{ employee.role }}</span>
           <div class="employee-item__actions">
-            <button class="action-button action-button--delete" @click="deleteEmployee(employee.id)">
+            <button
+              class="action-button action-button--delete"
+              @click="deleteEmployee(employee.id)"
+            >
               <img
                 src="https://cdn.builder.io/api/v1/image/assets/c3e46d0a629546c7a48302a5db3297d5/ba078f16c37c9f7f4a38bffc3903a0783959b7a0f9fc95368926f1c2df1ef2a7?apiKey=c3e46d0a629546c7a48302a5db3297d5"
                 alt="Delete icon"
@@ -66,7 +73,10 @@
               />
               <span class="action-button__text">Видалити</span>
             </button>
-            <button class="action-button action-button--update" @click="openUpdateModal(employee)">
+            <button
+              class="action-button action-button--update"
+              @click="openUpdateModal(employee)"
+            >
               <img
                 src="https://via.placeholder.com/24"
                 alt="Update icon"
@@ -90,25 +100,57 @@
           <form @submit.prevent="submitForm" class="user-form">
             <div class="form-group">
               <label for="first_name">Ім'я:</label>
-              <input id="first_name" v-model="form.first_name" type="text" placeholder="Ім'я" required />
+              <input
+                id="first_name"
+                v-model="form.first_name"
+                type="text"
+                placeholder="Ім'я"
+                required
+              />
             </div>
             <div class="form-group">
               <label for="second_name">По-батькові:</label>
-              <input id="second_name" v-model="form.second_name" type="text" placeholder="По-батькові" required />
+              <input
+                id="second_name"
+                v-model="form.second_name"
+                type="text"
+                placeholder="По-батькові"
+                required
+              />
             </div>
             <div class="form-group">
               <label for="last_name">Прізвище:</label>
-              <input id="last_name" v-model="form.last_name" type="text" placeholder="Прізвище" required />
+              <input
+                id="last_name"
+                v-model="form.last_name"
+                type="text"
+                placeholder="Прізвище"
+                required
+              />
             </div>
             <div class="form-group">
               <label for="email">Email:</label>
-              <input id="email" v-model="form.email" type="email" placeholder="Email" required />
+              <!-- При оновленні поле email недоступне для редагування -->
+              <input
+                id="email"
+                v-model="form.email"
+                type="email"
+                placeholder="Email"
+                required
+                :disabled="!isAddMode"
+              />
             </div>
             <div class="form-group">
               <label for="phone_number">Телефон:</label>
-              <input id="phone_number" v-model="form.phone_number" type="text" placeholder="Телефон" required />
+              <input
+                id="phone_number"
+                v-model="form.phone_number"
+                type="text"
+                placeholder="Телефон"
+                required
+              />
             </div>
-            <!-- Роль можна редагувати тільки при додаванні -->
+            <!-- Роль можна редагувати лише при додаванні -->
             <div class="form-group" v-if="isAddMode">
               <label for="role">Роль:</label>
               <select id="role" v-model="form.role" required>
@@ -120,7 +162,9 @@
             </div>
             <div class="form-actions">
               <button type="submit" class="btn-primary">Зберегти</button>
-              <button type="button" class="btn-secondary" @click="closeModal">Відміна</button>
+              <button type="button" class="btn-secondary" @click="closeModal">
+                Відміна
+              </button>
             </div>
           </form>
         </div>
@@ -130,40 +174,30 @@
 </template>
 
 <script>
-import axios from 'axios';
+import axios from "axios";
 
 export default {
-  name: 'EmployeeList',
+  name: "EmployeeList",
   data() {
     return {
-      users: [], // отримуємо всіх користувачів
-      searchQuery: '',
+      users: [], // Масив працівників
+      searchQuery: "",
+      // Для отримання лише працівників встановлюємо role "employee"
+      searchRole: "employee",
       showModal: false,
       isAddMode: true,
-      modalTitle: '',
+      modalTitle: "",
       form: {
         id: null,
-        first_name: '',
-        second_name: '',
-        last_name: '',
-        email: '',
-        phone_number: '',
-        role: ''
-      }
+        first_name: "",
+        second_name: "",
+        last_name: "",
+        email: "",
+        phone_number: "",
+        role: ""
+      },
+      originalEmail: "" // Для збереження початкового email при оновленні
     };
-  },
-  computed: {
-    // Фільтруємо лише тих, хто має роль admin, superadmin або manager
-    filteredEmployees() {
-      const allowedRoles = ['admin', 'superadmin', 'manager'];
-      return this.users
-        .filter(user => allowedRoles.includes(user.role))
-        .filter(user =>
-          (user.first_name + ' ' + user.last_name)
-            .toLowerCase()
-            .includes(this.searchQuery.toLowerCase())
-        );
-    }
   },
   mounted() {
     this.fetchUsers();
@@ -171,22 +205,43 @@ export default {
   methods: {
     async fetchUsers() {
       try {
-        const response = await axios.get('http://26.235.139.202:8080/api/admin/users', {
+        const response = await axios.get("http://26.235.139.202:8080/api/admin/users", {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
-            Accept: 'application/json'
-          }
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            Accept: "application/json"
+          },
+          params: { role: this.searchRole }
         });
-        // Зберігаємо всіх користувачів
         this.users = response.data.data;
       } catch (error) {
-        console.error('Помилка отримання користувачів:', error);
+        console.error("Помилка отримання користувачів:", error);
+      }
+    },
+    async onSearch() {
+      if (this.searchQuery.trim() === "") {
+        this.fetchUsers();
+        return;
+      }
+      try {
+        const response = await axios.get(
+          `http://26.235.139.202:8080/api/admin/users/search/${this.searchQuery}`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+              Accept: "application/json"
+            },
+            params: { role: this.searchRole }
+          }
+        );
+        this.users = response.data.data;
+      } catch (error) {
+        console.error("Помилка пошуку:", error);
       }
     },
     async addUser() {
       try {
         const response = await axios.post(
-          'http://26.235.139.202:8080/api/admin/user',
+          "http://26.235.139.202:8080/api/admin/user",
           {
             first_name: this.form.first_name,
             second_name: this.form.second_name,
@@ -197,75 +252,85 @@ export default {
           },
           {
             headers: {
-              Authorization: `Bearer ${localStorage.getItem('token')}`,
-              Accept: 'application/json'
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+              Accept: "application/json"
             }
           }
         );
-        console.log('Працівника додано:', response.data);
+        console.log("Працівника додано:", response.data);
         this.fetchUsers();
         this.closeModal();
       } catch (error) {
-        console.error('Помилка додавання працівника:', error);
+        console.error("Помилка додавання працівника:", error);
       }
     },
     async updateUser() {
       try {
+        // Формуємо payload без email, якщо режим оновлення
+        const payload = {
+          first_name: this.form.first_name,
+          second_name: this.form.second_name,
+          last_name: this.form.last_name,
+          phone_number: this.form.phone_number,
+          role: this.form.role // дозволяємо оновлювати роль
+        };
+        // Якщо режим додавання, включаємо email
+        if (this.isAddMode) {
+          payload.email = this.form.email;
+        }
         const response = await axios.patch(
           `http://26.235.139.202:8080/api/admin/user/${this.form.id}`,
-          {
-            first_name: this.form.first_name,
-            second_name: this.form.second_name,
-            last_name: this.form.last_name,
-            email: this.form.email,
-            phone_number: this.form.phone_number
-          },
+          payload,
           {
             headers: {
-              Authorization: `Bearer ${localStorage.getItem('token')}`,
-              Accept: 'application/json'
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+              Accept: "application/json"
             }
           }
         );
-        console.log('Дані працівника оновлено:', response.data);
+        console.log("Дані працівника оновлено:", response.data);
         this.fetchUsers();
         this.closeModal();
       } catch (error) {
-        console.error('Помилка оновлення працівника:', error);
+        console.error("Помилка оновлення працівника:", error);
       }
     },
     async deleteEmployee(id) {
       try {
-        const response = await axios.delete(`http://26.235.139.202:8080/api/admin/users/${id}`, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
-            Accept: 'application/json'
+        const response = await axios.delete(
+          `http://26.235.139.202:8080/api/admin/users/${id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+              Accept: "application/json"
+            }
           }
-        });
-        console.log('Працівника видалено:', response.data);
+        );
+        console.log("Працівника видалено:", response.data);
         this.fetchUsers();
       } catch (error) {
-        console.error('Помилка видалення працівника:', error);
+        console.error("Помилка видалення працівника:", error);
       }
     },
     openAddModal() {
       this.isAddMode = true;
-      this.modalTitle = 'Додати працівника';
+      this.modalTitle = "Додати працівника";
       this.form = {
         id: null,
-        first_name: '',
-        second_name: '',
-        last_name: '',
-        email: '',
-        phone_number: '',
-        role: ''
+        first_name: "",
+        second_name: "",
+        last_name: "",
+        email: "",
+        phone_number: "",
+        role: ""
       };
       this.showModal = true;
     },
     openUpdateModal(employee) {
       this.isAddMode = false;
-      this.modalTitle = 'Оновити дані працівника';
+      this.modalTitle = "Оновити дані працівника";
       this.form = { ...employee };
+      this.originalEmail = employee.email; // Зберігаємо початковий email
       this.showModal = true;
     },
     submitForm() {
@@ -277,14 +342,13 @@ export default {
     },
     closeModal() {
       this.showModal = false;
-    },
-    onSearch() {
-      console.log('Пошук:', this.searchQuery);
-      // Можна додати логіку пошуку, якщо потрібно
     }
   }
 };
 </script>
+
+
+
 
 <style scoped>
 /* Загальні стилі для сторінки */

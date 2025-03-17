@@ -1,60 +1,80 @@
-<template>
+<template> 
   <main class="product-add">
     <header class="product-header">
       <h1 class="product-title">Додавання продукту</h1>
     </header>
     <section class="product-form-container">
-      <form class="product-form" @submit.prevent="addProduct">
+      <form class="product-form" @submit.prevent="addProduct" enctype="multipart/form-data">
+        <!-- Назва продукту -->
         <div class="form-group">
           <label for="productName" class="form-label">Назва продукту</label>
           <input id="productName" v-model="form.name" type="text" class="form-input" required>
         </div>
+        <!-- Зображення (jpg, jpeg, png) -->
         <div class="form-group">
-          <label for="productImage" class="form-label">Зображення</label>
-          <input id="productImage" type="file" class="form-input" @change="onImageChange" accept="image/*" required>
+          <label for="productImage" class="form-label">Зображення (jpg, jpeg, png)</label>
+          <input id="productImage" type="file" class="form-input" @change="onImageChange" accept=".jpg,.jpeg,.png" required>
         </div>
+        <!-- Категорія -->
         <div class="form-group">
           <label for="productCategory" class="form-label">Категорія</label>
           <select id="productCategory" v-model="form.category" class="form-input" required>
-            <option v-for="category in formData.categories" :key="category" :value="category">{{ category }}</option>
+            <option v-for="category in formData.categories" :key="category" :value="category">
+              {{ category }}
+            </option>
           </select>
         </div>
+        <!-- Ціна -->
         <div class="form-group">
           <label for="productPrice" class="form-label">Ціна</label>
           <input id="productPrice" v-model.number="form.price" type="number" class="form-input" required>
         </div>
+        <!-- Виробник бісеру -->
         <div class="form-group">
           <label for="beadProducer" class="form-label">Виробник бісеру</label>
           <select id="beadProducer" v-model="form.bead_producer" class="form-input" required>
-            <option v-for="producer in formData.bead_producers" :key="producer" :value="producer">{{ producer }}
+            <option v-for="producer in formData.bead_producers" :key="producer" :value="producer">
+              {{ producer }}
             </option>
           </select>
         </div>
+        <!-- Країна виробництва -->
         <div class="form-group">
           <label for="countryOfManufacture" class="form-label">Країна виробництва</label>
           <select id="countryOfManufacture" v-model="form.country_of_manufacture" class="form-input" required>
-            <option v-for="country in formData.countries" :key="country" :value="country">{{ country }}</option>
+            <option v-for="country in formData.countries" :key="country" :value="country">
+              {{ country }}
+            </option>
           </select>
         </div>
+        <!-- Тип бісеру -->
         <div class="form-group">
           <label for="typeOfBead" class="form-label">Тип бісеру</label>
           <select id="typeOfBead" v-model="form.type_of_bead" class="form-input" required>
-            <option v-for="type in formData.types_of_bead" :key="type" :value="type">{{ type }}</option>
+            <option v-for="type in formData.types_of_bead" :key="type" :value="type">
+              {{ type }}
+            </option>
           </select>
         </div>
+        <!-- Вага -->
         <div class="form-group">
           <label for="productWeight" class="form-label">Вага</label>
           <input id="productWeight" v-model.number="form.weight" type="number" class="form-input" required>
         </div>
+        <!-- Кольори (вибір за допомогою чекбоксів з кольоровими кружочками) -->
         <div class="form-group">
-          <label for="productColors" class="form-label">Кольори</label>
-          <select id="productColors" @change="onColorsChange" multiple class="form-input" required>
-            <option v-for="color in formData.colors" :key="color" :value="color">{{ color }}</option>
-          </select>
-
+          <label class="form-label">Кольори</label>
+          <div class="color-options">
+            <label v-for="color in formData.colors" :key="color.name" class="color-option">
+              <input type="checkbox" :value="color.name" v-model="form.colors">
+              <span class="color-swatch" :style="{ backgroundColor: color.hex }"></span>
+              <span class="color-label">{{ color.name }}</span>
+            </label>
+          </div>
         </div>
+        <!-- Розміри (масив об'єктів) -->
         <div class="form-group">
-          <label for="productSizes" class="form-label">Розміри</label>
+          <label class="form-label">Розміри</label>
           <div v-for="(size, index) in form.sizes" :key="index" class="size-group">
             <input v-model.number="size.size" type="number" class="form-input" placeholder="Розмір" required>
             <input v-model.number="size.quantity" type="number" class="form-input" placeholder="Кількість" required>
@@ -62,14 +82,19 @@
           </div>
           <button type="button" @click="addSize" class="add-button">+</button>
         </div>
+        <!-- Фурнітура (масив об'єктів) -->
         <div class="form-group">
-          <label for="productFittings" class="form-label">Фурнітура</label>
+          <label class="form-label">Фурнітура</label>
           <div v-for="(fitting, index) in form.fittings" :key="index" class="fitting-group">
             <select v-model="fitting.fitting" class="form-input" required>
-              <option v-for="f in formData.fittings" :key="f" :value="f">{{ f }}</option>
+              <option v-for="f in formData.fittings" :key="f" :value="f">
+                {{ f }}
+              </option>
             </select>
             <select v-model="fitting.material" class="form-input" required>
-              <option v-for="material in formData.materials" :key="material" :value="material">{{ material }}</option>
+              <option v-for="material in formData.materials" :key="material" :value="material">
+                {{ material }}
+              </option>
             </select>
             <input v-model.number="fitting.quantity" type="number" class="form-input" placeholder="Кількість" required>
             <button type="button" @click="removeFitting(index)" class="remove-button">-</button>
@@ -99,12 +124,30 @@ export default {
         sizes: [{ size: 0, quantity: 1 }],
         fittings: [{ fitting: '', material: '', quantity: 1 }],
       },
+      // Якщо API повертає інший список, його можна об'єднати з цим.
       formData: {
         categories: [],
         bead_producers: [],
         countries: [],
         types_of_bead: [],
-        colors: [],
+        // Фіксований список кольорів із назвами та hex-кодами:
+        colors: [
+          { name: 'Чорний', hex: '#000000' },
+          { name: 'Білий', hex: '#ffffff' },
+          { name: 'Червоний', hex: '#ff0000' },
+          { name: 'Зелений', hex: '#008000' },
+          { name: 'Синій', hex: '#0000ff' },
+          { name: 'Жовтий', hex: '#ffff00' },
+          { name: 'Помаранчевий', hex: '#ffa500' },
+          { name: 'Фіолетовий', hex: '#800080' },
+          { name: 'Коричневий', hex: '#a52a2a' },
+          { name: 'Сірий', hex: '#808080' },
+          { name: 'Рожевий', hex: '#ffc0cb' },
+          { name: 'Блакитний', hex: '#add8e6' },
+          { name: 'Бежевий', hex: '#f5f5dc' },
+          { name: 'Золотий', hex: '#ffd700' },
+          { name: 'Сріблястий', hex: '#c0c0c0' }
+        ],
         fittings: [],
         materials: [],
       },
@@ -114,19 +157,28 @@ export default {
   methods: {
     async fetchFormData() {
       try {
-        const response = await fetch('http://26.235.139.202:8080/api/products/form-data');
+        const token = localStorage.getItem("token");
+        const response = await fetch('http://26.235.139.202:8080/api/admin/products/form-data', {
+          headers: {
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          }
+        });
         if (!response.ok) {
           throw new Error(`HTTP помилка: ${response.status}`);
         }
         const result = await response.json();
-        console.log(result.data); // Перевіряємо ключі
-        this.formData = {
-          ...result.data,
-          countries: result.data.countries_of_manufacture,
-          types_of_bead: result.data.type_of_bead,
-        };
+        console.log(result.data); // Перевірка отриманих даних
+        // Якщо API повертає дані для інших полів, оновлюємо їх:
+        this.formData.categories = result.data.categories || [];
+        this.formData.bead_producers = result.data.bead_producers || [];
+        this.formData.countries = result.data.countries_of_manufacture || [];
+        this.formData.types_of_bead = result.data.type_of_bead || [];
+        this.formData.fittings = result.data.fittings || [];
+        this.formData.materials = result.data.materials || [];
+        // Список кольорів залишаємо фіксованим, як визначено вище.
       } catch (error) {
-        console.error('Помилка під час отримання даних:', error);
+        console.error('Помилка завантаження даних:', error);
         alert('Не вдалося завантажити дані форми. Перевірте зʼєднання з сервером.');
       }
     },
@@ -156,7 +208,7 @@ export default {
       formData.append('type_of_bead', this.form.type_of_bead);
       formData.append('weight', this.form.weight);
 
-      // Додаємо кольори
+      // Додаємо кольори як масив
       this.form.colors.forEach(color => {
         formData.append('colors[]', color);
       });
@@ -174,21 +226,23 @@ export default {
         formData.append(`fittings[${index}][quantity]`, fitting.quantity);
       });
 
-      console.log([...formData.entries()]); // Дебаг: перевіряємо, що дані надсилаються коректно
+      console.log([...formData.entries()]); // Перевірка вмісту formData
 
       try {
-        const response = await fetch('http://26.235.139.202:8080/api/products', {
+        const token = localStorage.getItem("token");
+        const response = await fetch('http://26.235.139.202:8080/api/admin/products', {
           method: 'POST',
           body: formData,
           headers: {
             'Accept': 'application/json',
+            'Authorization': `Bearer ${token}`,
           },
         });
 
         if (!response.ok) {
           const errorResponse = await response.json();
           console.error('Помилка сервера:', errorResponse);
-          throw new Error('Failed to add product');
+          throw new Error('Не вдалося додати продукт');
         }
 
         const data = await response.json();
@@ -196,11 +250,10 @@ export default {
         alert('Продукт успішно додано!');
         this.resetForm();
       } catch (error) {
-        console.error('Error adding product:', error);
-        alert('Не вдалося додати продукт. Перевірте дані.');
+        console.error('Помилка при додаванні продукту:', error);
+        alert('Не вдалося додати продукт. Перевірте введені дані.');
       }
     },
-
     resetForm() {
       this.form = {
         name: '',
@@ -228,134 +281,118 @@ export default {
   max-width: 800px;
   margin: 0 auto;
   padding: 20px;
-  background: #f9f9f9;
-  border-radius: 10px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
-
 .product-header {
   text-align: center;
-  margin-bottom: 30px;
+  margin-bottom: 20px;
 }
-
 .product-title {
-  font-family: 'Montserrat', sans-serif;
+  font-family: Montserrat, sans-serif;
   font-size: 32px;
   font-weight: 700;
-  color: #333;
+  color: #000;
 }
-
 .product-form-container {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+  background-color: #FFF7F6;
+  border: 1px solid #E6E6E6;
+  border-radius: 8px;
+  padding: 20px;
 }
-
 .product-form {
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
-
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 8px;
 }
-
 .form-label {
+  font-family: Montserrat, sans-serif;
   font-size: 16px;
-  font-weight: 600;
-  color: #555;
+  margin-bottom: 8px;
+  color: #333;
 }
-
 .form-input {
   padding: 10px;
+  font-size: 15px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+/* Стилізація вибору кольорів */
+.color-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.color-option {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  font-family: Montserrat, sans-serif;
   font-size: 14px;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  background-color: #fff;
-  transition: border-color 0.3s ease;
 }
-
-.form-input:focus {
-  border-color: #7a8b9c;
-  outline: none;
+.color-option input[type="checkbox"] {
+  margin: 0;
 }
-
+.color-swatch {
+  width: 20px;
+  height: 20px;
+  border: 1px solid #ccc;
+  border-radius: 50%;
+  display: inline-block;
+}
 .size-group,
 .fitting-group {
   display: flex;
+  gap: 8px;
   align-items: center;
-  gap: 10px;
+  margin-bottom: 8px;
 }
-
 .remove-button,
 .add-button {
-  background-color: #f44336;
+  background-color: #C4AEAC;
+  border: none;
   color: #fff;
   font-size: 16px;
-  border: none;
-  border-radius: 50%;
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  border-radius: 4px;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  padding: 4px 8px;
 }
-
-.add-button {
-  background-color: #4caf50;
-}
-
-.remove-button:hover {
-  background-color: #d32f2f;
-}
-
+.remove-button:hover,
 .add-button:hover {
-  background-color: #388e3c;
+  background-color: #b19694;
 }
-
 .submit-button {
-  padding: 12px 20px;
-  font-size: 16px;
-  font-weight: 600;
+  background-color: #6B1F1F;
   color: #fff;
-  background-color: #007bff;
+  padding: 12px;
+  font-size: 18px;
   border: none;
-  border-radius: 5px;
+  border-radius: 4px;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: background-color 0.3s;
 }
-
 .submit-button:hover {
-  background-color: #0056b3;
+  background-color: #a01212;
 }
 
+/* Responsive adjustments */
 @media (max-width: 768px) {
   .product-add {
-    padding: 15px;
+    padding: 10px;
   }
-
-  .product-title {
-    font-size: 28px;
-  }
-
   .form-input {
-    font-size: 13px;
-  }
-
-  .submit-button {
     font-size: 14px;
-    padding: 10px 15px;
+    padding: 8px;
   }
-}
-
-select[multiple] {
-  height: auto;
-  min-height: 100px;
-  /* Зроби список візуально зручним */
+  .form-label {
+    font-size: 14px;
+  }
+  .submit-button {
+    font-size: 16px;
+    padding: 10px;
+  }
 }
 </style>

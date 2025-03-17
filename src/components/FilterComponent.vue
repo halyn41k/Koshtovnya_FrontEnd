@@ -192,7 +192,6 @@
   </div>
 </template>
 
-
 <script>
 import axios from "axios";
 
@@ -207,9 +206,9 @@ export default {
   data() {
     return {
       availabilityOptions: [],
-      sizeOptions: { min: 0, max: 100 }, // Adjust max value as needed
-      selectedSize: "", // Remove this as we'll use sizeRange now
-      sizeRange: [0, 100], // New range for size
+      sizeOptions: { min: 0, max: 100 },
+      selectedSize: "",
+      sizeRange: [0, 100],
       colorOptions: [],
       beadTypeOptions: [],
       beadProducerOptions: [],
@@ -228,70 +227,61 @@ export default {
   },
   methods: {
     updateSliderValue(event, type, thumb) {
-    const value = parseFloat(event.target.value);
-    let range, options;
-    
-    switch(type) {
-      case 'size':
-        range = this.sizeRange;
-        options = this.sizeOptions;
-        break;
-      case 'weight':
-        range = this.weightRange;
-        options = this.weightOptions;
-        break;
-      case 'price':
-        range = this.priceRange;
-        options = this.priceOptions;
-        break;
-    }
-
-    if (thumb === 'min') {
-      if (value >= range[1]) {
-        range[0] = range[1];
-      } else {
-        range[0] = value;
+      const value = parseFloat(event.target.value);
+      let range, options;
+      
+      switch(type) {
+        case 'size':
+          range = this.sizeRange;
+          options = this.sizeOptions;
+          break;
+        case 'weight':
+          range = this.weightRange;
+          options = this.weightOptions;
+          break;
+        case 'price':
+          range = this.priceRange;
+          options = this.priceOptions;
+          break;
       }
-    } else {
-      if (value <= range[0]) {
-        range[1] = range[0];
-      } else {
-        range[1] = value;
-      }
-    }
-  },
 
-  getTrackStyle(min, max, rangeMin, rangeMax) {
-    const leftPercent = ((min - rangeMin) / (rangeMax - rangeMin)) * 100;
-    const rightPercent = ((max - rangeMin) / (rangeMax - rangeMin)) * 100;
-    
-    return {
-      left: `${leftPercent}%`,
-      right: `${100 - rightPercent}%`,
-      background: "#6B1F1F"
-    };
-  },
+      if (thumb === 'min') {
+        if (value >= range[1]) {
+          range[0] = range[1];
+        } else {
+          range[0] = value;
+        }
+      } else {
+        if (value <= range[0]) {
+          range[1] = range[0];
+        } else {
+          range[1] = value;
+        }
+      }
+    },
+
+    getTrackStyle(min, max, rangeMin, rangeMax) {
+      const leftPercent = ((min - rangeMin) / (rangeMax - rangeMin)) * 100;
+      const rightPercent = ((max - rangeMin) / (rangeMax - rangeMin)) * 100;
+      
+      return {
+        left: `${leftPercent}%`,
+        right: `${100 - rightPercent}%`,
+        background: "#6B1F1F"
+      };
+    },
+
     async loadFilters() {
       try {
-        const cachedFilters = localStorage.getItem('filterCache');
-        if (cachedFilters) {
-          const parsedFilters = JSON.parse(cachedFilters);
-          this.updateFilterOptions(parsedFilters);
-          console.log('Фільтри завантажені з кешу');
-          return;
-        }
-
         const response = await axios.get("http://26.235.139.202:8080/api/filter");
         const data = response.data;
-
         this.updateFilterOptions(data);
-
-        localStorage.setItem('filterCache', JSON.stringify(data));
-        console.log('Фільтри завантажені з сервера та збережені в кеш');
+        console.log("Фільтри завантажені з сервера");
       } catch (error) {
         console.error("Помилка завантаження фільтрів:", error);
       }
     },
+
     updateFilterOptions(data) {
       this.availabilityOptions = data["Доступність"] || [];
       this.sizeOptions = {
@@ -318,10 +308,9 @@ export default {
     },
 
     trackStyle(min, max, maxRange, minRange = 0) {
-      const adjustedMaxRange = maxRange - minRange; // Коригуємо діапазон
-      const minPercent = ((min - minRange) / adjustedMaxRange) * 100; // Відсоток для мінімального значення
-      const maxPercent = ((max - minRange) / adjustedMaxRange) * 100; // Відсоток для максимального значення
-
+      const adjustedMaxRange = maxRange - minRange;
+      const minPercent = ((min - minRange) / adjustedMaxRange) * 100;
+      const maxPercent = ((max - minRange) / adjustedMaxRange) * 100;
       return {
         left: `${minPercent}%`,
         right: `${100 - maxPercent}%`,
@@ -329,20 +318,15 @@ export default {
       };
     },
 
-    
-
     applyFilters() {
       const filters = {};
 
-      // Перевірка наявності вибору доступності
       if (this.selectedAvailability.length > 0) {
-        // Перетворюємо значення на '1' або '0', залежно від обраного варіанту
         filters.is_available = this.selectedAvailability.map((availability) =>
-          availability === 'В наявності' ? '1' : '0'
+          availability === "В наявності" ? "1" : "0"
         );
       }
 
-      // Додавання інших фільтрів
       if (this.sizeRange[0] !== this.sizeOptions.min || this.sizeRange[1] !== this.sizeOptions.max) {
         filters.size_from = parseFloat(this.sizeRange[0]);
         filters.size_to = parseFloat(this.sizeRange[1]);
@@ -370,74 +354,68 @@ export default {
         filters.price_to = parseFloat(this.priceRange[1]);
       }
 
-      // Викликаємо fetchProducts з усіма фільтрами
       this.fetchProducts(1, filters);
-      console.log('Вибрані фільтри:', filters);
-
+      console.log("Вибрані фільтри:", filters);
     },
+
     validateInput(type, index) {
       let range, options;
       
       switch(type) {
-        case 'size':
+        case "size":
           range = this.sizeRange;
           options = this.sizeOptions;
           break;
-        case 'weight':
+        case "weight":
           range = this.weightRange;
           options = this.weightOptions;
           break;
-        case 'price':
+        case "price":
           range = this.priceRange;
           options = this.priceOptions;
           break;
       }
 
-      // Convert to number and ensure it's within bounds
       range[index] = Number(range[index]);
 
-      // Prevent values below minimum
       if (range[index] < options.min) {
         range[index] = options.min;
       }
       
-      // Prevent values above maximum
       if (range[index] > options.max) {
         range[index] = options.max;
       }
 
-      // Ensure min doesn't exceed max and max doesn't go below min
       if (index === 0 && range[0] > range[1]) {
         range[0] = range[1];
       } else if (index === 1 && range[1] < range[0]) {
         range[1] = range[0];
       }
 
-      // Force update the model
       this.$forceUpdate();
     },
 
     updateRangeValue(event, type, thumb) {
-      const index = thumb === 'min' ? 0 : 1;
+      const index = thumb === "min" ? 0 : 1;
       switch(type) {
-        case 'size':
+        case "size":
           this.sizeRange[index] = parseFloat(event.target.value);
-          this.validateInput('size', index);
+          this.validateInput("size", index);
           break;
-        case 'weight':
+        case "weight":
           this.weightRange[index] = parseFloat(event.target.value);
-          this.validateInput('weight', index);
+          this.validateInput("weight", index);
           break;
-        case 'price':
+        case "price":
           this.priceRange[index] = parseFloat(event.target.value);
-          this.validateInput('price', index);
+          this.validateInput("price", index);
           break;
       }
     },
-    
   },
 };
 </script>
+
 
 
 

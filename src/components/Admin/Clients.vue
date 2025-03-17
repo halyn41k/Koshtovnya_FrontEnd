@@ -1,8 +1,6 @@
 <template>
   <main class="client-list">
     <h1 class="client-list__title">Клієнти</h1>
-
-    <!-- Блок із фільтрами й кнопкою "Додати" -->
     <div class="client-list__controls">
       <div class="controls-left">
         <div class="filter">
@@ -17,7 +15,7 @@
           <input
             class="search-input"
             type="text"
-            placeholder="Пошук"
+            placeholder="Пошук за ім'ям"
             v-model="searchQuery"
             @input="onSearch"
           />
@@ -35,13 +33,7 @@
       </div>
     </div>
 
-    <!--
-      Горизонтальний контейнер для "таблиці":
-      всередині нього лежить шапка (header) і список (<ul>).
-      Якщо екран надто вузький, з’явиться горизонтальний скрол.
-    -->
     <div class="client-table-container">
-      <!-- Шапка (7 колонок) -->
       <header class="client-table__header">
         <span>ID</span>
         <span>Ім'я</span>
@@ -51,8 +43,6 @@
         <span>Додано</span>
         <span>Керування</span>
       </header>
-
-      <!-- Список клієнтів (кожен li – 7 колонок) -->
       <ul class="client-list__items">
         <li v-for="(client, index) in clients" :key="client.id" class="client-item">
           <span class="client-item__id">{{ index + 1 }}</span>
@@ -62,6 +52,14 @@
           <span class="client-item__phone">{{ client.phone_number }}</span>
           <span class="client-item__date">{{ client.date }}</span>
           <div class="client-item__actions">
+            <button class="action-button action-button--orders" @click="openOrdersModal(client)">
+              <img src="https://via.placeholder.com/16" alt="Orders icon" class="action-button__icon" />
+              <span class="action-button__text">Замовлення</span>
+            </button>
+            <button class="action-button action-button--update" @click="openUpdateModal(client)">
+              <img src="https://via.placeholder.com/16" alt="Update icon" class="action-button__icon" />
+              <span class="action-button__text">Оновити</span>
+            </button>
             <button class="action-button action-button--delete" @click="deleteUser(client.id)">
               <img
                 src="https://cdn.builder.io/api/v1/image/assets/c3e46d0a629546c7a48302a5db3297d5/ba078f16c37c9f7f4a38bffc3903a0783959b7a0f9fc95368926f1c2df1ef2a7?apiKey=c3e46d0a629546c7a48302a5db3297d5"
@@ -69,14 +67,6 @@
                 class="action-button__icon"
               />
               <span class="action-button__text">Видалити</span>
-            </button>
-            <button class="action-button action-button--update" @click="openUpdateModal(client)">
-              <img
-                src="https://via.placeholder.com/24"
-                alt="Update icon"
-                class="action-button__icon"
-              />
-              <span class="action-button__text">Оновити</span>
             </button>
           </div>
         </li>
@@ -106,13 +96,11 @@
             </div>
             <div class="form-group">
               <label for="email">Email:</label>
-              <input id="email" v-model="form.email" type="email" placeholder="Email" required />
+              <!-- Заблоковано для оновлення: якщо не режим додавання, поле email недоступне -->
+              <input id="email" v-model="form.email" type="email" placeholder="Email" required :disabled="!isAddMode" />
             </div>
+            <!-- Поле role показується завжди, для можливості змінити роль -->
             <div class="form-group">
-              <label for="phone_number">Телефон:</label>
-              <input id="phone_number" v-model="form.phone_number" type="text" placeholder="Телефон" required />
-            </div>
-            <div class="form-group" v-if="isAddMode">
               <label for="role">Роль:</label>
               <select id="role" v-model="form.role" required>
                 <option disabled value="">Оберіть роль</option>
@@ -120,7 +108,12 @@
                 <option value="manager">Manager</option>
                 <option value="superadmin">Superadmin</option>
                 <option value="user">User</option>
+                <option value="employee">Employee</option>
               </select>
+            </div>
+            <div class="form-group">
+              <label for="phone_number">Телефон:</label>
+              <input id="phone_number" v-model="form.phone_number" type="text" placeholder="Телефон" required />
             </div>
             <div class="form-actions">
               <button type="submit" class="btn-primary">Зберегти</button>
@@ -130,30 +123,60 @@
         </div>
       </div>
     </div>
+
+    <!-- Модальне вікно для перегляду замовлень користувача -->
+    <div v-if="showOrdersModal" class="modal-overlay">
+      <div class="modal-dialog">
+        <div class="modal-header">
+          <h2>Замовлення користувача: {{ selectedUser.first_name }} {{ selectedUser.last_name }}</h2>
+          <button class="close-button" @click="closeOrdersModal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div v-if="orders.length">
+            <ul class="orders-list">
+              <li v-for="order in orders" :key="order.id" class="order-item">
+                <span>Замовлення ID: {{ order.id }}</span>
+                <span>Сума: {{ order.total_amount }}₴</span>
+                <span>Статус: {{ order.status }}</span>
+                <button @click="viewOrder(order)">Деталі</button>
+              </li>
+            </ul>
+          </div>
+          <div v-else>
+            <p>Замовлень не знайдено.</p>
+          </div>
+        </div>
+      </div>
+    </div>
   </main>
 </template>
 
 <script>
-import axios from 'axios';
+import axios from "axios";
 
 export default {
-  name: 'ClientList',
+  name: "ClientList",
   data() {
     return {
       clients: [],
-      searchQuery: '',
+      searchQuery: "",
+      searchRole: "user",
       showModal: false,
       isAddMode: true,
-      modalTitle: '',
+      modalTitle: "",
       form: {
         id: null,
-        first_name: '',
-        second_name: '',
-        last_name: '',
-        email: '',
-        phone_number: '',
-        role: ''
-      }
+        first_name: "",
+        second_name: "",
+        last_name: "",
+        email: "",
+        phone_number: "",
+        role: ""
+      },
+      originalEmail: "", // Зберігаємо початковий email для порівняння
+      showOrdersModal: false,
+      orders: [],
+      selectedUser: {}
     };
   },
   mounted() {
@@ -162,21 +185,43 @@ export default {
   methods: {
     async fetchUsers() {
       try {
-        const response = await axios.get('http://26.235.139.202:8080/api/admin/users', {
+        const response = await axios.get("http://26.235.139.202:8080/api/admin/users", {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
-            Accept: 'application/json'
-          }
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            Accept: "application/json"
+          },
+          params: { role: "user" }
         });
         this.clients = response.data.data;
       } catch (error) {
-        console.error('Помилка отримання користувачів:', error);
+        console.error("Помилка отримання користувачів:", error);
+      }
+    },
+    async onSearch() {
+      if (this.searchQuery.trim() === "") {
+        this.fetchUsers();
+        return;
+      }
+      try {
+        const response = await axios.get(
+          `http://26.235.139.202:8080/api/admin/users/search/${this.searchQuery}`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+              Accept: "application/json"
+            },
+            params: { role: this.searchRole }
+          }
+        );
+        this.clients = response.data.data;
+      } catch (error) {
+        console.error("Помилка пошуку:", error);
       }
     },
     async addUser() {
       try {
         const response = await axios.post(
-          'http://26.235.139.202:8080/api/admin/user',
+          "http://26.235.139.202:8080/api/admin/user",
           {
             first_name: this.form.first_name,
             second_name: this.form.second_name,
@@ -187,41 +232,46 @@ export default {
           },
           {
             headers: {
-              Authorization: `Bearer ${localStorage.getItem('token')}`,
-              Accept: 'application/json'
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+              Accept: "application/json"
             }
           }
         );
-        console.log('Користувача додано:', response.data);
+        console.log("Користувача додано:", response.data);
         this.fetchUsers();
         this.closeModal();
       } catch (error) {
-        console.error('Помилка додавання користувача:', error);
+        console.error("Помилка додавання користувача:", error);
       }
     },
     async updateUser() {
       try {
+        // Формуємо payload з можливістю оновлення role
+        const payload = {
+          first_name: this.form.first_name,
+          second_name: this.form.second_name,
+          last_name: this.form.last_name,
+          phone_number: this.form.phone_number,
+          role: this.form.role
+        };
+        if (this.form.email !== this.originalEmail) {
+          payload.email = this.form.email;
+        }
         const response = await axios.patch(
           `http://26.235.139.202:8080/api/admin/user/${this.form.id}`,
-          {
-            first_name: this.form.first_name,
-            second_name: this.form.second_name,
-            last_name: this.form.last_name,
-            email: this.form.email,
-            phone_number: this.form.phone_number
-          },
+          payload,
           {
             headers: {
-              Authorization: `Bearer ${localStorage.getItem('token')}`,
-              Accept: 'application/json'
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+              Accept: "application/json"
             }
           }
         );
-        console.log('Дані користувача оновлено:', response.data);
+        console.log("Дані користувача оновлено:", response.data);
         this.fetchUsers();
         this.closeModal();
       } catch (error) {
-        console.error('Помилка оновлення користувача:', error);
+        console.error("Помилка оновлення користувача:", error);
       }
     },
     async deleteUser(id) {
@@ -230,35 +280,36 @@ export default {
           `http://26.235.139.202:8080/api/admin/users/${id}`,
           {
             headers: {
-              Authorization: `Bearer ${localStorage.getItem('token')}`,
-              Accept: 'application/json'
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+              Accept: "application/json"
             }
           }
         );
-        console.log('Користувача видалено:', response.data);
+        console.log("Користувача видалено:", response.data);
         this.fetchUsers();
       } catch (error) {
-        console.error('Помилка видалення користувача:', error);
+        console.error("Помилка видалення користувача:", error);
       }
     },
     openAddModal() {
       this.isAddMode = true;
-      this.modalTitle = 'Додати користувача';
+      this.modalTitle = "Додати користувача";
       this.form = {
         id: null,
-        first_name: '',
-        second_name: '',
-        last_name: '',
-        email: '',
-        phone_number: '',
-        role: ''
+        first_name: "",
+        second_name: "",
+        last_name: "",
+        email: "",
+        phone_number: "",
+        role: ""
       };
       this.showModal = true;
     },
     openUpdateModal(client) {
       this.isAddMode = false;
-      this.modalTitle = 'Оновити дані користувача';
+      this.modalTitle = "Оновити дані користувача";
       this.form = { ...client };
+      this.originalEmail = client.email;
       this.showModal = true;
     },
     submitForm() {
@@ -271,30 +322,79 @@ export default {
     closeModal() {
       this.showModal = false;
     },
-    onSearch() {
-      console.log('Пошук:', this.searchQuery);
-      // Додайте власну логіку пошуку, якщо потрібно
+    async openOrdersModal(client) {
+      this.selectedUser = client;
+      try {
+        const response = await axios.get(
+          `http://26.235.139.202:8080/api/admin/users/${client.id}/orders`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+              Accept: "application/json"
+            }
+          }
+        );
+        this.orders = response.data.data;
+        this.showOrdersModal = true;
+      } catch (error) {
+        console.error("Помилка отримання замовлень користувача:", error);
+      }
+    },
+    closeOrdersModal() {
+      this.showOrdersModal = false;
+    },
+    async viewOrder(order) {
+      try {
+        const response = await axios.get(
+          `http://26.235.139.202:8080/api/admin/orders/${order.id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+              Accept: "application/json"
+            }
+          }
+        );
+        console.log("Деталі замовлення:", response.data);
+        alert(`Деталі замовлення:\n${JSON.stringify(response.data, null, 2)}`);
+      } catch (error) {
+        console.error("Помилка отримання деталей замовлення:", error);
+      }
+    },
+    async onSearchUsers() {
+      try {
+        const response = await axios.get(
+          `http://26.235.139.202:8080/api/admin/users/search/${this.searchQuery}`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+              Accept: "application/json"
+            },
+            params: { role: this.searchRole }
+          }
+        );
+        this.clients = response.data.data;
+      } catch (error) {
+        console.error("Помилка пошуку:", error);
+      }
     }
   }
 };
 </script>
 
+
+
 <style scoped>
-/* Контейнер сторінки */
 .client-list {
   max-width: 1200px;
   margin: 20px auto;
   font-family: Montserrat, sans-serif;
   padding: 0 20px;
 }
-
 .client-list__title {
   color: #000;
   font-size: 32px;
   font-weight: 700;
 }
-
-/* Блок із фільтрами й кнопкою "Додати" */
 .client-list__controls {
   display: flex;
   justify-content: space-between;
@@ -312,20 +412,25 @@ export default {
   gap: 8px;
 }
 .search-form {
-  background-color: #F1E9E9;
-  border-radius: 8px;
-  padding: 8px 20px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
 }
 .search-input {
   border: none;
-  background: transparent;
+  background: #F1E9E9;
   font-size: 16px;
   color: #000;
   outline: none;
+  padding: 8px;
+  border-radius: 8px;
+}
+.search-select {
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
 }
 .controls-right {}
-
-/* Кнопка "Додати" */
 .add-button {
   display: flex;
   align-items: center;
@@ -343,19 +448,15 @@ export default {
   height: 29px;
   object-fit: contain;
 }
-
-/* Контейнер для таблиці + горизонтальний скрол */
 .client-table-container {
   width: 100%;
-  overflow-x: auto; /* Горизонтальний скрол, якщо екран замалий */
+  overflow-x: auto;
   margin-top: 20px;
 }
-
-/* Шапка (7 колонок) */
 .client-table__header {
   display: grid;
   grid-template-columns: 5% 15% 20% 10% 15% 15% 20%;
-  column-gap: 16px; /* Проміжок між колонками */
+  gap: 16px;
   align-items: center;
   padding: 16px;
   border-radius: 12px;
@@ -364,31 +465,25 @@ export default {
   font-size: 16px;
   color: #000;
   font-weight: 600;
-  min-width: 800px; /* Мінімальна ширина, щоб не “стискалося” */
+  min-width: 800px;
 }
-
-/* Список */
 .client-list__items {
   list-style: none;
   padding: 0;
   margin: 0;
 }
-
-/* Кожен рядок (7 колонок) */
 .client-item {
   display: grid;
   grid-template-columns: 5% 15% 20% 10% 15% 15% 20%;
-  column-gap: 16px; /* Проміжок між колонками */
+  gap: 16px;
   align-items: center;
   padding: 16px;
   margin-top: 12px;
   border-radius: 12px;
   background-color: #FFF7F6;
   border: 2px solid #E6E6E6;
-  min-width: 800px; /* Щоб колонки не “з’їжджалися” */
+  min-width: 800px;
 }
-
-/* Окремі стилі для кожної колонки (необов’язково) */
 .client-item__id {
   font-size: 16px;
   font-weight: 600;
@@ -407,15 +502,10 @@ export default {
   font-size: 14px;
   color: #000;
 }
-
-/* Колонка з діями (кнопки "Видалити", "Оновити") */
 .client-item__actions {
   display: flex;
   gap: 6px;
-  justify-content: flex-start;
 }
-
-/* Кнопки */
 .action-button {
   display: flex;
   align-items: center;
@@ -433,8 +523,6 @@ export default {
   height: 16px;
   object-fit: contain;
 }
-
-/* Модальне вікно */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -506,8 +594,6 @@ export default {
   border-radius: 4px;
   cursor: pointer;
 }
-
-/* Анімація */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -517,19 +603,5 @@ export default {
     opacity: 1;
     transform: translateY(0);
   }
-}
-
-/* 
-  Якщо ви не хочете, щоб на малих екранах все 
-  перетворювалося на вертикальні блоки — просто 
-  видаліть або закоментуйте цей медіа-запит 
-*/
-@media (max-width: 991px) {
-  /* Можна прибрати, якщо потрібен лише горизонтальний скрол */
-  /* .client-table__header,
-  .client-item {
-    grid-template-columns: 1fr 1fr;
-    min-width: auto;
-  } */
 }
 </style>
