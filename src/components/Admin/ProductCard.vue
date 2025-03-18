@@ -1,5 +1,5 @@
 <template>
-  <article class="product-card">
+  <article class="product-card" :class="{ deleted: product.is_deleted }">
     <div class="image-container" v-if="hasValidImage">
       <img 
         :src="imageUrl" 
@@ -14,17 +14,7 @@
       <p class="product-material">{{ product.material }}</p>
       <div class="product-actions">
         <button
-          class="action-button update-button"
-          @click="$emit('update-product', product)"
-        >
-          <img
-            src="https://cdn.builder.io/api/v1/image/assets/c3e46d0a629546c7a48302a5db3297d5/d62ecd6a0ba33c8e03dea9a0e01ed58597cdbb804851ef4c6c5cb5302696985b?apiKey=c3e46d0a629546c7a48302a5db3297d5"
-            alt="Update icon"
-            class="action-icon"
-          />
-          <span>Оновити</span>
-        </button>
-        <button
+          v-if="!product.is_deleted"
           class="action-button delete-button"
           @click="$emit('delete-product', product.id)"
         >
@@ -34,6 +24,29 @@
             class="action-icon"
           />
           <span>Видалити</span>
+        </button>
+        <button
+          v-else
+          class="action-button restore-button"
+          @click="$emit('restore-product', product.id)"
+        >
+          <img
+            src="https://cdn.builder.io/api/v1/image/assets/c3e46d0a629546c7a48302a5db3297d5/restore-icon-placeholder.png"
+            alt="Restore icon"
+            class="action-icon"
+          />
+          <span>Відновити</span>
+        </button>
+        <button
+          class="action-button update-button"
+          @click="$emit('update-product', product)"
+        >
+          <img
+            src="https://cdn.builder.io/api/v1/image/assets/c3e46d0a629546c7a48302a5db3297d5/d62ecd6a0ba33c8e03dea9a0e01ed58597cdbb804851ef4c6c5cb5302696985b?apiKey=c3e46d0a629546c7a48302a5db3297d5"
+            alt="Update icon"
+            class="action-icon"
+          />
+          <span>Оновити</span>
         </button>
       </div>
     </div>
@@ -103,12 +116,17 @@ export default {
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
 }
 
-/* Фіксовані розміри для зображення */
+/* Стиль для видалених товарів */
+.product-card.deleted {
+  opacity: 0.5;
+  filter: grayscale(100%);
+}
+
 .image-container {
   width: 395px;
   height: 303px;
   overflow: hidden;
-  margin: 0 auto; /* Центрування блоку */
+  margin: 0 auto;
 }
 
 .product-image {
@@ -176,6 +194,19 @@ export default {
   background-color: #b19694;
 }
 
+.delete-button {
+  /* Стилізація для кнопки видалення, якщо потрібно */
+}
+
+.restore-button {
+  background-color: #27ae60;
+  color: #fff;
+}
+
+.update-button {
+  /* Стилізація для кнопки оновлення, якщо потрібно */
+}
+
 .action-icon {
   width: 20px;
   height: 20px;
@@ -187,7 +218,7 @@ export default {
   .image-container {
     width: 100%;
     height: auto;
-    aspect-ratio: 395 / 303; /* Зберігаємо пропорції */
+    aspect-ratio: 395 / 303;
   }
   .product-card {
     margin: 12px;

@@ -2,10 +2,15 @@
   <main class="admin-panel">
     <aside class="sidebar">
       <h1 class="sidebar-title">Адмін панель</h1>
-      <nav class="sidebar-nav">
+      <nav class="sidebar-nav" v-if="menuItems.length">
         <ul class="nav-list">
-          <li class="nav-item" v-for="(menuItem, index) in menuItems" :key="index" @click="selectTab(index)"
-            :class="{ active: activeTab === index }">
+          <li 
+            class="nav-item" 
+            v-for="(menuItem, index) in menuItems" 
+            :key="index" 
+            @click="selectTab(index)"
+            :class="{ active: activeTab === index }"
+          >
             <img :src="menuItem.icon" alt="" class="nav-icon" />
             <span class="nav-text">{{ menuItem.title }}</span>
           </li>
@@ -19,13 +24,13 @@
 </template>
 
 <script>
-import WelcomeAdmin from './WelcomeAdmin.vue'; // Компонент вітального екрану
-import ProductList from './ProductList.vue'; // Компонент списку товарів
-import Employees from './Employees.vue'; // Компонент працівників
-import Orders from './Orders.vue'; // Компонент замовлень
-import Reports from './Reports.vue'; // Компонент звітів
-import Clients from './Clients.vue'; // Компонент клієнтів
-import Settings from './Settings.vue'; // Компонент налаштувань
+import WelcomeAdmin from './WelcomeAdmin.vue';
+import ProductList from './ProductList.vue';
+import Employees from './Employees.vue';
+import Orders from './Orders.vue';
+import Reports from './Reports.vue';
+import Clients from './Clients.vue';
+import Settings from './Settings.vue';
 
 export default {
   name: 'AdminPanel',
@@ -40,43 +45,58 @@ export default {
   },
   data() {
     return {
-      activeTab: -1, // Активна вкладка (-1 для вітального екрану)
-      menuItems: [
-        { title: 'Товари', icon: require('@/assets/arrowadmin.png') },
-        { title: 'Працівники', icon: require('@/assets/arrowadmin.png') },
-        { title: 'Замовлення', icon: require('@/assets/arrowadmin.png') },
-        { title: 'Звіти', icon: require('@/assets/arrowadmin.png') },
-        { title: 'Клієнти', icon: require('@/assets/arrowadmin.png') },
-        { title: 'Налаштування', icon: require('@/assets/arrowadmin.png') },
-      ],
+      activeTab: -1, // -1 означає вітальний екран
+      user: null
     };
   },
   computed: {
-    activeComponent() {
-      // Визначає, який компонент відображати на основі активної вкладки
-      if (this.activeTab === -1) return 'WelcomeAdmin';
-      switch (this.activeTab) {
-        case 0: return 'ProductList';
-        case 1: return 'Employees';
-        case 2: return 'Orders';
-        case 3: return 'Reports';
-        case 4: return 'Clients';
-        case 5: return 'Settings';
-        default: return 'ProductList';
+    // Формуємо список меню залежно від ролі користувача
+    menuItems() {
+      if (!this.user) return [];
+      if (this.user.role === 'manager') {
+        return [
+          { title: 'Користувачі', icon: require('@/assets/arrowadmin.png'), component: 'Clients' },
+          { title: 'Товари', icon: require('@/assets/arrowadmin.png'), component: 'ProductList' },
+          { title: 'Замовлення', icon: require('@/assets/arrowadmin.png'), component: 'Orders' }
+        ];
+      } else if (this.user.role === 'admin') {
+        return [
+          { title: 'Користувачі', icon: require('@/assets/arrowadmin.png'), component: 'Clients' },
+          { title: 'Працівники', icon: require('@/assets/arrowadmin.png'), component: 'Employees' },
+          { title: 'Товари', icon: require('@/assets/arrowadmin.png'), component: 'ProductList' },
+          { title: 'Замовлення', icon: require('@/assets/arrowadmin.png'), component: 'Orders' }
+        ];
+      } else if (this.user.role === 'superadmin') {
+        return [
+          { title: 'Користувачі', icon: require('@/assets/arrowadmin.png'), component: 'Clients' },
+          { title: 'Працівники', icon: require('@/assets/arrowadmin.png'), component: 'Employees' },
+          { title: 'Товари', icon: require('@/assets/arrowadmin.png'), component: 'ProductList' },
+          { title: 'Замовлення', icon: require('@/assets/arrowadmin.png'), component: 'Orders' },
+          { title: 'Налаштування', icon: require('@/assets/arrowadmin.png'), component: 'Settings' },
+        ];
+      } else {
+        return [];
       }
     },
+    // Визначає активний компонент залежно від вибраної вкладки
+    activeComponent() {
+      if (this.activeTab === -1) return 'WelcomeAdmin';
+      return this.menuItems[this.activeTab].component;
+    }
   },
   methods: {
     selectTab(index) {
-      this.activeTab = index; // Встановлює активну вкладку
-    },
+      this.activeTab = index;
+    }
   },
   mounted() {
-  const user = JSON.parse(localStorage.getItem('user'));
-  if (!user || !['superadmin', 'admin', 'manager'].includes(user.role)) {
-    this.$router.push({ name: 'Home' });
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (!user || !['superadmin', 'admin', 'manager'].includes(user.role)) {
+      this.$router.push({ name: 'Home' });
+    } else {
+      this.user = user;
+    }
   }
-}
 };
 </script>
 
@@ -98,7 +118,6 @@ export default {
   left: 0;
   height: 100vh;
   overflow-y: auto;
-
   margin-top: 180px;
   z-index: 1;
 }
@@ -123,7 +142,6 @@ export default {
   font-size: 20px;
   font-weight: 800;
   cursor: pointer;
-  position: relative;
   transition: color 0.3s ease;
   margin-left: 15px;
 }
@@ -143,10 +161,8 @@ export default {
   height: 20px;
 }
 
-/* Content section styling */
 .content {
   margin-left: 20%;
-  /* Offset by sidebar width */
   padding: 40px;
   width: 80%;
   overflow-y: auto;

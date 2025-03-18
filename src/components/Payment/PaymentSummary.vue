@@ -16,7 +16,7 @@
           <span class="price">{{ totalWithDelivery }}₴</span>
         </div>
       </div>
-      <button class="payment-button" @click="handleClick">
+      <button class="payment-button" @click="submitOrder">
         <span>Оформити замовлення</span>
         <img
           src="https://cdn.builder.io/api/v1/image/assets/TEMP/436b738744905f60c6a542e2cd314f5694db20045d36b8991f8dab9a31b316a0?placeholderIfAbsent=true&apiKey=c3e46d0a629546c7a48302a5db3297d5"
@@ -99,24 +99,25 @@ export default {
       const customer = this.customerData;
 
       const orderData = {
-        last_name: customer.lastName,
-        first_name: customer.firstName,
-        second_name: customer.secondName,
-        phone_number: customer.phone,
-        city: customer.city,
-        delivery_name: customer.deliveryType,
-        delivery_address: (customer.deliveryType || "").toLowerCase().includes("самовивіз")
-          ? customer.warehouse
-          : `${customer.street} ${customer.houseNumber}`,
-        payment_method: this.paymentMethod,
-        type_of_card: this.paymentMethod === "Післяоплата" ? "" : this.typeOfCard,
-        delivery_cost: this.localDeliveryCost,
-        cart_cost: this.cartItems.reduce(
-          (total, item) => total + item.price * item.quantity,
-          0
-        ),
-        product_ids: this.cartItems.map(item => item.id),
-      };
+  last_name: customer.lastName,
+  first_name: customer.firstName,
+  second_name: customer.secondName || "", 
+  phone_number: customer.phone,
+  city: customer.city,
+  delivery_name: customer.deliveryType,
+  delivery_address: customer.deliveryType.toLowerCase().includes("самовивіз")
+    ? customer.warehouse
+    : `${customer.street} ${customer.houseNumber}`,
+  payment_method: this.paymentMethod,
+  type_of_card: this.paymentMethod === "Післяоплата" ? "" : this.typeOfCard,
+  delivery_cost: this.localDeliveryCost,
+  cart_cost: this.cartItems.reduce((total, item) => total + item.price * item.quantity, 0),
+  products: this.cartItems.map(item => ({
+    product_id: item.id,
+    quantity: item.quantity
+  })),
+};
+
 
       console.log("Готовий payload замовлення:", orderData);
 

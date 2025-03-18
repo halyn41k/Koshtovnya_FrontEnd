@@ -166,22 +166,24 @@
     </section>
 
     <!-- Підсумковий блок – PaymentSummary -->
-      <PaymentSummary
-      v-if="steps.every(step => step.completed)"
-      :cart-items="cartItems"
-      :delivery-cost="deliveryCost"
-      :total-amount="cartTotalAmount"
-      :city-ref="formData.cityRef"
-      :payment-method="formData.selectedPaymentOption"
-      :type-of-card="formData.typeOfCard"
-      :customer-data="formData"
-      @order-submitted="submitOrder"
-    />
+    <PaymentSummary
+  v-if="steps.every(step => step.completed)"
+  :cart-items="cartItems"
+  :delivery-cost="deliveryCost"
+  :total-amount="cartTotalAmount"
+  :city-ref="formData.cityRef"
+  :payment-method="formData.selectedPaymentOption"
+  :type-of-card="formData.typeOfCard"
+  :customer-data="clonedFormData"
+  @order-submitted="submitOrder"
+/>
+
 
 
     <DeliveryAddress v-if="showDeliveryAddress" :customerData="formData" />
   </div>
 </template>
+
 
 <script>
 import axios from "axios";
@@ -602,29 +604,26 @@ export default {
         this.$router.push("/login");
         return;
       }
-      // Переконуємось, що основні дані завантажені
-      if (!this.formData.firstName || !this.formData.lastName || !this.formData.phone) {
-        alert("Дані користувача ще не завантажені. Будь ласка, зачекайте.");
-        return;
-      }
-      // Формуємо payload із актуальними даними
+      
+      // Використовуємо injected paymentData як customerData
+      const customer = this.customerData;
       const orderData = {
-        last_name: this.formData.lastName,
-        first_name: this.formData.firstName,
-        second_name: this.formData.secondName,
-        phone_number: this.formData.phone,
-        city: this.formData.city,
-        delivery_name: this.formData.deliveryType,
-        delivery_address: (this.formData.deliveryType || "").toLowerCase().includes("самовивіз")
-          ? this.formData.warehouse
-          : `${this.formData.street} ${this.formData.houseNumber}`,
-        payment_method: this.formData.selectedPaymentOption,
-        type_of_card:
-          this.formData.selectedPaymentOption === "Післяоплата"
-            ? ""
-            : this.formData.typeOfCard,
-        delivery_cost: this.deliveryCost,
-        cart_cost: this.cartTotalAmount,
+        last_name: customer.lastName,
+        first_name: customer.firstName,
+        second_name: customer.secondName,
+        phone_number: customer.phone,
+        city: customer.city,
+        delivery_name: customer.deliveryType,
+        delivery_address: (customer.deliveryType || "").toLowerCase().includes("самовивіз")
+          ? customer.warehouse
+          : `${customer.street} ${customer.houseNumber}`,
+        payment_method: this.paymentMethod,
+        type_of_card: this.paymentMethod === "Післяоплата" ? "" : this.typeOfCard,
+        delivery_cost: this.localDeliveryCost,
+        cart_cost: this.cartItems.reduce(
+          (total, item) => total + item.price * item.quantity,
+          0
+        ),
         product_ids: this.cartItems.map(item => item.id),
       };
 
@@ -636,10 +635,10 @@ export default {
         });
         console.log("Відповідь сервера на замовлення:", orderResponse.data);
         const orderId = orderResponse.data.order_id;
-        if (this.formData.selectedPaymentOption === "Післяоплата") {
+        if (this.paymentMethod === "Післяоплата") {
           this.$router.push("/payment-confirmed");
-        } else if (this.formData.selectedPaymentOption === "Оплата картою") {
-          const amount = this.cartTotalAmount + this.deliveryCost;
+        } else if (this.paymentMethod === "Оплата картою") {
+          const amount = this.totalWithDelivery;
           await axios.post("https://b9bc-176-121-4-31.ngrok-free.app/api/payment", {
             amount,
             order_id: orderId,
@@ -660,6 +659,9 @@ export default {
         alert("Не вдалося оформити замовлення. Спробуйте пізніше.");
       }
     },
+  },
+  mounted() {
+    console.log("Отримані дані customerData у PaymentSummary:", this.paymentData);
   },
   created() {
     this.fetchProfile();

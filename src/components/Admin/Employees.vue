@@ -142,12 +142,13 @@
             </div>
             <div class="form-group">
               <label for="phone_number">Телефон:</label>
+              <!-- Поле обов’язкове лише при додаванні -->
               <input
                 id="phone_number"
                 v-model="form.phone_number"
                 type="text"
                 placeholder="Телефон"
-                required
+                :required="isAddMode"
               />
             </div>
             <!-- Роль можна редагувати лише при додаванні -->
@@ -271,7 +272,8 @@ export default {
           first_name: this.form.first_name,
           second_name: this.form.second_name,
           last_name: this.form.last_name,
-          phone_number: this.form.phone_number,
+          // Якщо телефон залишено порожнім, його можна не передавати
+          ...(this.form.phone_number && { phone_number: this.form.phone_number }),
           role: this.form.role // дозволяємо оновлювати роль
         };
         // Якщо режим додавання, включаємо email
@@ -346,6 +348,7 @@ export default {
   }
 };
 </script>
+
 
 
 

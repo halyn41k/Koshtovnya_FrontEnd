@@ -1,4 +1,4 @@
-<template>  
+<template>
   <main class="product-list">
     <header class="product-header">
       <div class="header-left">
@@ -40,6 +40,7 @@
           :product="product"
           @update-product="showUpdateOrders" 
           @delete-product="handleDelete" 
+          @restore-product="handleRestore"
         />
       </section>
       <div class="pagination" v-if="totalPages > 1">
@@ -121,22 +122,43 @@ export default {
     handleSearch() {
       this.fetchProducts(1);
     },
-    handleDelete(productId) {
-      this.products = this.products.filter(product => product.id !== productId);
+    async handleDelete(productId) {
+      const token = localStorage.getItem("token");
+      try {
+        await axios.delete(`http://26.235.139.202:8080/api/admin/products/${productId}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        // Встановлюємо прапорець видалення замість видалення з масиву
+        const product = this.products.find(p => p.id === productId);
+        if (product) product.is_deleted = true;
+      } catch (error) {
+        console.error('Помилка видалення товару:', error.response || error);
+      }
+    },
+    async handleRestore(productId) {
+      const token = localStorage.getItem("token");
+      try {
+        await axios.post(`http://26.235.139.202:8080/api/admin/products/${productId}/restore`, null, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        // Знімаємо прапорець видалення
+        const product = this.products.find(p => p.id === productId);
+        if (product) product.is_deleted = false;
+      } catch (error) {
+        console.error('Помилка відновлення товару:', error.response || error);
+      }
     },
     resetComponent() {
       this.currentComponent = null;
       this.currentProps = {};
     },
     showAddProduct() {
-      // Замінюємо список товарів компонентом AddProduct
       this.currentComponent = 'AddProduct';
     },
     showUpdateOrders(product) {
-  this.currentComponent = 'ProductUpdate';
-  this.currentProps = { productId: product.id };
-},
-
+      this.currentComponent = 'ProductUpdate';
+      this.currentProps = { productId: product.id };
+    },
   },
   created() {
     this.fetchProducts();
@@ -195,9 +217,7 @@ export default {
   width: 30px;
   height: 30px;
 }
-.header-right {
-  /* Кнопка "Додати" розташована праворуч */
-}
+.header-right {}
 .add-product-button {
   display: flex;
   align-items: center;

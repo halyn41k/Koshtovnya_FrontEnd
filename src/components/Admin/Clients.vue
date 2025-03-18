@@ -1,6 +1,6 @@
 <template>
   <main class="client-list">
-    <h1 class="client-list__title">Клієнти</h1>
+    <h1 class="client-list__title">Користувачі</h1>
     <div class="client-list__controls">
       <div class="controls-left">
         <div class="filter">
@@ -108,12 +108,18 @@
                 <option value="manager">Manager</option>
                 <option value="superadmin">Superadmin</option>
                 <option value="user">User</option>
-                <option value="employee">Employee</option>
               </select>
             </div>
             <div class="form-group">
               <label for="phone_number">Телефон:</label>
-              <input id="phone_number" v-model="form.phone_number" type="text" placeholder="Телефон" required />
+              <!-- Використовуємо умовне required: обов'язкове тільки при додаванні -->
+              <input
+                id="phone_number"
+                v-model="form.phone_number"
+                type="text"
+                placeholder="Телефон"
+                :required="isAddMode"
+              />
             </div>
             <div class="form-actions">
               <button type="submit" class="btn-primary">Зберегти</button>
@@ -246,14 +252,16 @@ export default {
     },
     async updateUser() {
       try {
-        // Формуємо payload з можливістю оновлення role
+        // Формуємо payload з можливістю оновлення role та номеру телефону (тільки, якщо поле заповнене)
         const payload = {
           first_name: this.form.first_name,
           second_name: this.form.second_name,
           last_name: this.form.last_name,
-          phone_number: this.form.phone_number,
           role: this.form.role
         };
+        if (this.form.phone_number && this.form.phone_number.trim() !== '') {
+          payload.phone_number = this.form.phone_number;
+        }
         if (this.form.email !== this.originalEmail) {
           payload.email = this.form.email;
         }
@@ -380,6 +388,7 @@ export default {
   }
 };
 </script>
+
 
 
 

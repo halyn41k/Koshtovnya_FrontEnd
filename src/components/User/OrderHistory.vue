@@ -2,15 +2,15 @@
   <div class="order-history">
     <h2 class="order-history-title">Історія замовлень</h2>
 
-    <!-- Show Loader while loading orders -->
+    <!-- Показати Loader під час завантаження -->
     <Loader v-if="loading" />
 
-    <!-- Show message if no orders found -->
+    <!-- Повідомлення, якщо замовлень немає -->
     <div v-else-if="orders.length === 0" class="no-orders">
       Ви не розмістили жодного замовлення :(
     </div>
 
-    <!-- Show order details if there are orders -->
+    <!-- Відображення списку замовлень -->
     <div v-else>
       <div class="order-item" v-for="(order, index) in orders" :key="index">
         <div class="order-header">
@@ -21,9 +21,18 @@
           <div v-for="(item, i) in order.items" :key="i" class="order-product">
             <img :src="item.image_url" alt="Product Image" class="order-product-image" />
             <div class="order-product-info">
-              <h3>{{ item.title }}</h3>
+              <!-- Якщо товар не видалено, відображаємо назву товару -->
+              <h3 v-if="!item.is_deleted">{{ item.title }}</h3>
+              <!-- Якщо товар видалено, відображаємо повідомлення -->
+              <h3 v-else class="deleted-product">Товар видалено</h3>
               <p>Кількість: {{ item.quantity }}</p>
               <p>Ціна: {{ item.price }}₴</p>
+              <!-- Посилання на деталі товару, тільки якщо він не видалений -->
+              <router-link 
+                v-if="!item.is_deleted" 
+                :to="{ name: 'ProductDetail', params: { id: item.id } }">
+                Деталі товару
+              </router-link>
             </div>
           </div>
         </div>
@@ -34,17 +43,17 @@
 
 <script>
 import axios from 'axios';
-import Loader from '@/components/Loader.vue'; // Import the loader component
+import Loader from '@/components/Loader.vue'; // Імпорт Loader компонента
 
 export default {
   name: 'OrderHistory',
   components: {
-    Loader, // Register the loader component
+    Loader,
   },
   data() {
     return {
       orders: [],
-      loading: true, // Initially loading is true
+      loading: true,
     };
   },
   methods: {
@@ -61,22 +70,24 @@ export default {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        // Transform the response data to match the desired structure
+        // Перетворення отриманих даних для зручного використання в компоненті
         this.orders = response.data.orders.map((order) => ({
           id: order.id,
           status: order.status,
           items: order.items.map((item) => ({
+            id: item.id,
             title: item.name,
             price: item.price,
             quantity: item.quantity,
             image_url: item.image_url || 'default_image_path',
+            is_deleted: item.is_deleted, // Додаємо прапорець is_deleted
           })),
         }));
       } catch (error) {
         console.error('Помилка завантаження замовлень:', error);
         alert('Не вдалося завантажити ваші замовлення.');
       } finally {
-        this.loading = false; // Hide the loader after fetching is complete
+        this.loading = false;
       }
     },
   },
@@ -86,7 +97,6 @@ export default {
   },
 };
 </script>
-
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Merriweather:wght@400;700&family=Montserrat:wght@600&display=swap');
@@ -132,69 +142,51 @@ export default {
   transform: scale(1.02);
 }
 
-.item-number {
+.order-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 15px;
+}
+
+.order-number {
   font-family: 'Montserrat', sans-serif;
-  font-size: 40px;
+  font-size: 20px;
   font-weight: 600;
   color: #333;
-  margin-right: 20px;
-  margin-top: 10px;
-}
-
-.item-content {
-  display: flex;
-  gap: 20px;
-  align-items: center;
-  width: 100%;
-}
-
-.item-image {
-  width: 120px;
-  height: 120px;
-  object-fit: cover;
-  border-radius: 8px;
-}
-
-.item-details {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  width: 100%;
-}
-
-.item-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.item-title {
-  font-size: 18px;
-  font-family: 'Merriweather', serif;
-  font-weight: 700;
-  color: #333;
-}
-
-.item-price {
-  font-family: 'Inter', sans-serif;
-  font-size: 18px;
-  font-weight: 600;
-  color: #A01212;
-}
-
-.item-quantity {
-  font-size: 16px;
-  font-family: 'Merriweather', serif;
-  font-weight: 600;
-  color: #CA7E7E;
-  margin-top: 10px;
 }
 
 .order-status {
   font-size: 20px;
   font-family: 'Merriweather', serif;
   color: #555;
-  text-align: left;
-  margin-top: 30px;
+}
+
+.order-details {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.order-product {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.order-product-image {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.order-product-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.deleted-product {
+  color: red;
+  font-style: italic;
 }
 </style>
