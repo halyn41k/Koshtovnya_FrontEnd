@@ -9,6 +9,7 @@
       <PaymentSteps :currentStep="currentStep" />
       <OrderReview :cartItems="cartItems" :deliveryCost="deliveryCost" />
       <DeliveryAddress :formData="formData" />
+      <PaymentSummary :cartItems="cartItemsFromParent" />
 
 
     </main>

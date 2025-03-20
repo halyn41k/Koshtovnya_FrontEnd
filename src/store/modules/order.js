@@ -1,4 +1,3 @@
-// store/modules/order.js
 const state = {
     customerData: {
       firstName: "",
@@ -12,7 +11,7 @@ const state = {
       houseNumber: "",
       warehouse: "",
       typeOfCard: "",
-      selectedPaymentOption: ""
+      paymentMethod: ""
     },
     cartItems: [],
     deliveryCost: 0

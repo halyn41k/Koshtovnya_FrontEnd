@@ -174,7 +174,7 @@
                     type="radio"
                     :id="`payment-${idx}`"
                     :value="option"
-                    v-model="formData.selectedPaymentOption"
+                    v-model="formData.paymentMethod"
                     class="radio-input"
                   />
                   <label :for="`payment-${idx}`" class="payment-label">
@@ -184,7 +184,7 @@
                 <span v-if="errors.paymentOption" class="error">{{ errors.paymentOption }}</span>
               </div>
               <button
-                :disabled="!formData.selectedPaymentOption"
+                :disabled="!formData.paymentMethod"
                 @click="validateAndProceed"
                 class="next-button"
               >
@@ -206,7 +206,8 @@
     </section>
 
     <!-- Підсумковий блок – PaymentSummary (відображається після завершення всіх кроків) -->
-    <PaymentSummary v-if="steps.every(step => step.completed)" />
+    <PaymentSummary v-if="steps.every(step => step.completed)" :cartItems="cartItems" />
+
 
     <!-- Компонент адреси доставки (якщо необхідно) -->
     <DeliveryAddress v-if="showDeliveryAddress" :customerData="formData" />
@@ -235,7 +236,7 @@ export default {
       paymentOptions: ["Післяоплата", "Оплата картою"],
       currentStep: 0,
       formData: {
-        selectedPaymentOption: "",
+        paymentMethod: "",
         firstName: "",
         lastName: "",
         secondName: "",
@@ -272,6 +273,13 @@ export default {
       deliveryCost: 0,
     };
   },
+  watch: {
+    cartItems(newVal) {
+      if (newVal && newVal.length) {
+        this.calculateDeliveryCost();
+      }
+    }
+  },
   computed: {
     clonedFormData() {
       return JSON.parse(JSON.stringify(this.formData));
@@ -282,7 +290,7 @@ export default {
       } else if (this.currentStep === 1) {
         return this.validatePostalInfo();
       } else if (this.currentStep === 2) {
-        return !!this.formData.selectedPaymentOption;
+        return !!this.formData.paymentMethod;
       }
       return false;
     },
@@ -354,6 +362,28 @@ export default {
         console.error("Помилка отримання міст", error);
       }
     },
+    async fetchCartItems() {
+  const token = localStorage.getItem("token");
+  if (!token) {
+    alert("Будь ласка, увійдіть.");
+    this.$router.push("/login");
+    return;
+  }
+  try {
+    const response = await axios.get("http://26.235.139.202:8080/api/cart", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    // Припустимо, що дані кошика знаходяться у response.data.data
+    const cartData = response.data.data;
+    // Оновлюємо локальний стан (якщо потрібен) та Vuex
+    this.cartItems = cartData;
+    this.updateCartItems(cartData);
+    console.log("Кошик оновлено:", cartData);
+  } catch (error) {
+    console.error("Помилка завантаження кошика", error);
+  }
+},
+
     selectCity(city) {
       this.formData.city = city.city;
       this.formData.cityRef = city.Ref;
@@ -426,7 +456,7 @@ export default {
       } else if (this.currentStep === 1) {
         isValid = this.validatePostalInfo();
       } else if (this.currentStep === 2) {
-        isValid = !!this.formData.selectedPaymentOption;
+        isValid = !!this.formData.paymentMethod;
         if (!isValid) {
           this.errors.paymentOption = "Оберіть спосіб оплати";
         }
@@ -571,8 +601,8 @@ export default {
     this.$router.push("/login");
     return;
   }
-  
-  // Якщо cityRef не встановлено, отримуємо його через API
+
+  // Якщо cityRef не встановлено, отримуємо його за назвою міста
   if (!this.formData.cityRef && this.formData.city) {
     try {
       const cityResponse = await axios.get("http://26.235.139.202:8080/api/nova-poshta/cities", {
@@ -581,41 +611,60 @@ export default {
       });
       if (cityResponse.data.success && Array.isArray(cityResponse.data.data) && cityResponse.data.data.length > 0) {
         this.formData.cityRef = cityResponse.data.data[0].Ref;
+      } else {
+        console.error("Невдалося знайти місто. Отримано:", cityResponse.data);
       }
     } catch (err) {
       console.error("Помилка встановлення cityRef", err);
     }
   }
-  
-  const serviceType = this.formData.deliveryType === "Поштове відділення" 
-                        ? "WarehouseWarehouse" 
+
+  // Визначаємо тип доставки
+  const serviceType = this.formData.deliveryType === "Поштове відділення"
+                        ? "WarehouseWarehouse"
                         : "WarehouseDoors";
-  const productIds = this.cartItems.map(item => item.id);
-  
+
+  // Отримуємо product_ids із кошика, переданого через пропси
+  const productIds = (this.cartItems && this.cartItems.length > 0)
+    ? this.cartItems.map(item => item.id)
+    : [];
+
+  if (!productIds.length) {
+    console.error("Кошик порожній, product_ids обов'язковий для розрахунку доставки.");
+    alert("Кошик порожній. Додайте товари до кошика для розрахунку доставки.");
+    return;
+  }
+
   console.log("Параметри для розрахунку доставки:", {
     CityRecipient: this.formData.cityRef,
     ServiceType: serviceType,
     product_ids: productIds
   });
-  
+
   try {
     const response = await axios.get("http://26.235.139.202:8080/api/nova-poshta/delivery/cost", {
       headers: { Authorization: `Bearer ${token}` },
       params: {
         CityRecipient: this.formData.cityRef,
         ServiceType: serviceType,
-        product_ids: productIds
+        product_ids: productIds // Передаємо як масив
       },
     });
-    
-    // Оновлюємо локальну змінну та стан у Vuex
-    this.deliveryCost = response.data.deliveryCost;
-    this.updateDeliveryCost(response.data.deliveryCost); // Виклик Vuex action
+
+    // Очікуємо, що API поверне ключ deliveryCost
+    if (response.data && response.data.deliveryCost !== undefined) {
+      this.deliveryCost = response.data.deliveryCost;
+      this.updateDeliveryCost(response.data.deliveryCost);
+    } else {
+      console.error("Невірна відповідь API розрахунку доставки:", response.data);
+      alert("Не вдалося розрахувати доставку. Спробуйте ще раз.");
+    }
   } catch (error) {
     console.error("Помилка розрахунку вартості доставки", error);
     alert("Сталася помилка при розрахунку вартості доставки.");
   }
 },
+
 
   },
   mounted() {
@@ -625,6 +674,7 @@ export default {
     this.fetchProfile();
     this.fetchDeliveryTypes();
     this.fetchUserAddress();
+    this.fetchCartItems();
   },
 };
 </script>

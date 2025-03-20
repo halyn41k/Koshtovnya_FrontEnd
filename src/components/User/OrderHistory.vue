@@ -1,4 +1,4 @@
-<template>
+<template> 
   <div class="order-history">
     <h2 class="order-history-title">Історія замовлень</h2>
 
@@ -10,8 +10,8 @@
       Ви не розмістили жодного замовлення :(
     </div>
 
-    <!-- Відображення списку замовлень -->
-    <div v-else>
+    <!-- Відображення списку замовлень у прокручуваному контейнері -->
+    <div v-else class="orders-container">
       <div class="order-item" v-for="order in orders" :key="order.id">
         <div class="order-header">
           <span class="order-number">Замовлення №{{ order.id }}</span>
@@ -124,6 +124,8 @@ export default {
 .order-history {
   margin: 0 auto;
   padding: 20px;
+  max-height: 90vh; /* Максимальна висота контейнера для всього компонента */
+  overflow-y: auto; /* Вертикальна прокрутка для всього компонента */
 }
 
 .order-history-title {
@@ -139,6 +141,13 @@ export default {
   color: #666;
   text-align: center;
   margin-top: 30px;
+}
+
+/* Прокручуваний контейнер для списку замовлень */
+.orders-container {
+  max-height: 70vh;
+  overflow-y: auto;
+  padding-right: 10px; /* Додаємо відступ для прокрутки */
 }
 
 .order-item {
