@@ -2,7 +2,7 @@
   <div class="order-history">
     <h2 class="order-history-title">Історія замовлень</h2>
 
-    <!-- Показати Loader під час завантаження -->
+    <!-- Loader при завантаженні -->
     <Loader v-if="loading" />
 
     <!-- Повідомлення, якщо замовлень немає -->
@@ -12,7 +12,7 @@
 
     <!-- Відображення списку замовлень -->
     <div v-else>
-      <div class="order-item" v-for="(order, index) in orders" :key="index">
+      <div class="order-item" v-for="order in orders" :key="order.id">
         <div class="order-header">
           <span class="order-number">Замовлення №{{ order.id }}</span>
           <span class="order-status">Статус: {{ order.status }}</span>
@@ -21,78 +21,93 @@
           <div v-for="(item, i) in order.items" :key="i" class="order-product">
             <img :src="item.image_url" alt="Product Image" class="order-product-image" />
             <div class="order-product-info">
-              <!-- Якщо товар не видалено, відображаємо назву товару -->
               <h3 v-if="!item.is_deleted">{{ item.title }}</h3>
-              <!-- Якщо товар видалено, відображаємо повідомлення -->
               <h3 v-else class="deleted-product">Товар видалено</h3>
               <p>Кількість: {{ item.quantity }}</p>
               <p>Ціна: {{ item.price }}₴</p>
-              <!-- Посилання на деталі товару, тільки якщо він не видалений -->
-              <router-link 
-                v-if="!item.is_deleted" 
-                :to="{ name: 'ProductDetail', params: { id: item.id } }">
-                Деталі товару
-              </router-link>
             </div>
           </div>
         </div>
+        <button class="details-btn" @click="openOrderDetails(order)">
+          Деталі замовлення
+        </button>
       </div>
     </div>
+
+    <!-- Модальне вікно з деталями замовлення -->
+    <OrderDetailModal
+      v-if="showModal"
+      :order="selectedOrder"
+      @close="closeModal"
+    />
   </div>
 </template>
 
 <script>
-import axios from 'axios';
-import Loader from '@/components/Loader.vue'; // Імпорт Loader компонента
+import axios from "axios";
+import Loader from "@/components/Loader.vue";
+import OrderDetailModal from "./OrderDetailModal.vue";
 
 export default {
-  name: 'OrderHistory',
+  name: "OrderHistory",
   components: {
     Loader,
+    OrderDetailModal,
   },
   data() {
     return {
       orders: [],
       loading: true,
+      showModal: false,
+      selectedOrder: null,
     };
   },
   methods: {
     async fetchOrders() {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       if (!token) {
-        alert('Будь ласка, увійдіть у свій обліковий запис.');
-        this.$router.push('/login');
+        alert("Будь ласка, увійдіть у свій обліковий запис.");
+        this.$router.push("/login");
         return;
       }
 
       try {
-        const response = await axios.get('http://26.235.139.202:8080/api/orders', {
+        const response = await axios.get("http://26.235.139.202:8080/api/orders", {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        // Перетворення отриманих даних для зручного використання в компоненті
-        this.orders = response.data.orders.map((order) => ({
+        // Припустимо, що API повертає об'єкт з полем "orders"
+        this.orders = (response.data.orders || []).map((order) => ({
           id: order.id,
           status: order.status,
-          items: order.items.map((item) => ({
+          // Якщо API повертає товари в полі "products"
+          items: (order.products || []).map((item) => ({
             id: item.id,
-            title: item.name,
+            title: item.name, // або item.title, якщо так
             price: item.price,
             quantity: item.quantity,
-            image_url: item.image_url || 'default_image_path',
-            is_deleted: item.is_deleted, // Додаємо прапорець is_deleted
+            image_url: item.image_url || "default_image_path",
+            is_deleted: item.is_deleted,
           })),
         }));
       } catch (error) {
-        console.error('Помилка завантаження замовлень:', error);
-        alert('Не вдалося завантажити ваші замовлення.');
+        console.error("Помилка завантаження замовлень:", error);
+        alert("Не вдалося завантажити ваші замовлення.");
       } finally {
         this.loading = false;
       }
     },
+    openOrderDetails(order) {
+      this.selectedOrder = order;
+      this.showModal = true;
+    },
+    closeModal() {
+      this.showModal = false;
+      this.selectedOrder = null;
+    },
   },
   mounted() {
-    document.title = 'Історія замовлень';
+    document.title = "Історія замовлень";
     this.fetchOrders();
   },
 };
@@ -107,10 +122,8 @@ export default {
 }
 
 .order-history {
-  max-width: 800px;
   margin: 0 auto;
   padding: 20px;
-  margin-left: -10px;
 }
 
 .order-history-title {
@@ -129,12 +142,10 @@ export default {
 }
 
 .order-item {
-  display: flex;
   background-color: #F5EAE9;
   padding: 20px;
   margin-bottom: 20px;
   border-radius: 8px;
-  position: relative;
   transition: transform 0.3s;
 }
 
@@ -162,15 +173,14 @@ export default {
 }
 
 .order-details {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
+  margin-bottom: 15px;
 }
 
 .order-product {
   display: flex;
   align-items: center;
   gap: 15px;
+  margin-bottom: 15px;
 }
 
 .order-product-image {
@@ -188,5 +198,15 @@ export default {
 .deleted-product {
   color: red;
   font-style: italic;
+}
+
+.details-btn {
+  background-color: #6b1f1f;
+  color: #fff;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 18px;
 }
 </style>

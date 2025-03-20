@@ -9,7 +9,7 @@
         </div>
         <div class="summary-row">
           <span>Доставка</span>
-          <span class="price">{{ localDeliveryCost }}₴</span>
+          <span class="price">{{ deliveryCost }}₴</span>
         </div>
         <div class="summary-row total">
           <span>Загальна сума</span>
@@ -28,108 +28,58 @@
   </section>
 </template>
 
-
 <script>
 import axios from "axios";
+import { mapGetters } from "vuex";
 
 export default {
   name: "PaymentSummary",
-  props: {
-    cartItems: {
-      type: Array,
-      required: true,
-      default: () => [],
-    },
-    deliveryCost: {
-      type: Number,
-      required: true,
-      default: 0,
-    },
-    totalAmount: {
-      type: Number,
-      required: true,
-      default: 0,
-    },
-    cityRef: {
-      type: String,
-      required: true,
-      default: "",
-    },
-    paymentMethod: {
-      type: String,
-      required: true,
-      default: "",
-    },
-    typeOfCard: {
-      type: String,
-      default: "",
-    },
-    // Дані користувача: firstName, lastName, phone, city, deliveryType, warehouse, street, houseNumber
-    customerData: {
-      type: Object,
-      required: true,
-      default: () => ({}),
-    },
-  },
-  data() {
-    return {
-      localDeliveryCost: this.deliveryCost,
-    };
-  },
   computed: {
+    ...mapGetters("order", ["customerData", "cartItems", "deliveryCost", "cartTotalAmount"]),
     totalWithDelivery() {
-      return (
-        this.cartItems.reduce(
-          (total, item) => total + item.price * item.quantity,
-          0
-        ) + this.localDeliveryCost
-      );
-    },
+      return this.cartTotalAmount + this.deliveryCost;
+    }
   },
   methods: {
     async submitOrder() {
+      console.log("submitOrder запущено");
       const token = localStorage.getItem("token");
       if (!token) {
-        alert("Будь ласка, увійдіть у свій обліковий запис.");
+        alert("Будь ласка, увійдіть.");
         this.$router.push("/login");
         return;
       }
-      
-      // customerData вже є plain object, якщо PaymentSteps передає clonedFormData
-      const customer = this.customerData;
-
+      // Створюємо чисту копію даних
+      const customer = { ...this.customerData };
+      const deliveryType = customer.deliveryType || "";
       const orderData = {
-  last_name: customer.lastName,
-  first_name: customer.firstName,
-  second_name: customer.secondName || "", 
-  phone_number: customer.phone,
-  city: customer.city,
-  delivery_name: customer.deliveryType,
-  delivery_address: customer.deliveryType.toLowerCase().includes("самовивіз")
-    ? customer.warehouse
-    : `${customer.street} ${customer.houseNumber}`,
-  payment_method: this.paymentMethod,
-  type_of_card: this.paymentMethod === "Післяоплата" ? "" : this.typeOfCard,
-  delivery_cost: this.localDeliveryCost,
-  cart_cost: this.cartItems.reduce((total, item) => total + item.price * item.quantity, 0),
-  products: this.cartItems.map(item => ({
-    product_id: item.id,
-    quantity: item.quantity
-  })),
-};
-
+        last_name: customer.lastName,
+        first_name: customer.firstName,
+        second_name: customer.secondName || "",
+        phone_number: customer.phone,
+        city: customer.city,
+        delivery_name: customer.deliveryType,
+        delivery_address: deliveryType.toLowerCase().includes("самовивіз")
+          ? customer.warehouse
+          : `${customer.street} ${customer.houseNumber}`,
+        payment_method: customer.selectedPaymentOption,
+        type_of_card: customer.selectedPaymentOption === "Післяоплата" ? "" : customer.typeOfCard,
+        delivery_cost: this.deliveryCost,
+        cart_cost: this.cartTotalAmount,
+        // Якщо потрібно передавати список товарів:
+        // products: this.cartItems.map(item => ({ product_id: item.id, quantity: item.quantity })),
+      };
 
       console.log("Готовий payload замовлення:", orderData);
-
       try {
         const orderResponse = await axios.post("http://26.235.139.202:8080/api/orders", orderData, {
           headers: { Authorization: `Bearer ${token}` },
         });
         console.log("Відповідь сервера на замовлення:", orderResponse.data);
         const orderId = orderResponse.data.order_id;
-        if (this.paymentMethod === "Післяоплата") {
+        if (customer.selectedPaymentOption === "Післяоплата") {
           this.$router.push("/payment-confirmed");
-        } else if (this.paymentMethod === "Оплата картою") {
+        } else if (customer.selectedPaymentOption === "Оплата картою") {
           const amount = this.totalWithDelivery;
           await axios.post("https://b9bc-176-121-4-31.ngrok-free.app/api/payment", {
             amount,
@@ -143,45 +93,18 @@ export default {
           if (status === "Оплачено") {
             this.$router.push("/payment-confirmed");
           } else {
-            alert("Сталася помилка при оплаті або замовлення знаходиться в очікуванні.");
+            alert("Помилка оплати або замовлення очікує оплати.");
           }
         }
       } catch (error) {
         console.error("Помилка оформлення замовлення:", error.response?.data || error.message);
         alert("Не вдалося оформити замовлення. Спробуйте пізніше.");
       }
-    },
-    async calculateDeliveryCost() {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        alert("Будь ласка, увійдіть у свій обліковий запис.");
-        this.$router.push("/login");
-        return;
-      }
-      if (!this.cityRef || !this.cityRef.trim()) {
-        console.error("CityRecipient is required but not provided.");
-        alert("Місто отримувача не визначене. Будь ласка, виберіть місто.");
-        return;
-      }
-      try {
-        const response = await axios.get("http://26.235.139.202:8080/api/nova-poshta/delivery/cost", {
-          headers: { Authorization: `Bearer ${token}` },
-          params: {
-            CityRecipient: this.cityRef,
-            ServiceType: this.paymentMethod === "Поштове відділення" ? "WarehouseWarehouse" : "WarehouseDoors",
-            "product_ids[]": this.cartItems.map((item) => item.id),
-          },
-        });
-        this.localDeliveryCost = response.data.deliveryCost;
-      } catch (error) {
-        console.error("Помилка розрахунку вартості доставки:", error.response?.data || error.message);
-        alert("Помилка розрахунку вартості доставки");
-      }
-    },
+    }
   },
   mounted() {
     console.log("Отримані дані customerData у PaymentSummary:", this.customerData);
-  },
+  }
 };
 </script>
 

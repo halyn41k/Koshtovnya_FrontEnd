@@ -1,12 +1,8 @@
 import { createStore } from "vuex";
-import payment from "../../store/modules/payment";
+import order from "./modules/order";
 
-
-const store = createStore({
+export default createStore({
   modules: {
-    payment
+    order
   }
 });
-
-
-export default store;

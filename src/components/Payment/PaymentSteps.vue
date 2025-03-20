@@ -1,5 +1,6 @@
 <template>
   <div class="payment-columns">
+    <!-- Кроки оформлення -->
     <section class="payment-steps">
       <div class="delivery-steps">
         <div
@@ -29,16 +30,32 @@
             <!-- Крок "Особиста інформація" -->
             <template v-if="step.title === 'Особиста інформація'">
               <div class="input-container">
-                <input class="input-field" v-model="formData.firstName" placeholder="Ім'я" />
+                <input
+                  class="input-field"
+                  v-model="formData.firstName"
+                  placeholder="Ім'я"
+                />
                 <span v-if="errors.firstName" class="error">{{ errors.firstName }}</span>
 
-                <input class="input-field" v-model="formData.lastName" placeholder="Прізвище" />
+                <input
+                  class="input-field"
+                  v-model="formData.lastName"
+                  placeholder="Прізвище"
+                />
                 <span v-if="errors.lastName" class="error">{{ errors.lastName }}</span>
 
-                <input class="input-field" v-model="formData.secondName" placeholder="По батькові" />
+                <input
+                  class="input-field"
+                  v-model="formData.secondName"
+                  placeholder="По батькові"
+                />
                 <span v-if="errors.secondName" class="error">{{ errors.secondName }}</span>
 
-                <input class="input-field" v-model="formData.phone" placeholder="Номер телефону" />
+                <input
+                  class="input-field"
+                  v-model="formData.phone"
+                  placeholder="Номер телефону"
+                />
                 <span v-if="errors.phone" class="error">{{ errors.phone }}</span>
               </div>
             </template>
@@ -46,15 +63,23 @@
             <!-- Крок "Поштове відділення" -->
             <template v-else-if="step.title === 'Поштове відділення'">
               <div class="input-container">
-                <!-- Перший селект для вибору категорії доставки (скорочено) -->
-                <select v-model="selectedDeliveryCategory" @change="updateDeliveryOptions" class="input-field">
+                <!-- Вибір типу доставки -->
+                <select
+                  v-model="selectedDeliveryCategory"
+                  @change="updateDeliveryOptions"
+                  class="input-field"
+                >
                   <option disabled value="">Оберіть тип доставки</option>
                   <option value="courier">Кур'єр</option>
                   <option value="pickup">Самовивіз</option>
                 </select>
 
-                <!-- Другий селект для вибору конкретного способу доставки із повною назвою -->
-                <select v-model="formData.deliveryType" class="input-field" :disabled="!selectedDeliveryCategory">
+                <!-- Вибір конкретного способу доставки -->
+                <select
+                  v-model="formData.deliveryType"
+                  class="input-field"
+                  :disabled="!selectedDeliveryCategory"
+                >
                   <option disabled value="">Оберіть спосіб доставки</option>
                   <option
                     v-for="option in filteredDeliveryOptions"
@@ -64,14 +89,18 @@
                     {{ option.name }}
                   </option>
                 </select>
-
                 <span v-if="!filteredDeliveryOptions.length" class="error">
                   Способи доставки не доступні
                 </span>
 
-                <!-- Якщо вибрано доставку, що потребує введення міста -->
+                <!-- Якщо обрана доставка, що потребує введення міста -->
                 <div v-if="formData.deliveryType && formData.deliveryType !== 'Самовивіз з наших магазинів'">
-                  <input class="input-field" v-model="formData.city" placeholder="Введіть місто" @input="handleCityInput" />
+                  <input
+                    class="input-field"
+                    v-model="formData.city"
+                    placeholder="Введіть місто"
+                    @input="handleCityInput"
+                  />
                   <div v-if="cities.length > 0" class="city-suggestions">
                     <ul>
                       <li v-for="city in cities" :key="city.Ref" @click="selectCity(city)">
@@ -82,11 +111,26 @@
                 </div>
 
                 <!-- Якщо обрана доставка «Кур'єр» -->
-                <div v-if="formData.city && formData.deliveryType && formData.deliveryType.includes('Кур\'єр')">
-                  <input class="input-field" v-model="formData.streetSearch" placeholder="Введіть назву вулиці" @input="handleStreetSearch" />
+                <div
+                  v-if="
+                    formData.city &&
+                    formData.deliveryType &&
+                    formData.deliveryType.includes('Кур\'єр')
+                  "
+                >
+                  <input
+                    class="input-field"
+                    v-model="formData.streetSearch"
+                    placeholder="Введіть назву вулиці"
+                    @input="handleStreetSearch"
+                  />
                   <div v-if="streets.length > 0" class="street-suggestions">
                     <ul>
-                      <li v-for="(street, index) in streets" :key="index" @click="selectStreet(street)">
+                      <li
+                        v-for="(street, idx) in streets"
+                        :key="idx"
+                        @click="selectStreet(street)"
+                      >
                         {{ street.street || street.Name }}
                       </li>
                     </ul>
@@ -99,35 +143,21 @@
 
                 <!-- Введення номера будинку -->
                 <div v-if="formData.street">
-                  <input class="input-field" v-model="formData.houseNumber" placeholder="Введіть номер будинку" />
+                  <input
+                    class="input-field"
+                    v-model="formData.houseNumber"
+                    placeholder="Введіть номер будинку"
+                  />
                   <span v-if="errors.houseNumber" class="error">{{ errors.houseNumber }}</span>
                 </div>
 
-                <!-- Якщо обрана доставка, що не потребує введення міста -->
+                <!-- Вибір відділення для самовивозу -->
                 <div v-if="formData.deliveryType === 'Самовивіз з наших магазинів'">
                   <select v-model="formData.warehouse" class="input-field">
                     <option disabled value="">Оберіть магазин</option>
                     <option value="Степана Бандери 22">Степана Бандери 22</option>
                   </select>
-                </div>
-
-                <!-- Інші варіанти самовивозу -->
-                <div v-if="formData.deliveryType === 'Самовивіз з поштоматів Нової Пошти'">
-                  <select v-model="formData.warehouse" class="input-field">
-                    <option disabled value="">Оберіть поштомат</option>
-                    <option v-for="warehouse in warehouses" :key="warehouse.id" :value="warehouse.id">
-                      {{ warehouse.name }}
-                    </option>
-                  </select>
-                </div>
-
-                <div v-if="formData.deliveryType === 'Самовивіз з Нової Пошти' || formData.deliveryType === 'Самовивіз з УКРПОШТИ'">
-                  <select v-model="formData.warehouse" class="input-field">
-                    <option disabled value="">Оберіть відділення</option>
-                    <option v-for="warehouse in warehouses" :key="warehouse.id" :value="warehouse.name">
-                      {{ warehouse.name }}
-                    </option>
-                  </select>
+                  <span v-if="errors.warehouse" class="error">{{ errors.warehouse }}</span>
                 </div>
               </div>
             </template>
@@ -135,7 +165,11 @@
             <!-- Крок "Оплата" -->
             <template v-else-if="step.title === 'Оплата'">
               <div class="payment-options">
-                <div v-for="(option, idx) in paymentOptions" :key="idx" class="payment-option">
+                <div
+                  v-for="(option, idx) in paymentOptions"
+                  :key="idx"
+                  class="payment-option"
+                >
                   <input
                     type="radio"
                     :id="`payment-${idx}`"
@@ -143,18 +177,24 @@
                     v-model="formData.selectedPaymentOption"
                     class="radio-input"
                   />
-                  <label :for="`payment-${idx}`" class="payment-label">{{ option }}</label>
+                  <label :for="`payment-${idx}`" class="payment-label">
+                    {{ option }}
+                  </label>
                 </div>
                 <span v-if="errors.paymentOption" class="error">{{ errors.paymentOption }}</span>
               </div>
-              <button :disabled="!formData.selectedPaymentOption" @click="validateAndProceed" class="next-button">
+              <button
+                :disabled="!formData.selectedPaymentOption"
+                @click="validateAndProceed"
+                class="next-button"
+              >
                 Далі
               </button>
             </template>
 
             <!-- Універсальна кнопка "Далі" для кроків, окрім останнього -->
             <button
-              v-if="canProceedToNextStep && currentStep < steps.length - 1"
+              v-if="canProceedToNextStep && currentStep < steps.length - 1 && step.title !== 'Оплата'"
               @click="validateAndProceed"
               class="next-button"
             >
@@ -165,30 +205,19 @@
       </div>
     </section>
 
-    <!-- Підсумковий блок – PaymentSummary -->
-    <PaymentSummary
-  v-if="steps.every(step => step.completed)"
-  :cart-items="cartItems"
-  :delivery-cost="deliveryCost"
-  :total-amount="cartTotalAmount"
-  :city-ref="formData.cityRef"
-  :payment-method="formData.selectedPaymentOption"
-  :type-of-card="formData.typeOfCard"
-  :customer-data="clonedFormData"
-  @order-submitted="submitOrder"
-/>
+    <!-- Підсумковий блок – PaymentSummary (відображається після завершення всіх кроків) -->
+    <PaymentSummary v-if="steps.every(step => step.completed)" />
 
-
-
+    <!-- Компонент адреси доставки (якщо необхідно) -->
     <DeliveryAddress v-if="showDeliveryAddress" :customerData="formData" />
   </div>
 </template>
-
 
 <script>
 import axios from "axios";
 import PaymentSummary from "./PaymentSummary.vue";
 import DeliveryAddress from "./DeliveryAddress.vue";
+import { mapActions } from "vuex";
 
 export default {
   name: "PaymentSteps",
@@ -213,20 +242,17 @@ export default {
         phone: "",
         city: "",
         streetSearch: "",
-        postalOffice: "",
         cityRef: "",
-        deliveryType: "", // Повна назва способу доставки (наприклад, "Самовивіз з Нової Пошти")
+        deliveryType: "",
         street: "",
         houseNumber: "",
         warehouse: "",
-        postomats: "",
         typeOfCard: "",
       },
       errors: {},
       cities: [],
       streets: [],
       warehouses: [],
-      // Залишаємо selectedDeliveryCategory для внутрішньої логіки (наприклад, "pickup" або "courier")
       selectedDeliveryCategory: "",
       deliveryOptions: [],
       filteredDeliveryOptions: [],
@@ -242,7 +268,7 @@ export default {
           { id: 4, name: "Самовивіз з УКРПОШТИ", delivery_type: "pickup" },
         ],
       },
-      cartItems: [],
+      cartItems: [], // При потребі, дані кошика можна також завантажувати у Vuex
       deliveryCost: 0,
     };
   },
@@ -253,11 +279,9 @@ export default {
     canProceedToNextStep() {
       if (this.currentStep === 0) {
         return this.validatePersonalInfo();
-      }
-      if (this.currentStep === 1) {
+      } else if (this.currentStep === 1) {
         return this.validatePostalInfo();
-      }
-      if (this.currentStep === 2) {
+      } else if (this.currentStep === 2) {
         return !!this.formData.selectedPaymentOption;
       }
       return false;
@@ -266,10 +290,14 @@ export default {
       return this.steps.every((step) => step.completed);
     },
     cartTotalAmount() {
-      return this.cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
+      return this.cartItems.reduce(
+        (total, item) => total + item.price * item.quantity,
+        0
+      );
     },
   },
   methods: {
+    ...mapActions("order", ["updateCustomerData", "updateCartItems", "updateDeliveryCost"]),
     toggleStep(index) {
       if (this.currentStep !== index) {
         this.steps[this.currentStep].isExpanded = false;
@@ -279,7 +307,8 @@ export default {
     },
     updateDeliveryOptions() {
       if (this.selectedDeliveryCategory) {
-        this.filteredDeliveryOptions = this.deliveryData[this.selectedDeliveryCategory];
+        this.filteredDeliveryOptions =
+          this.deliveryData[this.selectedDeliveryCategory];
       } else {
         this.filteredDeliveryOptions = [];
       }
@@ -296,9 +325,9 @@ export default {
           headers: { Authorization: `Bearer ${token}` },
         });
         this.deliveryOptions = response.data.data;
-        console.log("Отримано типи доставки:", this.deliveryOptions);
       } catch (error) {
-        this.handleApiError(error);
+        console.error("Помилка отримання типів доставки", error);
+        alert("Помилка отримання типів доставки");
       }
     },
     handleCityInput() {
@@ -306,31 +335,7 @@ export default {
         this.fetchCities();
       }
     },
-    selectCity(city) {
-      this.formData.city = city.city;
-      this.formData.cityRef = city.Ref;
-      this.cities = [];
-      console.log("Вибране місто:", this.formData.city, this.formData.cityRef);
-      this.fetchWarehouses();
-    },
-    handleStreetSearch() {
-      clearTimeout(this.streetSearchTimeout);
-      this.streetSearchTimeout = setTimeout(() => {
-        this.fetchStreets();
-      }, 300);
-    },
-    selectStreet(street) {
-      const streetName = street.street || street.Name;
-      this.formData.street = streetName;
-      this.formData.streetSearch = streetName;
-      this.streets = [];
-      console.log("Вибрана вулиця:", streetName);
-    },
     async fetchCities() {
-      console.log("Пошукові параметри для міст:", {
-        city: this.formData.city,
-        delivery_type: this.formData.deliveryType, // використовується фактична назва
-      });
       const token = localStorage.getItem("token");
       try {
         const response = await axios.get("http://26.235.139.202:8080/api/nova-poshta/cities", {
@@ -345,19 +350,26 @@ export default {
         } else {
           this.cities = [];
         }
-        console.log("Отримані міста:", this.cities);
       } catch (error) {
-        console.error("Помилка отримання міст:", error.response?.data || error.message);
+        console.error("Помилка отримання міст", error);
       }
     },
-    selectDeliveryType(type) {
-      this.formData.deliveryType = type;
+    selectCity(city) {
+      this.formData.city = city.city;
+      this.formData.cityRef = city.Ref;
+      this.cities = [];
       this.fetchWarehouses();
+    },
+    handleStreetSearch() {
+      clearTimeout(this.streetSearchTimeout);
+      this.streetSearchTimeout = setTimeout(() => {
+        this.fetchStreets();
+      }, 300);
     },
     async fetchStreets() {
       const token = localStorage.getItem("token");
       if (!token) {
-        alert("Ви не авторизовані. Будь ласка, увійдіть у свій обліковий запис.");
+        alert("Ви не авторизовані. Будь ласка, увійдіть.");
         this.$router.push("/login");
         return;
       }
@@ -375,14 +387,18 @@ export default {
           } else {
             this.streets = [];
           }
-          console.log("Отримані вулиці:", this.streets);
         } catch (error) {
-          this.handleApiError(error);
+          console.error("Помилка отримання вулиць", error);
         }
       }
     },
+    selectStreet(street) {
+      const streetName = street.street || street.Name;
+      this.formData.street = streetName;
+      this.formData.streetSearch = streetName;
+      this.streets = [];
+    },
     async fetchWarehouses() {
-      this.warehouses = [];
       const token = localStorage.getItem("token");
       try {
         const response = await axios.get("http://26.235.139.202:8080/api/nova-poshta/ware-houses", {
@@ -390,7 +406,7 @@ export default {
           params: {
             city: this.formData.city,
             Ref: this.formData.cityRef,
-            delivery_type: this.formData.deliveryType, // використовується фактична назва
+            delivery_type: this.formData.deliveryType,
           },
         });
         if (response.status === 200 && Array.isArray(response.data?.data)) {
@@ -399,86 +415,8 @@ export default {
             name: item.warehouse,
           }));
         }
-        console.log("Отримані відділення:", this.warehouses);
       } catch (error) {
-        console.error("Помилка отримання відділень:", error.response?.data || error.message);
-      }
-    },
-    handleApiError(error) {
-      console.error("API Error:", error.response?.data || error.message);
-      if (error.response) {
-        alert(`Сервер повернув помилку: ${error.response.status}`);
-      } else {
-        alert("Не вдалося виконати запит. Перевірте ваше з'єднання.");
-      }
-    },
-    async fetchProfile() {
-      try {
-        const token = localStorage.getItem("token");
-        if (!token) return;
-        const response = await axios.get("http://26.235.139.202:8080/api/profile", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const { user } = response.data;
-        this.formData.firstName = user.first_name || "";
-        this.formData.lastName = user.last_name || "";
-        this.formData.secondName = user.second_name || "";
-        console.log("Отриманий профіль користувача:", this.formData);
-      } catch (error) {
-        console.error("Помилка завантаження профілю:", error.response?.data || error.message);
-      }
-    },
-    async fetchUserAddress() {
-      const token = localStorage.getItem("token");
-      if (!token) return;
-      try {
-        const response = await axios.get("http://26.235.139.202:8080/api/user-address", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (response.data && response.data.data && response.data.data.address) {
-          const address = response.data.data.address;
-          if (address.phone_number) {
-            this.formData.phone = address.phone_number;
-          }
-          if (address.city) {
-            this.formData.city = address.city;
-          }
-          if (address.delivery_address) {
-            this.formData.warehouse = address.delivery_address;
-          }
-          if (address.delivery_type) {
-            this.selectedDeliveryCategory =
-              address.delivery_type === "courier" ? "courier" :
-              address.delivery_type === "pickup" ? "pickup" : "";
-            this.$nextTick(() => {
-              this.updateDeliveryOptions();
-              if (address.delivery_name) {
-                this.formData.deliveryType = address.delivery_name;
-              }
-            });
-          }
-          console.log("Отримана адреса користувача:", address);
-          if (!this.formData.cityRef && this.formData.city) {
-            try {
-              const cityResponse = await axios.get("http://26.235.139.202:8080/api/nova-poshta/cities", {
-                headers: { Authorization: `Bearer ${token}` },
-                params: { city: this.formData.city, delivery_type: this.formData.deliveryType },
-              });
-              if (
-                cityResponse.data.success &&
-                Array.isArray(cityResponse.data.data) &&
-                cityResponse.data.data.length > 0
-              ) {
-                this.formData.cityRef = cityResponse.data.data[0].Ref;
-                console.log("Автоматично встановлено cityRef:", this.formData.cityRef);
-              }
-            } catch (err) {
-              console.error("Помилка встановлення cityRef:", err.response?.data || err.message);
-            }
-          }
-        }
-      } catch (error) {
-        console.error("Помилка отримання адреси користувача:", error.response?.data || error.message);
+        console.error("Помилка отримання відділень", error);
       }
     },
     validateAndProceed() {
@@ -494,6 +432,8 @@ export default {
         }
       }
       if (isValid) {
+        // Оновлюємо дані замовлення у Vuex перед переходом
+        this.updateCustomerData(this.formData);
         this.completeStep();
       }
     },
@@ -554,114 +494,132 @@ export default {
         this.currentStep++;
         this.steps[this.currentStep].isExpanded = true;
       } else {
+        // Після завершення всіх кроків перераховуємо вартість доставки
         this.calculateDeliveryCost();
       }
     },
+  
+    async fetchProfile() {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+      try {
+        const response = await axios.get("http://26.235.139.202:8080/api/profile", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const user = response.data.user;
+        this.formData.firstName = user.first_name || "";
+        this.formData.lastName = user.last_name || "";
+        this.formData.secondName = user.second_name || "";
+      } catch (error) {
+        console.error("Помилка завантаження профілю", error);
+      }
+    },
+    async fetchUserAddress() {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+      try {
+        const response = await axios.get("http://26.235.139.202:8080/api/user-address", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (response.data && response.data.data && response.data.data.address) {
+          const address = response.data.data.address;
+          if (address.phone_number) {
+            this.formData.phone = address.phone_number;
+          }
+          if (address.city) {
+            this.formData.city = address.city;
+          }
+          if (address.delivery_address) {
+            this.formData.warehouse = address.delivery_address;
+          }
+          if (address.delivery_type) {
+            this.selectedDeliveryCategory =
+              address.delivery_type === "courier" ? "courier" : "pickup";
+            this.$nextTick(() => {
+              this.updateDeliveryOptions();
+              if (address.delivery_name) {
+                this.formData.deliveryType = address.delivery_name;
+              }
+            });
+          }
+          if (!this.formData.cityRef && this.formData.city) {
+            try {
+              const cityResponse = await axios.get("http://26.235.139.202:8080/api/nova-poshta/cities", {
+                headers: { Authorization: `Bearer ${token}` },
+                params: { city: this.formData.city, delivery_type: this.formData.deliveryType },
+              });
+              if (
+                cityResponse.data.success &&
+                Array.isArray(cityResponse.data.data) &&
+                cityResponse.data.data.length > 0
+              ) {
+                this.formData.cityRef = cityResponse.data.data[0].Ref;
+              }
+            } catch (err) {
+              console.error("Помилка встановлення cityRef", err);
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Помилка отримання адреси користувача", error);
+      }
+    },
     async calculateDeliveryCost() {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        alert("Будь ласка, увійдіть у свій обліковий запис.");
-        this.$router.push("/login");
-        return;
+  const token = localStorage.getItem("token");
+  if (!token) {
+    alert("Будь ласка, увійдіть у свій обліковий запис.");
+    this.$router.push("/login");
+    return;
+  }
+  
+  // Якщо cityRef не встановлено, отримуємо його через API
+  if (!this.formData.cityRef && this.formData.city) {
+    try {
+      const cityResponse = await axios.get("http://26.235.139.202:8080/api/nova-poshta/cities", {
+        headers: { Authorization: `Bearer ${token}` },
+        params: { city: this.formData.city, delivery_type: this.formData.deliveryType },
+      });
+      if (cityResponse.data.success && Array.isArray(cityResponse.data.data) && cityResponse.data.data.length > 0) {
+        this.formData.cityRef = cityResponse.data.data[0].Ref;
       }
-      if (!this.formData.cityRef && this.formData.city) {
-        try {
-          const cityResponse = await axios.get("http://26.235.139.202:8080/api/nova-poshta/cities", {
-            headers: { Authorization: `Bearer ${token}` },
-            params: { city: this.formData.city, delivery_type: this.formData.deliveryType },
-          });
-          if (
-            cityResponse.data.success &&
-            Array.isArray(cityResponse.data.data) &&
-            cityResponse.data.data.length > 0
-          ) {
-            this.formData.cityRef = cityResponse.data.data[0].Ref;
-            console.log("Встановлено cityRef в calculateDeliveryCost:", this.formData.cityRef);
-          }
-        } catch (err) {
-          console.error("Помилка встановлення cityRef в calculateDeliveryCost:", err.response?.data || err.message);
-        }
-      }
-      try {
-        const response = await axios.get("http://26.235.139.202:8080/api/nova-poshta/delivery/cost", {
-          headers: { Authorization: `Bearer ${token}` },
-          params: {
-            CityRecipient: this.formData.cityRef,
-            ServiceType: this.formData.deliveryType === "Поштове відділення" ? "WarehouseWarehouse" : "WarehouseDoors",
-            product_ids: this.cartItems.map(item => item.id),
-          },
-        });
-        this.deliveryCost = response.data.deliveryCost;
-        console.log("Вартість доставки:", this.deliveryCost);
-      } catch (error) {
-        console.error("Помилка розрахунку вартості доставки:", error.response?.data || error.message);
-      }
-    },
-    async submitOrder() {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        alert("Будь ласка, увійдіть у свій обліковий запис.");
-        this.$router.push("/login");
-        return;
-      }
-      
-      // Використовуємо injected paymentData як customerData
-      const customer = this.customerData;
-      const orderData = {
-        last_name: customer.lastName,
-        first_name: customer.firstName,
-        second_name: customer.secondName,
-        phone_number: customer.phone,
-        city: customer.city,
-        delivery_name: customer.deliveryType,
-        delivery_address: (customer.deliveryType || "").toLowerCase().includes("самовивіз")
-          ? customer.warehouse
-          : `${customer.street} ${customer.houseNumber}`,
-        payment_method: this.paymentMethod,
-        type_of_card: this.paymentMethod === "Післяоплата" ? "" : this.typeOfCard,
-        delivery_cost: this.localDeliveryCost,
-        cart_cost: this.cartItems.reduce(
-          (total, item) => total + item.price * item.quantity,
-          0
-        ),
-        product_ids: this.cartItems.map(item => item.id),
-      };
+    } catch (err) {
+      console.error("Помилка встановлення cityRef", err);
+    }
+  }
+  
+  const serviceType = this.formData.deliveryType === "Поштове відділення" 
+                        ? "WarehouseWarehouse" 
+                        : "WarehouseDoors";
+  const productIds = this.cartItems.map(item => item.id);
+  
+  console.log("Параметри для розрахунку доставки:", {
+    CityRecipient: this.formData.cityRef,
+    ServiceType: serviceType,
+    product_ids: productIds
+  });
+  
+  try {
+    const response = await axios.get("http://26.235.139.202:8080/api/nova-poshta/delivery/cost", {
+      headers: { Authorization: `Bearer ${token}` },
+      params: {
+        CityRecipient: this.formData.cityRef,
+        ServiceType: serviceType,
+        product_ids: productIds
+      },
+    });
+    
+    // Оновлюємо локальну змінну та стан у Vuex
+    this.deliveryCost = response.data.deliveryCost;
+    this.updateDeliveryCost(response.data.deliveryCost); // Виклик Vuex action
+  } catch (error) {
+    console.error("Помилка розрахунку вартості доставки", error);
+    alert("Сталася помилка при розрахунку вартості доставки.");
+  }
+},
 
-      console.log("Готовий payload замовлення:", orderData);
-
-      try {
-        const orderResponse = await axios.post("http://26.235.139.202:8080/api/orders", orderData, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        console.log("Відповідь сервера на замовлення:", orderResponse.data);
-        const orderId = orderResponse.data.order_id;
-        if (this.paymentMethod === "Післяоплата") {
-          this.$router.push("/payment-confirmed");
-        } else if (this.paymentMethod === "Оплата картою") {
-          const amount = this.totalWithDelivery;
-          await axios.post("https://b9bc-176-121-4-31.ngrok-free.app/api/payment", {
-            amount,
-            order_id: orderId,
-            description: "Оплата замовлення",
-          });
-          const orderStatusResponse = await axios.get(`http://26.235.139.202:8080/api/orders/${orderId}`, {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          const status = orderStatusResponse.data.status;
-          if (status === "Оплачено") {
-            this.$router.push("/payment-confirmed");
-          } else {
-            alert("Сталася помилка при оплаті або замовлення знаходиться в очікуванні.");
-          }
-        }
-      } catch (error) {
-        console.error("Помилка оформлення замовлення:", error.response?.data || error.message);
-        alert("Не вдалося оформити замовлення. Спробуйте пізніше.");
-      }
-    },
   },
   mounted() {
-    console.log("Отримані дані customerData у PaymentSummary:", this.paymentData);
+    console.log("PaymentSteps mounted. Customer data:", this.formData);
   },
   created() {
     this.fetchProfile();
@@ -670,8 +628,6 @@ export default {
   },
 };
 </script>
-
-
 
 
 <style scoped>
