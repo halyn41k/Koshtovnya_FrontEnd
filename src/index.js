@@ -3,6 +3,10 @@ import { createRouter, createWebHistory } from 'vue-router';
 const routes = [
   {
     path: '/',
+    redirect: '/homepage'
+  },
+  {
+    path: '/homepage',
     name: 'Home',
     component: () => import('@/components/HomePage.vue'),
   },
@@ -106,7 +110,7 @@ const routes = [
   },
   {
     path: '/payment-confirmed',
-    name: 'Verify',
+    name: 'PaymentConfirmed',
     component: () => import('@/components/Payment/PaymentConfirmed.vue')
   },
   {
@@ -114,7 +118,7 @@ const routes = [
     name: 'AdminPanel',
     component: () => import('@/components/Admin/AdminPanel.vue'),
     meta: {
-      requiresAdmin: true, // позначаємо, що цей маршрут потребує адмінських прав
+      requiresAdmin: true,
     },
   },
   {
@@ -132,19 +136,15 @@ const routes = [
   },
 ];
 
-
 const router = createRouter({
   history: createWebHistory(),
   routes,
 });
 
-
 router.beforeEach((to, from, next) => {
   if (to.meta.requiresAdmin) {
     const storedUser = localStorage.getItem('user');
-    console.log("Stored user:", storedUser);
     const user = storedUser ? JSON.parse(storedUser) : null;
-    console.log("Parsed user:", user);
     if (user && (user.role === 'superadmin' || user.role === 'admin' || user.role === 'manager')) {
       next();
     } else {
@@ -154,6 +154,5 @@ router.beforeEach((to, from, next) => {
     next();
   }
 });
-
 
 export default router;

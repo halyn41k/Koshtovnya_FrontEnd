@@ -547,62 +547,66 @@ export default {
       }
     },
     async submitAddress() {
-      if (!this.validateForm()) return;
-      const token = localStorage.getItem("token");
-      if (!token) {
-        this.$router.push("/login");
-        return;
-      }
-      if (
-        this.formData.deliveryType === "pickup" &&
-        this.formData.selectedDeliveryMethod &&
-        this.formData.selectedDeliveryMethod.is_store &&
-        !this.formData.city
-      ) {
-        this.formData.city = "Коломия";
-      }
-      let deliveryAddressValue = "";
-      if (this.formData.deliveryType === "courier") {
-        deliveryAddressValue = `${this.deliveryAddress.street} ${this.deliveryAddress.number}`;
-      } else if (this.formData.deliveryType === "pickup") {
-        if (this.formData.selectedDeliveryMethod.is_store) {
-          deliveryAddressValue = "вул. Степана Бандери 22, Коломия";
-        } else if (this.formData.selectedDeliveryMethod.name === "Самовивіз з Нової Пошти") {
-          deliveryAddressValue = this.deliveryAddress.branch;
-        } else if (this.formData.selectedDeliveryMethod.name === "Самовивіз з поштоматів Нової Пошти") {
-          deliveryAddressValue = this.deliveryAddress.postomat;
-        }
-      }
-      let deliveryName = "";
-      if (this.formData.deliveryType === "courier") {
-        deliveryName = "Кур'єр Нової Пошти";
-      } else if (this.formData.deliveryType === "pickup") {
-        deliveryName = this.formData.selectedDeliveryMethod.name;
-      }
-      const postData = {
-        phone_number: this.phoneNumber,
-        city: this.formData.city,
-        delivery_name: deliveryName,
-        delivery_address: deliveryAddressValue
-      };
-      console.log("Submit address data:", postData);
-      try {
-        const response = await axios.post(
-          "http://26.235.139.202:8080/api/user-address",
-          postData,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        console.log("Response data:", response.data);
-        console.log("Адресу успішно збережено!");
-        this.fetchUserAddress();
-        this.showForm = false;
-      } catch (error) {
-        console.error("Помилка збереження адреси:", error);
-        if (error.response) {
-          console.error("Error response data:", error.response.data);
-        }
-      }
-    },
+  if (!this.validateForm()) return;
+  const token = localStorage.getItem("token");
+  if (!token) {
+    this.$router.push("/login");
+    return;
+  }
+  if (
+    this.formData.deliveryType === "pickup" &&
+    this.formData.selectedDeliveryMethod &&
+    this.formData.selectedDeliveryMethod.is_store &&
+    !this.formData.city
+  ) {
+    this.formData.city = "Коломия";
+  }
+  let deliveryAddressValue = "";
+  if (this.formData.deliveryType === "courier") {
+    deliveryAddressValue = `${this.deliveryAddress.street} ${this.deliveryAddress.number}`;
+  } else if (this.formData.deliveryType === "pickup") {
+    if (this.formData.selectedDeliveryMethod.is_store) {
+      deliveryAddressValue = "вул. Степана Бандери 22, Коломия";
+    } else if (this.formData.selectedDeliveryMethod.name === "Самовивіз з Нової Пошти") {
+      deliveryAddressValue = this.deliveryAddress.branch;
+    } else if (this.formData.selectedDeliveryMethod.name === "Самовивіз з поштоматів Нової Пошти") {
+      deliveryAddressValue = this.deliveryAddress.postomat;
+    }
+  }
+  let deliveryName = "";
+  if (this.formData.deliveryType === "courier") {
+    deliveryName = "Кур'єр Нової Пошти";
+  } else if (this.formData.deliveryType === "pickup") {
+    deliveryName = this.formData.selectedDeliveryMethod.name;
+  }
+  
+  // Додаємо поле cityRef, яке зберігається при виборі міста
+  const postData = {
+    phone_number: this.phoneNumber,
+    city: this.formData.city,
+    city_ref: this.formData.cityRef, // нове поле
+    delivery_name: deliveryName,
+    delivery_address: deliveryAddressValue
+  };
+  
+  console.log("Submit address data:", postData);
+  try {
+    const response = await axios.post(
+      "http://26.235.139.202:8080/api/user-address",
+      postData,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    console.log("Response data:", response.data);
+    console.log("Адресу успішно збережено!");
+    this.fetchUserAddress();
+    this.showForm = false;
+  } catch (error) {
+    console.error("Помилка збереження адреси:", error);
+    if (error.response) {
+      console.error("Error response data:", error.response.data);
+    }
+  }
+},
     resetAddressForm() {
       this.phoneNumber = "";
       this.formData.city = "";

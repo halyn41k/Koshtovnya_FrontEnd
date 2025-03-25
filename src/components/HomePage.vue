@@ -9,9 +9,13 @@
       <div class="exclusive-necklaces-bracelets-earrings fade-in">
         {{ $t('exclusiveJewelry') }}
       </div>
-      <router-link to="/allproduct" class="view-products-button fade-in">
-        <button class="view-products-button">{{ $t('viewProducts') }}</button>
-      </router-link>
+      <router-link
+  to="/allproduct"
+  class="view-products-button fade-in"
+>
+  {{ $t('viewProducts') }}
+</router-link>
+
     </div>
 
     <div class="content-container fade-in">
@@ -338,6 +342,9 @@ export default {
 }
 
 .view-products-button {
+  display: inline-block;        /* Ensures margin/padding work nicely */
+  margin-top: 50px;             /* Increase or decrease to move down */
+  text-decoration: none;        /* Removes the hyperlink underline */
   font-family: 'Merriweather', sans-serif;
   color: #fff;
   background-color: #6B1F1F;
@@ -346,10 +353,14 @@ export default {
   border-radius: 8px;
   cursor: pointer;
   font-size: 18px;
-  margin-top: 50px;
   transition: background-color 0.3s ease, transform 0.3s ease;
-
 }
+
+.view-products-button:hover {
+  background-color: #a01212;
+  text-decoration: none; /* Keep it off on hover as well */
+}
+
 
 .view-products-button:hover {
   background-color: #a01212;

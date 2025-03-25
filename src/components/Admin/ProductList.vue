@@ -3,6 +3,10 @@
     <header class="product-header">
       <div class="header-left">
         <h1 class="product-title">Товари</h1>
+        <!-- Тригер для відкриття фільтру -->
+        <button class="filter-toggle-button" @click="toggleFilter">
+          Фільтр
+        </button>
         <form class="search-form" @submit.prevent="handleSearch">
           <input 
             type="text" 
@@ -31,7 +35,14 @@
       </div>
     </header>
 
-    <!-- Якщо currentComponent не встановлено, показуємо список товарів із пагінацією -->
+    <!-- Оверлей фільтра, який відкривається зліва -->
+    <div v-if="showFilter" class="filter-overlay">
+      <!-- Компонент фільтру, який ми створили раніше.
+           Передаємо метод fetchProducts та очікуємо подію close -->
+      <FilterComponent :fetchProducts="fetchProducts" @close="toggleFilter" />
+    </div>
+
+    <!-- Основний вміст: список товарів або інший активний компонент -->
     <div v-if="!currentComponent">
       <section class="product-grid">
         <ProductCard 
@@ -54,8 +65,6 @@
         </button>
       </div>
     </div>
-
-    <!-- Якщо currentComponent встановлено, замінюємо список товарів -->
     <div v-else>
       <component 
         :is="currentComponent" 
@@ -70,6 +79,7 @@
 import ProductCard from './ProductCard.vue';
 import AddProduct from './AddProduct.vue';
 import ProductUpdate from './ProductUpdate.vue';
+import FilterComponent from './FilterProduct.vue'; // імпорт компонента фільтра
 import axios from 'axios';
 
 export default {
@@ -78,6 +88,7 @@ export default {
     ProductCard,
     AddProduct,
     ProductUpdate,
+    FilterComponent,
   },
   data() {
     return {
@@ -88,6 +99,7 @@ export default {
       filters: {},
       currentComponent: null,
       currentProps: {},
+      showFilter: false, // прапорець для показу/приховування оверлею фільтра
     };
   },
   computed: {
@@ -128,7 +140,6 @@ export default {
         await axios.delete(`http://26.235.139.202:8080/api/admin/products/${productId}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
-        // Встановлюємо прапорець видалення замість видалення з масиву
         const product = this.products.find(p => p.id === productId);
         if (product) product.is_deleted = true;
       } catch (error) {
@@ -141,7 +152,6 @@ export default {
         await axios.post(`http://26.235.139.202:8080/api/admin/products/${productId}/restore`, null, {
           headers: { Authorization: `Bearer ${token}` }
         });
-        // Знімаємо прапорець видалення
         const product = this.products.find(p => p.id === productId);
         if (product) product.is_deleted = false;
       } catch (error) {
@@ -159,6 +169,10 @@ export default {
       this.currentComponent = 'ProductUpdate';
       this.currentProps = { productId: product.id };
     },
+    toggleFilter() {
+      // Перемикаємо прапорець показу фільтру
+      this.showFilter = !this.showFilter;
+    }
   },
   created() {
     this.fetchProducts();
@@ -167,6 +181,131 @@ export default {
 </script>
 
 <style scoped>
+/* Стилі для основного контейнера товарів */
+.product-list {
+  position: relative;
+  padding: 20px;
+}
+
+.product-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+}
+
+.product-title {
+  margin-right: 20px;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.filter-toggle-button {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 16px;
+  background: none;
+  border: none;
+  color: #6B1F1F;
+  cursor: pointer;
+  margin-right: 20px;
+  padding: 8px 12px;
+  transition: background-color 0.3s ease;
+}
+
+.filter-toggle-button:hover {
+  background-color: #f0f0f0;
+}
+
+.search-form {
+  display: flex;
+  align-items: center;
+}
+
+.search-input {
+  padding: 8px 12px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.search-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  margin-left: 8px;
+}
+
+.add-product-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #6b1f1f;
+  color: #fff;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: 'Montserrat', sans-serif;
+  transition: background-color 0.3s ease;
+}
+
+.add-product-button:hover {
+  background-color: #a01212;
+}
+
+/* Стилі для сітки товарів */
+.product-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.pagination button {
+  margin: 0 5px;
+  padding: 8px 12px;
+  border: none;
+  background-color: #ddd;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.pagination button.active,
+.pagination button:hover {
+  background-color: #6b1f1f;
+  color: #fff;
+}
+
+/* Стилі для оверлею фільтра */
+.filter-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 600px; /* ширина панелі фільтра, змінюйте за потребою */
+  height: 100%;
+  background-color: #fff7f6;
+  z-index: 1000;
+  overflow-y: auto;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.2);
+  animation: slideIn 0.3s ease-out;
+}
+
+/* Анімація відкриття */
+@keyframes slideIn {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
 .product-list {
   max-width: 1200px;
   margin: 0 auto;
