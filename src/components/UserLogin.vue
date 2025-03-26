@@ -39,9 +39,12 @@
         </div>
 
         <p class="signup-prompt">
-          Немає облікового запису?
-          <router-link to="/registration" class="signup-link">Створіть його тут</router-link>
-        </p>
+  Немає облікового запису?
+  <router-link to="/registration" class="signup-link">Створіть його тут</router-link>
+  | 
+  <router-link to="/reset-password" class="signup-link">Забули пароль?</router-link>
+</p>
+
         <button type="submit" class="login-button">
           <span>Увійти</span>
           <img

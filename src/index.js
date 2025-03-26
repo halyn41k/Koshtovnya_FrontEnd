@@ -114,6 +114,11 @@ const routes = [
     component: () => import('@/components/Payment/PaymentConfirmed.vue')
   },
   {
+    path: '/reset-password',
+    name: 'ResetPassword',
+    component: () => import('@/components/ResetPassword.vue')
+  },
+  {
     path: '/admin',
     name: 'AdminPanel',
     component: () => import('@/components/Admin/AdminPanel.vue'),

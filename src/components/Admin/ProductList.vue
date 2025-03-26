@@ -1,4 +1,4 @@
-<template>
+<template> 
   <main class="product-list">
     <header class="product-header">
       <div class="header-left">
@@ -37,9 +37,8 @@
 
     <!-- Оверлей фільтра, який відкривається зліва -->
     <div v-if="showFilter" class="filter-overlay">
-      <!-- Компонент фільтру, який ми створили раніше.
-           Передаємо метод fetchProducts та очікуємо подію close -->
-      <FilterComponent :fetchProducts="fetchProducts" @close="toggleFilter" />
+      <!-- Передаємо прапорець видимості та обробник події закриття -->
+      <FilterComponent :visible="showFilter" @closeFilter="toggleFilter" :fetchProducts="fetchProducts" />
     </div>
 
     <!-- Основний вміст: список товарів або інший активний компонент -->
@@ -79,7 +78,7 @@
 import ProductCard from './ProductCard.vue';
 import AddProduct from './AddProduct.vue';
 import ProductUpdate from './ProductUpdate.vue';
-import FilterComponent from './FilterProduct.vue'; // імпорт компонента фільтра
+import FilterComponent from './FilterProduct.vue';
 import axios from 'axios';
 
 export default {
@@ -99,7 +98,7 @@ export default {
       filters: {},
       currentComponent: null,
       currentProps: {},
-      showFilter: false, // прапорець для показу/приховування оверлею фільтра
+      showFilter: false,
     };
   },
   computed: {
@@ -170,8 +169,16 @@ export default {
       this.currentProps = { productId: product.id };
     },
     toggleFilter() {
-      // Перемикаємо прапорець показу фільтру
       this.showFilter = !this.showFilter;
+    },
+    // Обробка події від фільтра
+    handleApplyFilters(selectedFilters) {
+      // Оновлюємо локальний об'єкт фільтрів
+      this.filters = { ...selectedFilters };
+      // Запитуємо товари з новими фільтрами (починаючи з першої сторінки)
+      this.fetchProducts(1);
+      // Закриваємо фільтр
+      this.toggleFilter();
     }
   },
   created() {
@@ -179,6 +186,7 @@ export default {
   },
 };
 </script>
+
 
 <style scoped>
 /* Стилі для основного контейнера товарів */
@@ -291,7 +299,7 @@ export default {
   position: fixed;
   top: 0;
   left: 0;
-  width: 600px; /* ширина панелі фільтра, змінюйте за потребою */
+  width: 340px; /* ширина панелі фільтра, змінюйте за потребою */
   height: 100%;
   background-color: #fff7f6;
   z-index: 1000;

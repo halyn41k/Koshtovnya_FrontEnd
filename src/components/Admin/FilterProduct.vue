@@ -1,425 +1,442 @@
 <template>
-    <div class="filter-container">
-      <section class="filter">
-        <!-- Доступність -->
-        <h2 class="section-title">Доступність</h2>
-        <hr class="divider" />
-        <div class="availability-options">
-          <div class="option" v-for="item in availabilityOptions" :key="item.name">
-            <input type="checkbox" :id="item.name" :value="item.name" v-model="selectedAvailability" />
-            <label :for="item.name">{{ item.name }} ({{ item.count }})</label>
-          </div>
+  <div class="filter-container" v-if="visible">
+    <section class="filter">
+      <!-- Кнопка для закриття фільтра -->
+      <button class="close-button" @click="closeFilter">Х</button>
+
+      <!-- Доступність -->
+      <h2 class="section-title">Доступність</h2>
+      <hr class="divider" />
+      <div class="availability-options">
+        <div class="option" v-for="item in availabilityOptions" :key="item.name">
+          <input type="checkbox" :id="item.name" :value="item.name" v-model="selectedAvailability" />
+          <label :for="item.name">{{ item.name }} ({{ item.count }})</label>
         </div>
-  
-        <!-- Розмір -->
-        <h3 class="subsection-title">Розмір</h3>
-        <hr class="divider" />
-        <div class="input-box">
-          <div class="min-box">
-            <input 
-              type="number" 
-              v-model.number="sizeRange[0]" 
-              :min="sizeOptions.min" 
-              :max="sizeOptions.max" 
-              step="1"
-              @input="validateInput('size', 0)" 
-            />
-            <span class="unit-label">см</span>
-          </div>
-          <div class="input-divider"></div>
-          <div class="max-box">
-            <input 
-              type="number" 
-              v-model.number="sizeRange[1]" 
-              :min="sizeOptions.min" 
-              :max="sizeOptions.max" 
-              step="1"
-              @input="validateInput('size', 1)" 
-            />
-            <span class="unit-label">см</span>
-          </div>
-        </div>
-        <div class="range-slider">
+      </div>
+
+      <!-- Розмір -->
+      <h3 class="subsection-title">Розмір</h3>
+      <hr class="divider" />
+      <div class="input-box">
+        <div class="min-box">
           <input 
-            type="range" 
+            type="number" 
             v-model.number="sizeRange[0]" 
             :min="sizeOptions.min" 
             :max="sizeOptions.max" 
-            class="slider min-slider" 
-            @input="updateSliderValue($event, 'size', 'min')"
+            step="1"
+            @input="validateInput('size', 0)" 
           />
+          <span class="unit-label">см</span>
+        </div>
+        <div class="input-divider"></div>
+        <div class="max-box">
           <input 
-            type="range" 
+            type="number" 
             v-model.number="sizeRange[1]" 
             :min="sizeOptions.min" 
             :max="sizeOptions.max" 
-            class="slider max-slider" 
-            @input="updateSliderValue($event, 'size', 'max')"
+            step="1"
+            @input="validateInput('size', 1)" 
           />
-          <!-- Використовуємо width для коректного відображення -->
-          <div class="slider-track" :style="getTrackStyle(sizeRange[0], sizeRange[1], sizeOptions.min, sizeOptions.max)"></div>
+          <span class="unit-label">см</span>
         </div>
-  
-        <!-- Колір -->
-        <h3 class="subsection-title">Колір</h3>
-        <hr class="divider" />
-        <div class="dropdown-menu">
-          <select v-model="selectedColor" class="dropdown">
-            <option value="">(без фільтра)</option>
-            <option v-for="color in colorOptions" :key="color" :value="color">
-              {{ color }}
-            </option>
-          </select>
+      </div>
+      <div class="range-slider">
+        <input 
+          type="range" 
+          v-model.number="sizeRange[0]" 
+          :min="sizeOptions.min" 
+          :max="sizeOptions.max" 
+          class="slider min-slider" 
+          @input="updateSliderValue($event, 'size', 'min')"
+        />
+        <input 
+          type="range" 
+          v-model.number="sizeRange[1]" 
+          :min="sizeOptions.min" 
+          :max="sizeOptions.max" 
+          class="slider max-slider" 
+          @input="updateSliderValue($event, 'size', 'max')"
+        />
+        <div class="slider-track" :style="getTrackStyle(sizeRange[0], sizeRange[1], sizeOptions.min, sizeOptions.max)"></div>
+      </div>
+
+      <!-- Колір -->
+      <h3 class="subsection-title">Колір</h3>
+      <hr class="divider" />
+      <div class="dropdown-menu">
+        <select v-model="selectedColor" class="dropdown">
+          <option value="">(без фільтра)</option>
+          <option v-for="color in colorOptions" :key="color" :value="color">
+            {{ color }}
+          </option>
+        </select>
+      </div>
+
+      <!-- Тип бісеру -->
+      <h3 class="subsection-title">Тип бісеру</h3>
+      <hr class="divider" />
+      <div class="bead-type-options">
+        <div class="option" v-for="item in beadTypeOptions" :key="item.name">
+          <input type="checkbox" :id="item.name" :value="item.name" v-model="selectedBeadTypes" />
+          <label :for="item.name">{{ item.name }} ({{ item.count }})</label>
         </div>
-  
-        <!-- Тип бісеру -->
-        <h3 class="subsection-title">Тип бісеру</h3>
-        <hr class="divider" />
-        <div class="bead-type-options">
-          <div class="option" v-for="item in beadTypeOptions" :key="item.name">
-            <input type="checkbox" :id="item.name" :value="item.name" v-model="selectedBeadTypes" />
-            <label :for="item.name">{{ item.name }} ({{ item.count }})</label>
-          </div>
+      </div>
+
+      <!-- Виробник бісеру -->
+      <h3 class="subsection-title">Виробник бісеру</h3>
+      <hr class="divider" />
+      <div class="manufacturer-options">
+        <div class="option" v-for="item in beadProducerOptions" :key="item.origin_country">
+          <input type="checkbox" :id="item.origin_country" :value="item.origin_country" v-model="selectedProducers" />
+          <label :for="item.origin_country">{{ item.origin_country }} ({{ item.count }})</label>
         </div>
-  
-        <!-- Виробник бісеру -->
-        <h3 class="subsection-title">Виробник бісеру</h3>
-        <hr class="divider" />
-        <div class="manufacturer-options">
-          <div class="option" v-for="item in beadProducerOptions" :key="item.origin_country">
-            <input type="checkbox" :id="item.origin_country" :value="item.origin_country" v-model="selectedProducers" />
-            <label :for="item.origin_country">{{ item.origin_country }} ({{ item.count }})</label>
-          </div>
+      </div>
+
+      <!-- Категорія -->
+      <!-- Категорія -->
+<h3 class="subsection-title">Категорія</h3>
+<hr class="divider" />
+<div class="category-options">
+  <div class="option" v-for="item in categoryOptions" :key="item.name">
+    <input 
+      type="checkbox" 
+      :id="item.name" 
+      :value="item.name" 
+      v-model="selectedCategories" 
+    />
+    <label :for="item.name">
+      {{ item.name }}
+      <span v-if="item.count"> ({{ item.count }})</span>
+    </label>
+  </div>
+</div>
+
+
+      <!-- Статус -->
+      <h3 class="subsection-title">Статус</h3>
+      <hr class="divider" />
+      <div class="status-options">
+        <div class="option" v-for="item in statusOptions" :key="item.name">
+          <input type="checkbox" :id="item.name" :value="item.name" v-model="selectedStatus" />
+          <label :for="item.name">{{ item.name }} ({{ item.count }})</label>
         </div>
-  
-        <!-- Категорія (перетворено на селектор) -->
-        <h3 class="subsection-title">Категорія</h3>
-        <hr class="divider" />
-        <div class="dropdown-menu">
-          <select v-model="selectedCategories" class="dropdown">
-            <option value="">(без фільтра)</option>
-            <option v-for="item in categoryOptions" :key="item.name" :value="item.name">
-              {{ item.name }} ({{ item.count }})
-            </option>
-          </select>
-        </div>
-  
-        <!-- Статус -->
-        <h3 class="subsection-title">Статус</h3>
-        <hr class="divider" />
-        <div class="status-options">
-          <div class="option" v-for="item in statusOptions" :key="item.name">
-            <input type="checkbox" :id="item.name" :value="item.name" v-model="selectedStatus" />
-            <label :for="item.name">{{ item.name }} ({{ item.count }})</label>
-          </div>
-        </div>
-  
-        <!-- Вага -->
-        <h3 class="subsection-title">Вага</h3>
-        <hr class="divider" />
-        <div class="input-box">
-          <div class="min-box">
-            <input 
-              type="number" 
-              v-model.number="weightRange[0]" 
-              :min="weightOptions.min" 
-              :max="weightOptions.max" 
-              step="1"
-              @input="validateInput('weight', 0)" 
-            />
-            <span class="unit-label">г</span>
-          </div>
-          <div class="input-divider"></div>
-          <div class="max-box">
-            <input 
-              type="number" 
-              v-model.number="weightRange[1]" 
-              :min="weightOptions.min" 
-              :max="weightOptions.max" 
-              step="1"
-              @input="validateInput('weight', 1)" 
-            />
-            <span class="unit-label">г</span>
-          </div>
-        </div>
-        <div class="range-slider">
+      </div>
+
+      <!-- Вага -->
+      <h3 class="subsection-title">Вага</h3>
+      <hr class="divider" />
+      <div class="input-box">
+        <div class="min-box">
           <input 
-            type="range" 
+            type="number" 
             v-model.number="weightRange[0]" 
             :min="weightOptions.min" 
             :max="weightOptions.max" 
-            class="slider min-slider" 
-            @input="updateSliderValue($event, 'weight', 'min')"
+            step="1"
+            @input="validateInput('weight', 0)" 
           />
+          <span class="unit-label">г</span>
+        </div>
+        <div class="input-divider"></div>
+        <div class="max-box">
           <input 
-            type="range" 
+            type="number" 
             v-model.number="weightRange[1]" 
             :min="weightOptions.min" 
             :max="weightOptions.max" 
-            class="slider max-slider" 
-            @input="updateSliderValue($event, 'weight', 'max')"
+            step="1"
+            @input="validateInput('weight', 1)" 
           />
-          <div class="slider-track" :style="getTrackStyle(weightRange[0], weightRange[1], weightOptions.min, weightOptions.max)"></div>
+          <span class="unit-label">г</span>
         </div>
-  
-        <!-- Ціна -->
-        <h3 class="subsection-title">Ціна</h3>
-        <hr class="divider" />
-        <div class="input-box">
-          <div class="min-box">
-            <input 
-              type="number" 
-              v-model.number="priceRange[0]" 
-              :min="priceOptions.min" 
-              :max="priceOptions.max" 
-              step="1"
-              @input="validateInput('price', 0)" 
-            />
-            <span class="unit-label">грн</span>
-          </div>
-          <div class="input-divider"></div>
-          <div class="max-box">
-            <input 
-              type="number" 
-              v-model.number="priceRange[1]" 
-              :min="priceOptions.min" 
-              :max="priceOptions.max" 
-              step="1"
-              @input="validateInput('price', 1)" 
-            />
-            <span class="unit-label">грн</span>
-          </div>
-        </div>
-        <div class="range-slider">
+      </div>
+      <div class="range-slider">
+        <input 
+          type="range" 
+          v-model.number="weightRange[0]" 
+          :min="weightOptions.min" 
+          :max="weightOptions.max" 
+          class="slider min-slider" 
+          @input="updateSliderValue($event, 'weight', 'min')"
+        />
+        <input 
+          type="range" 
+          v-model.number="weightRange[1]" 
+          :min="weightOptions.min" 
+          :max="weightOptions.max" 
+          class="slider max-slider" 
+          @input="updateSliderValue($event, 'weight', 'max')"
+        />
+        <div class="slider-track" :style="getTrackStyle(weightRange[0], weightRange[1], weightOptions.min, weightOptions.max)"></div>
+      </div>
+
+      <!-- Ціна -->
+      <h3 class="subsection-title">Ціна</h3>
+      <hr class="divider" />
+      <div class="input-box">
+        <div class="min-box">
           <input 
-            type="range" 
+            type="number" 
             v-model.number="priceRange[0]" 
             :min="priceOptions.min" 
             :max="priceOptions.max" 
-            class="slider min-slider" 
-            @input="updateSliderValue($event, 'price', 'min')"
+            step="1"
+            @input="validateInput('price', 0)" 
           />
+          <span class="unit-label">грн</span>
+        </div>
+        <div class="input-divider"></div>
+        <div class="max-box">
           <input 
-            type="range" 
+            type="number" 
             v-model.number="priceRange[1]" 
             :min="priceOptions.min" 
             :max="priceOptions.max" 
-            class="slider max-slider" 
-            @input="updateSliderValue($event, 'price', 'max')"
+            step="1"
+            @input="validateInput('price', 1)" 
           />
-          <div class="slider-track" :style="getTrackStyle(priceRange[0], priceRange[1], priceOptions.min, priceOptions.max)"></div>
+          <span class="unit-label">грн</span>
         </div>
-  
-        <div class="apply-filters">
-          <button @click="applyFilters" class="results-button">Результати</button>
-        </div>
-      </section>
-    </div>
-  </template>
-  
-  <script>
-  import axios from "axios";
-  
-  export default {
-    name: "FilterComponent",
-    props: {
-      fetchProducts: {
-        type: Function,
-        required: true,
-      },
+      </div>
+      <div class="range-slider">
+        <input 
+          type="range" 
+          v-model.number="priceRange[0]" 
+          :min="priceOptions.min" 
+          :max="priceOptions.max" 
+          class="slider min-slider" 
+          @input="updateSliderValue($event, 'price', 'min')"
+        />
+        <input 
+          type="range" 
+          v-model.number="priceRange[1]" 
+          :min="priceOptions.min" 
+          :max="priceOptions.max" 
+          class="slider max-slider" 
+          @input="updateSliderValue($event, 'price', 'max')"
+        />
+        <div class="slider-track" :style="getTrackStyle(priceRange[0], priceRange[1], priceOptions.min, priceOptions.max)"></div>
+      </div>
+
+      <div class="apply-filters">
+        <button @click="applyFilters" class="results-button">Результати</button>
+      </div>
+    </section>
+  </div>
+</template>
+
+<script>
+import axios from "axios";
+
+export default {
+  name: "FilterComponent",
+  props: {
+    visible: { // Проп для керування видимістю компонента
+      type: Boolean,
+      default: true
     },
-    data() {
+    fetchProducts: {
+      type: Function,
+      required: true,
+    },
+  },
+  data() {
+    return {
+      availabilityOptions: [],
+      sizeOptions: { min: 0, max: 100 },
+      sizeRange: [0, 100],
+      colorOptions: [],
+      beadTypeOptions: [],
+      beadProducerOptions: [],
+      categoryOptions: [],
+      statusOptions: [],
+      weightOptions: { min: 0, max: 1000 },
+      priceOptions: { min: 0, max: 10000 },
+      selectedAvailability: [],
+      selectedColor: "",
+      selectedBeadTypes: [],
+      selectedProducers: [],
+      selectedCategories: [],
+      selectedStatus: [],
+      weightRange: [0, 1000],
+      priceRange: [0, 10000],
+    };
+  },
+  created() {
+    this.loadFilters();
+  },
+  methods: {
+    async loadFilters() {
+      const token = localStorage.getItem("token");
+      try {
+        const response = await axios.get("http://26.235.139.202:8080/api/admin/product-filter", {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const data = response.data;
+        this.updateFilterOptions(data);
+        console.log("Фільтри завантажені з сервера:", data);
+      } catch (error) {
+        console.error("Помилка завантаження фільтрів:", error);
+      }
+    },
+
+    updateFilterOptions(data) {
+      this.availabilityOptions = data["Доступність"] || [];
+      this.sizeOptions = {
+        min: parseFloat(data["Розмір"].min) || 0,
+        max: parseFloat(data["Розмір"].max) || 100,
+      };
+      this.sizeRange = [this.sizeOptions.min, this.sizeOptions.max];
+
+      this.colorOptions = data["Колір"] || [];
+      this.beadTypeOptions = data["Тип бісеру"] || [];
+      this.beadProducerOptions = data["Виробник бісеру"] || [];
+      this.categoryOptions = data["Категорія"] || [];
+      this.statusOptions = data["Статус"] || [];
+
+      this.weightOptions = {
+        min: parseFloat(data["Вага"].min) || 0,
+        max: parseFloat(data["Вага"].max) || 1000,
+      };
+      this.weightRange = [this.weightOptions.min, this.weightOptions.max];
+
+      this.priceOptions = {
+        min: parseFloat(data["Ціна"].min) || 0,
+        max: parseFloat(data["Ціна"].max) || 10000,
+      };
+      this.priceRange = [this.priceOptions.min, this.priceOptions.max];
+      this.categoryOptions = (data["Категорія"] || []).map(item => ({
+  name: item,
+  count: ''  // або якесь значення за замовчуванням, якщо необхідно
+}));
+
+    },
+
+    getTrackStyle(min, max, rangeMin, rangeMax) {
+      const leftPercent = ((min - rangeMin) / (rangeMax - rangeMin)) * 100;
+      const rightPercent = ((max - rangeMin) / (rangeMax - rangeMin)) * 100;
       return {
-        availabilityOptions: [],
-        sizeOptions: { min: 0, max: 100 },
-        sizeRange: [0, 100],
-        colorOptions: [],
-        beadTypeOptions: [],
-        beadProducerOptions: [],
-        categoryOptions: [],
-        statusOptions: [],
-        weightOptions: { min: 0, max: 1000 },
-        priceOptions: { min: 0, max: 10000 },
-        selectedAvailability: [],
-        selectedColor: "",
-        selectedBeadTypes: [],
-        selectedProducers: [],
-        selectedCategories: "", // Оскільки тепер селектор, використовується строка
-        selectedStatus: [],
-        weightRange: [0, 1000],
-        priceRange: [0, 10000],
+        left: `${leftPercent}%`,
+        width: `${rightPercent - leftPercent}%`,
+        background: "#6B1F1F"
       };
     },
-    created() {
-      this.loadFilters();
+
+    applyFilters() {
+  const filters = {};
+
+  if (this.selectedAvailability.length > 0) {
+    filters.is_available = this.selectedAvailability.map((availability) =>
+      availability === "В наявності" ? "1" : "0"
+    );
+  }
+  if (this.sizeRange[0] !== this.sizeOptions.min || this.sizeRange[1] !== this.sizeOptions.max) {
+    filters.size_from = parseFloat(this.sizeRange[0]);
+    filters.size_to = parseFloat(this.sizeRange[1]);
+  }
+  if (this.selectedColor) {
+    filters.color = this.selectedColor;
+  }
+  if (this.selectedBeadTypes.length > 0) {
+    filters.type_of_bead = this.selectedBeadTypes;
+  }
+  if (this.selectedProducers.length > 0) {
+    filters.bead_producer = this.selectedProducers;
+  }
+  if (this.selectedCategories.length > 0) {
+  filters.category = this.selectedCategories;
+}
+  if (this.selectedStatus.length > 0) {
+    filters.status = this.selectedStatus;
+  }
+  if (this.weightRange[0] !== this.weightOptions.min || this.weightRange[1] !== this.weightOptions.max) {
+    filters.weight_from = parseFloat(this.weightRange[0]);
+    filters.weight_to = parseFloat(this.weightRange[1]);
+  }
+  if (this.priceRange[0] !== this.priceOptions.min || this.priceRange[1] !== this.priceOptions.max) {
+    filters.price_from = parseFloat(this.priceRange[0]);
+    filters.price_to = parseFloat(this.priceRange[1]);
+  }
+
+  console.log("Вибрані фільтри:", filters);
+  // Емітуємо подію з об'єктом фільтрів
+  this.$emit("applyFilters", filters);
+  // Можна закрити фільтр після застосування
+  this.closeFilter();
+},
+
+    validateInput(type, index) {
+      let range, options;
+
+      switch(type) {
+        case "size":
+          range = this.sizeRange;
+          options = this.sizeOptions;
+          break;
+        case "weight":
+          range = this.weightRange;
+          options = this.weightOptions;
+          break;
+        case "price":
+          range = this.priceRange;
+          options = this.priceOptions;
+          break;
+      }
+
+      range[index] = Number(range[index]);
+
+      if (range[index] < options.min) {
+        range[index] = options.min;
+      }
+      
+      if (range[index] > options.max) {
+        range[index] = options.max;
+      }
+
+      if (index === 0 && range[0] > range[1]) {
+        range[0] = range[1];
+      } else if (index === 1 && range[1] < range[0]) {
+        range[1] = range[0];
+      }
+
+      this.$forceUpdate();
     },
-    methods: {
-      async loadFilters() {
-        const token = localStorage.getItem("token");
-        try {
-          const response = await axios.get("http://26.235.139.202:8080/api/admin/product-filter", {
-            headers: { Authorization: `Bearer ${token}` }
-          });
-          const data = response.data;
-          this.updateFilterOptions(data);
-          console.log("Фільтри завантажені з сервера:", data);
-        } catch (error) {
-          console.error("Помилка завантаження фільтрів:", error);
-        }
-      },
-  
-      updateFilterOptions(data) {
-        this.availabilityOptions = data["Доступність"] || [];
-        this.sizeOptions = {
-          min: parseFloat(data["Розмір"].min) || 0,
-          max: parseFloat(data["Розмір"].max) || 100,
-        };
-        this.sizeRange = [this.sizeOptions.min, this.sizeOptions.max];
-  
-        this.colorOptions = data["Колір"] || [];
-        this.beadTypeOptions = data["Тип бісеру"] || [];
-        this.beadProducerOptions = data["Виробник бісеру"] || [];
-        this.categoryOptions = data["Категорія"] || [];
-        this.statusOptions = data["Статус"] || [];
-  
-        this.weightOptions = {
-          min: parseFloat(data["Вага"].min) || 0,
-          max: parseFloat(data["Вага"].max) || 1000,
-        };
-        this.weightRange = [this.weightOptions.min, this.weightOptions.max];
-  
-        this.priceOptions = {
-          min: parseFloat(data["Ціна"].min) || 0,
-          max: parseFloat(data["Ціна"].max) || 10000,
-        };
-        this.priceRange = [this.priceOptions.min, this.priceOptions.max];
-      },
-  
-      // Зміна функції: тепер повертаємо left та width для коректного відображення треку
-      getTrackStyle(min, max, rangeMin, rangeMax) {
-        const leftPercent = ((min - rangeMin) / (rangeMax - rangeMin)) * 100;
-        const rightPercent = ((max - rangeMin) / (rangeMax - rangeMin)) * 100;
-        return {
-          left: `${leftPercent}%`,
-          width: `${rightPercent - leftPercent}%`,
-          background: "#6B1F1F"
-        };
-      },
-  
-      applyFilters() {
-        const filters = {};
-  
-        if (this.selectedAvailability.length > 0) {
-          filters.is_available = this.selectedAvailability.map((availability) =>
-            availability === "В наявності" ? "1" : "0"
-          );
-        }
-  
-        if (this.sizeRange[0] !== this.sizeOptions.min || this.sizeRange[1] !== this.sizeOptions.max) {
-          filters.size_from = parseFloat(this.sizeRange[0]);
-          filters.size_to = parseFloat(this.sizeRange[1]);
-        }
-  
-        if (this.selectedColor) {
-          filters.color = this.selectedColor;
-        }
-  
-        if (this.selectedBeadTypes.length > 0) {
-          filters.type_of_bead = this.selectedBeadTypes;
-        }
-  
-        if (this.selectedProducers.length > 0) {
-          filters.bead_producer = this.selectedProducers;
-        }
-  
-        if (this.selectedCategories) {
-          filters.category = this.selectedCategories;
-        }
-  
-        if (this.selectedStatus.length > 0) {
-          filters.status = this.selectedStatus;
-        }
-  
-        if (this.weightRange[0] !== this.weightOptions.min || this.weightRange[1] !== this.weightOptions.max) {
-          filters.weight_from = parseFloat(this.weightRange[0]);
-          filters.weight_to = parseFloat(this.weightRange[1]);
-        }
-  
-        if (this.priceRange[0] !== this.priceOptions.min || this.priceRange[1] !== this.priceOptions.max) {
-          filters.price_from = parseFloat(this.priceRange[0]);
-          filters.price_to = parseFloat(this.priceRange[1]);
-        }
-  
-        console.log("Запит фільтрів відправлено. Вибрані фільтри:", filters);
-        this.fetchProducts(1, filters);
-      },
-  
-      validateInput(type, index) {
-        let range, options;
-  
-        switch(type) {
-          case "size":
-            range = this.sizeRange;
-            options = this.sizeOptions;
-            break;
-          case "weight":
-            range = this.weightRange;
-            options = this.weightOptions;
-            break;
-          case "price":
-            range = this.priceRange;
-            options = this.priceOptions;
-            break;
-        }
-  
-        range[index] = Number(range[index]);
-  
-        if (range[index] < options.min) {
-          range[index] = options.min;
-        }
-        
-        if (range[index] > options.max) {
-          range[index] = options.max;
-        }
-  
-        if (index === 0 && range[0] > range[1]) {
-          range[0] = range[1];
-        } else if (index === 1 && range[1] < range[0]) {
-          range[1] = range[0];
-        }
-  
-        this.$forceUpdate();
-      },
-  
-      updateSliderValue(event, type, thumb) {
-        const value = parseFloat(event.target.value);
-        let range, options;
-  
-        switch(type) {
-          case 'size':
-            range = this.sizeRange;
-            options = this.sizeOptions;
-            break;
-          case 'weight':
-            range = this.weightRange;
-            options = this.weightOptions;
-            break;
-          case 'price':
-            range = this.priceRange;
-            options = this.priceOptions;
-            break;
-        }
-  
-        if (thumb === 'min') {
-          range[0] = value >= range[1] ? range[1] : value;
-        } else {
-          range[1] = value <= range[0] ? range[0] : value;
-        }
-      },
+
+    updateSliderValue(event, type, thumb) {
+      const value = parseFloat(event.target.value);
+      let range, options;
+
+      switch(type) {
+        case 'size':
+          range = this.sizeRange;
+          options = this.sizeOptions;
+          break;
+        case 'weight':
+          range = this.weightRange;
+          options = this.weightOptions;
+          break;
+        case 'price':
+          range = this.priceRange;
+          options = this.priceOptions;
+          break;
+      }
+
+      if (thumb === 'min') {
+        range[0] = value >= range[1] ? range[1] : value;
+      } else {
+        range[1] = value <= range[0] ? range[0] : value;
+      }
     },
-  };
-  </script>
-  
+
+    // Метод для закриття фільтра
+    closeFilter() {
+      this.$emit("closeFilter");
+    }
+  },
+};
+</script>
   
   <style scoped>
   @import url('https://fonts.googleapis.com/css2?family=Podkova:wght@400..800&family=Inter:wght@600&display=swap');
@@ -430,10 +447,20 @@
     font-weight: 900;
     font-style: normal;
   }
-  
+  .close-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: transparent;
+  border: none;
+  font-size: 20px;
+  font-weight: bold;
+  cursor: pointer;
+  color: #333;
+}
   .filter {
     top: 150px;
-    margin-left: -40px;
+    margin-left: 10px;
     z-index: -1;
     background-color: #fff7f6;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
