@@ -127,7 +127,7 @@ export default {
       try {
         console.log('Відправлені параметри:', params);
         const response = await axios.get(
-          'http://26.235.139.202:8080/api/categories/4/products?page=${page}',
+          'http://26.235.139.202:8080/api/categories/5/products?page=${page}',
           { params }
         );
         this.products = response.data.data || [];

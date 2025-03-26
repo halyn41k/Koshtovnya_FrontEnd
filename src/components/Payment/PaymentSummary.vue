@@ -30,7 +30,6 @@
     </div>
   </section>
 </template>
-
 <script>
 import axios from "axios";
 import { mapGetters, mapActions } from "vuex";
@@ -110,7 +109,6 @@ export default {
         console.error("[calculateDeliveryCost] Необхідна авторизація");
         return 0;
       }
-      // Використовуємо effectiveCityRef та effectiveDeliveryType
       console.log("[calculateDeliveryCost] effectiveCityRef:", this.effectiveCityRef);
       console.log("[calculateDeliveryCost] effectiveDeliveryType:", this.effectiveDeliveryType);
       if (!this.effectiveCityRef || !this.effectiveDeliveryType) {
@@ -118,11 +116,9 @@ export default {
         return 0;
       }
       const productIds = this.safeCartItems.map(item => item.id);
-      console.log("[calculateDeliveryCost] Ідентифікатори товарів:", productIds);
       const serviceType = this.effectiveDeliveryType.toLowerCase().includes("кур'єр")
         ? "WarehouseDoors"
         : "WarehouseWarehouse";
-      console.log("[calculateDeliveryCost] ServiceType:", serviceType);
       try {
         const response = await axios.get("http://26.235.139.202:8080/api/nova-poshta/delivery/cost", {
           headers: { Authorization: `Bearer ${token}` },
@@ -132,10 +128,8 @@ export default {
             product_ids: productIds
           }
         });
-        console.log("[calculateDeliveryCost] Відповідь API:", response.data);
         if (response.data && response.data.data && response.data.data.cost !== undefined) {
           const cost = response.data.data.cost;
-          console.log("[calculateDeliveryCost] Розрахована вартість доставки:", cost);
           this.updateDeliveryCost(cost);
           return cost;
         } else {
@@ -161,6 +155,7 @@ export default {
         alert("Кошик порожній. Додайте товари перед оформленням замовлення.");
         return;
       }
+      // Логування перед розрахунком доставки
       console.log("[submitOrder] Перед розрахунком доставки:", {
         effectiveCityRef: this.effectiveCityRef,
         effectiveDeliveryType: this.effectiveDeliveryType,
@@ -189,6 +184,7 @@ export default {
       
       console.log("[submitOrder] Сформований payload замовлення:", orderData);
       try {
+        // Створення замовлення
         const orderResponse = await axios.post("http://26.235.139.202:8080/api/orders", orderData, {
           headers: { Authorization: `Bearer ${token}` }
         });
@@ -199,26 +195,46 @@ export default {
           return;
         }
         console.log("[submitOrder] Замовлення успішно створено, order_id:", orderId);
+        
         if (customer.paymentMethod === "Післяоплата") {
           this.$router.push("/payment-confirmed");
         } else if (customer.paymentMethod === "Оплата картою") {
+          // Оплата картою:
           const amount = this.cartTotalAmount + currentDeliveryCost;
-          await axios.post("https://7e21-176-121-4-31.ngrok-free.app/api/payment", {
-            amount,
-            order_id: orderId,
-            description: "Оплата замовлення"
-          }, {
-            headers: { Authorization: `Bearer ${token}` }
-          });
-          const orderStatusResponse = await axios.get(`http://26.235.139.202:8080/api/orders/${orderId}`, {
-            headers: { Authorization: `Bearer ${token}` }
-          });
-          const status = orderStatusResponse.data.status;
-          if (status === "Оплачено") {
-            this.$router.push("/payment-confirmed");
-          } else {
-            console.error("[submitOrder] Сталася помилка при оплаті або замовлення знаходиться в очікуванні, статус:", status);
-            alert("Сталася помилка при оплаті або замовлення знаходиться в очікуванні.");
+          console.log("[submitOrder] Спосіб оплати - Оплата картою, сума для оплати:", amount);
+          try {
+            const paymentResponse = await axios.post(
+              "https://b9ca-176-121-4-31.ngrok-free.app/api/payment",
+              {
+                amount,
+                order_id: orderId,
+                description: "Оплата замовлення" // або "Оплата товару" – за потребою
+              },
+              {
+                headers: { Authorization: `Bearer ${token}` }
+              }
+            );
+            // Очікуємо, що бекенд повертає HTML форму LiqPay у полі form
+            const liqpayFormHtml = paymentResponse.data.form;
+            if (!liqpayFormHtml) {
+              console.error("[submitOrder] Не отримано HTML форму LiqPay");
+              alert("Сталася помилка при оплаті картою. Спробуйте ще раз.");
+              return;
+            }
+            // Створюємо тимчасовий контейнер, вставляємо HTML форму та автоматично її відправляємо
+            const container = document.createElement("div");
+            container.innerHTML = liqpayFormHtml;
+            document.body.appendChild(container);
+            const form = container.querySelector("form");
+            if (form) {
+              console.log("[submitOrder] Відправка форми LiqPay...");
+              form.submit();
+            } else {
+              console.error("[submitOrder] Не вдалося знайти форму LiqPay в отриманому HTML");
+            }
+          } catch (paymentError) {
+            console.error("[submitOrder] Помилка оплати картою:", paymentError);
+            alert("Сталася помилка при оплаті картою. Спробуйте ще раз.");
           }
         }
       } catch (error) {
@@ -231,7 +247,6 @@ export default {
   async mounted() {
     console.log("[mounted] Компонент PaymentSummary монтується...");
     await this.fetchCartItems();
-    console.log("[mounted] Кошик завантажено, safeCartItems:", this.safeCartItems);
     if (this.effectiveCityRef && this.effectiveDeliveryType && this.safeCartItems.length) {
       await this.calculateDeliveryCost();
       console.log("[mounted] Розрахована вартість доставки:", this.deliveryCost);
@@ -242,6 +257,7 @@ export default {
   }
 };
 </script>
+
 
 
 
