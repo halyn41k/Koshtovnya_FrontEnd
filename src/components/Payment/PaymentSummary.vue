@@ -33,30 +33,33 @@
 
 <script>
 import axios from "axios";
+import { mapGetters, mapActions } from "vuex";
 
 export default {
   name: "PaymentSummary",
   props: {
     cityRef: {
       type: String,
-      required: true
+      required: false,
+      default: ""
     },
     deliveryType: {
       type: String,
-      required: true
+      required: false,
+      default: ""
     }
   },
-  data() {
-    return {
-      cartItems: [],
-      // Залишимо deliveryCost для відображення в шаблоні, 
-      // але у submitOrder будемо отримувати його безпосередньо
-      deliveryCost: 0
-    };
-  },
   computed: {
+    ...mapGetters("order", ["cartItems", "deliveryCost", "customerData"]),
     safeCartItems() {
       return Array.isArray(this.cartItems) ? this.cartItems : [];
+    },
+    // Використовуємо дані з пропсів, а якщо вони відсутні — дані з customerData
+    effectiveCityRef() {
+      return this.cityRef || (this.customerData && this.customerData.cityRef) || "";
+    },
+    effectiveDeliveryType() {
+      return this.deliveryType || (this.customerData && this.customerData.deliveryType) || "";
     },
     cartTotalAmount() {
       return this.safeCartItems.reduce(
@@ -68,11 +71,25 @@ export default {
       return this.cartTotalAmount + this.deliveryCost;
     }
   },
+  watch: {
+    effectiveCityRef(newVal) {
+      if (newVal && this.effectiveDeliveryType) {
+        this.calculateDeliveryCost();
+      }
+    },
+    effectiveDeliveryType(newVal) {
+      if (newVal && this.effectiveCityRef) {
+        this.calculateDeliveryCost();
+      }
+    }
+  },
   methods: {
+    ...mapActions("order", ["updateCartItems", "updateDeliveryCost"]),
     async fetchCartItems() {
+      console.log("[fetchCartItems] Початок завантаження кошика");
       const token = localStorage.getItem("token");
       if (!token) {
-        console.error("Необхідна авторизація");
+        console.error("[fetchCartItems] Необхідна авторизація");
         return;
       }
       try {
@@ -80,74 +97,80 @@ export default {
           headers: { Authorization: `Bearer ${token}` }
         });
         const data = response.data.products || [];
-        console.log("Отримані дані кошика:", data);
-        this.cartItems = data;
+        console.log("[fetchCartItems] Отримані дані кошика:", data);
+        this.updateCartItems(data);
       } catch (error) {
-        console.error("Помилка завантаження кошика", error);
+        console.error("[fetchCartItems] Помилка завантаження кошика", error);
       }
     },
     async calculateDeliveryCost() {
-      if (!this.cityRef || !this.deliveryType || this.safeCartItems.length === 0) {
-        console.warn("Недостатньо даних для розрахунку доставки");
-        return 0;
-      }
+      console.log("[calculateDeliveryCost] Виклик функції розрахунку доставки");
       const token = localStorage.getItem("token");
       if (!token) {
-        console.error("Необхідна авторизація");
+        console.error("[calculateDeliveryCost] Необхідна авторизація");
+        return 0;
+      }
+      // Використовуємо effectiveCityRef та effectiveDeliveryType
+      console.log("[calculateDeliveryCost] effectiveCityRef:", this.effectiveCityRef);
+      console.log("[calculateDeliveryCost] effectiveDeliveryType:", this.effectiveDeliveryType);
+      if (!this.effectiveCityRef || !this.effectiveDeliveryType) {
+        console.error("[calculateDeliveryCost] cityRef або deliveryType відсутні");
         return 0;
       }
       const productIds = this.safeCartItems.map(item => item.id);
-      const serviceType = this.deliveryType.toLowerCase().includes("кур'єр")
+      console.log("[calculateDeliveryCost] Ідентифікатори товарів:", productIds);
+      const serviceType = this.effectiveDeliveryType.toLowerCase().includes("кур'єр")
         ? "WarehouseDoors"
         : "WarehouseWarehouse";
+      console.log("[calculateDeliveryCost] ServiceType:", serviceType);
       try {
         const response = await axios.get("http://26.235.139.202:8080/api/nova-poshta/delivery/cost", {
           headers: { Authorization: `Bearer ${token}` },
           params: {
-            CityRecipient: this.cityRef,
+            CityRecipient: this.effectiveCityRef,
             ServiceType: serviceType,
             product_ids: productIds
           }
         });
-        if (
-          response.data &&
-          response.data.data &&
-          response.data.data.cost !== undefined
-        ) {
+        console.log("[calculateDeliveryCost] Відповідь API:", response.data);
+        if (response.data && response.data.data && response.data.data.cost !== undefined) {
           const cost = response.data.data.cost;
-          console.log("Розрахована вартість доставки:", cost);
-          // Оновлюємо відображення, але для payload використовуватимемо отримане значення
-          this.deliveryCost = cost;
+          console.log("[calculateDeliveryCost] Розрахована вартість доставки:", cost);
+          this.updateDeliveryCost(cost);
           return cost;
         } else {
-          console.error("Невірна відповідь API розрахунку доставки", response.data);
+          console.error("[calculateDeliveryCost] Невірна відповідь API розрахунку доставки", response.data);
           return 0;
         }
       } catch (error) {
-        console.error("Помилка розрахунку вартості доставки", error);
+        console.error("[calculateDeliveryCost] Помилка розрахунку вартості доставки", error);
         return 0;
       }
     },
     async submitOrder() {
-      console.log("submitOrder запущено");
+      console.log("[submitOrder] === Початок submitOrder ===");
       const token = localStorage.getItem("token");
       if (!token) {
+        console.error("[submitOrder] Токен відсутній - перенаправлення на логін");
         alert("Будь ласка, увійдіть у свій обліковий запис.");
         this.$router.push("/login");
         return;
       }
-      if (!this.cartItems.length) {
+      if (!this.safeCartItems.length) {
+        console.error("[submitOrder] Кошик порожній");
         alert("Кошик порожній. Додайте товари перед оформленням замовлення.");
         return;
       }
-      // Отримуємо актуальну вартість доставки безпосередньо з API
-      const currentDeliveryCost = await this.calculateDeliveryCost();
-      console.log("Отримана вартість доставки для замовлення:", currentDeliveryCost);
-
-      const customer = this.$store.getters["order/customerData"];
-      console.log("Customer Data:", customer);
-      console.log("Cart Items:", this.cartItems);
+      console.log("[submitOrder] Перед розрахунком доставки:", {
+        effectiveCityRef: this.effectiveCityRef,
+        effectiveDeliveryType: this.effectiveDeliveryType,
+        safeCartItems: this.safeCartItems
+      });
       
+      const currentDeliveryCost = await this.calculateDeliveryCost();
+      console.log("[submitOrder] Поточна вартість доставки після розрахунку:", currentDeliveryCost);
+      
+      const customer = this.customerData;
       const orderData = {
         last_name: customer.lastName,
         first_name: customer.firstName,
@@ -160,22 +183,22 @@ export default {
           : `${customer.street} ${customer.houseNumber}`,
         payment_method: customer.paymentMethod,
         type_of_card: customer.paymentMethod === "Післяоплата" ? "" : customer.typeOfCard,
-        delivery_cost: currentDeliveryCost, // використовуємо отримане значення
+        delivery_cost: currentDeliveryCost,
         cart_cost: this.cartTotalAmount
       };
-      console.log("Готовий payload замовлення:", orderData);
+      
+      console.log("[submitOrder] Сформований payload замовлення:", orderData);
       try {
         const orderResponse = await axios.post("http://26.235.139.202:8080/api/orders", orderData, {
           headers: { Authorization: `Bearer ${token}` }
         });
-        console.log("Повна відповідь сервера:", orderResponse);
         const orderId = orderResponse.data?.data?.order?.id;
         if (!orderId) {
-          console.error("Помилка: order_id не отримано з API.");
+          console.error("[submitOrder] Помилка: order_id не отримано з API.");
           alert("Сталася помилка при оформленні замовлення. Спробуйте ще раз.");
           return;
         }
-        console.log("Замовлення успішно створено, order_id:", orderId);
+        console.log("[submitOrder] Замовлення успішно створено, order_id:", orderId);
         if (customer.paymentMethod === "Післяоплата") {
           this.$router.push("/payment-confirmed");
         } else if (customer.paymentMethod === "Оплата картою") {
@@ -194,25 +217,31 @@ export default {
           if (status === "Оплачено") {
             this.$router.push("/payment-confirmed");
           } else {
+            console.error("[submitOrder] Сталася помилка при оплаті або замовлення знаходиться в очікуванні, статус:", status);
             alert("Сталася помилка при оплаті або замовлення знаходиться в очікуванні.");
           }
         }
       } catch (error) {
-        console.error("Помилка оформлення замовлення:", error.response?.data || error.message);
+        console.error("[submitOrder] Помилка оформлення замовлення:", error.response?.data || error.message);
         alert("Не вдалося оформити замовлення. Спробуйте пізніше.");
       }
+      console.log("[submitOrder] === Кінець submitOrder ===");
     }
   },
   async mounted() {
-    // Завантаження кошика і розрахунок доставки для відображення в інтерфейсі
+    console.log("[mounted] Компонент PaymentSummary монтується...");
     await this.fetchCartItems();
-    if (this.cityRef && this.deliveryType && this.safeCartItems.length) {
+    console.log("[mounted] Кошик завантажено, safeCartItems:", this.safeCartItems);
+    if (this.effectiveCityRef && this.effectiveDeliveryType && this.safeCartItems.length) {
       await this.calculateDeliveryCost();
+      console.log("[mounted] Розрахована вартість доставки:", this.deliveryCost);
+    } else {
+      console.warn("[mounted] Недостатньо даних для розрахунку доставки. effectiveCityRef:", this.effectiveCityRef, "effectiveDeliveryType:", this.effectiveDeliveryType, "safeCartItems.length:", this.safeCartItems.length);
     }
+    console.log("[mounted] Завершення монтування PaymentSummary");
   }
 };
 </script>
-
 
 
 

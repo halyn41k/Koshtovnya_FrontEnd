@@ -222,12 +222,12 @@
     <!-- Підсумковий блок – PaymentSummary (відображається після завершення всіх кроків) -->
     <PaymentSummary v-if="steps.every(step => step.completed)" :cartItems="cartItems" />
       
-      <PaymentSummary 
-  v-if="steps.every(step => step.completed)" 
-  :cartItems="cartItems"
-  :cityRef="formData.cityRef"
-  :deliveryType="formData.deliveryType"
+      <PaymentSummary
+  v-if="steps.every(s => s.completed)"
+  :city-ref="summaryCityRef"
+  :delivery-type="summaryDeliveryType"
 />
+
 
 
     <!-- Компонент адреси доставки (якщо необхідно) -->
@@ -270,7 +270,7 @@ export default {
         street: "",
         houseNumber: "",
         warehouse: "",
-        typeOfCard: "", // Це поле буде використовуватись, якщо обрано "Оплата картою"
+        typeOfCard: "", // Для оплати картою
       },
       errors: {},
       cities: [],
@@ -291,25 +291,17 @@ export default {
           { id: 4, name: "Самовивіз з УКРПОШТИ", delivery_type: "pickup" },
         ],
       },
-      cartItems: [], // Дані кошика можна також завантажувати через Vuex
+      cartItems: [],
       deliveryCost: 0,
     };
   },
-  watch: {
-  'formData.cityRef': function(newVal) {
-    if (newVal && this.formData.deliveryType) {
-      this.fetchWarehouses();
-    }
-  },
-  'formData.deliveryType': function(newVal) {
-    if (newVal && this.formData.cityRef) {
-      this.fetchWarehouses();
-    }
-  }
-},
   computed: {
-    clonedFormData() {
-      return JSON.parse(JSON.stringify(this.formData));
+    // Використовуємо ці computed для передачі значень у PaymentSummary
+    summaryCityRef() {
+      return this.formData.cityRef;
+    },
+    summaryDeliveryType() {
+      return this.formData.deliveryType;
     },
     canProceedToNextStep() {
       if (this.currentStep === 0) {
@@ -330,6 +322,19 @@ export default {
         0
       );
     },
+  },
+  watch: {
+    // Якщо formData.cityRef або deliveryType змінюються, можна оновити пов'язані дані
+    'formData.cityRef': function(newVal) {
+      if (newVal && this.formData.deliveryType) {
+        this.fetchWarehouses();
+      }
+    },
+    'formData.deliveryType': function(newVal) {
+      if (newVal && this.formData.cityRef) {
+        this.fetchWarehouses();
+      }
+    }
   },
   methods: {
     ...mapActions("order", [
@@ -394,51 +399,42 @@ export default {
       }
     },
     async fetchCartItems() {
-  const token = localStorage.getItem("token");
-  if (!token) {
-    alert("Будь ласка, увійдіть.");
-    this.$router.push("/login");
-    return [];
-  }
-  try {
-    const response = await axios.get("http://26.235.139.202:8080/api/cart", {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    
-    const cartData = response.data.data || [];
-    
-    // Додаємо додаткову перевірку та логування
-    console.log("Отримані дані кошика:", cartData);
-    
-    // Перевіряємо чи є товари в кошику
-    if (cartData.length === 0) {
-      console.warn("Кошик порожній");
-    }
-    
-    // Виконуємо глибоке копіювання даних
-    const processedCartData = JSON.parse(JSON.stringify(cartData));
-    
-    this.cartItems = processedCartData;
-    this.updateCartItems(processedCartData);
-    
-    return processedCartData;
-  } catch (error) {
-    console.error("Помилка завантаження кошика", error);
-    return [];
-  }
-},
-
-updateCartItemsInComponent(items) {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        alert("Будь ласка, увійдіть.");
+        this.$router.push("/login");
+        return [];
+      }
+      try {
+        const response = await axios.get("http://26.235.139.202:8080/api/cart", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const cartData = response.data.data || [];
+        console.log("Отримані дані кошика:", cartData);
+        if (cartData.length === 0) {
+          console.warn("Кошик порожній");
+        }
+        // Глибоке копіювання даних
+        const processedCartData = JSON.parse(JSON.stringify(cartData));
+        this.cartItems = processedCartData;
+        this.updateCartItems(processedCartData);
+        return processedCartData;
+      } catch (error) {
+        console.error("Помилка завантаження кошика", error);
+        return [];
+      }
+    },
+    updateCartItemsInComponent(items) {
       this.cartItems = items;
-      this.updateCartItems(items); // Оновлення в сторі
+      this.updateCartItems(items);
     },
     selectCity(city) {
-  this.formData.city = city.city;
-  this.formData.cityRef = city.Ref;
-  console.log("Вибране місто:", city.city, "Ref:", city.Ref);
-  this.cities = [];
-  this.fetchWarehouses();
-},
+      this.formData.city = city.city;
+      this.formData.cityRef = city.Ref;
+      console.log("Вибране місто:", city.city, "Ref:", city.Ref);
+      this.cities = [];
+      this.fetchWarehouses();
+    },
     handleStreetSearch() {
       clearTimeout(this.streetSearchTimeout);
       this.streetSearchTimeout = setTimeout(() => {
@@ -511,7 +507,6 @@ updateCartItemsInComponent(items) {
         }
       }
       if (isValid) {
-        // Передаємо дані замовлення (включаючи paymentMethod та typeOfCard) у Vuex
         this.updateCustomerData(this.formData);
         this.completeStep();
       }
@@ -572,7 +567,7 @@ updateCartItemsInComponent(items) {
       if (this.currentStep < this.steps.length - 1) {
         this.currentStep++;
         this.steps[this.currentStep].isExpanded = true;
-      } 
+      }
     },
     async fetchProfile() {
       const token = localStorage.getItem("token");
@@ -590,44 +585,32 @@ updateCartItemsInComponent(items) {
       }
     },
     async fetchUserAddress() {
-  const token = localStorage.getItem("token");
-  if (!token) return;
-  try {
-    const response = await axios.get("http://26.235.139.202:8080/api/user-address", {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    
-    const addressData = response.data.data;
-
-    if (addressData) {
-      // Заповнення всіх полів
-      this.formData.phone = addressData.phone_number || "";
-      this.formData.city = addressData.city || "";
-      this.formData.cityRef = addressData.Ref || "";
-      this.formData.warehouse = addressData.delivery_address || "";
-      
-      // Встановлення типу доставки
-      this.selectedDeliveryCategory = addressData.delivery_type === "courier" ? "courier" : "pickup";
-      
-      this.$nextTick(() => {
-        this.updateDeliveryOptions();
-        this.formData.deliveryType = addressData.delivery_name || "";
-        
-        // Додаткові поля, якщо потрібно
-        this.formData.firstName = addressData.user ? addressData.user.split(' ')[1] || "" : "";
-        this.formData.lastName = addressData.user ? addressData.user.split(' ')[0] || "" : "";
-        this.formData.secondName = addressData.user ? addressData.user.split(' ')[2] || "" : "";
-      });
-
-      console.log("Дані успішно заповнені:", this.formData);
-    }
-  } catch (error) {
-    console.error("Помилка отримання адреси користувача", error);
-  }
-},
-
-
-    
+      const token = localStorage.getItem("token");
+      if (!token) return;
+      try {
+        const response = await axios.get("http://26.235.139.202:8080/api/user-address", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const addressData = response.data.data;
+        if (addressData) {
+          this.formData.phone = addressData.phone_number || "";
+          this.formData.city = addressData.city || "";
+          this.formData.cityRef = addressData.Ref || "";
+          this.formData.warehouse = addressData.delivery_address || "";
+          this.selectedDeliveryCategory = addressData.delivery_type === "courier" ? "courier" : "pickup";
+          this.$nextTick(() => {
+            this.updateDeliveryOptions();
+            this.formData.deliveryType = addressData.delivery_name || "";
+            this.formData.firstName = addressData.user ? addressData.user.split(' ')[1] || "" : "";
+            this.formData.lastName = addressData.user ? addressData.user.split(' ')[0] || "" : "";
+            this.formData.secondName = addressData.user ? addressData.user.split(' ')[2] || "" : "";
+          });
+          console.log("Дані успішно заповнені:", this.formData);
+        }
+      } catch (error) {
+        console.error("Помилка отримання адреси користувача", error);
+      }
+    },
   },
   mounted() {
     console.log("PaymentSteps mounted. Customer data:", this.formData);
@@ -635,16 +618,13 @@ updateCartItemsInComponent(items) {
   created() {
     this.fetchDeliveryTypes();
     this.fetchUserAddress();
-    this.fetchCartItems();
-
     this.fetchCartItems().then(() => {
-      // Після завантаженняCartItems викликаємо updateCartItemsInComponent
       this.updateCartItemsInComponent(this.cartItems);
     });
-  
   },
 };
 </script>
+
 
 
 

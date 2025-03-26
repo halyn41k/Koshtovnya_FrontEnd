@@ -6,10 +6,6 @@
         <span>Проміжний підсумок</span>
         <span class="price">{{ totalSum }}₴</span>
       </div>
-      <div class="summary-row">
-        <span>Доставка</span>
-        <span class="price">0₴</span>
-      </div>
       <div class="summary-row total">
         <span>Загальна сума</span>
         <span class="price">{{ totalSum }}₴</span>
@@ -51,7 +47,7 @@ export default {
   border-radius: 16px;
   background-color: rgba(255, 247, 246, 1);
   width: 300px;
-  height: 200px;
+  height: 170px;
   padding: 20px;
   border: 1px solid rgba(230, 230, 230, 1);
   margin-left: 250px;
