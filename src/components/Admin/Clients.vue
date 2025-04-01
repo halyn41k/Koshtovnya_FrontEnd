@@ -1,188 +1,159 @@
 <template>
   <main class="client-list">
-    <h1 class="client-list__title">Користувачі</h1>
-    <div class="client-list__controls">
-      <div class="controls-left">
-        <div class="filter">
-          <span class="filter__text">Фільтр</span>
-          <img
-            src="https://cdn.builder.io/api/v1/image/assets/c3e46d0a629546c7a48302a5db3297d5/4b09284ab367fa70a05a4a4f59e91721443ad7e8e783dfd2c26fb681ebacd30f?apiKey=c3e46d0a629546c7a48302a5db3297d5"
-            alt="Filter icon"
-            class="filter__icon"
-          />
-        </div>
-        <div class="search-form">
-          <input
-            class="search-input"
-            type="text"
-            placeholder="Пошук за ім'ям"
-            v-model="searchQuery"
-            @input="onSearch"
-          />
-        </div>
-      </div>
-      <div class="controls-right">
-        <button class="add-button" @click="openAddModal">
-          <img
-            src="https://cdn.builder.io/api/v1/image/assets/c3e46d0a629546c7a48302a5db3297d5/a27ea7f8a293148ec591123dc3120b25f531a1f574adc4774e1503c5d2772fcb?apiKey=c3e46d0a629546c7a48302a5db3297d5"
-            alt="Add icon"
-            class="add-button__icon"
-          />
-          <span class="add-button__text">Додати</span>
-        </button>
-      </div>
+    <!-- Шапка з заголовком та кнопкою "Додати" -->
+    <div class="header-container">
+      <h1 class="client-list__title">Користувачі</h1>
+      <button class="add-button" @click="openAddModal">
+        <img src="@/assets/icons/plus.svg" alt="Add icon" class="add-button__icon" />
+        <span class="add-button__text">Додати</span>
+      </button>
     </div>
 
+    <!-- Поле пошуку -->
+    <!-- Поле пошуку -->
+<div class="search-container">
+  <div class="search-input-wrapper">
+    <input
+      class="search-input"
+      type="text"
+      placeholder="Пошук"
+      v-model="searchQuery"
+      @input="onSearch"
+    />
+    <img src="@/assets/icons/search.svg" alt="Search icon" class="search-icon" />
+  </div>
+</div>
+
+
+    <!-- Таблиця з користувачами -->
     <div class="client-table-container">
       <header class="client-table__header">
-        <span>ID</span>
-        <span>Ім'я</span>
-        <span>Email</span>
-        <span>№ Замовлення</span>
-        <span>Телефон</span>
-        <span>Додано</span>
-        <span>Керування</span>
+        <span class="sortable-header" @click="cycleSort('id')">
+          ID
+          <img :src="getSortIcon(sortState.id)" alt="Sort Icon" class="sort-icon" />
+        </span>
+        <span class="sortable-header" @click="cycleSort('first_name')">
+          Ім’я
+          <img :src="getSortIcon(sortState.first_name)" alt="Sort Icon" class="sort-icon" />
+        </span>
+        <span class="sortable-header" @click="cycleSort('last_name')">
+          Прізвище
+          <img :src="getSortIcon(sortState.last_name)" alt="Sort Icon" class="sort-icon" />
+        </span>
+        <span class="sortable-header" @click="cycleSort('email')">
+          Електронна пошта
+          <img :src="getSortIcon(sortState.email)" alt="Sort Icon" class="sort-icon" />
+        </span>
+        <span class="sortable-header" @click="cycleSort('order')">
+          № Замовлення
+          <img :src="getSortIcon(sortState.order)" alt="Sort Icon" class="sort-icon" />
+        </span>
+        <span class="sortable-header" @click="cycleSort('date')">
+          Додано
+          <img :src="getSortIcon(sortState.date)" alt="Sort Icon" class="sort-icon" />
+        </span>
+        <span class="sortable-header">Дії</span>
       </header>
       <ul class="client-list__items">
-        <li v-for="(client, index) in clients" :key="client.id" class="client-item">
+        <li
+          v-for="(client, index) in clients"
+          :key="client.id"
+          :class="['client-item', { highlighted: client.id === highlightedUserId }]"
+        >
           <span class="client-item__id">{{ index + 1 }}</span>
-          <span class="client-item__name">{{ client.first_name }} {{ client.last_name }}</span>
+          <span class="client-item__first-name">{{ client.first_name }}</span>
+          <span class="client-item__last-name">{{ client.last_name }}</span>
           <span class="client-item__email">{{ client.email }}</span>
           <span class="client-item__order">{{ client.order_id ? client.order_id : '—' }}</span>
-          <span class="client-item__phone">{{ client.phone_number }}</span>
           <span class="client-item__date">{{ client.date }}</span>
           <div class="client-item__actions">
-            <button class="action-button action-button--orders" @click="openOrdersModal(client)">
-              <img src="https://via.placeholder.com/16" alt="Orders icon" class="action-button__icon" />
-              <span class="action-button__text">Замовлення</span>
+            <button class="action-button" @click="openUpdateModal(client)">
+              <img src="@/assets/icons/edit.svg" alt="Update icon" class="action-button__icon" />
             </button>
-            <button class="action-button action-button--update" @click="openUpdateModal(client)">
-              <img src="https://via.placeholder.com/16" alt="Update icon" class="action-button__icon" />
-              <span class="action-button__text">Оновити</span>
-            </button>
-            <button class="action-button action-button--delete" @click="deleteUser(client.id)">
-              <img
-                src="https://cdn.builder.io/api/v1/image/assets/c3e46d0a629546c7a48302a5db3297d5/ba078f16c37c9f7f4a38bffc3903a0783959b7a0f9fc95368926f1c2df1ef2a7?apiKey=c3e46d0a629546c7a48302a5db3297d5"
-                alt="Delete icon"
-                class="action-button__icon"
-              />
-              <span class="action-button__text">Видалити</span>
+            <button class="action-button" @click="deleteUser(client.id)">
+              <img src="@/assets/icons/delete.svg" alt="Delete icon" class="action-button__icon" />
             </button>
           </div>
         </li>
       </ul>
     </div>
 
-    <!-- Модальне вікно для додавання/оновлення користувача -->
-    <div v-if="showModal" class="modal-overlay">
-      <div class="modal-dialog">
-        <div class="modal-header">
-          <h2>{{ modalTitle }}</h2>
-          <button class="close-button" @click="closeModal">&times;</button>
-        </div>
-        <div class="modal-body">
-          <form @submit.prevent="submitForm" class="user-form">
-            <div class="form-group">
-              <label for="first_name">Ім'я:</label>
-              <input id="first_name" v-model="form.first_name" type="text" placeholder="Ім'я" required />
-            </div>
-            <div class="form-group">
-              <label for="second_name">По-батькові:</label>
-              <input id="second_name" v-model="form.second_name" type="text" placeholder="По-батькові" required />
-            </div>
-            <div class="form-group">
-              <label for="last_name">Прізвище:</label>
-              <input id="last_name" v-model="form.last_name" type="text" placeholder="Прізвище" required />
-            </div>
-            <div class="form-group">
-              <label for="email">Email:</label>
-              <!-- Заблоковано для оновлення: якщо не режим додавання, поле email недоступне -->
-              <input id="email" v-model="form.email" type="email" placeholder="Email" required :disabled="!isAddMode" />
-            </div>
-            <!-- Поле role показується завжди, для можливості змінити роль -->
-            <div class="form-group">
-              <label for="role">Роль:</label>
-              <select id="role" v-model="form.role" required>
-                <option disabled value="">Оберіть роль</option>
-                <option value="admin">Admin</option>
-                <option value="manager">Manager</option>
-                <option value="superadmin">Superadmin</option>
-                <option value="user">User</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="phone_number">Телефон:</label>
-              <!-- Використовуємо умовне required: обов'язкове тільки при додаванні -->
-              <input
-                id="phone_number"
-                v-model="form.phone_number"
-                type="text"
-                placeholder="Телефон"
-                :required="isAddMode"
-              />
-            </div>
-            <div class="form-actions">
-              <button type="submit" class="btn-primary">Зберегти</button>
-              <button type="button" class="btn-secondary" @click="closeModal">Відміна</button>
-            </div>
-          </form>
-        </div>
-      </div>
+    <!-- Пагінація -->
+    <div class="pagination-container">
+      <button
+        class="pagination-arrow"
+        :disabled="currentPage === 1"
+        @click="goToPage(currentPage - 1)"
+      >
+        <img src="@/assets/icons/arrow_left.svg" alt="Arrow Left" class="arrow-icon" />
+      </button>
+      <button
+        v-for="page in totalPages"
+        :key="page"
+        @click="goToPage(page)"
+        :class="['pagination-button', { active: currentPage === page }]"
+      >
+        {{ page }}
+      </button>
+      <button
+        class="pagination-arrow"
+        :disabled="currentPage === totalPages"
+        @click="goToPage(currentPage + 1)"
+      >
+        <img src="@/assets/icons/arrow_right.svg" alt="Arrow Right" class="arrow-icon" />
+      </button>
     </div>
 
-    <!-- Модальне вікно для перегляду замовлень користувача -->
-    <div v-if="showOrdersModal" class="modal-overlay">
-      <div class="modal-dialog">
-        <div class="modal-header">
-          <h2>Замовлення користувача: {{ selectedUser.first_name }} {{ selectedUser.last_name }}</h2>
-          <button class="close-button" @click="closeOrdersModal">&times;</button>
-        </div>
-        <div class="modal-body">
-          <div v-if="orders.length">
-            <ul class="orders-list">
-              <li v-for="order in orders" :key="order.id" class="order-item">
-                <span>Замовлення ID: {{ order.id }}</span>
-                <span>Сума: {{ order.total_amount }}₴</span>
-                <span>Статус: {{ order.status }}</span>
-                <button @click="viewOrder(order)">Деталі</button>
-              </li>
-            </ul>
-          </div>
-          <div v-else>
-            <p>Замовлень не знайдено.</p>
-          </div>
-        </div>
-      </div>
+    <!-- Компонент модального вікна -->
+    <UserModal
+      v-if="showUserModal"
+      :key="modalKey"
+      :title="modalTitle"
+      @close="closeUserModal"
+      @userSubmit="handleUserSubmit"
+    />
+
+    <!-- Toast повідомлення -->
+    <div v-if="showToast" class="toast">
+      <img src="@/assets/icons/success.svg" alt="Success" class="toast-icon" />
+      <span class="toast-text">Користувач створений</span>
     </div>
   </main>
 </template>
 
 <script>
 import axios from "axios";
+import UserModal from "./UserModal.vue";
 
 export default {
   name: "ClientList",
+  components: {
+    UserModal
+  },
   data() {
     return {
       clients: [],
       searchQuery: "",
       searchRole: "user",
-      showModal: false,
-      isAddMode: true,
+      showUserModal: false,
       modalTitle: "",
-      form: {
-        id: null,
-        first_name: "",
-        second_name: "",
-        last_name: "",
-        email: "",
-        phone_number: "",
-        role: ""
+      modalKey: 0,
+      // Пагінація
+      currentPage: 1,
+      totalPages: 3,
+      // Стан сортування
+      sortState: {
+        id: "none",
+        first_name: "none",
+        last_name: "none",
+        email: "none",
+        order: "none",
+        date: "none",
+        actions: "none"
       },
-      originalEmail: "", // Зберігаємо початковий email для порівняння
-      showOrdersModal: false,
-      orders: [],
-      selectedUser: {}
+      // Toast та підсвічування
+      showToast: false,
+      highlightedUserId: null
     };
   },
   mounted() {
@@ -224,17 +195,17 @@ export default {
         console.error("Помилка пошуку:", error);
       }
     },
-    async addUser() {
+    async addUser(userData) {
       try {
         const response = await axios.post(
           "http://26.235.139.202:8080/api/admin/user",
           {
-            first_name: this.form.first_name,
-            second_name: this.form.second_name,
-            last_name: this.form.last_name,
-            email: this.form.email,
-            phone_number: this.form.phone_number,
-            role: this.form.role
+            first_name: userData.first_name,
+            second_name: userData.second_name,
+            last_name: userData.last_name,
+            email: userData.email,
+            phone_number: userData.phone_number,
+            role: userData.role
           },
           {
             headers: {
@@ -244,29 +215,31 @@ export default {
           }
         );
         console.log("Користувача додано:", response.data);
+        const newUserId = response.data.data.id;
+        this.highlightedUserId = newUserId;
         this.fetchUsers();
-        this.closeModal();
+        this.showToastMessage();
+        setTimeout(() => {
+          this.highlightedUserId = null;
+        }, 3000);
       } catch (error) {
         console.error("Помилка додавання користувача:", error);
       }
     },
-    async updateUser() {
+    async updateUser(userData) {
       try {
-        // Формуємо payload з можливістю оновлення role та номеру телефону (тільки, якщо поле заповнене)
         const payload = {
-          first_name: this.form.first_name,
-          second_name: this.form.second_name,
-          last_name: this.form.last_name,
-          role: this.form.role
+          first_name: userData.first_name,
+          second_name: userData.second_name,
+          last_name: userData.last_name,
+          role: userData.role,
+          phone_number: userData.phone_number
         };
-        if (this.form.phone_number && this.form.phone_number.trim() !== '') {
-          payload.phone_number = this.form.phone_number;
-        }
-        if (this.form.email !== this.originalEmail) {
-          payload.email = this.form.email;
+        if (userData.email !== userData.originalEmail) {
+          payload.email = userData.email;
         }
         const response = await axios.patch(
-          `http://26.235.139.202:8080/api/admin/user/${this.form.id}`,
+          `http://26.235.139.202:8080/api/admin/user/${userData.id}`,
           payload,
           {
             headers: {
@@ -277,340 +250,324 @@ export default {
         );
         console.log("Дані користувача оновлено:", response.data);
         this.fetchUsers();
-        this.closeModal();
       } catch (error) {
         console.error("Помилка оновлення користувача:", error);
       }
     },
-    async deleteUser(id) {
-      try {
-        const response = await axios.delete(
-          `http://26.235.139.202:8080/api/admin/users/${id}`,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-              Accept: "application/json"
-            }
+    deleteUser(id) {
+      axios
+        .delete(`http://26.235.139.202:8080/api/admin/users/${id}`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            Accept: "application/json"
           }
-        );
-        console.log("Користувача видалено:", response.data);
-        this.fetchUsers();
-      } catch (error) {
-        console.error("Помилка видалення користувача:", error);
-      }
+        })
+        .then((response) => {
+          console.log("Користувача видалено:", response.data);
+          this.fetchUsers();
+        })
+        .catch((error) => {
+          console.error("Помилка видалення користувача:", error);
+        });
     },
     openAddModal() {
-      this.isAddMode = true;
-      this.modalTitle = "Додати користувача";
-      this.form = {
-        id: null,
-        first_name: "",
-        second_name: "",
-        last_name: "",
-        email: "",
-        phone_number: "",
-        role: ""
-      };
-      this.showModal = true;
+      this.modalTitle = "Створити користувача";
+      // Оновлюємо ключ, щоб компонент модалки ініціалізувався заново
+      this.modalKey = Date.now();
+      this.showUserModal = true;
     },
     openUpdateModal(client) {
-      this.isAddMode = false;
       this.modalTitle = "Оновити дані користувача";
-      this.form = { ...client };
-      this.originalEmail = client.email;
-      this.showModal = true;
+      this.modalKey = Date.now();
+      // Можна передати дані клієнта через props, якщо потрібно
+      this.showUserModal = true;
     },
-    submitForm() {
-      if (this.isAddMode) {
-        this.addUser();
+    closeUserModal() {
+      this.showUserModal = false;
+    },
+    handleUserSubmit(userData) {
+      console.log("Дані, отримані від модалки:", userData);
+      if (userData.id) {
+        this.updateUser(userData);
       } else {
-        this.updateUser();
+        this.addUser(userData);
       }
+      this.closeUserModal();
     },
-    closeModal() {
-      this.showModal = false;
+    showToastMessage() {
+      this.showToast = true;
+      setTimeout(() => {
+        this.showToast = false;
+      }, 3000);
     },
-    async openOrdersModal(client) {
-      this.selectedUser = client;
-      try {
-        const response = await axios.get(
-          `http://26.235.139.202:8080/api/admin/users/${client.id}/orders`,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-              Accept: "application/json"
-            }
-          }
-        );
-        this.orders = response.data.data;
-        this.showOrdersModal = true;
-      } catch (error) {
-        console.error("Помилка отримання замовлень користувача:", error);
+    goToPage(page) {
+      this.currentPage = page;
+      // Реалізуйте логіку пагінації, якщо потрібно
+    },
+    cycleSort(column) {
+      if (this.sortState[column] === "none") {
+        this.sortState[column] = "asc";
+      } else if (this.sortState[column] === "asc") {
+        this.sortState[column] = "desc";
+      } else {
+        this.sortState[column] = "none";
       }
+      console.log(`Sort for ${column}: ${this.sortState[column]}`);
+      // Реалізуйте сортування, якщо потрібно
     },
-    closeOrdersModal() {
-      this.showOrdersModal = false;
-    },
-    async viewOrder(order) {
-      try {
-        const response = await axios.get(
-          `http://26.235.139.202:8080/api/admin/orders/${order.id}`,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-              Accept: "application/json"
-            }
-          }
-        );
-        console.log("Деталі замовлення:", response.data);
-        alert(`Деталі замовлення:\n${JSON.stringify(response.data, null, 2)}`);
-      } catch (error) {
-        console.error("Помилка отримання деталей замовлення:", error);
-      }
-    },
-    async onSearchUsers() {
-      try {
-        const response = await axios.get(
-          `http://26.235.139.202:8080/api/admin/users/search/${this.searchQuery}`,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-              Accept: "application/json"
-            },
-            params: { role: this.searchRole }
-          }
-        );
-        this.clients = response.data.data;
-      } catch (error) {
-        console.error("Помилка пошуку:", error);
+    getSortIcon(state) {
+      if (state === "asc") {
+        return require("@/assets/icons/asc.svg");
+      } else if (state === "desc") {
+        return require("@/assets/icons/desc.svg");
+      } else {
+        return require("@/assets/icons/none_sorted.svg");
       }
     }
   }
 };
 </script>
 
-
-
-
 <style scoped>
+/* Загальні налаштування */
 .client-list {
   max-width: 1200px;
-  margin: 20px auto;
+  margin: 0 auto;
   font-family: Montserrat, sans-serif;
-  padding: 0 20px;
-}
-.client-list__title {
+  padding: 20px 20px 40px;
   color: #000;
-  font-size: 32px;
-  font-weight: 700;
 }
-.client-list__controls {
+
+/* Шапка */
+.header-container {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 32px;
+  margin-bottom: 20px;
 }
-.controls-left {
-  display: flex;
-  gap: 20px;
-  align-items: center;
+.client-list__title {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0;
 }
-.filter {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.search-form {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-}
-.search-input {
-  border: none;
-  background: #F1E9E9;
-  font-size: 16px;
-  color: #000;
-  outline: none;
-  padding: 8px;
-  border-radius: 8px;
-}
-.search-select {
-  padding: 8px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-}
-.controls-right {}
 .add-button {
+  width: 126px;
+  height: 40px;
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 8px 15px;
-  border-radius: 12px;
-  background-color: #C4AEAC;
-  font-size: 16px;
-  color: #000;
+  justify-content: center;
+  gap: 6px;
+  border-radius: 4px;
+  background-color: #6b1f1f;
   border: none;
   cursor: pointer;
+  font-weight: 600;
+  color: #fff;
+  transition: background-color 0.3s, border 0.3s;
 }
 .add-button__icon {
-  width: 24px;
-  height: 29px;
+  width: 20px;
+  height: 20px;
   object-fit: contain;
 }
+.add-button__text {
+  font-size: 14px;
+  font-weight: 600;
+  font-family: Montserrat, sans-serif;
+}
+.add-button:hover {
+  background-color: #a01212;
+}
+.add-button:active {
+  border: 1px solid #1d1d1d;
+}
+
+.search-container {
+  margin-bottom: 20px;
+}
+
+.search-input-wrapper {
+  display: flex;
+  align-items: center;
+  width: 262px;
+  height: 30px;
+  background-color: #f6e7e7;
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid transparent;
+  transition: border 0.3s;
+}
+
+.search-input-wrapper:focus-within {
+  border: 1px solid #1d1d1d;
+}
+
+.search-input {
+  flex: 1;
+  height: 100%;
+  padding: 8px 12px;
+  border: none;
+  background-color: transparent;
+  color: #898989;
+  font-size: 14px;
+  outline: none;
+}
+
+.search-icon {
+  width: 16px;
+  height: 16px;
+  margin-right: 12px;
+  pointer-events: none;
+}
+
+/* Таблиця */
 .client-table-container {
-  width: 100%;
-  overflow-x: auto;
-  margin-top: 20px;
+  margin-top: 0;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid #e0e0e0;
 }
 .client-table__header {
   display: grid;
-  grid-template-columns: 5% 15% 20% 10% 15% 15% 20%;
-  gap: 16px;
+  grid-template-columns: 5% 15% 15% 25% 15% 15% 10%;
   align-items: center;
-  padding: 16px;
-  border-radius: 12px;
-  background-color: #FFF7F6;
-  border: 2px solid #E6E6E6;
-  font-size: 16px;
-  color: #000;
+  padding: 12px 16px;
+  border-bottom: 1px solid #e0e0e0;
+  background-color: #F6E7E7;
+  font-size: 14px;
   font-weight: 600;
-  min-width: 800px;
+  color: #48484b;
+}
+.sortable-header {
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+}
+.sort-icon {
+  width: 16px;
+  height: 16px;
+  margin-left: 4px;
+  object-fit: contain;
 }
 .client-list__items {
   list-style: none;
-  padding: 0;
   margin: 0;
+  padding: 0;
 }
 .client-item {
   display: grid;
-  grid-template-columns: 5% 15% 20% 10% 15% 15% 20%;
-  gap: 16px;
+  grid-template-columns: 5% 15% 15% 25% 15% 15% 10%;
   align-items: center;
-  padding: 16px;
-  margin-top: 12px;
-  border-radius: 12px;
-  background-color: #FFF7F6;
-  border: 2px solid #E6E6E6;
-  min-width: 800px;
-}
-.client-item__id {
-  font-size: 16px;
-  font-weight: 600;
-  color: #000;
-  text-align: center;
-}
-.client-item__name {
-  font-size: 16px;
-  font-weight: 600;
-  color: #000;
-}
-.client-item__email,
-.client-item__order,
-.client-item__phone,
-.client-item__date {
+  padding: 12px 16px;
+  border-bottom: 1px solid #e0e0e0;
+  background-color: #fff;
   font-size: 14px;
   color: #000;
+  transition: background-color 0.3s;
+}
+.client-item.highlighted {
+  background-color: #E4F2E7 !important;
 }
 .client-item__actions {
   display: flex;
-  gap: 6px;
+  gap: 8px;
+  justify-content: center;
 }
 .action-button {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  padding: 6px 10px;
-  border-radius: 8px;
-  background-color: #C4AEAC;
-  font-size: 14px;
-  color: #000;
+  width: 32px;
+  height: 32px;
   border: none;
+  background-color: transparent;
   cursor: pointer;
+  padding: 0;
 }
 .action-button__icon {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* Пагінація */
+.pagination-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 50px;
+  margin-top: 20px;
+  gap: 8px;
+}
+.pagination-button {
+  width: 35px;
+  height: 35px;
+  border: none;
+  background-color: #fff;
+  border-radius: 6px;
+  font-family: Montserrat, sans-serif;
+  font-size: 14px;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s, background-color 0.3s, box-shadow 0.3s;
+}
+.pagination-button:hover {
+  background-color: #f0f0f0;
+  transform: translateY(-2px);
+}
+.pagination-button.active {
+  background-color: #6b1f1f;
+  color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+.pagination-arrow {
+  width: 35px;
+  height: 35px;
+  border: none;
+  background-color: #fff;
+  border-radius: 6px;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s, background-color 0.3s, box-shadow 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.pagination-arrow:hover:not(:disabled) {
+  background-color: #f0f0f0;
+  transform: translateY(-2px);
+}
+.pagination-arrow:disabled {
+  background-color: #aeaeae;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+.arrow-icon {
   width: 16px;
   height: 16px;
   object-fit: contain;
 }
-.modal-overlay {
+
+/* Toast */
+.toast {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0,0,0,0.5);
+  bottom: 20px;
+  left: 20px;
+  width: 300px;
+  height: 44px;
+  background-color: #E4F2E7;
+  border-radius: 4px;
   display: flex;
   align-items: center;
-  justify-content: center;
-  z-index: 1000;
+  padding: 0 10px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  z-index: 2000;
 }
-.modal-dialog {
-  background: #fff;
-  border-radius: 8px;
-  width: 400px;
-  max-width: 90%;
-  padding: 20px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-  animation: fadeIn 0.3s ease-out;
+.toast-icon {
+  width: 20px;
+  height: 20px;
+  margin-right: 10px;
 }
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 1px solid #ddd;
-  padding-bottom: 10px;
-  margin-bottom: 20px;
-}
-.close-button {
-  background: transparent;
-  border: none;
-  font-size: 24px;
-  cursor: pointer;
-}
-.user-form .form-group {
-  margin-bottom: 15px;
-}
-.user-form .form-group label {
-  display: block;
-  margin-bottom: 5px;
-  font-weight: bold;
-}
-.user-form .form-group input,
-.user-form .form-group select {
-  width: 100%;
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-.form-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-}
-.btn-primary {
-  background-color: #C4AEAC;
-  border: none;
-  padding: 8px 16px;
-  color: #fff;
-  border-radius: 4px;
-  cursor: pointer;
-}
-.btn-secondary {
-  background-color: #aaa;
-  border: none;
-  padding: 8px 16px;
-  color: #fff;
-  border-radius: 4px;
-  cursor: pointer;
-}
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.toast-text {
+  font-family: Montserrat, sans-serif;
+  font-size: 14px;
+  color: #000;
 }
 </style>

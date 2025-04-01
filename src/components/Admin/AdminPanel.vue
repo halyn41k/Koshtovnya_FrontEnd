@@ -1,92 +1,175 @@
 <template>
-  <main class="admin-panel">
-    <aside class="sidebar">
-      <h1 class="sidebar-title">Адмін панель</h1>
-      <nav class="sidebar-nav" v-if="menuItems.length">
-        <ul class="nav-list">
-          <li 
-            class="nav-item" 
-            v-for="(menuItem, index) in menuItems" 
-            :key="index" 
-            @click="selectTab(index)"
-            :class="{ active: activeTab === index }"
-          >
-            <img :src="menuItem.icon" alt="" class="nav-icon" />
-            <span class="nav-text">{{ menuItem.title }}</span>
-          </li>
-        </ul>
-      </nav>
-    </aside>
-    <section class="content">
-      <component :is="activeComponent" />
-    </section>
-  </main>
+  <div class="admin-container">
+    <!-- Міні хедер -->
+    <header class="mini-header">
+      <div class="mini-header-content">
+        <div class="user-controls">
+          <div class="user-icon">
+            <img src="@/assets/icons/user.svg" alt="User Icon" />
+          </div>
+          <div class="language-switcher">
+            <img :src="currentFlag" :alt="selectedLanguage + ' Flag'" class="flag" />
+            <select v-model="selectedLanguage" @change="changeLanguage" class="language-select">
+              <option value="uk">Українська</option>
+              <option value="en">English</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </header>
+    
+    <!-- Основна частина адмін-панелі -->
+    <main class="admin-panel">
+      <aside class="sidebar">
+        <!-- Верхня частина бокової панелі -->
+        <div class="sidebar-header">
+          <div class="logo-wrapper">
+            <img :src="siteSettings.site_logo" alt="Коштовня Лого" class="logo" />
+            <div class="admin-title">Коштовня</div>
+          </div>
+          <div class="admin-subtitle">{{ panelSubtitle }}</div>
+        </div>
+        
+        <!-- Меню з табами -->
+        <nav class="sidebar-nav">
+          <ul class="nav-list">
+            <li 
+              class="nav-item" 
+              v-for="(menuItem, index) in computedMenuItems" 
+              :key="index" 
+              @click="selectTab(index)"
+              :class="{ active: activeTab === index }"
+            >
+              <img :src="menuItem.icon" alt="" class="nav-icon" />
+              <span class="nav-text">{{ menuItem.title }}</span>
+            </li>
+          </ul>
+        </nav>
+        
+        <!-- Кнопка виходу -->
+        <div class="logout" @click="logout">
+          <img src="@/assets/exit.png" alt="Exit Icon" class="logout-icon" />
+          <span class="logout-text">Вийти</span>
+        </div>
+      </aside>
+      
+      <!-- Контент вибраної вкладки -->
+      <section class="content">
+        <component :is="activeComponent" />
+      </section>
+    </main>
+  </div>
 </template>
 
 <script>
 import WelcomeAdmin from './WelcomeAdmin.vue';
-import ProductList from './ProductList.vue';
+import Clients from './Clients.vue';
 import Employees from './Employees.vue';
+import ProductList from './ProductList.vue';
 import Orders from './Orders.vue';
 import Reports from './Reports.vue';
-import Clients from './Clients.vue';
 import Settings from './Settings.vue';
 
 export default {
   name: 'AdminPanel',
   components: {
     WelcomeAdmin,
-    ProductList,
+    Clients,
     Employees,
+    ProductList,
     Orders,
     Reports,
-    Clients,
     Settings,
   },
   data() {
     return {
-      activeTab: -1, // -1 означає вітальний екран
-      user: null
+      activeTab: -1, // -1 означає, що ще не обрано вкладку
+      user: null,
+      selectedLanguage: 'uk',
+      siteSettings: {
+        site_logo: ''
+      }
     };
   },
   computed: {
-    // Формуємо список меню залежно від ролі користувача
-    menuItems() {
-      if (!this.user) return [];
-      if (this.user.role === 'manager') {
-        return [
-          { title: 'Користувачі', icon: require('@/assets/arrowadmin.png'), component: 'Clients' },
-          { title: 'Товари', icon: require('@/assets/arrowadmin.png'), component: 'ProductList' },
-          { title: 'Замовлення', icon: require('@/assets/arrowadmin.png'), component: 'Orders' }
-        ];
-      } else if (this.user.role === 'admin') {
-        return [
-          { title: 'Користувачі', icon: require('@/assets/arrowadmin.png'), component: 'Clients' },
-          { title: 'Працівники', icon: require('@/assets/arrowadmin.png'), component: 'Employees' },
-          { title: 'Товари', icon: require('@/assets/arrowadmin.png'), component: 'ProductList' },
-          { title: 'Замовлення', icon: require('@/assets/arrowadmin.png'), component: 'Orders' }
-        ];
-      } else if (this.user.role === 'superadmin') {
-        return [
-          { title: 'Користувачі', icon: require('@/assets/arrowadmin.png'), component: 'Clients' },
-          { title: 'Працівники', icon: require('@/assets/arrowadmin.png'), component: 'Employees' },
-          { title: 'Товари', icon: require('@/assets/arrowadmin.png'), component: 'ProductList' },
-          { title: 'Замовлення', icon: require('@/assets/arrowadmin.png'), component: 'Orders' },
-          { title: 'Налаштування', icon: require('@/assets/arrowadmin.png'), component: 'Settings' },
-        ];
-      } else {
-        return [];
-      }
-    },
-    // Визначає активний компонент залежно від вибраної вкладки
     activeComponent() {
       if (this.activeTab === -1) return 'WelcomeAdmin';
-      return this.menuItems[this.activeTab].component;
+      return this.computedMenuItems[this.activeTab].component;
+    },
+    currentFlag() {
+      return this.selectedLanguage === 'uk'
+        ? 'https://flagcdn.com/w320/ua.png'
+        : 'https://flagcdn.com/w320/gb.png';
+    },
+    panelSubtitle() {
+      if (!this.user) return '';
+      if (this.user.role === 'superadmin') {
+        return 'SUPER ADMIN PANEL';
+      } else if (this.user.role === 'admin') {
+        return 'ADMIN PANEL';
+      } else if (this.user.role === 'manager') {
+        return 'MANAGER PANEL';
+      } else {
+        return '';
+      }
+    },
+    computedMenuItems() {
+    if (!this.user) return [];
+    if (this.user.role === 'superadmin') {
+      return [
+        { title: 'Користувачі', icon: require('@/assets/icons/user.svg'), component: 'Clients' },
+        { title: 'Працівники', icon: require('@/assets/icons/user.svg'), component: 'Employees' },
+        { title: 'Товари', icon: require('@/assets/icons/goods.svg'), component: 'ProductList' },
+        { title: 'Замовлення', icon: require('@/assets/icons/orders.svg'), component: 'Orders' },
+        { title: 'Звіти', icon: require('@/assets/icons/reports.svg'), component: 'Reports' },
+        { title: 'Налаштування', icon: require('@/assets/icons/settings.svg'), component: 'Settings' }
+      ];
+    } else if (this.user.role === 'admin') {
+      return [
+        { title: 'Користувачі', icon: require('@/assets/icons/user.svg'), component: 'Clients' },
+        { title: 'Працівники', icon: require('@/assets/icons/user.svg'), component: 'Employees' },
+        { title: 'Товари', icon: require('@/assets/icons/goods.svg'), component: 'ProductList' },
+        { title: 'Замовлення', icon: require('@/assets/icons/orders.svg'), component: 'Orders' },
+        { title: 'Права доступу', icon: require('@/assets/icons/settings.svg'), component: 'Settings' },
+        { title: 'Налаштування сайту', icon: require('@/assets/icons/settings.svg'), component: 'Settings' }
+      ];
+    } else if (this.user.role === 'manager') {
+      return [
+        { title: 'Користувачі', icon: require('@/assets/icons/user.svg'), component: 'Clients' },
+        { title: 'Товари', icon: require('@/assets/icons/goods.svg'), component: 'ProductList' },
+        { title: 'Замовлення', icon: require('@/assets/icons/orders.svg'), component: 'Orders' }
+      ];
+    }
+    return []; // Значення за замовчуванням, якщо роль не співпадає
+  
+
+      
     }
   },
   methods: {
     selectTab(index) {
       this.activeTab = index;
+    },
+    logout() {
+      localStorage.removeItem('user');
+      localStorage.removeItem('token');
+      this.$router.push({ name: 'Login' });
+    },
+    changeLanguage() {
+      this.$i18n.locale = this.selectedLanguage;
+    },
+    async fetchSiteSettings() {
+      try {
+        const response = await this.$axios.get('http://26.235.139.202:8080/api/site-settings');
+        const settings = response.data.data;
+        settings.forEach(setting => {
+          if (setting.setting_key === 'site_logo') {
+            this.siteSettings.site_logo = setting.setting_value;
+          }
+        });
+      } catch (error) {
+        console.error('Помилка завантаження логотипу:', error);
+      }
     }
   },
   mounted() {
@@ -96,75 +179,186 @@ export default {
     } else {
       this.user = user;
     }
+    this.fetchSiteSettings();
   }
 };
 </script>
 
 <style scoped>
-.admin-panel {
-  font-family: 'Montserrat', sans-serif;
-  display: flex;
-  margin-top: 180px;
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap');
+
+@font-face {
+  font-family: 'KyivType Titling';
+  src: url('@/assets/fonts/KyivType2020-14-12/KyivType-NoVariable/TTF/KyivTypeTitling-Black2.ttf') format('truetype');
+  font-weight: 900;
+  font-style: normal;
 }
 
-.sidebar {
-  background-color: #fff7f6;
+/* Контейнер для всього адмін інтерфейсу */
+.admin-container {
   display: flex;
   flex-direction: column;
-  padding: 40px 20px;
-  width: 20%;
-  position: fixed;
-  top: 0;
-  left: 0;
   height: 100vh;
-  overflow-y: auto;
-  margin-top: 180px;
-  z-index: 1;
 }
 
-.sidebar-title {
-  font-size: 30px;
-  font-weight: 700;
+/* Міні хедер */
+.mini-header {
+  height: 48px;
+  width: 100%;
+  border-bottom: 1px solid #E0E0E0;
+  background-color: white;
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  box-sizing: border-box;
+}
+.mini-header-content {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+}
+.user-controls {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+}
+.user-icon img {
+  width: 24px;
+  height: 24px;
+}
+.language-switcher {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.flag {
+  width: 20px;
+  height: 15px;
+  border-radius: 2px;
+  object-fit: cover;
+}
+.language-select {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  border: none;
+  background: transparent;
+  outline: none;
+  cursor: pointer;
+  transition: font-weight 0.3s ease;
+}
+.language-select:hover,
+.language-select:focus {
+  font-weight: 600;
+}
+
+/* Панель – відступ зверху, щоб міні хедер не перекривав */
+.admin-panel {
+  display: flex;
+  flex: 1;
+  position: relative;
+}
+
+/* Сайдбар */
+.sidebar {
+  width: 250px;
+  background-color: #F6E7E7;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 20px;
+  box-sizing: border-box;
+}
+.sidebar-header {
   margin-bottom: 20px;
-  margin-left: 45px;
+}
+/* Контейнер для логотипу та назви */
+.logo-wrapper {
+  display: flex;
+  align-items: center;
+  margin-top: 20px;
+  margin-left: 27px;
+}
+.logo {
+  width: 50px;
+  height: 45px;
+}
+.admin-title {
+  font-family: 'KyivType Titling', sans-serif;
+  font-size: 15px;
+  font-weight: 900;
+  margin-left: 10px;
+}
+.admin-subtitle {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  margin-top: 10px;
+  margin-left: 27px;
 }
 
-.nav-list {
-  list-style-type: none;
+/* Меню табів */
+.sidebar-nav .nav-list {
+  list-style: none;
   padding: 0;
+  position: sticky;
+  top: 0;
 }
-
 .nav-item {
   display: flex;
   align-items: center;
-  gap: 15px;
-  margin-bottom: 20px;
-  font-size: 20px;
-  font-weight: 800;
+  width: 183px;
+  height: 36px;
+  padding: 0 10px;
+  margin-bottom: 10px;
+  border-radius: 4px;
   cursor: pointer;
-  transition: color 0.3s ease;
-  margin-left: 15px;
+  transition: background-color 0.3s ease;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 16px;
+  font-weight: 400;
 }
-
 .nav-item:hover {
-  color: #333;
+  background-color: #D1ABAB;
+  font-weight: 600;
 }
-
 .nav-item.active {
-  background-color: #EADCDC;
-  border-radius: 8px;
-  height: 35px;
+  background-color: #F2D8D8;
+  border-left: 4px solid #6B1F1F;
+  font-weight: 700;
 }
-
 .nav-icon {
-  width: 16px;
+  width: 20px;
   height: 20px;
+  margin-right: 10px;
 }
 
+/* Кнопка виходу */
+.logout {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  padding: 10px;
+  border-radius: 4px;
+  width: 183px;
+  transition: background-color 0.3s ease;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+}
+.logout:hover {
+  background-color: #D1ABAB;
+}
+.logout-icon {
+  width: 20px;
+  height: 20px;
+  margin-right: 10px;
+}
+
+/* Контент */
 .content {
-  margin-left: 20%;
-  padding: 40px;
-  width: 80%;
+  flex: 1;
+  padding: 20px;
   overflow-y: auto;
 }
 </style>

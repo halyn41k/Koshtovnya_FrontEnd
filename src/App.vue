@@ -1,8 +1,9 @@
 <template>
   <div id="app">
-    <HeaderComponent />
+    <!-- Рендеримо хедер, якщо маршрут не веде до адмін-панелі -->
+    <HeaderComponent v-if="!isAdminRoute" />
     <router-view />
-    <!-- Показувати футер, якщо це не адмін панель -->
+    <!-- Рендеримо футер, якщо маршрут не веде до адмін-панелі -->
     <FooterComponent v-if="!isAdminRoute" />
   </div>
 </template>
@@ -18,9 +19,9 @@ export default {
     FooterComponent,
   },
   computed: {
-    // Перевірка, чи маршрут веде до адмін панелі
+    // Перевірка, чи маршрут веде до адмін-панелі
     isAdminRoute() {
-      return this.$route.path.startsWith('/admin'); 
+      return this.$route.path.startsWith('/admin');
     },
   },
   mounted() {
@@ -29,5 +30,11 @@ export default {
       this.$router.push({ name: 'Login' });
     }
   },
+  watch: {
+    // Слідкуємо за змінами маршруту для коректного рендерингу Header та Footer
+    '$route'(to, from) {
+      // Це забезпечує реактивність computed властивості isAdminRoute при зміні маршруту
+    }
+  }
 };
 </script>
