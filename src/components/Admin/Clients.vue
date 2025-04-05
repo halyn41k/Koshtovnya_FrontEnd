@@ -10,23 +10,21 @@
     </div>
 
     <!-- Поле пошуку -->
-    <!-- Поле пошуку -->
-<div class="search-container">
-  <div class="search-input-wrapper">
-    <input
-      class="search-input"
-      type="text"
-      placeholder="Пошук"
-      v-model="searchQuery"
-      @input="onSearch"
-    />
-    <img src="@/assets/icons/search.svg" alt="Search icon" class="search-icon" />
-  </div>
-</div>
+    <div class="search-container">
+      <div class="search-input-wrapper">
+        <input
+          class="search-input"
+          type="text"
+          placeholder="Пошук"
+          v-model="searchQuery"
+          @input="onSearch"
+        />
+        <img src="@/assets/icons/search.svg" alt="Search icon" class="search-icon" />
+      </div>
+    </div>
 
-
-    <!-- Таблиця з користувачами -->
-    <div class="client-table-container">
+    <!-- 1) Є клієнти -->
+    <div v-if="clients.length > 0" class="client-table-container">
       <header class="client-table__header">
         <span class="sortable-header" @click="cycleSort('id')">
           ID
@@ -64,7 +62,7 @@
           <span class="client-item__first-name">{{ client.first_name }}</span>
           <span class="client-item__last-name">{{ client.last_name }}</span>
           <span class="client-item__email">{{ client.email }}</span>
-          <span class="client-item__order">{{ client.order_id ? client.order_id : '—' }}</span>
+          <span class="client-item__order">{{ client.order_id || '—' }}</span>
           <span class="client-item__date">{{ client.date }}</span>
           <div class="client-item__actions">
             <button class="action-button" @click="openUpdateModal(client)">
@@ -78,8 +76,18 @@
       </ul>
     </div>
 
+    <!-- 2) Немає клієнтів і не було пошуку -->
+    <div v-else-if="!searchQuery" class="empty-state">
+      Поки що не було додано жодного клієнта.
+    </div>
+
+    <!-- 3) Немає результатів пошуку -->
+    <div v-else class="empty-state">
+      За запитом «<strong>{{ searchQuery }}</strong>» нічого не знайдено.
+    </div>
+
     <!-- Пагінація -->
-    <div class="pagination-container">
+    <div class="pagination-container" v-if="clients.length > 0">
       <button
         class="pagination-arrow"
         :disabled="currentPage === 1"
@@ -104,7 +112,7 @@
       </button>
     </div>
 
-    <!-- Компонент модального вікна -->
+    <!-- Модальне вікно -->
     <UserModal
       v-if="showUserModal"
       :key="modalKey"
@@ -120,6 +128,8 @@
     </div>
   </main>
 </template>
+
+
 
 <script>
 import axios from "axios";
@@ -161,40 +171,43 @@ export default {
   },
   methods: {
     async fetchUsers() {
-      try {
-        const response = await axios.get("http://26.235.139.202:8080/api/admin/users", {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-            Accept: "application/json"
-          },
-          params: { role: "user" }
-        });
-        this.clients = response.data.data;
-      } catch (error) {
-        console.error("Помилка отримання користувачів:", error);
+  try {
+    const response = await axios.get(
+      "http://26.235.139.202:8080/api/admin/users",
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          Accept: "application/json"
+        },
+        params: { role: this.searchRole }
       }
-    },
-    async onSearch() {
-      if (this.searchQuery.trim() === "") {
-        this.fetchUsers();
-        return;
+    );
+    this.clients = response.data.data;
+  } catch (error) {
+    console.error("Помилка отримання:", error);
+  }
+},
+async onSearch() {
+  if (this.searchQuery.trim() === "") {
+    return this.fetchUsers();
+  }
+  try {
+    const response = await axios.get(
+      `http://26.235.139.202:8080/api/admin/users/search/${this.searchQuery}`,
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          Accept: "application/json"
+        },
+        params: { role: this.searchRole }
       }
-      try {
-        const response = await axios.get(
-          `http://26.235.139.202:8080/api/admin/users/search/${this.searchQuery}`,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-              Accept: "application/json"
-            },
-            params: { role: this.searchRole }
-          }
-        );
-        this.clients = response.data.data;
-      } catch (error) {
-        console.error("Помилка пошуку:", error);
-      }
-    },
+    );
+    this.clients = response.data.data;
+  } catch (error) {
+    console.error("Помилка пошуку:", error);
+    this.clients = []; // на випадок помилки
+  }
+},
     async addUser(userData) {
       try {
         const response = await axios.post(
@@ -570,4 +583,22 @@ export default {
   font-size: 14px;
   color: #000;
 }
+
+.empty-state {
+  width: 1124px;
+  height: 199px;
+  margin: 40px auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  color: #000;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #fafafa;
+  text-align: center;
+}
+
 </style>

@@ -2,18 +2,9 @@
   <main class="employee-list">
     <h1 class="employee-list__title">Працівники</h1>
 
-    <!-- Блок із фільтрами та кнопкою "Додати" -->
+    <!-- Пошук і кнопка "Додати" -->
     <div class="employee-list__controls">
       <div class="controls-left">
-        <div class="filter">
-          <span class="filter__text">Фільтр</span>
-          <img
-            src="https://cdn.builder.io/api/v1/image/assets/c3e46d0a629546c7a48302a5db3297d5/4b09284ab367fa70a05a4a4f59e91721443ad7e8e783dfd2c26fb681ebacd30f?apiKey=c3e46d0a629546c7a48302a5db3297d5"
-            alt="Filter icon"
-            class="filter__icon"
-          />
-        </div>
-        <!-- Блок пошуку аналогічно до користувачів -->
         <div class="search-container">
           <div class="search-input-wrapper">
             <input
@@ -35,9 +26,8 @@
       </div>
     </div>
 
-    <!-- Контейнер для таблиці з горизонтальним скролом -->
-    <div class="employee-table-container">
-      <!-- Заголовок таблиці з сортуванням -->
+    <!-- 1) Є працівники -->
+    <div v-if="users.length > 0" class="employee-table-container">
       <header class="employee-table__header">
         <span class="sortable-header" @click="cycleSort('id')">
           ID
@@ -65,50 +55,47 @@
         </span>
         <span>Керування</span>
       </header>
-
-      <!-- Список працівників -->
       <ul class="employee-list__items">
         <li v-for="(employee, index) in users" :key="employee.id" class="employee-item">
           <span class="employee-item__id">{{ index + 1 }}</span>
-          <span class="employee-item__name">{{ employee.first_name }} {{ employee.last_name }}</span>
+          <span class="employee-item__name">
+            {{ employee.first_name }} {{ employee.last_name }}
+          </span>
           <span class="employee-item__email">{{ employee.email }}</span>
           <span class="employee-item__phone">{{ employee.phone_number }}</span>
           <span class="employee-item__date">{{ employee.date }}</span>
           <span class="employee-item__role">{{ employee.role }}</span>
           <div class="employee-item__actions">
             <button class="action-button" @click="deleteEmployee(employee.id)">
-              <img
-                src="https://cdn.builder.io/api/v1/image/assets/c3e46d0a629546c7a48302a5db3297d5/ba078f16c37c9f7f4a38bffc3903a0783959b7a0f9fc95368926f1c2df1ef2a7?apiKey=c3e46d0a629546c7a48302a5db3297d5"
-                alt="Delete icon"
-                class="action-button__icon"
-              />
+              <img src="@/assets/icons/delete.svg" alt="Delete icon" class="action-button__icon" />
             </button>
             <button class="action-button" @click="openUpdateModal(employee)">
-              <img
-                src="https://via.placeholder.com/24"
-                alt="Update icon"
-                class="action-button__icon"
-              />
+              <img src="@/assets/icons/edit.svg" alt="Edit icon" class="action-button__icon" />
             </button>
           </div>
         </li>
       </ul>
     </div>
 
+    <!-- 2) Немає працівників і не було пошуку -->
+    <div v-else-if="!searchQuery" class="empty-state">
+      Поки що не було додано жодного працівника.
+    </div>
+
+    <!-- 3) Немає результатів пошуку -->
+    <div v-else class="empty-state">
+      За запитом «<strong>{{ searchQuery }}</strong>» нічого не знайдено.
+    </div>
+
     <!-- Пагінація -->
-    <div class="pagination-container">
+    <div class="pagination-container" v-if="users.length > 0">
       <button
         class="pagination-arrow"
         :disabled="currentPage === 1"
-        @click="currentPage > 1 && goToPage(currentPage - 1)"
+        @click="goToPage(currentPage - 1)"
       >
-        <img
-          src="@/assets/icons/arrow_left.svg"
-          alt="Arrow Left"
-          class="arrow-icon"
-        />
+        <img src="@/assets/icons/arrow_left.svg" alt="Arrow Left" class="arrow-icon" />
       </button>
-
       <button
         v-for="page in totalPages"
         :key="page"
@@ -117,81 +104,23 @@
       >
         {{ page }}
       </button>
-
       <button
         class="pagination-arrow"
         :disabled="currentPage === totalPages"
-        @click="currentPage < totalPages && goToPage(currentPage + 1)"
+        @click="goToPage(currentPage + 1)"
       >
-        <img
-          src="@/assets/icons/arrow_right.svg"
-          alt="Arrow Right"
-          class="arrow-icon"
-        />
+        <img src="@/assets/icons/arrow_right.svg" alt="Arrow Right" class="arrow-icon" />
       </button>
     </div>
 
-    <!-- Модальне вікно для додавання/оновлення -->
-    <div v-if="showModal" class="modal-overlay">
-      <div class="modal-dialog">
-        <div class="modal-header">
-          <h2>{{ modalTitle }}</h2>
-          <button class="close-button" @click="closeModal">&times;</button>
-        </div>
-        <div class="modal-body">
-          <form @submit.prevent="submitForm" class="user-form">
-            <div class="form-group">
-              <label for="first_name">Ім'я:</label>
-              <input id="first_name" v-model="form.first_name" type="text" placeholder="Ім'я" required />
-            </div>
-            <div class="form-group">
-              <label for="second_name">По-батькові:</label>
-              <input id="second_name" v-model="form.second_name" type="text" placeholder="По-батькові" required />
-            </div>
-            <div class="form-group">
-              <label for="last_name">Прізвище:</label>
-              <input id="last_name" v-model="form.last_name" type="text" placeholder="Прізвище" required />
-            </div>
-            <div class="form-group">
-              <label for="email">Email:</label>
-              <input
-                id="email"
-                v-model="form.email"
-                type="email"
-                placeholder="Email"
-                required
-                :disabled="!isAddMode"
-              />
-            </div>
-            <div class="form-group">
-              <label for="phone_number">Телефон:</label>
-              <input
-                id="phone_number"
-                v-model="form.phone_number"
-                type="text"
-                placeholder="Телефон"
-                :required="isAddMode"
-              />
-            </div>
-            <div class="form-group" v-if="isAddMode">
-              <label for="role">Роль:</label>
-              <select id="role" v-model="form.role" required>
-                <option disabled value="">Оберіть роль</option>
-                <option value="admin">Admin</option>
-                <option value="manager">Manager</option>
-                <option value="superadmin">Superadmin</option>
-              </select>
-            </div>
-            <div class="form-actions">
-              <button type="submit" class="btn-primary">Зберегти</button>
-              <button type="button" class="btn-secondary" @click="closeModal">
-                Відміна
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
+    <!-- Модальне вікно -->
+    <UserModal
+      v-if="showModal"
+      :title="modalTitle"
+      :key="modalKey"
+      @close="closeModal"
+      @userSubmit="submitForm"
+    />
   </main>
 </template>
 
@@ -221,7 +150,7 @@ export default {
       // Пагінація
       currentPage: 1,
       totalPages: 3,
-      // Стан сортування для полів таблиці
+      // Стан сортування
       sortState: {
         id: "none",
         first_name: "none",
@@ -280,7 +209,7 @@ export default {
         this.sortState[column] = "none";
       }
       console.log(`Sort for ${column}: ${this.sortState[column]}`);
-      // Реалізуйте сортування, якщо потрібно
+      // Тут можна реалізувати сортування, якщо потрібно
     },
     getSortIcon(state) {
       if (state === "asc") {
@@ -326,6 +255,7 @@ export default {
           ...(this.form.phone_number && { phone_number: this.form.phone_number }),
           role: this.form.role
         };
+        // Якщо додаємо, додаємо й email
         if (this.isAddMode) {
           payload.email = this.form.email;
         }
@@ -396,15 +326,13 @@ export default {
     },
     goToPage(page) {
       this.currentPage = page;
-      // Реалізуйте логіку завантаження даних для сторінки page
+      // Логіка для завантаження даних певної сторінки, якщо потрібно
     }
   }
 };
 </script>
 
-
 <style scoped>
-/* Загальні налаштування */
 .employee-list {
   max-width: 1200px;
   margin: 0 auto;
@@ -418,7 +346,7 @@ export default {
   margin-bottom: 20px;
 }
 
-/* Контролли: фільтр, пошук, кнопка "Додати" */
+/* Контролли */
 .employee-list__controls {
   display: flex;
   justify-content: space-between;
@@ -430,23 +358,8 @@ export default {
   align-items: center;
   gap: 20px;
 }
-.filter {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.filter__text {
-  font-size: 14px;
-  font-weight: 600;
-  color: #48484b;
-}
-.filter__icon {
-  width: 16px;
-  height: 16px;
-  object-fit: contain;
-}
 
-/* Блок пошуку */
+/* Пошук */
 .search-container {
   margin-bottom: 0;
 }
@@ -513,31 +426,33 @@ export default {
   border: 1px solid #1d1d1d;
 }
 
-/* Таблиця: використання адаптивного розподілу колонок */
+/* Таблиця */
 .employee-table-container {
   margin-top: 0;
   border-radius: 6px;
-  overflow: hidden; /* Забираємо горизонтальний скрол, якщо всі колонки адаптуються */
+  overflow: hidden;
   border: 1px solid #e0e0e0;
 }
+/* Задаємо свої ширини стовпців і текст left */
 .employee-table__header,
 .employee-item {
   display: grid;
-  grid-template-columns: repeat(7, 1fr); /* 7 колонок з рівною шириною */
-  align-items: center; /* Центруємо контент по вертикалі */
+  grid-template-columns: 50px 200px 300px 150px 120px 150px 120px; /* підігнай під себе */
+  align-items: center;
+  text-align: left;            /* вирівнюємо текст ліворуч */
   padding: 12px 16px;
+  column-gap: 10px;           /* відстань між стовпцями */
 }
 .employee-table__header {
   border-bottom: 1px solid #e0e0e0;
-  background-color: #F6E7E7;
+  background-color: #f6e7e7;
   font-size: 14px;
   font-weight: 600;
   color: #48484b;
 }
 .sortable-header {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
   cursor: pointer;
   gap: 4px;
 }
@@ -547,7 +462,7 @@ export default {
   object-fit: contain;
 }
 
-/* Список елементів */
+/* Рядки */
 .employee-list__items {
   list-style: none;
   margin: 0;
@@ -563,10 +478,12 @@ export default {
 .employee-item:hover {
   background-color: #f9f9f9;
 }
+
+/* Дії */
 .employee-item__actions {
   display: flex;
+  align-items: center;
   gap: 8px;
-  justify-content: center;
 }
 .action-button {
   width: 32px;
@@ -639,81 +556,21 @@ export default {
   object-fit: contain;
 }
 
-/* Модальне вікно */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.4);
+/* Порожній стан */
+.empty-state {
+  width: 1124px;
+  height: 199px;
+  margin: 40px auto;
   display: flex;
+  align-items: center;
   justify-content: center;
-  align-items: center;
-  z-index: 2000;
-}
-.modal-dialog {
-  background-color: #fff;
-  width: 500px;
-  border-radius: 6px;
-  overflow: hidden;
-}
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px;
-  background-color: #F6E7E7;
-  border-bottom: 1px solid #e0e0e0;
-}
-.modal-header h2 {
-  margin: 0;
-  font-size: 18px;
-}
-.close-button {
-  background: none;
-  border: none;
-  font-size: 24px;
-  cursor: pointer;
-}
-.modal-body {
-  padding: 16px;
-}
-.form-group {
-  margin-bottom: 12px;
-}
-.form-group label {
-  display: block;
-  margin-bottom: 4px;
+  font-family: "Montserrat", sans-serif;
   font-weight: 600;
-}
-.form-group input,
-.form-group select {
-  width: 100%;
-  padding: 8px 12px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-.form-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  margin-top: 20px;
-}
-.btn-primary {
-  background-color: #6b1f1f;
-  color: #fff;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 4px;
-  cursor: pointer;
-}
-.btn-secondary {
-  background-color: #e0e0e0;
+  font-size: 14px;
   color: #000;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 4px;
-  cursor: pointer;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #fafafa;
+  text-align: center;
 }
 </style>

@@ -1,9 +1,6 @@
 <template>
   <main class="settings-content">
     <header class="settings-header">
-      <img loading="lazy"
-        src="https://cdn.builder.io/api/v1/image/assets/c3e46d0a629546c7a48302a5db3297d5/323c4a41975024a41335e068c0653ecd7e32a04e8e9a79655a5b6ee065ec92f4?apiKey=c3e46d0a629546c7a48302a5db3297d5"
-        alt="Settings logo" class="settings-logo" />
       <h1 class="settings-title">Налаштування</h1>
     </header>
 
@@ -161,8 +158,9 @@ export default {
 }
 
 .settings-title {
-  flex-grow: 1;
-  margin: auto 0;
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0;
 }
 
 .section-title {
