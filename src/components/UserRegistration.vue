@@ -21,38 +21,83 @@
             <label for="password" class="form-label">Пароль:</label>
           </div>
           <div class="form-inputs">
+            <!-- Поле Ім'я -->
             <div class="form-input-container">
-              <input type="text" id="first_name" class="form-input" v-model="first_name" @input="validateName"
-                placeholder="Введіть ваше ім'я" required />
+              <input
+                type="text"
+                id="first_name"
+                class="form-input"
+                v-model="first_name"
+                @input="validateName"
+                :class="{ 'error-field': nameError }"
+                placeholder="Введіть ваше ім'я"
+                required
+              />
               <transition name="fade">
                 <small v-if="nameError" class="error-message">{{ nameError }}</small>
               </transition>
             </div>
+            <!-- Поле Прізвище -->
             <div class="form-input-container">
-              <input type="text" id="last_name" class="form-input" v-model="last_name" @input="validateLastName"
-                placeholder="Введіть ваше прізвище" required />
+              <input
+                type="text"
+                id="last_name"
+                class="form-input"
+                v-model="last_name"
+                @input="validateLastName"
+                :class="{ 'error-field': lastNameError }"
+                placeholder="Введіть ваше прізвище"
+                required
+              />
               <transition name="fade">
                 <small v-if="lastNameError" class="error-message">{{ lastNameError }}</small>
               </transition>
             </div>
+            <!-- Поле По батькові -->
             <div class="form-input-container">
-              <input type="text" id="second_name" class="form-input" v-model="second_name" @input="validateSecondName"
-                placeholder="Введіть ваше по батькові" required />
+              <input
+                type="text"
+                id="second_name"
+                class="form-input"
+                v-model="second_name"
+                @input="validateSecondName"
+                :class="{ 'error-field': secondNameError }"
+                placeholder="Введіть ваше по батькові"
+                required
+              />
               <transition name="fade">
                 <small v-if="secondNameError" class="error-message">{{ secondNameError }}</small>
               </transition>
             </div>
+            <!-- Поле Email -->
             <div class="form-input-container">
-              <input type="email" id="email" class="form-input" v-model="email" @input="validateEmail"
-                placeholder="Введіть ваш email" required />
+              <input
+                type="email"
+                id="email"
+                class="form-input"
+                v-model="email"
+                @input="validateEmail"
+                :class="{ 'error-field': emailError }"
+                placeholder="Введіть ваш email"
+                required
+              />
               <transition name="fade">
                 <small v-if="emailError" class="error-message">{{ emailError }}</small>
               </transition>
             </div>
+            <!-- Поле Пароль -->
             <div class="form-input-container">
               <div class="password-input-container">
-                <input :type="showPassword ? 'text' : 'password'" id="password" class="form-input" v-model="password"
-                  @input="validatePassword" placeholder="Введіть пароль" required />
+                <input
+                  :type="showPassword ? 'text' : 'password'"
+                  id="password"
+                  class="form-input"
+                  v-model="password"
+                  @input="validatePassword"
+                  :class="{ 'error-field': passwordError }"
+                  placeholder="Введіть пароль"
+                  required
+                />
                 <button type="button" @click="togglePasswordVisibility" class="toggle-password-button">
                   <img :src="showPassword ? eyeOpenIcon : eyeClosedIcon" alt="toggle password visibility" />
                 </button>
@@ -70,11 +115,12 @@
         </p>
 
         <button type="submit" class="registration-button">
-
           <span>Зареєструватися</span>
           <img
             src="https://cdn.builder.io/api/v1/image/assets/TEMP/436b738744905f60c6a542e2cd314f5694db20045d36b8991f8dab9a31b316a0?placeholderIfAbsent=true&apiKey=c3e46d0a629546c7a48302a5db3297d5"
-            alt="" class="login-icon" />
+            alt=""
+            class="login-icon"
+          />
         </button>
       </form>
     </main>
@@ -86,6 +132,7 @@ import eyeOpenIcon from "@/assets/eye-hide-svgrepo-com.svg";
 import eyeClosedIcon from "@/assets/eye-1-svgrepo-com.svg";
 
 export default {
+  name: "Registration",
   data() {
     return {
       first_name: "",
@@ -105,19 +152,31 @@ export default {
   },
   methods: {
     validateName() {
-      this.nameError = this.first_name.trim()
-        ? ""
-        : "Ім'я не може бути порожнім.";
+      if (!this.first_name.trim()) {
+        this.nameError = "Ім'я не може бути порожнім.";
+      } else if (/\d/.test(this.first_name)) {
+        this.nameError = "Ім'я не може містити цифри.";
+      } else {
+        this.nameError = "";
+      }
     },
     validateLastName() {
-      this.lastNameError = this.last_name.trim()
-        ? ""
-        : "Прізвище не може бути порожнім.";
+      if (!this.last_name.trim()) {
+        this.lastNameError = "Прізвище не може бути порожнім.";
+      } else if (/\d/.test(this.last_name)) {
+        this.lastNameError = "Прізвище не може містити цифри.";
+      } else {
+        this.lastNameError = "";
+      }
     },
     validateSecondName() {
-      this.secondNameError = this.second_name.trim()
-        ? ""
-        : "По батькові не може бути порожнім.";
+      if (!this.second_name.trim()) {
+        this.secondNameError = "По батькові не може бути порожнім.";
+      } else if (/\d/.test(this.second_name)) {
+        this.secondNameError = "По батькові не може містити цифри.";
+      } else {
+        this.secondNameError = "";
+      }
     },
     validateEmail() {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -127,135 +186,76 @@ export default {
     },
     validatePassword() {
       const hasSpaces = /\s/.test(this.password);
-      this.passwordError =
-        this.password.length < 8
-          ? "Пароль повинен містити щонайменше 8 символів."
-          : hasSpaces
-            ? "Пароль не повинен містити пробілів."
-            : "";
+      if (this.password.length < 8) {
+        this.passwordError = "Пароль повинен містити щонайменше 8 символів.";
+      } else if (hasSpaces) {
+        this.passwordError = "Пароль не повинен містити пробілів.";
+      } else {
+        this.passwordError = "";
+      }
     },
     async submitRegistration() {
-  console.log("Виклик submitRegistration");
-  this.validateName();
-  this.validateLastName();
-  this.validateSecondName();
-  this.validateEmail();
-  this.validatePassword();
+      // Викликаємо валідацію для всіх полів
+      this.validateName();
+      this.validateLastName();
+      this.validateSecondName();
+      this.validateEmail();
+      this.validatePassword();
 
-  if (
-    this.nameError ||
-    this.lastNameError ||
-    this.secondNameError ||
-    this.emailError ||
-    this.passwordError
-  ) {
-    console.log("Є помилки валідації.");
-    alert("Будь ласка, виправте помилки.");
-    return;
-  }
+      if (
+        this.nameError ||
+        this.lastNameError ||
+        this.secondNameError ||
+        this.emailError ||
+        this.passwordError
+      ) {
+        console.log("Є помилки валідації.");
+        alert("Будь ласка, виправте помилки.");
+        return;
+      }
 
-  try {
-    console.log("Відправка запиту на сервер...");
-    const response = await fetch("http://26.235.139.202:8080/api/register", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        first_name: this.first_name,
-        last_name: this.last_name,
-        second_name: this.second_name,
-        email: this.email,
-        password: this.password,
-      }),
-    });
+      try {
+        console.log("Відправка запиту на сервер...");
+        const response = await fetch("http://26.235.139.202:8080/api/register", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            first_name: this.first_name,
+            last_name: this.last_name,
+            second_name: this.second_name,
+            email: this.email,
+            password: this.password,
+          }),
+        });
 
-    const data = await response.json();
-    console.log("Відповідь API:", data);
+        const data = await response.json();
+        console.log("Відповідь API:", data);
 
-    if (!response.ok) {
-      throw new Error(data.message || "Помилка реєстрації.");
-    }
+        if (!response.ok) {
+          throw new Error(data.message || "Помилка реєстрації.");
+        }
 
-    // Перенаправлення на сторінку верифікації
-    this.$router.push({
-      name: "Verify",
-      query: { email: this.email }
-    });
-  } catch (error) {
-    console.error("Помилка реєстрації:", error);
-    alert(`Помилка реєстрації: ${error.message}`);
-  }
-},
+        // Перенаправлення на сторінку верифікації
+        this.$router.push({
+          name: "Verify",
+          query: { email: this.email }
+        });
+      } catch (error) {
+        console.error("Помилка реєстрації:", error);
+        alert(`Помилка реєстрації: ${error.message}`);
+      }
+    },
     togglePasswordVisibility() {
       this.showPassword = !this.showPassword;
-    },
-    
-  },
+    }
+  }
 };
 </script>
 
-
-
 <style scoped>
-.form-input-container {
-  position: relative;
-  margin-bottom: 1.5rem;
-}
-
-.error-message {
-  color: red;
-  font-size: 0.8rem;
-  position: absolute;
-  top: 100%;
-  left: 0;
-}
-
-.error-field input {
-  border-color: red;
-}
-
-.form-item {
-  margin-bottom: 1.5rem;
-}
-
-.error-field input {
-  border: 1px solid red;
-  animation: shake 0.3s ease-in-out;
-}
-
-.error-message {
-  color: red;
-  font-size: 0.85rem;
-  margin-top: 4px;
-}
-
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.3s;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-}
-
-@keyframes shake {
-
-  0%,
-  100% {
-    transform: translateX(0);
-  }
-
-  25% {
-    transform: translateX(-4px);
-  }
-
-  75% {
-    transform: translateX(4px);
-  }
-}
-
+/* Загальні стилі контейнера та фону */
 .registration-container {
   display: flex;
   flex-direction: column;
@@ -275,6 +275,7 @@ export default {
   left: 0;
 }
 
+/* Стилі для заголовку реєстрації */
 .registration-header {
   z-index: 10;
   display: flex;
@@ -311,6 +312,7 @@ export default {
   margin-bottom: 0px;
 }
 
+/* Стилі для основного блоку реєстрації */
 .registration-main {
   background-color: rgba(255, 247, 246, 0.9);
   display: flex;
@@ -353,17 +355,25 @@ export default {
   align-items: baseline;
 }
 
+/* Стилі для інпутів та їх контейнерів */
+.form-input-container {
+  position: relative;
+  margin-bottom: 1.5rem;
+  width: 800px;
+}
+
 .form-input {
   border-radius: 8px;
   border: 1px solid var(--Grays-Black, #000);
   background-color: #E6D7D7;
   display: flex;
   height: 35px;
-  width: 800px;
+  width: 100%;
   gap: 10px;
   font-size: 18px;
   margin-bottom: 20px;
   transition: background-color 0.3s ease;
+  padding: 0 10px;
 }
 
 .form-input:focus {
@@ -375,6 +385,25 @@ export default {
   background-color: #E6D7D7;
 }
 
+/* Підсвічування полів з помилками */
+.error-field {
+  border-color: red !important;
+  animation: shake 0.3s ease-in-out;
+}
+
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-4px);
+  }
+  75% {
+    transform: translateX(4px);
+  }
+}
+
+/* Стилі для контейнера паролю */
 .password-input-container {
   position: relative;
   width: 900px;
@@ -393,31 +422,47 @@ export default {
   align-items: center;
   justify-content: center;
   width: 30px;
-  /* Ширина кнопки */
   height: 30px;
-  /* Висота кнопки */
 }
 
 .toggle-password-button img {
   width: 20px;
-  /* Ширина іконки */
   height: 20px;
-  /* Висота іконки */
   object-fit: contain;
-  /* Запобігає спотворенню зображення */
 }
 
+/* Стилі для повідомлень про помилки */
+.error-message {
+  color: red;
+  font-size: 0.85rem;
+  margin-top: 4px;
+  position: absolute;
+  top: 100%;
+  left: 0;
+}
+
+/* Анімація для появи/зникання повідомлень */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+/* Стилі для підказки входу */
 .login-prompt {
   color: var(--Schemes-On-Error-Container, #852221);
   margin-top: -10px;
   font: 400 20px/1.3 Merriweather, sans-serif;
 }
-
 .login-link {
   font-weight: 700;
   color: #852221;
 }
 
+/* Стилі для кнопки реєстрації */
 .registration-button {
   background-color: #6b1f1f;
   border-radius: 8px;
@@ -435,17 +480,11 @@ export default {
   transition: background-color 0.3s ease;
 }
 
-.registration-text {
-  flex: 1;
-  text-align: left;
+.registration-button:hover {
+  background-color: #a01212;
 }
 
 .registration-icon {
   margin-left: 10px;
-}
-
-
-.registration-button:hover {
-  background-color: #a01212;
 }
 </style>
