@@ -61,8 +61,8 @@ import { defineAsyncComponent, toRaw } from 'vue';
 export default {
   name: 'AllProducts',
   components: {
-    FilterComponent: defineAsyncComponent(() => import('../FilterComponent.vue')),
-    CategoryProduct: defineAsyncComponent(() => import('../CategoryProduct.vue')),
+    FilterComponent: defineAsyncComponent(() => import('../Product/FilterComponent.vue')),
+    CategoryProduct: defineAsyncComponent(() => import('../Home/CategoryProduct.vue')),
   },
   data() {
     return {

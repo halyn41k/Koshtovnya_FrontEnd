@@ -1,6 +1,6 @@
 <template>
-  <section class="popular-goods">
-    <h2 class="section-title">{{ $t('popularGoods') }}</h2>
+  <section class="view-other-products">
+    <h2 class="specifications-title">{{ $t('Перегляньте інші товари') }}</h2>
     <div class="arrow-container">
       <img src="@/assets/left_arrow.png" alt="left-arrow" class="arrow left-arrow" @click="showPreviousProducts" />
       <div class="product-grid">
@@ -29,7 +29,7 @@
               </svg>
             </span>
           </p>
-          <button class="buy-button">
+          <button class="buy-button" @click="addToCart(product)">
             <span>{{ $t('buyButton') }}</span>
             <img src="@/assets/miniarrow.png" alt="Arrow icon" class="button-icon" />
           </button>
@@ -169,6 +169,46 @@ export default {
         this.updateVisibleProducts();
       }
     },
+    async addToCart(item, size = null) {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        alert('Будь ласка, увійдіть у свій обліковий запис.');
+        this.$router.push('/login');
+        return;
+      }
+
+      try {
+        // Додаємо базові параметри для запиту
+        const cartData = {
+          product_id: item.id,
+          quantity: 1, // Ви можете змінити це значення, залежно від потреб
+        };
+
+        // Додаємо size, якщо передано
+        if (size) {
+          cartData.size = size;
+        }
+
+        const response = await axios.post(
+          'http://26.235.139.202:8080/api/cart',
+          cartData,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+
+        console.log('Відповідь після додавання товару:', response.data); // Логування відповіді
+
+        // Перевірка, чи додавання успішне
+        if (response.data && response.data.message === 'Product added to cart') {
+          alert('Товар успішно додано до кошика.');
+        } else {
+          console.error('Товар не був доданий:', response.data);
+          alert('Не вдалося додати товар до кошика.');
+        }
+      } catch (error) {
+        console.error('Помилка додавання товару до кошика:', error.response || error);
+        alert('Не вдалося додати товар до кошика.');
+      }
+    },
 
     showNextProducts() {
       if (this.currentPage < this.totalPages - 1) {
@@ -191,26 +231,47 @@ export default {
   display: block;
 }
 
-
-.product-card-link {
-  text-decoration: none;
-  color: inherit;
-  display: block;
-}
-
-.product-card-link:hover .product-card {
-  transform: translateY(-5px);
-}
-
-.section-title {
-  color: #222222;
-  font-family: 'KyivType Titling', sans-serif;
-  font-weight: 900;
-  font-size: 32px;
-  text-shadow: 0 4px 4px rgba(99, 2, 2, 0.22);
-  letter-spacing: -2px;
+.specifications-title {
+  font-size: 24px;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: bold;
   text-align: center;
+  color: #171717;
+  margin: 20px 0;
+  position: relative;
+}
+
+.specifications-title::before,
+.specifications-title::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 35%;
+  height: 2px;
+  background: grey;
+  transform: translateY(-50%);
+}
+
+.specifications-title::before {
+  left: 0;
+}
+
+.specifications-title::after {
+  right: 0;
+}
+
+.view-other-products {
   margin-top: 70px;
+}
+
+.arrow-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 90%;
+  margin: 0 auto;
+  padding: 20px 0;
+  position: relative;
 }
 
 .arrow-container {
@@ -411,7 +472,7 @@ export default {
   justify-content: center;
   align-items: center;
   gap: 10px;
-  margin-top: 15px;
+  margin-bottom: 10px;
 }
 
 .dot {

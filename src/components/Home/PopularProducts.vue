@@ -1,6 +1,6 @@
 <template>
-  <section class="new-arrivals">
-    <h2 class="section-title">{{ $t('newArrivals') }}</h2>
+  <section class="popular-goods">
+    <h2 class="section-title">{{ $t('popularGoods') }}</h2>
     <div class="arrow-container">
       <img src="@/assets/left_arrow.png" alt="left-arrow" class="arrow left-arrow" @click="showPreviousProducts" />
       <div class="product-grid">
@@ -29,7 +29,7 @@
               </svg>
             </span>
           </p>
-          <button class="buy-button">
+          <button class="buy-button" @click="addToCart(product)">
             <span>{{ $t('buyButton') }}</span>
             <img src="@/assets/miniarrow.png" alt="Arrow icon" class="button-icon" />
           </button>
@@ -61,7 +61,7 @@ export default {
   methods: {
     async fetchProducts() {
       try {
-        const response = await fetch("http://26.235.139.202:8080/api/new-arrivals?page=1");
+        const response = await fetch("http://26.235.139.202:8080/api/popular-products?page=1");
         if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
 
         const data = await response.json();
@@ -74,6 +74,7 @@ export default {
         console.error("Error fetching popular products:", error.message);
       }
     },
+
     async fetchWishlist() {
       const token = localStorage.getItem('token');
       if (!token) {
@@ -155,6 +156,7 @@ export default {
       }
     },
 
+
     updateVisibleProducts() {
       const start = this.currentPage * this.productsPerPage;
       const end = start + this.productsPerPage;
@@ -165,6 +167,46 @@ export default {
       if (this.currentPage > 0) {
         this.currentPage--;
         this.updateVisibleProducts();
+      }
+    },
+    async addToCart(item, size = null) {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        alert('Будь ласка, увійдіть у свій обліковий запис.');
+        this.$router.push('/login');
+        return;
+      }
+
+      try {
+        // Додаємо базові параметри для запиту
+        const cartData = {
+          product_id: item.id,
+          quantity: 1, // Ви можете змінити це значення, залежно від потреб
+        };
+
+        // Додаємо size, якщо передано
+        if (size) {
+          cartData.size = size;
+        }
+
+        const response = await axios.post(
+          'http://26.235.139.202:8080/api/cart',
+          cartData,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+
+        console.log('Відповідь після додавання товару:', response.data); // Логування відповіді
+
+        // Перевірка, чи додавання успішне
+        if (response.data && response.data.message === 'Product added to cart') {
+          alert('Товар успішно додано до кошика.');
+        } else {
+          console.error('Товар не був доданий:', response.data);
+          alert('Не вдалося додати товар до кошика.');
+        }
+      } catch (error) {
+        console.error('Помилка додавання товару до кошика:', error.response || error);
+        alert('Не вдалося додати товар до кошика.');
       }
     },
 
@@ -182,9 +224,14 @@ export default {
 };
 </script>
 
-
-
 <style scoped>
+.product-card-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+
 .product-card-link {
   text-decoration: none;
   color: inherit;

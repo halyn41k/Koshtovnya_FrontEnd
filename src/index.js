@@ -8,7 +8,7 @@ const routes = [
   {
     path: '/homepage',
     name: 'Home',
-    component: () => import('@/components/HomePage.vue'),
+    component: () => import('@/components/Home/HomePage.vue'),
   },
   {
     path: '/bracelets',
@@ -43,27 +43,27 @@ const routes = [
   {
     path: '/aboutus',
     name: 'Aboutus',
-    component: () => import('@/components/AboutUs.vue'),
+    component: () => import('@/components/InfoShop/AboutUs.vue'),
   },
   {
     path: '/aboutdelivery',
     name: 'AboutDelivery',
-    component: () => import('@/components/AboutDelivery.vue'),
+    component: () => import('@/components/InfoShop/AboutDelivery.vue'),
   },
   {
     path: '/login',
     name: 'Login',
-    component: () => import('@/components/UserLogin.vue'),
+    component: () => import('@/components/Authorization/UserLogin.vue'),
   },
   {
     path: '/registration',
     name: 'Registration',
-    component: () => import('@/components/UserRegistration.vue'),
+    component: () => import('@/components/Authorization/UserRegistration.vue'),
   },
   {
     path: '/productpage/:id',
     name: 'ProductPage',
-    component: () => import('@/components/ProductPage.vue'),
+    component: () => import('@/components/Product/ProductPage.vue'),
   },
   {
     path: '/wishlist',
@@ -96,7 +96,7 @@ const routes = [
   {
     path: '/changepassword',
     name: 'ChangePassword',
-    component: () => import('@/components/ChangePassword.vue'),
+    component: () => import('@/components/Authorization/ChangePassword.vue'),
   },
   {
     path: '/payment',
@@ -106,7 +106,7 @@ const routes = [
   {
     path: '/verify',
     name: 'Verify',
-    component: () => import('@/components/UserVerificationComponent.vue')
+    component: () => import('@/components/Authorization/UserVerificationComponent.vue')
   },
   {
     path: '/payment-confirmed',
@@ -116,7 +116,7 @@ const routes = [
   {
     path: '/reset-password',
     name: 'ResetPassword',
-    component: () => import('@/components/ResetPassword.vue')
+    component: () => import('@/components/Authorization/ResetPassword.vue')
   },
   {
     path: '/admin',

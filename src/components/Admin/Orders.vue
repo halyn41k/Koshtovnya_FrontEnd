@@ -24,8 +24,8 @@
       </div>
     </div>
 
-    <!-- Таблиця замовлень -->
-    <div class="order-table-container">
+    <!-- 1) Є замовлення -->
+    <div v-if="orders.length > 0" class="order-table-container">
       <header class="order-table__header">
         <span class="order-sortable-header" @click="cycleSort('id')">
           ID
@@ -47,7 +47,7 @@
           Продукти
           <img :src="getSortIcon(sortState.products)" alt="Sort Icon" class="order-sort-icon" />
         </span>
-        <span class="order-sortable-header">Дії</span>
+        <span>Дії</span>
       </header>
       <ul class="order-list__items">
         <li
@@ -64,18 +64,39 @@
           </span>
           <div class="order-item__actions">
             <button class="order-action-button" @click="showOrderDetails(order.id)">
-              <img src="@/assets/icons/edit.svg" alt="Detail icon" class="order-action-button__icon" />
+              <img
+                src="@/assets/icons/edit.svg"
+                alt="Detail icon"
+                class="order-action-button__icon"
+              />
             </button>
+            <!-- Видалення прибрано, бо замовлення не можна видаляти -->
+            <!--
             <button class="order-action-button" @click="deleteOrder(order.id)">
-              <img src="@/assets/icons/delete.svg" alt="Delete icon" class="order-action-button__icon" />
+              <img
+                src="@/assets/icons/delete.svg"
+                alt="Delete icon"
+                class="order-action-button__icon"
+              />
             </button>
+            -->
           </div>
         </li>
       </ul>
     </div>
 
+    <!-- 2) Немає замовлень і пошук не проводився -->
+    <div v-else-if="!searchQuery" class="empty-state">
+      Поки що не було додано жодного замовлення.
+    </div>
+
+    <!-- 3) Немає результатів пошуку -->
+    <div v-else class="empty-state">
+      За запитом «<strong>{{ searchQuery }}</strong>» нічого не знайдено.
+    </div>
+
     <!-- Пагінація -->
-    <div class="order-pagination-container">
+    <div class="order-pagination-container" v-if="orders.length > 0">
       <button
         class="order-pagination-arrow"
         :disabled="currentPage === 1"
@@ -173,7 +194,7 @@ export default {
             Accept: "application/json"
           }
         });
-        // API повертає orders у полі response.data.orders
+        // Припустимо, що API повертає список замовлень у response.data.orders
         this.orders = response.data.orders;
       } catch (error) {
         console.error("Помилка отримання замовлень:", error);
@@ -193,6 +214,8 @@ export default {
         console.error("Помилка отримання деталей замовлення:", error);
       }
     },
+    // Видалення прибрано, оскільки замовлення не можна видаляти
+    /*
     async deleteOrder(orderId) {
       try {
         await axios.delete(`http://26.235.139.202:8080/api/admin/orders/${orderId}`, {
@@ -207,17 +230,17 @@ export default {
         console.error("Помилка видалення замовлення:", error);
       }
     },
+    */
     closeDetailsModal() {
       this.showDetailsModal = false;
       this.orderDetails = {};
     },
     onSearch() {
       console.log("Пошук:", this.searchQuery);
-      // Додаткова логіка пошуку при потребі
     },
     goToPage(page) {
       this.currentPage = page;
-      // Реалізуйте логіку пагінації, якщо потрібно
+      // Логіка пагінації при потребі
     },
     cycleSort(column) {
       if (this.sortState[column] === "none") {
@@ -228,7 +251,7 @@ export default {
         this.sortState[column] = "none";
       }
       console.log(`Сортування ${column}: ${this.sortState[column]}`);
-      // Локальне сортування або запит до API можна реалізувати тут
+      // Реалізуйте локальне сортування або виклик API тут
     },
     getSortIcon(state) {
       if (state === "asc") {
@@ -346,24 +369,25 @@ export default {
 }
 .order-table__header {
   display: grid;
-  grid-template-columns: 10% 20% 20% 20% 20% 10%;
+  grid-template-columns: 100px 150px 150px 150px 400px 100px;
   align-items: center;
   padding: 12px 16px;
   border-bottom: 1px solid #e0e0e0;
-  background-color: #F6E7E7;
+  background-color: #f6e7e7;
   font-size: 14px;
   font-weight: 600;
   color: #48484b;
+  text-align: left;
 }
 .order-sortable-header {
   cursor: pointer;
   display: inline-flex;
   align-items: center;
+  gap: 4px;
 }
 .order-sort-icon {
   width: 16px;
   height: 16px;
-  margin-left: 4px;
   object-fit: contain;
 }
 
@@ -375,35 +399,37 @@ export default {
 }
 .order-item {
   display: grid;
-  grid-template-columns: 10% 20% 20% 20% 20% 10%;
+  grid-template-columns: 100px 150px 150px 150px 400px 100px;
   align-items: center;
   padding: 12px 16px;
   border-bottom: 1px solid #e0e0e0;
   background-color: #fff;
   font-size: 14px;
   transition: background-color 0.3s;
+  text-align: left;
+}
+.order-item:hover {
+  background-color: #f9f9f9;
 }
 .order-item.highlighted {
-  background-color: #E4F2E7 !important;
+  background-color: #e4f2e7 !important;
 }
 
 /* Поля таблиці */
-.order-item__id {
-  text-align: center;
-  font-weight: 600;
-}
+.order-item__id,
 .order-item__date,
 .order-item__status,
 .order-item__phone,
 .order-item__products {
-  text-align: center;
+  padding-right: 8px;
+  white-space: nowrap;
 }
 
 /* Дії */
 .order-item__actions {
   display: flex;
   gap: 8px;
-  justify-content: center;
+  justify-content: flex-start;
 }
 .order-action-button {
   width: 32px;
@@ -477,6 +503,24 @@ export default {
   object-fit: contain;
 }
 
+/* Empty state */
+.empty-state {
+  width: 1124px;
+  height: 199px;
+  margin: 40px auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  color: #000;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #fafafa;
+  text-align: center;
+}
+
 /* Модальне вікно */
 .order-modal-overlay {
   position: fixed;
@@ -525,7 +569,7 @@ export default {
   left: 20px;
   width: 300px;
   height: 44px;
-  background-color: #E4F2E7;
+  background-color: #e4f2e7;
   border-radius: 4px;
   display: flex;
   align-items: center;

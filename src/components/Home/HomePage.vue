@@ -85,9 +85,9 @@
 </template>
 
 <script>
-import PopularProducts from "@/components/PopularProducts.vue";
-import NewArrivals from "@/components/NewArrivals.vue";
-import CategoryProduct from "@/components/CategoryProduct.vue";
+import PopularProducts from "./PopularProducts.vue";
+import NewArrivals from "./NewArrivals.vue";
+import CategoryProduct from "./CategoryProduct.vue";
 
 export default {
   components: {

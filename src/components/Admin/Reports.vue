@@ -1,4 +1,4 @@
-<template>
+<template> 
   <main class="order-list profit-report">
     <!-- Заголовок та кнопки дій -->
     <div class="order-header">
@@ -24,8 +24,8 @@
       </div>
     </div>
 
-    <!-- Таблиця звіту у стилі "Замовлення" -->
-    <div class="order-table-container">
+    <!-- 1) Якщо є дані звіту -->
+    <div v-if="profitData.length > 0" class="order-table-container">
       <header class="order-table__header">
         <span class="order-sortable-header" @click="cycleSort('id')">ID</span>
         <span class="order-sortable-header" @click="cycleSort('order_date')">Дата</span>
@@ -44,6 +44,16 @@
           <span class="order-item__profit">{{ order.profit }}</span>
         </li>
       </ul>
+    </div>
+
+    <!-- 2) Якщо даних звіту немає і пошук не проводився -->
+    <div v-else-if="!searchQuery" class="empty-state">
+      Поки що не було додано жодного звіту по прибутку.
+    </div>
+
+    <!-- 3) Якщо пошук активний, але нічого не знайдено -->
+    <div v-else class="empty-state">
+      За запитом «<strong>{{ searchQuery }}</strong>» нічого не знайдено.
     </div>
   </main>
 </template>
@@ -141,7 +151,6 @@ export default {
 </script>
 
 <style scoped>
-/* Стилі, схожі на компонент "Замовлення" */
 .order-list {
   max-width: 1200px;
   margin: 20px auto;
@@ -266,6 +275,24 @@ export default {
 .order-item__date,
 .order-item__price,
 .order-item__profit {
+  text-align: center;
+}
+
+/* Empty state */
+.empty-state {
+  width: 1124px;
+  height: 199px;
+  margin: 40px auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  color: #000;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #fafafa;
   text-align: center;
 }
 </style>

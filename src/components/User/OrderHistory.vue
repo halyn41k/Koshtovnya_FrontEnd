@@ -45,7 +45,7 @@
 
 <script>
 import axios from "axios";
-import Loader from "@/components/Loader.vue";
+import Loader from '../Home/Loader.vue'
 import OrderDetailModal from "./OrderDetailModal.vue";
 
 export default {

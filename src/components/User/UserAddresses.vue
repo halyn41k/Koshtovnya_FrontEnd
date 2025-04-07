@@ -253,7 +253,7 @@
 </template>
 
 <script>
-import Loader from "../Loader.vue";
+import Loader from '../Home/Loader.vue';
 import axios from "axios";
 
 export default {
@@ -618,45 +618,52 @@ export default {
       this.addressId = null;
     },
     validateForm() {
-      const errors = {};
-      const ukrPhoneRegex = /^\+380\d{9}$/;
-      if (!this.phoneNumber) {
-        errors.phoneNumber = "Номер телефону є обов'язковим";
-      } else if (!ukrPhoneRegex.test(this.phoneNumber)) {
-        errors.phoneNumber = "Невірний формат номера телефону. Приклад: +380XXXXXXXXX";
+  const errors = {};
+  const ukrPhoneRegex = /^\+380\d{9}$/;
+
+  // Валідація номера телефону
+  if (!this.phoneNumber) {
+    errors.phoneNumber = "Номер телефону є обов'язковим";
+  } else if (!ukrPhoneRegex.test(this.phoneNumber)) {
+    errors.phoneNumber = "Невірний формат номера телефону. Приклад: +380XXXXXXXXX";
+  }
+
+  if (this.formData.deliveryType === "courier") {
+    // Валідація для доставки кур'єром
+    if (!this.formData.city) {
+      errors.city = "Місто є обов'язковим";
+    }
+    if (!this.deliveryAddress.street) {
+      errors.street = "Оберіть вулицю";
+    }
+    if (!this.deliveryAddress.number) {
+      errors.number = "Введіть номер будинку/квартири";
+    }
+  }
+
+  if (this.formData.deliveryType === "pickup") {
+    // Валідація для самовивозу
+    if (!this.formData.selectedDeliveryMethod) {
+      errors.selectedDeliveryMethod = "Оберіть спосіб доставки";
+    }
+    // Перевірка міста незалежно від вибору способу доставки
+    if (!this.formData.city) {
+      errors.city = "Місто є обов'язковим";
+    }
+    // Якщо обраний спосіб доставки не з магазину – перевіряємо відділення або поштомат
+    if (this.formData.selectedDeliveryMethod) {
+      if (this.formData.selectedDeliveryMethod.name === "Самовивіз з Нової Пошти" && !this.deliveryAddress.branch) {
+        errors.branch = "Введіть номер відділення";
       }
-      if (this.formData.deliveryType === "courier") {
-        if (!this.formData.city) {
-          errors.city = "Місто є обов'язковим";
-        }
-        if (!this.deliveryAddress.street) {
-          errors.street = "Оберіть вулицю";
-        }
-        if (!this.deliveryAddress.number) {
-          errors.number = "Введіть номер будинку/квартири";
-        }
+      if (this.formData.selectedDeliveryMethod.name === "Самовивіз з поштоматів Нової Пошти" && !this.deliveryAddress.postomat) {
+        errors.postomat = "Введіть номер поштомата";
       }
-      if (this.formData.deliveryType === "pickup") {
-        if (!this.formData.selectedDeliveryMethod) {
-          errors.selectedDeliveryMethod = "Оберіть спосіб доставки";
-        } else if (!this.formData.selectedDeliveryMethod.is_store) {
-          if (!this.formData.city) {
-            errors.city = "Місто є обов'язковим";
-          }
-          if (this.formData.selectedDeliveryMethod.name === "Самовивіз з Нової Пошти") {
-            if (!this.deliveryAddress.branch) {
-              errors.branch = "Введіть номер відділення";
-            }
-          } else if (this.formData.selectedDeliveryMethod.name === "Самовивіз з поштоматів Нової Пошти") {
-            if (!this.deliveryAddress.postomat) {
-              errors.postomat = "Введіть номер поштомата";
-            }
-          }
-        }
-      }
-      this.errors = errors;
-      return Object.keys(errors).length === 0;
-    },
+    }
+  }
+
+  this.errors = errors;
+  return Object.keys(errors).length === 0;
+},
     async deleteAddress() {
       const token = localStorage.getItem("token");
       if (!token) {

@@ -1,4 +1,4 @@
-<template>
+<template> 
   <main class="product-list">
     <!-- Заголовок та блок дій -->
     <div class="header-container">
@@ -47,8 +47,8 @@
       <FilterProduct @closeFilter="closeFilter" :fetchProducts="fetchProducts" />
     </div>
 
-    <!-- Список товарів у вигляді карточок -->
-    <div class="product-cards">
+    <!-- 1) Якщо товари є -->
+    <div v-if="products.length > 0" class="product-cards">
       <div
         v-for="product in filteredProducts"
         :key="product.id"
@@ -84,6 +84,16 @@
           </div>
         </div>
       </div>
+    </div>
+
+    <!-- 2) Якщо товари відсутні і пошук не проводився -->
+    <div v-else-if="!searchQuery" class="empty-state">
+      Поки що не було додано жодного товару.
+    </div>
+
+    <!-- 3) Якщо пошук активний, але товарів не знайдено -->
+    <div v-else class="empty-state">
+      За запитом «<strong>{{ searchQuery }}</strong>» нічого не знайдено.
     </div>
 
     <!-- Пагінація -->
@@ -401,7 +411,7 @@ export default {
   padding: 20px;
 }
 
-/* Новий дизайн карточок товарів */
+/* Карточки товарів */
 .product-cards {
   display: flex;
   flex-direction: column;
@@ -472,6 +482,24 @@ export default {
   color: #48484b;
 }
 
+/* Empty state */
+.empty-state {
+  width: 1124px;
+  height: 199px;
+  margin: 40px auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  color: #000;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #fafafa;
+  text-align: center;
+}
+
 /* Пагінація */
 .pagination-container {
   display: flex;
@@ -522,11 +550,5 @@ export default {
   background-color: #aeaeae;
   cursor: not-allowed;
   box-shadow: none;
-}
-
-/* При видаленому товарі */
-.product-card.deleted {
-  opacity: 0.5;
-  pointer-events: none;
 }
 </style>

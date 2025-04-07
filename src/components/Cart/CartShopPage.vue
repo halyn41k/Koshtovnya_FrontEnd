@@ -29,7 +29,7 @@
 import axios from "axios";
 import CartItem from './CartItem.vue';
 import Summary from './Summary.vue';
-import Loader from '../Loader.vue';
+import Loader from '../Home/Loader.vue'; 
 
 
 export default {
