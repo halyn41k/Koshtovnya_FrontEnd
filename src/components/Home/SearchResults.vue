@@ -2,7 +2,19 @@
   <div>
     <div v-if="isVisible" class="search-results" @mousedown.stop>
       <h2>Результати пошуку:</h2>
-      <ul>
+
+      <!-- Лоадер з анімацією крапок -->
+      <div v-if="loading" class="loader">
+        Завантаження<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span>
+      </div>
+
+      <!-- Якщо пошук завершено, але нічого не знайдено -->
+      <div v-else-if="results.length === 0">
+        <p>Нічого не знайдено.</p>
+      </div>
+
+      <!-- Якщо є результати -->
+      <ul v-else>
         <li v-for="product in highlightedResults" :key="product.id" class="search-result-item">
           <router-link :to="`/productpage/${product.id}`" class="product-link">
             <img :src="product.image_url" alt="Product Image" />
@@ -18,84 +30,84 @@
 </template>
 
 <script>
-import axios from "axios"; // Імпортуємо бібліотеку axios для запитів до API.
+import axios from "axios";
 
 export default {
   props: {
-    query: { // Властивість для запиту пошуку.
+    query: {
       type: String,
       required: false,
-      default: "", // За замовчуванням порожній рядок.
+      default: "",
     },
   },
   data() {
     return {
-      results: [], // Масив для збереження результатів пошуку.
-      isVisible: false, // Прапорець для відображення результатів.
+      results: [],
+      isVisible: false,
+      loading: false,
     };
   },
   computed: {
-    // Виділяємо збіги в результатах пошуку.
     highlightedResults() {
-      const query = this.query.trim(); // Очищаємо запит від пробілів.
-      if (!query) return this.results; // Якщо запит порожній — повертаємо всі результати.
+      const query = this.query.trim();
+      if (!query) return this.results;
 
-      // Створюємо регулярний вираз для виділення частин тексту.
       const regex = new RegExp(`(${query})`, "gi");
       return this.results.map((product) => ({
         ...product,
-        highlightedName: product.name.replace(
-          regex,
-          '<span class="highlight">$1</span>' // Виділяємо знайдені частини.
-        ),
+        highlightedName: product.name.replace(regex, '<span class="highlight">$1</span>'),
       }));
     },
   },
   watch: {
-    // Стежимо за змінами в query і виконуємо пошук.
     query(newQuery) {
       if (newQuery.trim()) {
-        this.search(newQuery); // Якщо запит не порожній, виконуємо пошук.
+        this.search(newQuery);
       } else {
-        this.results = []; // Якщо запит порожній, очищуємо результати.
-        this.isVisible = false; // Сховуємо блок з результатами.
+        this.results = [];
+        this.isVisible = false;
       }
     },
   },
   methods: {
-    // Пошук товарів через API.
     search(query) {
-      const apiUrl = `http://26.235.139.202:8080/api/products/search/${query}`; // Формуємо URL.
-      axios
-        .get(apiUrl) // Запит до API.
-        .then((response) => {
-          this.results = response.data.data; // Оновлюємо результати.
-          this.isVisible = true; // Показуємо блок з результатами.
-        })
-        .catch((error) => {
-          console.error("Error fetching search results:", error); // Логуємо помилки.
-          this.results = []; // Очищаємо результати у разі помилки.
-          this.isVisible = false; // Сховуємо блок з результатами.
-        });
-    },
-    // Обробка кліків за межами компонента.
+  const trimmedQuery = query.trim();
+  if (!trimmedQuery) {
+    this.results = [];
+    this.isVisible = false;
+    return;
+  }
+  const apiUrl = `http://26.235.139.202:8080/api/products/search/${encodeURIComponent(trimmedQuery)}`;
+  this.loading = true;
+  this.isVisible = true;
+  axios
+    .get(apiUrl)
+    .then((response) => {
+      this.results = response.data.data;
+    })
+    .catch((error) => {
+      console.error("Error fetching search results:", error);
+      this.results = [];
+      this.isVisible = false;
+    })
+    .finally(() => {
+      this.loading = false;
+    });
+},
     handleOutsideClick(event) {
       if (!this.$el.contains(event.target)) {
-        this.isVisible = false; // Сховуємо результати, якщо клікнули поза.
+        this.isVisible = false;
       }
     },
   },
   mounted() {
-    // Додаємо слухача на клік миші по всьому документу.
     document.addEventListener("mousedown", this.handleOutsideClick);
   },
   beforeUnmount() {
-    // Видаляємо слухача перед знищенням компонента.
     document.removeEventListener("mousedown", this.handleOutsideClick);
   },
 };
 </script>
-
 
 <style scoped>
 .search-results {
@@ -172,6 +184,34 @@ export default {
   color: gray;
   font-weight: bold;
   font-size: 14px;
+}
+
+/* Лоадер з анімацією крапок */
+.loader {
+  text-align: center;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 14px;
+  color: #6b1f1f;
+  padding: 10px 0;
+}
+
+.loader .dot {
+  opacity: 0;
+  animation: blink 1.5s infinite;
+  font-weight: bold;
+}
+
+.loader .dot:nth-child(2) {
+  animation-delay: 0.5s;
+}
+
+.loader .dot:nth-child(3) {
+  animation-delay: 1s;
+}
+
+@keyframes blink {
+  0%, 20%, 100% { opacity: 0; }
+  50% { opacity: 1; }
 }
 
 .search-results::-webkit-scrollbar {

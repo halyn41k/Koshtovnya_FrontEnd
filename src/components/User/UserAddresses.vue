@@ -228,7 +228,8 @@
     <!-- Відображення збереженої адреси -->
     <div v-else-if="addressAvailable && !loading && !showForm" class="address-card">
       <h2 class="card-title">Ваша адреса доставки</h2>
-      <p><strong>Телефон:</strong> {{ phoneNumber.phone_number }}</p>
+      <p><strong>Телефон:</strong> {{ phoneNumber }}</p>
+
 
       <p><strong>Тип доставки:</strong> {{ formData.deliveryName }}</p>
       <template v-if="formData.deliveryType === 'courier'">
