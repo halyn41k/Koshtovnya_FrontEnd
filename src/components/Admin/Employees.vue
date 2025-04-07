@@ -5,16 +5,32 @@
     <!-- Пошук і кнопка "Додати" -->
     <div class="employee-list__controls">
       <div class="controls-left">
-        <div class="search-container">
-          <div class="search-input-wrapper">
-            <input
-              class="search-input"
-              type="text"
-              placeholder="Пошук"
-              v-model="searchQuery"
-              @input="onSearch"
+        <div class="filter-search-row">
+          <!-- Фільтр -->
+          <div class="filter-button" @click="openFilter">
+            <span class="filter__text">Фільтр</span>
+            <img
+              src="https://cdn.builder.io/api/v1/image/assets/c3e46d0a629546c7a48302a5db3297d5/4b09284ab367fa70a05a4a4f59e91721443ad7e8e783dfd2c26fb681ebacd30f?apiKey=c3e46d0a629546c7a48302a5db3297d5"
+              alt="Filter icon"
+              class="filter__icon"
             />
-            <img src="@/assets/icons/search.svg" alt="Search icon" class="search-icon" />
+          </div>
+          <!-- Пошук із фіксованою шириною -->
+          <div class="search-container">
+            <div class="search-input-wrapper">
+              <input
+                class="search-input"
+                type="text"
+                placeholder="Пошук"
+                v-model="searchQuery"
+                @input="onSearch"
+              />
+              <img
+                src="@/assets/icons/search.svg"
+                alt="Search icon"
+                class="search-icon"
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -26,7 +42,29 @@
       </div>
     </div>
 
-    <!-- 1) Є працівники -->
+    <!-- Оверлей фільтра -->
+    <div v-if="showFilter" class="filter-overlay">
+      <h2>Фільтр за роллю</h2>
+      <div class="filter-options">
+        <!-- Використовуємо чекбокси, але дозволяємо вибір лише однієї ролі -->
+        <div v-for="role in availableRoles" :key="role" class="filter-option">
+          <input
+            type="checkbox"
+            :id="role"
+            :value="role"
+            :checked="selectedRole === role"
+            @change="selectRole(role)"
+          />
+          <label :for="role">{{ role }}</label>
+        </div>
+      </div>
+      <div class="filter-actions">
+        <button @click="applyFilter">Застосувати</button>
+        <button @click="closeFilter">Скасувати</button>
+      </div>
+    </div>
+
+    <!-- Таблиця з працівниками -->
     <div v-if="users.length > 0" class="employee-table-container">
       <header class="employee-table__header">
         <span class="sortable-header" @click="cycleSort('id')">
@@ -77,12 +115,12 @@
       </ul>
     </div>
 
-    <!-- 2) Немає працівників і не було пошуку -->
+    <!-- Якщо немає працівників і не було пошуку -->
     <div v-else-if="!searchQuery" class="empty-state">
       Поки що не було додано жодного працівника.
     </div>
 
-    <!-- 3) Немає результатів пошуку -->
+    <!-- Якщо пошук повернув порожній результат -->
     <div v-else class="empty-state">
       За запитом «<strong>{{ searchQuery }}</strong>» нічого не знайдено.
     </div>
@@ -133,6 +171,7 @@ export default {
     return {
       users: [],
       searchQuery: "",
+      // Значення за замовчуванням для фільтра - "employee"
       searchRole: "employee",
       showModal: false,
       isAddMode: true,
@@ -158,7 +197,11 @@ export default {
         phone_number: "none",
         date: "none",
         role: "none"
-      }
+      },
+      // Фільтр
+      showFilter: false,
+      availableRoles: ["admin", "superadmin", "manager"],
+      selectedRole: "employee"
     };
   },
   mounted() {
@@ -255,7 +298,6 @@ export default {
           ...(this.form.phone_number && { phone_number: this.form.phone_number }),
           role: this.form.role
         };
-        // Якщо додаємо, додаємо й email
         if (this.isAddMode) {
           payload.email = this.form.email;
         }
@@ -327,6 +369,24 @@ export default {
     goToPage(page) {
       this.currentPage = page;
       // Логіка для завантаження даних певної сторінки, якщо потрібно
+    },
+    // Методи для фільтра
+    openFilter() {
+      this.selectedRole = this.searchRole; // встановлюємо поточний фільтр
+      this.showFilter = true;
+    },
+    closeFilter() {
+      this.showFilter = false;
+    },
+    selectRole(role) {
+      // Оскільки чекбокси дозволяють лише один вибір,
+      // при виборі нового значення встановлюємо його як selectedRole
+      this.selectedRole = role;
+    },
+    applyFilter() {
+      this.searchRole = this.selectedRole;
+      this.fetchUsers();
+      this.closeFilter();
     }
   }
 };
@@ -359,40 +419,6 @@ export default {
   gap: 20px;
 }
 
-/* Пошук */
-.search-container {
-  margin-bottom: 0;
-}
-.search-input-wrapper {
-  display: flex;
-  align-items: center;
-  width: 262px;
-  height: 30px;
-  background-color: #f6e7e7;
-  border-radius: 4px;
-  overflow: hidden;
-  border: 1px solid transparent;
-  transition: border 0.3s;
-}
-.search-input-wrapper:focus-within {
-  border: 1px solid #1d1d1d;
-}
-.search-input {
-  flex: 1;
-  height: 100%;
-  padding: 8px 12px;
-  border: none;
-  background-color: transparent;
-  color: #898989;
-  font-size: 14px;
-  outline: none;
-}
-.search-icon {
-  width: 16px;
-  height: 16px;
-  margin-right: 12px;
-  pointer-events: none;
-}
 
 /* Кнопка "Додати" */
 .add-button {
@@ -426,6 +452,122 @@ export default {
   border: 1px solid #1d1d1d;
 }
 
+
+/* Рядок для пошуку та фільтра */
+.filter-search-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+.filter-button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+.filter-button:hover {
+  background-color: #e0e0e0;
+}
+.filter__text {
+  font-size: 14px;
+  font-weight: 600;
+  color: #48484b;
+}
+.filter__icon {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+}
+
+/* Фіксована ширина для пошуку */
+.search-container {
+  width: 250px;
+}
+.search-input-wrapper {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 30px;
+  background-color: #f6e7e7;
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid transparent;
+  transition: border 0.3s;
+}
+.search-input-wrapper:focus-within {
+  border: 1px solid #1d1d1d;
+}
+.search-input {
+  flex: 1;
+  height: 100%;
+  padding: 8px 12px;
+  border: none;
+  background: transparent;
+  color: #6b1f1f;
+  font-size: 14px;
+  outline: none;
+}
+.search-icon {
+  width: 16px;
+  height: 16px;
+  margin-right: 12px;
+  pointer-events: none;
+}
+
+/* Оверлей для фільтра */
+.filter-overlay {
+  position: absolute;
+  top: 60px;
+  left: 20px;
+  width: 350px;
+  background-color: #fff7f6;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  z-index: 1000;
+  padding: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+.filter-overlay h2 {
+  margin-top: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+.filter-options {
+  margin: 15px 0;
+}
+.filter-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.filter-option input {
+  width: 16px;
+  height: 16px;
+}
+.filter-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+.filter-actions button {
+  padding: 5px 10px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.filter-actions button:first-child {
+  background-color: #6b1f1f;
+  color: #fff;
+}
+.filter-actions button:last-child {
+  background-color: #ccc;
+}
+
 /* Таблиця */
 .employee-table-container {
   margin-top: 0;
@@ -433,15 +575,14 @@ export default {
   overflow: hidden;
   border: 1px solid #e0e0e0;
 }
-/* Задаємо свої ширини стовпців і текст left */
 .employee-table__header,
 .employee-item {
   display: grid;
-  grid-template-columns: 50px 200px 300px 150px 120px 150px 120px; /* підігнай під себе */
+  grid-template-columns: 50px 200px 300px 150px 120px 150px 120px;
   align-items: center;
-  text-align: left;            /* вирівнюємо текст ліворуч */
+  text-align: left;
   padding: 12px 16px;
-  column-gap: 10px;           /* відстань між стовпцями */
+  column-gap: 10px;
 }
 .employee-table__header {
   border-bottom: 1px solid #e0e0e0;
@@ -485,6 +626,53 @@ export default {
   align-items: center;
   gap: 8px;
 }
+
+/* Стилізація для контейнера чекбокса */
+.option {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+  font-size: 16px;
+  font-family: Montserrat, sans-serif;
+  color: #333;
+}
+
+/* Збільшення розміру чекбокса та відступу */
+input[type="checkbox"] {
+  accent-color: #996666;
+  width: 20px;   /* збільшено для кращої видимості */
+  height: 20px;
+  margin-right: 10px; /* відступ між чекбоксом і текстом */
+}
+
+/* Загальний стиль для кнопок */
+button {
+  font-family: Montserrat, sans-serif;
+  font-size: 16px;
+  padding: 10px 20px; /* більший падінг для кращого вигляду */
+  border-radius: 4px;
+  cursor: pointer;
+  border: none;
+  transition: background-color 0.3s, transform 0.3s;
+}
+
+/* Приклад для кнопки "Додати" */
+.add-button {
+  width: auto;  /* даємо можливість кнопці розширюватись за контентом */
+  height: auto;
+  background-color: #6b1f1f;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.add-button:hover {
+  background-color: #a01212;
+}
+.add-button:active {
+  transform: scale(0.98);
+}
+
 .action-button {
   width: 32px;
   height: 32px;
