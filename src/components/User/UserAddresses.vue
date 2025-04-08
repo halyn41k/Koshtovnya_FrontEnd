@@ -479,38 +479,50 @@ export default {
       console.log("Вибрана вулиця:", this.deliveryAddress.street);
     },
     async fetchUserAddress() {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        this.$router.push("/login");
-        return;
+  const token = localStorage.getItem("token");
+  if (!token) {
+    this.$router.push("/login");
+    return;
+  }
+  this.loading = true;
+  try {
+    const response = await axios.get("http://26.235.139.202:8080/api/user-address", {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    console.log("Отримана адреса:", response.data);
+    
+    // Ось тут зміни
+    if (response.data && response.data.data) {
+      const address = response.data.data; 
+      // Підставляємо ключі з address
+      this.phoneNumber = address.phone_number || "";
+      this.formData.city = address.city || "";
+      this.formData.deliveryType = address.delivery_type || "";
+      this.formData.deliveryName = address.delivery_name || "";
+      this.addressId = address.id;
+
+      // Логіка розділення адреси на "street" і "number", якщо потрібно
+      if (address.delivery_type === "courier") {
+        const parts = address.delivery_address.split(" ");
+        this.deliveryAddress.street = parts[0];
+        this.deliveryAddress.number = parts.slice(1).join(" ");
+      } else if (address.delivery_type === "pickup") {
+        this.deliveryAddress.branch = address.delivery_address;
       }
-      this.loading = true;
-      try {
-        const response = await axios.get("http://26.235.139.202:8080/api/user-address", {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        if (response.data && response.data.data && response.data.data.address) {
-          const { phone_number, city, delivery_type, delivery_name, delivery_address, id } = response.data.data.address;
-          this.phoneNumber = phone_number || "";
-          this.formData.city = city || "";
-          this.formData.deliveryType = delivery_type || "";
-          this.formData.deliveryName = delivery_name || "";
-          this.addressId = id;
-          if (delivery_type === "courier") {
-            const parts = delivery_address.split(" ");
-            this.deliveryAddress.street = parts[0];
-            this.deliveryAddress.number = parts.slice(1).join(" ");
-          } else if (delivery_type === "pickup") {
-            this.deliveryAddress.branch = delivery_address;
-          }
-          this.addressAvailable = true;
-        }
-      } catch (error) {
-        console.error("Помилка отримання адреси:", error);
-      } finally {
-        this.loading = false;
-      }
-    },
+
+      // Якщо дані були знайдені, встановлюємо addressAvailable = true
+      this.addressAvailable = true;
+    } else {
+      this.addressAvailable = false;
+    }
+  } catch (error) {
+    console.error("Помилка отримання адреси:", error);
+    this.addressAvailable = false;
+  } finally {
+    this.loading = false;
+  }
+},
+
     async fetchUserPhoneNumber() {
       const token = localStorage.getItem("token");
       if (!token) return;
@@ -519,7 +531,7 @@ export default {
           headers: { Authorization: `Bearer ${token}` }
         });
         if (response.data !== null) {
-          this.phoneNumber = response.data;
+          this.phoneNumber = response.data.phone;
         }
       } catch (error) {
         console.error("Помилка отримання номера телефону:", error);
@@ -554,14 +566,8 @@ export default {
     this.$router.push("/login");
     return;
   }
-  if (
-    this.formData.deliveryType === "pickup" &&
-    this.formData.selectedDeliveryMethod &&
-    this.formData.selectedDeliveryMethod.is_store &&
-    !this.formData.city
-  ) {
-    this.formData.city = "Коломия";
-  }
+  
+  // Формуємо дані для збереження адреси
   let deliveryAddressValue = "";
   if (this.formData.deliveryType === "courier") {
     deliveryAddressValue = `${this.deliveryAddress.street} ${this.deliveryAddress.number}`;
@@ -574,6 +580,7 @@ export default {
       deliveryAddressValue = this.deliveryAddress.postomat;
     }
   }
+  
   let deliveryName = "";
   if (this.formData.deliveryType === "courier") {
     deliveryName = "Кур'єр Нової Пошти";
@@ -581,22 +588,35 @@ export default {
     deliveryName = this.formData.selectedDeliveryMethod.name;
   }
   
-  // Додаємо поле cityRef, яке зберігається при виборі міста
+  // Дані для запиту
   const postData = {
     phone_number: this.phoneNumber,
     city: this.formData.city,
-    city_ref: this.formData.cityRef, // нове поле
+    city_ref: this.formData.cityRef,
     delivery_name: deliveryName,
     delivery_address: deliveryAddressValue
   };
   
   console.log("Submit address data:", postData);
+  
   try {
-    const response = await axios.post(
-      "http://26.235.139.202:8080/api/user-address",
-      postData,
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
+    let response;
+    if (this.addressAvailable) {
+      // Якщо адреса вже існує, викликаємо метод оновлення (наприклад, PUT або PATCH)
+      response = await axios.patch(
+          `http://26.235.139.202:8080/api/user-address/${this.addressId}`,
+          postData,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+
+    } else {
+      // Якщо адреса відсутня – викликаємо створення нової адреси
+      response = await axios.post(
+        "http://26.235.139.202:8080/api/user-address",
+        postData,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+    }
     console.log("Response data:", response.data);
     console.log("Адресу успішно збережено!");
     this.fetchUserAddress();
