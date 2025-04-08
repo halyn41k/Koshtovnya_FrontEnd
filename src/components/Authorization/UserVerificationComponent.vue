@@ -143,6 +143,9 @@ export default {
             }
         },
     },
+    mounted() {
+        document.title = "Підтвердження пошти";
+    }
 };
 
 </script>

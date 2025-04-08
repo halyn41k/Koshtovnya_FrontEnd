@@ -206,6 +206,7 @@ export default {
   },
   mounted() {
     this.fetchUsers();
+    document.title = "Працівники";
   },
   methods: {
     async fetchUsers() {

@@ -119,6 +119,9 @@ export default {
   created() {
     this.fetchSettings();
   },
+  mounted() {
+    document.title = "Налаштування";
+  }
 };
 </script>
 

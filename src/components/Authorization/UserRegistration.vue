@@ -250,6 +250,9 @@ export default {
     togglePasswordVisibility() {
       this.showPassword = !this.showPassword;
     }
+  },
+  mounted() {
+    document.title = "Реєстрація";
   }
 };
 </script>

@@ -99,7 +99,7 @@ export default {
     this.fetchPopularProducts(); // Завантаження популярних продуктів при монтуванні компонента
     this.fetchNewArrivals(); // Завантаження нових надходжень при монтуванні компонента
     this.observeElements();
-
+    document.title = "Головна";
   },
   data() {
     return {

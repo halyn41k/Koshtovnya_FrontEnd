@@ -107,6 +107,9 @@ export default {
     changePassword() {
       this.$router.push("/changepassword");
     }
+  },
+  mounted(){
+    document.title = "Ваша особиста інформація";
   }
 };
 </script>

@@ -111,6 +111,7 @@ export default {
   name: 'AboutDelivery',
   mounted() {
     this.observeElements();
+    document.title = "Про Оплату Доставку";
   },
   methods: {
     observeElements() {

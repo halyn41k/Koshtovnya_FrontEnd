@@ -129,6 +129,9 @@ export default {
       this.showPassword = !this.showPassword;
     },
   },
+  mounted() {
+    document.title = "Вхід";
+  }
 };
 </script>
 

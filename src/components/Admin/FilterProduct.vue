@@ -429,6 +429,7 @@ export default {
         range[1] = value <= range[0] ? range[0] : value;
       }
     },
+    
 
     // Метод для закриття фільтра
     closeFilter() {

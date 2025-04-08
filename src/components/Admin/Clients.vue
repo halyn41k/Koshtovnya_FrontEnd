@@ -168,6 +168,7 @@ export default {
   },
   mounted() {
     this.fetchUsers();
+    document.title = "Користувачі";
   },
   methods: {
     async fetchUsers() {

@@ -130,6 +130,7 @@ export default {
   },
   mounted() {
     this.observeElements();
+    document.title = "Про нас";
   },
   methods: {
     observeElements() {

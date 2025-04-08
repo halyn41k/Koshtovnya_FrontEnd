@@ -150,6 +150,7 @@ export default {
   },
   mounted() {
     this.fetchCartItems();
+    document.title = "Кошик";
   }
 };
 </script>

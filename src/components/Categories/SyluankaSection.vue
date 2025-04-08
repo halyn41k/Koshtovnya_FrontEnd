@@ -262,6 +262,7 @@ export default {
   mounted() {
     console.log(this.fetchProducts); // Має бути функцією
     this.fetchProducts(this.currentPage, this.filters);
+    document.title = "Силянки";
   },
 };
 </script>

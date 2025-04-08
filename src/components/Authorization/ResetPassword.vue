@@ -102,6 +102,9 @@
         alert('Пароль успішно змінено!');
         this.$router.push('/login');
       }
+    },
+    mounted() {
+      document.title = "Зміна паролю";
     }
   };
   </script>

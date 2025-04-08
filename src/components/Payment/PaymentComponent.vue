@@ -65,6 +65,7 @@ export default {
     },
   },
   mounted() {
+    document.title = "Оплата";
     this.calculateTotalAmount();
   },
 

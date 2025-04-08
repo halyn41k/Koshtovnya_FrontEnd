@@ -184,6 +184,7 @@ export default {
   },
   mounted() {
     this.fetchOrders();
+    document.title = "Замовлення";
   },
   methods: {
     async fetchOrders() {
@@ -369,7 +370,7 @@ export default {
 }
 .order-table__header {
   display: grid;
-  grid-template-columns: 100px 150px 150px 150px 400px 100px;
+  grid-template-columns: 100px 150px 150px 150px 500px 100px;
   align-items: center;
   padding: 12px 16px;
   border-bottom: 1px solid #e0e0e0;
@@ -399,7 +400,7 @@ export default {
 }
 .order-item {
   display: grid;
-  grid-template-columns: 100px 150px 150px 150px 400px 100px;
+  grid-template-columns: 100px 150px 150px 150px 500px 100px;
   align-items: center;
   padding: 12px 16px;
   border-bottom: 1px solid #e0e0e0;
@@ -424,6 +425,14 @@ export default {
   padding-right: 8px;
   white-space: nowrap;
 }
+
+.order-item__products {
+  max-width: 600px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 
 /* Дії */
 .order-item__actions {

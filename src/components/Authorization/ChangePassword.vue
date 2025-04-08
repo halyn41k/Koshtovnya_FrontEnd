@@ -124,6 +124,9 @@ export default {
     toggleConfirmPasswordVisibility() {
       this.showConfirmPassword = !this.showConfirmPassword;
     }
+  },
+  mounted() {
+    document.title = "Зміна паролю";
   }
 };
 </script>

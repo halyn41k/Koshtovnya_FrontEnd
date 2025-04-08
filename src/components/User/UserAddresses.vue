@@ -695,6 +695,9 @@ export default {
     cancelEdit() {
       this.showForm = false;
     }
+  },
+  mounted() {
+    document.title = "Ваша адреса";
   }
 };
 </script>

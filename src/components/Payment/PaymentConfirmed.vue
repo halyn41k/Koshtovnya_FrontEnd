@@ -21,6 +21,7 @@
 export default {
   name: "PaymentConfirmed",
   mounted() {
+    document.title = "Підтвердження оплати";
     // Перенаправлення через 3 секунди
     setTimeout(() => {
       this.$router.push({ path: "/account", query: { tab: "orderhistory" } });

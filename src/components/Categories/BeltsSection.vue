@@ -139,14 +139,6 @@ export default {
         console.error('Помилка запиту продуктів:', error.response || error);
       }
     },
-
-
-
-
-
-
-
-
     async fetchWishlist() {
       const token = localStorage.getItem('token');
       if (!token) {
@@ -275,6 +267,7 @@ export default {
   mounted() {
     console.log(this.fetchProducts); // Має бути функцією
     this.fetchProducts(this.currentPage, this.filters);
+    document.title = "Пояси";
   },
 };
 </script>

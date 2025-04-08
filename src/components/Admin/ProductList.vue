@@ -42,10 +42,14 @@
       </div>
     </div>
 
-    <!-- Оверлей фільтра -->
     <div v-if="showFilter" class="filter-overlay" @click.self="closeFilter">
-      <FilterProduct @closeFilter="closeFilter" :fetchProducts="fetchProducts" />
-    </div>
+  <FilterProduct
+    @closeFilter="closeFilter"
+    @applyFilters="applyFilters"
+    :fetchProducts="fetchProducts"
+  />
+</div>
+
 
     <!-- 1) Якщо товари є -->
     <div v-if="products.length > 0" class="product-cards">
@@ -141,6 +145,7 @@
       @close="closeDeleteModal"
       @product-deleted="onProductDeleted"
     />
+    
   </main>
 </template>
 
@@ -191,6 +196,7 @@ export default {
   },
   mounted() {
     this.fetchProducts();
+    document.title = "Товари";
   },
   methods: {
     fetchProducts(pageUrl = "http://26.235.139.202:8080/api/admin/products") {
@@ -267,6 +273,26 @@ export default {
       this.products = this.products.filter((p) => p.id !== deletedProductId);
       this.closeDeleteModal();
     },
+    serializeFilters(filters) {
+  const params = [];
+  for (const key in filters) {
+    if (Array.isArray(filters[key])) {
+      filters[key].forEach(item => {
+        params.push(`${encodeURIComponent(key)}[]=${encodeURIComponent(item)}`);
+      });
+    } else {
+      params.push(`${encodeURIComponent(key)}=${encodeURIComponent(filters[key])}`);
+    }
+  }
+  return params.join('&');
+},
+applyFilters(filters) {
+  const query = this.serializeFilters(filters);
+  const url = `http://26.235.139.202:8080/api/admin/products?${query}`;
+  this.fetchProducts(url);
+},
+
+
   },
 };
 </script>
@@ -402,13 +428,13 @@ export default {
 .filter-overlay {
   position: absolute;
   top: 0;
-  left: 0;
+  left: -20px;
   bottom: 0;
-  width: 350px;
+  width: 330px;
   background-color: transparent;
   z-index: 1000;
   overflow-y: auto;
-  padding: 20px;
+  padding: 0px;
 }
 
 /* Карточки товарів */

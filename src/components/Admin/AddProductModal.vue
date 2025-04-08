@@ -48,13 +48,27 @@
           </div>
           <div class="form-group">
             <label>Кольори</label>
-            <!-- Якщо дозволяється лише один колір, можна використати select.
-                 Для множинного вибору – можна реалізувати multi-select -->
-            <select v-model="form.color" required>
-              <option value="">Оберіть колір</option>
-              <option v-for="color in formData.colors" :key="color" :value="color">{{ color }}</option>
-            </select>
+            <div class="colors-container">
+              <div
+                v-for="color in formData.colors"
+                :key="color"
+                class="color-option"
+                :class="{ selected: form.colors.includes(color) }"
+                @click="toggleColor(color)"
+              >
+                <div class="color-circle" :style="{ backgroundColor: colorMap[color] || '#fff' }">
+                  <!-- Галочка, показується тільки в .selected -->
+                  <svg v-if="form.colors.includes(color)" class="check-icon" viewBox="0 0 24 24">
+                    <polyline points="20 6 9 17 4 12" fill="none" stroke="#fff" stroke-width="2"/>
+                  </svg>
+                </div>
+                <span class="color-label">{{ color }}</span>
+              </div>
+
+
+            </div>
           </div>
+
           <!-- Динамічні поля для розмірів -->
           <div class="form-group">
             <label>Розміри</label>
@@ -102,29 +116,48 @@
   export default {
     name: 'AddProductModal',
     data() {
-      return {
-        form: {
-          name: '',
-          price: '',
-          category: '',
-          bead_producer: '',
-          country_of_manufacture: '',
-          type_of_bead: '',
-          weight: '',
-          color: '',
-          sizes: [],
-          fittings: [],
-          image: null,
-        },
-        formData: {
-          categories: [],
-          bead_producers: [],
-          countries_of_manufacture: [],
-          type_of_bead: [],
-          colors: [],
-          fittings: [],
-          materials: [],
-        }
+    return {
+      colorMap: {
+  'Чорний': '#000000',
+  'Червоний': '#FF0000',
+  'Білий': '#FFFFFF',
+  'Зелений': '#008000',
+  'Синій': '#0000FF',
+  'Жовтий': '#FFFF00',
+  'Помаранчевий': '#FFA500',
+  'Фіолетовий': '#800080',
+  'Коричневий': '#8B4513',
+  'Сірий': '#808080',
+  'Рожевий': '#FFC0CB',
+  'Блакитний': '#87CEEB',
+  'Бежевий': '#F5F5DC',
+  'Золотий': '#FFD700',
+  'Сріблястий': '#C0C0C0'
+},
+
+      form: {
+        name: '',
+        price: '',
+        category: '',
+        bead_producer: '',
+        country_of_manufacture: '',
+        type_of_bead: '',
+        weight: '',
+        // Замість color робимо colors як масив
+        colors: [],
+        sizes: [],
+        fittings: [],
+        image: null,
+      },
+      formData: {
+        categories: [],
+        bead_producers: [],
+        countries_of_manufacture: [],
+        type_of_bead: [],
+        colors: [], // тут очікуємо перелік кольорів (наприклад, 'red', 'blue', 'green' або їхні значення)
+        fittings: [],
+        materials: [],
+      }
       };
     },
     mounted() {
@@ -165,36 +198,62 @@
       removeFitting(index) {
         this.form.fittings.splice(index, 1);
       },
-      submitForm() {
-        const fd = new FormData();
-        if (this.form.image) {
-          fd.append('image', this.form.image);
-        }
-        fd.append('name', this.form.name);
-        fd.append('price', this.form.price);
-        fd.append('category', this.form.category);
-        fd.append('bead_producer', this.form.bead_producer);
-        fd.append('country_of_manufacture', this.form.country_of_manufacture);
-        fd.append('type_of_bead', this.form.type_of_bead);
-        fd.append('weight', this.form.weight);
-        fd.append('color', this.form.color);
-        fd.append('sizes', JSON.stringify(this.form.sizes));
-        fd.append('fittings', JSON.stringify(this.form.fittings));
-        
-        axios
-          .post('http://26.235.139.202:8080/api/admin/products', fd, {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-              'Content-Type': 'multipart/form-data'
-            }
-          })
-          .then(response => {
-            this.$emit('product-added', response.data.data);
-          })
-          .catch(error => {
-            console.error("Error adding product", error);
-          });
-      },
+
+    toggleColor(color) {
+      const index = this.form.colors.indexOf(color);
+      if (index === -1) {
+        this.form.colors.push(color);
+      } else {
+        this.form.colors.splice(index, 1);
+      }
+    },
+    // ... інші методи (handleFileChange, addSize, submitForm тощо)
+    submitForm() {
+      const fd = new FormData();
+      if (this.form.image) {
+        fd.append('image', this.form.image);
+      }
+      fd.append('name', this.form.name);
+      fd.append('price', this.form.price);
+      fd.append('category', this.form.category);
+      fd.append('bead_producer', this.form.bead_producer);
+      fd.append('country_of_manufacture', this.form.country_of_manufacture);
+      fd.append('type_of_bead', this.form.type_of_bead);
+      fd.append('weight', this.form.weight);
+      
+      // Відправляємо кольори як масив
+      this.form.colors.forEach(color => {
+        fd.append('colors[]', color);
+      });
+      
+      // Додаємо розміри як вкладені поля:
+      this.form.sizes.forEach((item, index) => {
+        fd.append(`sizes[${index}][size]`, item.size);
+        fd.append(`sizes[${index}][quantity]`, item.quantity);
+      });
+      
+      // Додаємо фурнітуру як вкладені поля:
+      this.form.fittings.forEach((item, index) => {
+        fd.append(`fittings[${index}][fitting]`, item.fitting);
+        fd.append(`fittings[${index}][material]`, item.material);
+        fd.append(`fittings[${index}][quantity]`, item.quantity);
+      });
+  
+      axios
+        .post('http://26.235.139.202:8080/api/admin/products', fd, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            'Content-Type': 'multipart/form-data'
+          }
+        })
+        .then(response => {
+          this.$emit('product-added', response.data.data);
+        })
+        .catch(error => {
+          console.error("Error adding product", error);
+        });
+    },
+
       close() {
         this.$emit('close');
       }
@@ -280,5 +339,62 @@
   .modal-button.submit:hover {
     background-color: #a01212;
   }
+
+  .colors-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.color-option {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.color-circle {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid #ccc;
+  margin-right: 6px;
+  position: relative;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.color-option:hover .color-circle {
+  transform: scale(1.1);
+}
+
+.color-option.selected .color-circle {
+  transform: scale(1.2);
+  border-color: #333;
+  animation: pulse 0.5s ease-out;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(0,0,0,0.3);
+  }
+  70% {
+    box-shadow: 0 0 0 12px rgba(0,0,0,0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(0,0,0,0);
+  }
+}
+
+/* Іконка галочки */
+.check-icon {
+  width: 16px;
+  height: 16px;
+}
+
+
+
   </style>
   

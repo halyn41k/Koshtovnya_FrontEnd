@@ -101,6 +101,7 @@ export default {
   },
   mounted() {
     this.fetchOrders();
+    document.title = "Звіти";
   },
   methods: {
     async fetchOrders() {

@@ -398,6 +398,9 @@ export default {
       this.fetchWishlist();
     }
   },
+  mounted(){
+    document.title = "Сторінка товару";
+  }
 };
 </script>
 

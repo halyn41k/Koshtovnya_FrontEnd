@@ -126,19 +126,7 @@ const routes = [
       requiresAdmin: true,
     },
   },
-  {
-    path: '/updateproduct',
-    name: 'ProductUpdate',
-    component: () => import('@/components/Admin/ProductUpdate.vue'),
-    beforeEnter: (to, from, next) => {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        next({ name: 'Login' });
-      } else {
-        next();
-      }
-    },
-  },
+ 
 ];
 
 const router = createRouter({

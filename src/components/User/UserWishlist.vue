@@ -147,6 +147,7 @@ export default {
 
   mounted() {
     this.fetchWishlist();
+    document.title = "Список бажаного";
   },
 };
 </script>
