@@ -260,14 +260,14 @@ export default {
       this.products.push(newProduct);
       this.closeAddModal();
     },
-    // Callback після успішного редагування товару
-    onProductUpdated(updatedProduct) {
-      const index = this.products.findIndex((p) => p.id === updatedProduct.id);
-      if (index !== -1) {
-        this.$set(this.products, index, updatedProduct);
-      }
-      this.closeEditModal();
-    },
+
+      onProductUpdated(updatedProduct) {
+        const index = this.products.findIndex(product => product.id === updatedProduct.id);
+        if (index !== -1) {
+          // Замінюємо старий елемент на оновлений
+          this.products.splice(index, 1, updatedProduct);
+        }
+      },
     // Callback після успішного видалення товару
     onProductDeleted(deletedProductId) {
       this.products = this.products.filter((p) => p.id !== deletedProductId);
@@ -291,7 +291,6 @@ applyFilters(filters) {
   const url = `http://26.235.139.202:8080/api/admin/products?${query}`;
   this.fetchProducts(url);
 },
-
 
   },
 };

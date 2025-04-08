@@ -443,7 +443,7 @@ async onSearch() {
 }
 .client-table__header {
   display: grid;
-  grid-template-columns: 5% 15% 15% 25% 15% 15% 10%;
+  grid-template-columns: 80px 150px 150px 300px 180px 150px 150px;
   align-items: center;
   padding: 12px 16px;
   border-bottom: 1px solid #e0e0e0;
@@ -470,7 +470,7 @@ async onSearch() {
 }
 .client-item {
   display: grid;
-  grid-template-columns: 5% 15% 15% 25% 15% 15% 10%;
+  grid-template-columns: 80px 150px 150px 300px 180px 150px 70px;
   align-items: center;
   padding: 12px 16px;
   border-bottom: 1px solid #e0e0e0;

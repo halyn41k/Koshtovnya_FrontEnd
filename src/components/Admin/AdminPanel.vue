@@ -4,7 +4,7 @@
     <header class="mini-header">
       <div class="mini-header-content">
         <div class="user-controls">
-          <div class="user-icon">
+          <div class="user-icon" @click="showProfile = true">
             <img src="@/assets/icons/user.svg" alt="User Icon" />
           </div>
           <div class="language-switcher">
@@ -17,11 +17,22 @@
         </div>
       </div>
     </header>
-    
+
+    <!-- Модал профілю адміністратора -->
+    <div
+      v-if="showProfile"
+      class="profile-modal-backdrop"
+      @click.self="showProfile = false"
+    >
+      <div class="profile-modal">
+        <button class="close-btn" @click="showProfile = false">✕</button>
+        <AdminProfile />
+      </div>
+    </div>
+
     <!-- Основна частина адмін-панелі -->
-    <main class="admin-panel">
+    <main class="admin-panel" :class="{ blurred: showProfile }">
       <aside class="sidebar">
-        <!-- Верхня частина бокової панелі -->
         <div class="sidebar-header">
           <div class="logo-wrapper">
             <img :src="siteSettings.site_logo" alt="Коштовня Лого" class="logo" />
@@ -29,14 +40,12 @@
           </div>
           <div class="admin-subtitle">{{ panelSubtitle }}</div>
         </div>
-        
-        <!-- Меню з табами -->
         <nav class="sidebar-nav">
           <ul class="nav-list">
-            <li 
-              class="nav-item" 
-              v-for="(menuItem, index) in computedMenuItems" 
-              :key="index" 
+            <li
+              class="nav-item"
+              v-for="(menuItem, index) in computedMenuItems"
+              :key="index"
               @click="selectTab(index)"
               :class="{ active: activeTab === index }"
             >
@@ -45,15 +54,11 @@
             </li>
           </ul>
         </nav>
-        
-        <!-- Кнопка виходу -->
         <div class="logout" @click="logout">
           <img src="@/assets/exit.png" alt="Exit Icon" class="logout-icon" />
           <span class="logout-text">Вийти</span>
         </div>
       </aside>
-      
-      <!-- Контент вибраної вкладки -->
       <section class="content">
         <component :is="activeComponent" />
       </section>
@@ -69,6 +74,7 @@ import ProductList from './ProductList.vue';
 import Orders from './Orders.vue';
 import Reports from './Reports.vue';
 import Settings from './Settings.vue';
+import AdminProfile from './AdminProfile.vue';
 
 export default {
   name: 'AdminPanel',
@@ -80,10 +86,12 @@ export default {
     Orders,
     Reports,
     Settings,
+    AdminProfile
   },
   data() {
     return {
-      activeTab: -1, // -1 означає, що ще не обрано вкладку
+      showProfile: false,
+      activeTab: -1,
       user: null,
       selectedLanguage: 'uk',
       siteSettings: {
@@ -93,8 +101,9 @@ export default {
   },
   computed: {
     activeComponent() {
-      if (this.activeTab === -1) return 'WelcomeAdmin';
-      return this.computedMenuItems[this.activeTab].component;
+      return this.activeTab === -1
+        ? 'WelcomeAdmin'
+        : this.computedMenuItems[this.activeTab].component;
     },
     currentFlag() {
       return this.selectedLanguage === 'uk'
@@ -103,47 +112,41 @@ export default {
     },
     panelSubtitle() {
       if (!this.user) return '';
-      if (this.user.role === 'superadmin') {
-        return 'SUPER ADMIN PANEL';
-      } else if (this.user.role === 'admin') {
-        return 'ADMIN PANEL';
-      } else if (this.user.role === 'manager') {
-        return 'MANAGER PANEL';
-      } else {
-        return '';
+      switch (this.user.role) {
+        case 'superadmin': return 'SUPER ADMIN PANEL';
+        case 'admin':      return 'ADMIN PANEL';
+        case 'manager':    return 'MANAGER PANEL';
+        default:           return '';
       }
     },
     computedMenuItems() {
-    if (!this.user) return [];
-    if (this.user.role === 'superadmin') {
-      return [
-        { title: 'Користувачі', icon: require('@/assets/icons/user.svg'), component: 'Clients' },
-        { title: 'Працівники', icon: require('@/assets/icons/user.svg'), component: 'Employees' },
-        { title: 'Товари', icon: require('@/assets/icons/goods.svg'), component: 'ProductList' },
-        { title: 'Замовлення', icon: require('@/assets/icons/orders.svg'), component: 'Orders' },
-        { title: 'Звіти', icon: require('@/assets/icons/reports.svg'), component: 'Reports' },
-        { title: 'Налаштування', icon: require('@/assets/icons/settings.svg'), component: 'Settings' }
-      ];
-    } else if (this.user.role === 'admin') {
-      return [
-        { title: 'Користувачі', icon: require('@/assets/icons/user.svg'), component: 'Clients' },
-        { title: 'Працівники', icon: require('@/assets/icons/user.svg'), component: 'Employees' },
-        { title: 'Товари', icon: require('@/assets/icons/goods.svg'), component: 'ProductList' },
-        { title: 'Замовлення', icon: require('@/assets/icons/orders.svg'), component: 'Orders' },
-        { title: 'Права доступу', icon: require('@/assets/icons/settings.svg'), component: 'Settings' },
-        { title: 'Налаштування сайту', icon: require('@/assets/icons/settings.svg'), component: 'Settings' }
-      ];
-    } else if (this.user.role === 'manager') {
-      return [
-        { title: 'Користувачі', icon: require('@/assets/icons/user.svg'), component: 'Clients' },
-        { title: 'Товари', icon: require('@/assets/icons/goods.svg'), component: 'ProductList' },
-        { title: 'Замовлення', icon: require('@/assets/icons/orders.svg'), component: 'Orders' }
-      ];
-    }
-    return []; // Значення за замовчуванням, якщо роль не співпадає
-  
-
-      
+      if (!this.user) return [];
+      if (this.user.role === 'superadmin') {
+        return [
+          { title: 'Користувачі',      icon: require('@/assets/icons/user.svg'),    component: 'Clients' },
+          { title: 'Працівники',       icon: require('@/assets/icons/user.svg'),    component: 'Employees' },
+          { title: 'Товари',           icon: require('@/assets/icons/goods.svg'),   component: 'ProductList' },
+          { title: 'Замовлення',       icon: require('@/assets/icons/orders.svg'),  component: 'Orders' },
+          { title: 'Звіти',            icon: require('@/assets/icons/reports.svg'), component: 'Reports' },
+          { title: 'Налаштування',     icon: require('@/assets/icons/settings.svg'),component: 'Settings' }
+        ];
+      } else if (this.user.role === 'admin') {
+        return [
+          { title: 'Користувачі',      icon: require('@/assets/icons/user.svg'),    component: 'Clients' },
+          { title: 'Працівники',       icon: require('@/assets/icons/user.svg'),    component: 'Employees' },
+          { title: 'Товари',           icon: require('@/assets/icons/goods.svg'),   component: 'ProductList' },
+          { title: 'Замовлення',       icon: require('@/assets/icons/orders.svg'),  component: 'Orders' },
+          { title: 'Права доступу',    icon: require('@/assets/icons/settings.svg'),component: 'Settings' },
+          { title: 'Налаштування сайту',icon: require('@/assets/icons/settings.svg'),component: 'Settings' }
+        ];
+      } else if (this.user.role === 'manager') {
+        return [
+          { title: 'Користувачі',      icon: require('@/assets/icons/user.svg'),    component: 'Clients' },
+          { title: 'Товари',           icon: require('@/assets/icons/goods.svg'),   component: 'ProductList' },
+          { title: 'Замовлення',       icon: require('@/assets/icons/orders.svg'),  component: 'Orders' }
+        ];
+      }
+      return [];
     }
   },
   methods: {
@@ -162,13 +165,13 @@ export default {
       try {
         const response = await this.$axios.get('http://26.235.139.202:8080/api/site-settings');
         const settings = response.data.data;
-        settings.forEach(setting => {
-          if (setting.setting_key === 'site_logo') {
-            this.siteSettings.site_logo = setting.setting_value;
+        settings.forEach(s => {
+          if (s.setting_key === 'site_logo') {
+            this.siteSettings.site_logo = s.setting_value;
           }
         });
-      } catch (error) {
-        console.error('Помилка завантаження логотипу:', error);
+      } catch (err) {
+        console.error('Помилка завантаження логотипу:', err);
       }
     }
   },
@@ -194,7 +197,6 @@ export default {
   font-style: normal;
 }
 
-/* Контейнер для всього адмін інтерфейсу */
 .admin-container {
   display: flex;
   flex-direction: column;
@@ -225,6 +227,7 @@ export default {
 .user-icon img {
   width: 24px;
   height: 24px;
+  cursor: pointer;
 }
 .language-switcher {
   display: flex;
@@ -252,11 +255,14 @@ export default {
   font-weight: 600;
 }
 
-/* Панель – відступ зверху, щоб міні хедер не перекривав */
+/* Основна частина */
 .admin-panel {
   display: flex;
   flex: 1;
   position: relative;
+}
+.blurred {
+  filter: blur(2px);
 }
 
 /* Сайдбар */
@@ -272,7 +278,6 @@ export default {
 .sidebar-header {
   margin-bottom: 20px;
 }
-/* Контейнер для логотипу та назви */
 .logo-wrapper {
   display: flex;
   align-items: center;
@@ -296,8 +301,6 @@ export default {
   margin-top: 10px;
   margin-left: 27px;
 }
-
-/* Меню табів */
 .sidebar-nav .nav-list {
   list-style: none;
   padding: 0;
@@ -332,8 +335,6 @@ export default {
   height: 20px;
   margin-right: 10px;
 }
-
-/* Кнопка виходу */
 .logout {
   display: flex;
   align-items: center;
@@ -354,11 +355,36 @@ export default {
   height: 20px;
   margin-right: 10px;
 }
-
-/* Контент */
 .content {
   flex: 1;
   padding: 20px;
   overflow-y: auto;
+}
+
+/* Модалка */
+.profile-modal-backdrop {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+.profile-modal {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  max-width: 600px;
+  width: 100%;
+  position: relative;
+}
+.close-btn {
+  position: absolute;
+  top: 10px; right: 10px;
+  border: none;
+  background: transparent;
+  font-size: 18px;
+  cursor: pointer;
 }
 </style>

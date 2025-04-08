@@ -187,6 +187,8 @@ export default {
   cursor: pointer;
   border-radius: 4px;
   transition: background-color 0.3s;
+  font-family: Montserrat, sans-serif;
+  font-weight: 600;
 }
 
 .action-button:hover {
@@ -239,7 +241,7 @@ export default {
 
 .order-table__header {
   display: grid;
-  grid-template-columns: 10% 25% 30% 35%;
+  grid-template-columns: 100px 200px 300px 300px;
   align-items: center;
   padding: 12px 16px;
   border-bottom: 1px solid #e0e0e0;
@@ -263,7 +265,7 @@ export default {
 
 .order-item {
   display: grid;
-  grid-template-columns: 10% 25% 30% 35%;
+  grid-template-columns: 100px 200px 300px 300px;
   align-items: center;
   padding: 12px 16px;
   border-bottom: 1px solid #e0e0e0;
