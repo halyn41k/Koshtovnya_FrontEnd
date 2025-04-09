@@ -151,10 +151,11 @@
       </button>
     </div>
 
-    <!-- Модальне вікно -->
+    <!-- Модальне вікно для додавання/оновлення -->
     <UserModal
       v-if="showModal"
       :title="modalTitle"
+      :initialForm="form"
       :key="modalKey"
       @close="closeModal"
       @userSubmit="submitForm"
@@ -164,14 +165,15 @@
 
 <script>
 import axios from "axios";
+import UserModal from "./UserModal.vue"; // скоригуйте шлях за потреби
 
 export default {
   name: "EmployeeList",
+  components: { UserModal },
   data() {
     return {
       users: [],
       searchQuery: "",
-      // Значення за замовчуванням для фільтра - "employee"
       searchRole: "employee",
       showModal: false,
       isAddMode: true,
@@ -186,10 +188,8 @@ export default {
         role: ""
       },
       originalEmail: "",
-      // Пагінація
       currentPage: 1,
       totalPages: 3,
-      // Стан сортування
       sortState: {
         id: "none",
         first_name: "none",
@@ -198,11 +198,18 @@ export default {
         date: "none",
         role: "none"
       },
-      // Фільтр
       showFilter: false,
       availableRoles: ["admin", "superadmin", "manager"],
       selectedRole: "employee"
     };
+  },
+  computed: {
+    // Для перевантаження модального вікна при кожному відкритті залежно від режиму
+    modalKey() {
+      return this.isAddMode
+        ? `add-employee`
+        : `edit-employee-${this.form.id}`;
+    }
   },
   mounted() {
     this.fetchUsers();
@@ -253,7 +260,7 @@ export default {
         this.sortState[column] = "none";
       }
       console.log(`Sort for ${column}: ${this.sortState[column]}`);
-      // Тут можна реалізувати сортування, якщо потрібно
+      // Реалізацію сортування можна додати тут
     },
     getSortIcon(state) {
       if (state === "asc") {
@@ -264,9 +271,10 @@ export default {
         return require("@/assets/icons/none_sorted.svg");
       }
     },
+    // Додавання працівника
     async addUser() {
       try {
-        const response = await axios.post(
+        await axios.post(
           "http://26.235.139.202:8080/api/admin/user",
           {
             first_name: this.form.first_name,
@@ -283,13 +291,14 @@ export default {
             }
           }
         );
-        console.log("Працівника додано:", response.data);
+        console.log("Працівника додано");
         this.fetchUsers();
         this.closeModal();
       } catch (error) {
         console.error("Помилка додавання працівника:", error);
       }
     },
+    // Оновлення даних працівника
     async updateUser() {
       try {
         const payload = {
@@ -302,7 +311,7 @@ export default {
         if (this.isAddMode) {
           payload.email = this.form.email;
         }
-        const response = await axios.patch(
+        await axios.patch(
           `http://26.235.139.202:8080/api/admin/user/${this.form.id}`,
           payload,
           {
@@ -312,7 +321,7 @@ export default {
             }
           }
         );
-        console.log("Дані працівника оновлено:", response.data);
+        console.log("Дані працівника оновлено");
         this.fetchUsers();
         this.closeModal();
       } catch (error) {
@@ -321,7 +330,7 @@ export default {
     },
     async deleteEmployee(id) {
       try {
-        const response = await axios.delete(
+        await axios.delete(
           `http://26.235.139.202:8080/api/admin/users/${id}`,
           {
             headers: {
@@ -330,12 +339,13 @@ export default {
             }
           }
         );
-        console.log("Працівника видалено:", response.data);
+        console.log("Працівника видалено");
         this.fetchUsers();
       } catch (error) {
         console.error("Помилка видалення працівника:", error);
       }
     },
+    // Відкриття модального вікна для додавання
     openAddModal() {
       this.isAddMode = true;
       this.modalTitle = "Додати працівника";
@@ -350,6 +360,7 @@ export default {
       };
       this.showModal = true;
     },
+    // Відкриття модального вікна для редагування
     openUpdateModal(employee) {
       this.isAddMode = false;
       this.modalTitle = "Оновити дані працівника";
@@ -357,7 +368,9 @@ export default {
       this.originalEmail = employee.email;
       this.showModal = true;
     },
-    submitForm() {
+    // Обробка даних з модального вікна (отримуємо об'єкт з форми)
+    submitForm(formData) {
+      this.form = { ...formData };
       if (this.isAddMode) {
         this.addUser();
       } else {
@@ -369,19 +382,18 @@ export default {
     },
     goToPage(page) {
       this.currentPage = page;
-      // Логіка для завантаження даних певної сторінки, якщо потрібно
+      // Реалізуйте логіку завантаження даних певної сторінки, якщо потрібно
     },
-    // Методи для фільтра
+    // Методи для роботи з фільтром
     openFilter() {
-      this.selectedRole = this.searchRole; // встановлюємо поточний фільтр
+      this.selectedRole = this.searchRole;
       this.showFilter = true;
     },
     closeFilter() {
       this.showFilter = false;
     },
     selectRole(role) {
-      // Оскільки чекбокси дозволяють лише один вибір,
-      // при виборі нового значення встановлюємо його як selectedRole
+      // Дозволяємо вибір лише однієї ролі
       this.selectedRole = role;
     },
     applyFilter() {
@@ -392,6 +404,7 @@ export default {
   }
 };
 </script>
+
 
 <style scoped>
 .employee-list {

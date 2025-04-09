@@ -5,46 +5,74 @@
       <form @submit.prevent="submitForm">
         <!-- Назва та ціна -->
         <div class="form-group">
-          <label>Назва</label>
-          <input type="text" v-model="form.name" required />
+          <label for="name">Назва</label>
+          <input id="name" type="text" v-model="form.name" required />
         </div>
         <div class="form-group">
-          <label>Ціна</label>
-          <input type="number" v-model="form.price" required />
+          <label for="price">Ціна</label>
+          <input id="price" type="number" v-model="form.price" required />
         </div>
         <!-- Селекти з даними форми -->
         <div class="form-group">
-          <label>Категорія</label>
-          <select v-model="form.category" required>
+          <label for="category">Категорія</label>
+          <select id="category" v-model="form.category" required>
             <option value="">Оберіть категорію</option>
-            <option v-for="item in formData.categories" :key="item" :value="item">{{ item }}</option>
+            <option
+              v-for="item in formData.categories"
+              :key="item"
+              :value="item"
+            >
+              {{ item }}
+            </option>
           </select>
         </div>
         <div class="form-group">
-          <label>Бісер виробник</label>
-          <select v-model="form.bead_producer" required>
+          <label for="bead_producer">Бісер виробник</label>
+          <select id="bead_producer" v-model="form.bead_producer" required>
             <option value="">Оберіть виробника</option>
-            <option v-for="item in formData.bead_producers" :key="item" :value="item">{{ item }}</option>
+            <option
+              v-for="item in formData.bead_producers"
+              :key="item"
+              :value="item"
+            >
+              {{ item }}
+            </option>
           </select>
         </div>
         <div class="form-group">
-          <label>Країна виробництва</label>
-          <select v-model="form.country_of_manufacture" required>
+          <label for="country_of_manufacture">Країна виробництва</label>
+          <select
+            id="country_of_manufacture"
+            v-model="form.country_of_manufacture"
+            required
+          >
             <option value="">Оберіть країну</option>
-            <option v-for="item in formData.countries_of_manufacture" :key="item" :value="item">{{ item }}</option>
+            <option
+              v-for="item in formData.countries_of_manufacture"
+              :key="item"
+              :value="item"
+            >
+              {{ item }}
+            </option>
           </select>
         </div>
         <div class="form-group">
-          <label>Тип бісеру</label>
-          <select v-model="form.type_of_bead" required>
+          <label for="type_of_bead">Тип бісеру</label>
+          <select id="type_of_bead" v-model="form.type_of_bead" required>
             <option value="">Оберіть тип</option>
-            <option v-for="item in formData.type_of_bead" :key="item" :value="item">{{ item }}</option>
+            <option
+              v-for="item in formData.type_of_bead"
+              :key="item"
+              :value="item"
+            >
+              {{ item }}
+            </option>
           </select>
         </div>
         <!-- Вага та колір -->
         <div class="form-group">
-          <label>Вага</label>
-          <input type="number" v-model="form.weight" required />
+          <label for="weight">Вага</label>
+          <input id="weight" type="number" v-model="form.weight" required />
         </div>
         <div class="form-group">
           <label>Кольори</label>
@@ -56,9 +84,21 @@
               :class="{ selected: form.colors.includes(color) }"
               @click="toggleColor(color)"
             >
-              <div class="color-circle" :style="{ backgroundColor: colorMap[color] || '#fff' }">
-                <svg v-if="form.colors.includes(color)" class="check-icon" viewBox="0 0 24 24">
-                  <polyline points="20 6 9 17 4 12" fill="none" stroke="#fff" stroke-width="2"/>
+              <div
+                class="color-circle"
+                :style="{ backgroundColor: colorMap[color] || '#fff' }"
+              >
+                <svg
+                  v-if="form.colors.includes(color)"
+                  class="check-icon"
+                  viewBox="0 0 24 24"
+                >
+                  <polyline
+                    points="20 6 9 17 4 12"
+                    fill="none"
+                    stroke="#fff"
+                    stroke-width="2"
+                  />
                 </svg>
               </div>
               <span class="color-label">{{ color }}</span>
@@ -68,39 +108,110 @@
         <!-- Динамічні поля для розмірів -->
         <div class="form-group">
           <label>Розміри</label>
-          <div v-for="(sizeItem, index) in form.sizes" :key="index" class="dynamic-field">
-            <input type="text" v-model="sizeItem.size" placeholder="Розмір" required />
-            <input type="number" v-model="sizeItem.quantity" placeholder="Кількість" min="1" required />
-            <button type="button" @click="removeSize(index)">Видалити</button>
+          <div
+            v-for="(sizeItem, index) in form.sizes"
+            :key="index"
+            class="dynamic-field"
+          >
+            <input
+              type="text"
+              v-model="sizeItem.size"
+              placeholder="Розмір"
+              required
+            />
+            <input
+              type="number"
+              v-model="sizeItem.quantity"
+              placeholder="Кількість"
+              min="1"
+              required
+            />
+            <button
+              type="button"
+              class="btn btn-remove"
+              @click="removeSize(index)"
+            >
+              Видалити
+            </button>
           </div>
-          <button type="button" @click="addSize">Додати розмір</button>
+          <button
+            type="button"
+            class="btn btn-add"
+            @click="addSize"
+          >
+            Додати розмір
+          </button>
         </div>
         <!-- Динамічні поля для фурнітури -->
         <div class="form-group">
           <label>Фурнітура</label>
-          <div v-for="(fitItem, index) in form.fittings" :key="index" class="dynamic-field">
+          <div
+            v-for="(fitItem, index) in form.fittings"
+            :key="index"
+            class="dynamic-field"
+          >
             <select v-model="fitItem.fitting" required>
               <option value="">Оберіть фурнітуру</option>
-              <option v-for="item in formData.fittings" :key="item" :value="item">{{ item }}</option>
+              <option
+                v-for="item in formData.fittings"
+                :key="item"
+                :value="item"
+              >
+                {{ item }}
+              </option>
             </select>
             <select v-model="fitItem.material" required>
               <option value="">Оберіть матеріал</option>
-              <option v-for="item in formData.materials" :key="item" :value="item">{{ item }}</option>
+              <option
+                v-for="item in formData.materials"
+                :key="item"
+                :value="item"
+              >
+                {{ item }}
+              </option>
             </select>
-            <input type="number" v-model="fitItem.quantity" placeholder="Кількість" min="1" required />
-            <button type="button" @click="removeFitting(index)">Видалити</button>
+            <input
+              type="number"
+              v-model="fitItem.quantity"
+              placeholder="Кількість"
+              min="1"
+              required
+            />
+            <button
+              type="button"
+              class="btn btn-remove"
+              @click="removeFitting(index)"
+            >
+              Видалити
+            </button>
           </div>
-          <button type="button" @click="addFitting">Додати фурнітуру</button>
+          <button
+            type="button"
+            class="btn btn-add"
+            @click="addFitting"
+          >
+            Додати фурнітуру
+          </button>
         </div>
         <!-- Зображення -->
         <div class="form-group">
           <label>Зображення</label>
-          <input type="file" @change="handleFileChange" accept="image/jpeg,image/png,image/jpg" />
+          <label class="file-input-label">
+            Вибрати файл
+            <input
+              type="file"
+              @change="handleFileChange"
+              accept="image/jpeg,image/png,image/jpg"
+              class="file-input"
+            />
+          </label>
         </div>
         <!-- Дії -->
         <div class="modal-actions">
-          <button type="button" class="modal-button cancel" @click="close">Скасувати</button>
-          <button type="submit" class="modal-button submit">Додати</button>
+          <button type="button" class="btn btn-secondary" @click="close">
+            Скасувати
+          </button>
+          <button type="submit" class="btn btn-primary">Додати</button>
         </div>
       </form>
     </div>
@@ -108,37 +219,37 @@
 </template>
 
 <script>
-import axios from 'axios';
+import axios from "axios";
 
 export default {
-  name: 'AddProductModal',
+  name: "AddProductModal",
   data() {
     return {
       colorMap: {
-        'Чорний': '#000000',
-        'Червоний': '#FF0000',
-        'Білий': '#FFFFFF',
-        'Зелений': '#008000',
-        'Синій': '#0000FF',
-        'Жовтий': '#FFFF00',
-        'Помаранчевий': '#FFA500',
-        'Фіолетовий': '#800080',
-        'Коричневий': '#8B4513',
-        'Сірий': '#808080',
-        'Рожевий': '#FFC0CB',
-        'Блакитний': '#87CEEB',
-        'Бежевий': '#F5F5DC',
-        'Золотий': '#FFD700',
-        'Сріблястий': '#C0C0C0'
+        Чорний: "#000000",
+        Червоний: "#FF0000",
+        Білий: "#FFFFFF",
+        Зелений: "#008000",
+        Синій: "#0000FF",
+        Жовтий: "#FFFF00",
+        Помаранчевий: "#FFA500",
+        Фіолетовий: "#800080",
+        Коричневий: "#8B4513",
+        Сірий: "#808080",
+        Рожевий: "#FFC0CB",
+        Блакитний: "#87CEEB",
+        Бежевий: "#F5F5DC",
+        Золотий: "#FFD700",
+        Сріблястий: "#C0C0C0",
       },
       form: {
-        name: '',
-        price: '',
-        category: '',
-        bead_producer: '',
-        country_of_manufacture: '',
-        type_of_bead: '',
-        weight: '',
+        name: "",
+        price: "",
+        category: "",
+        bead_producer: "",
+        country_of_manufacture: "",
+        type_of_bead: "",
+        weight: "",
         colors: [],
         sizes: [],
         fittings: [],
@@ -152,213 +263,147 @@ export default {
         colors: [],
         fittings: [],
         materials: [],
-      }
+      },
     };
   },
   mounted() {
     axios
-      .get('http://26.235.139.202:8080/api/admin/products/form-data', {
+      .get("http://26.235.139.202:8080/api/admin/products/form-data", {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`
-        }
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
       })
-      .then(response => {
-        console.log('Response from form-data:', response.data);
-        // Змінили з response.data.product на response.data.data
-        const data = response.data.data;
-        this.formData.categories = data.categories || [];
-        this.formData.bead_producers = data.bead_producers || [];
-        this.formData.countries_of_manufacture = data.countries_of_manufacture || [];
-        this.formData.type_of_bead = data.type_of_bead || [];
-        this.formData.colors = data.colors || [];
-        this.formData.fittings = data.fittings || [];
-        this.formData.materials = data.materials || [];
-        console.log('Form data loaded:', this.formData);
+      .then((res) => {
+        const d = res.data.data;
+        this.formData.categories = d.categories || [];
+        this.formData.bead_producers = d.bead_producers || [];
+        this.formData.countries_of_manufacture =
+          d.countries_of_manufacture || [];
+        this.formData.type_of_bead = d.type_of_bead || [];
+        this.formData.colors = d.colors || [];
+        this.formData.fittings = d.fittings || [];
+        this.formData.materials = d.materials || [];
       })
-      .catch(err => {
-        console.error("Error fetching form data", err);
-      });
+      .catch(console.error);
   },
   methods: {
     handleFileChange(e) {
-      const file = e.target.files[0];
-      this.form.image = file;
-      console.log('File selected:', file);
+      this.form.image = e.target.files[0];
     },
     addSize() {
-      this.form.sizes.push({ size: '', quantity: 1 });
-      console.log('Added size field, current sizes:', this.form.sizes);
+      this.form.sizes.push({ size: "", quantity: 1 });
     },
-    removeSize(index) {
-      this.form.sizes.splice(index, 1);
-      console.log(`Removed size at index ${index}, current sizes:`, this.form.sizes);
+    removeSize(i) {
+      this.form.sizes.splice(i, 1);
     },
     addFitting() {
-      this.form.fittings.push({ fitting: '', material: '', quantity: 1 });
-      console.log('Added fitting field, current fittings:', this.form.fittings);
+      this.form.fittings.push({ fitting: "", material: "", quantity: 1 });
     },
-    removeFitting(index) {
-      this.form.fittings.splice(index, 1);
-      console.log(`Removed fitting at index ${index}, current fittings:`, this.form.fittings);
+    removeFitting(i) {
+      this.form.fittings.splice(i, 1);
     },
-    toggleColor(color) {
-      const index = this.form.colors.indexOf(color);
-      if (index === -1) {
-        this.form.colors.push(color);
-      } else {
-        this.form.colors.splice(index, 1);
-      }
-      console.log('Toggled color:', color, 'Current colors:', this.form.colors);
+    toggleColor(c) {
+      const i = this.form.colors.indexOf(c);
+      if (i === -1) this.form.colors.push(c);
+      else this.form.colors.splice(i, 1);
     },
     submitForm() {
-      console.log('Submitting form with data:', this.form);
       const fd = new FormData();
-      if (this.form.image) {
-        fd.append('image', this.form.image);
-      }
-      fd.append('name', this.form.name);
-      fd.append('price', this.form.price);
-      fd.append('category', this.form.category);
-      fd.append('bead_producer', this.form.bead_producer);
-      fd.append('country_of_manufacture', this.form.country_of_manufacture);
-      fd.append('type_of_bead', this.form.type_of_bead);
-      fd.append('weight', this.form.weight);
-      
-      // Додаємо кольори як масив
-      this.form.colors.forEach(color => {
-        fd.append('colors[]', color);
+      if (this.form.image) fd.append("image", this.form.image);
+      Object.entries(this.form).forEach(([k, v]) => {
+        if (k === "sizes" || k === "fittings" || k === "colors") return;
+        fd.append(k, v);
       });
-      
-      // Додаємо розміри як вкладені поля
-      this.form.sizes.forEach((item, index) => {
-        fd.append(`sizes[${index}][size]`, item.size);
-        fd.append(`sizes[${index}][quantity]`, item.quantity);
+      this.form.colors.forEach((c) => fd.append("colors[]", c));
+      this.form.sizes.forEach((s, i) => {
+        fd.append(`sizes[${i}][size]`, s.size);
+        fd.append(`sizes[${i}][quantity]`, s.quantity);
       });
-      
-      // Додаємо фурнітуру як вкладені поля
-      this.form.fittings.forEach((item, index) => {
-        fd.append(`fittings[${index}][fitting]`, item.fitting);
-        fd.append(`fittings[${index}][material]`, item.material);
-        fd.append(`fittings[${index}][quantity]`, item.quantity);
+      this.form.fittings.forEach((f, i) => {
+        fd.append(`fittings[${i}][fitting]`, f.fitting);
+        fd.append(`fittings[${i}][material]`, f.material);
+        fd.append(`fittings[${i}][quantity]`, f.quantity);
       });
-  
       axios
-        .post('http://26.235.139.202:8080/api/admin/products', fd, {
+        .post("http://26.235.139.202:8080/api/admin/products", fd, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
-            'Content-Type': 'multipart/form-data'
-          }
+            "Content-Type": "multipart/form-data",
+          },
         })
-        .then(response => {
-          console.log('Response from add product:', response.data);
-          const arr = response.data.product;
-          let newProduct = {};
-          if (Array.isArray(arr)) {
-            newProduct = arr.reduce((acc, obj) => ({ ...acc, ...obj }), {});
-            console.log('Combined product from array:', newProduct);
-          } else if (response.data.data) {
-            newProduct = response.data.data;
-            console.log('Product from data key:', newProduct);
-          } else {
-            newProduct = arr;
-            console.log('Product received:', newProduct);
-          }
-          if (!newProduct.id) {
-            console.warn('Нова сутність товару не містить id, перевірте відповідь сервера.');
-          } else {
-            console.log('New product id:', newProduct.id);
-          }
-          this.$emit('product-added', newProduct);
+        .then((r) => {
+          const d = r.data.data || r.data.product;
+          this.$emit(
+            "product-added",
+            Array.isArray(d) ? Object.assign({}, ...d) : d
+          );
+          this.close();
         })
-        .catch(error => {
-          console.error("Error adding product", error);
-        });
+        .catch(console.error);
     },
     close() {
-      this.$emit('close');
-    }
-  }
+      this.$emit("close");
+    },
+  },
 };
 </script>
 
 <style scoped>
 .modal-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0,0,0,0.5);
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 2000;
 }
 .modal-container {
-  background-color: #fff;
-  padding: 20px;
-  border-radius: 6px;
+  background: #fff;
+  padding: 24px;
+  border-radius: 8px;
   width: 600px;
   max-height: 90vh;
   overflow-y: auto;
   font-family: Montserrat, sans-serif;
 }
 .modal-title {
-  font-size: 20px;
+  font-size: 24px;
   font-weight: 700;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
   text-align: center;
 }
+
+/* Вирівнюємо лейбли та інпути в дві колонки */
 .form-group {
-  margin-bottom: 15px;
+  display: grid;
+  grid-template-columns: 150px 1fr;
+  align-items: center;
+  margin-bottom: 16px;
 }
 .form-group label {
-  display: block;
+  margin: 0;
   font-weight: 600;
-  margin-bottom: 5px;
 }
 .form-group input[type="text"],
 .form-group input[type="number"],
-.form-group select,
-.form-group input[type="file"] {
+.form-group select {
   width: 100%;
-  padding: 8px;
+  padding: 8px 12px;
   border: 1px solid #ccc;
   border-radius: 4px;
+  font-size: 14px;
 }
-.dynamic-field {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 10px;
+
+/* Виносимо великі блоки в другу колонку */
+.form-group .colors-container,
+.form-group .dynamic-field,
+.form-group .btn-add,
+.form-group .file-input-label {
+  grid-column: 2 / 3;
 }
-.dynamic-field input,
-.dynamic-field select {
-  flex: 1;
-}
-.modal-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  margin-top: 20px;
-}
-.modal-button {
-  padding: 8px 16px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-weight: 600;
-}
-.modal-button.cancel {
-  background-color: #ccc;
-  color: #000;
-}
-.modal-button.submit {
-  background-color: #6b1f1f;
-  color: #fff;
-}
-.modal-button.submit:hover {
-  background-color: #a01212;
-}
+
+/* Стилі для кольорів, динамічних полів і кнопок лишаються без змін */
 .colors-container {
   display: flex;
   flex-wrap: wrap;
@@ -375,34 +420,92 @@ export default {
   border-radius: 50%;
   border: 2px solid #ccc;
   margin-right: 6px;
-  position: relative;
-  transition: transform 0.2s ease, border-color 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
+  transition: transform 0.2s, border-color 0.2s;
 }
 .color-option:hover .color-circle {
   transform: scale(1.1);
 }
 .color-option.selected .color-circle {
+  border-color: #6b1f1f;
   transform: scale(1.2);
-  border-color: #333;
-  animation: pulse 0.5s ease-out;
-}
-@keyframes pulse {
-  0% {
-    box-shadow: 0 0 0 0 rgba(0,0,0,0.3);
-  }
-  70% {
-    box-shadow: 0 0 0 12px rgba(0,0,0,0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(0,0,0,0);
-  }
 }
 .check-icon {
   width: 16px;
   height: 16px;
+}
+.dynamic-field {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.dynamic-field input,
+.dynamic-field select {
+  flex: 1;
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+}
+.file-input-label {
+  display: inline-block;
+  padding: 8px 16px;
+  background: #f0f0f0;
+  border: 1px dashed #aaa;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #333;
+}
+.file-input-label:hover {
+  background: #e0e0e0;
+}
+.file-input {
+  display: none;
+}
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+}
+.btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.btn-add {
+  background: #6b1f1f;
+  color: #fff;
+}
+.btn-add:hover {
+  background: #c82333;
+}
+.btn-remove {
+  background: #dc3545;
+  color: #fff;
+}
+.btn-remove:hover {
+  background: #c82333;
+}
+.btn-primary {
+  background: #6b1f1f;
+  color: #fff;
+}
+.btn-primary:hover {
+  background: #5a1a1a;
+}
+.btn-secondary {
+  background: #ccc;
+  color: #000;
+}
+.btn-secondary:hover {
+  background: #b3b3b3;
 }
 </style>

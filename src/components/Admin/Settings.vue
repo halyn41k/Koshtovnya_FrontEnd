@@ -153,15 +153,10 @@ export default {
   }
 }
 
-.settings-logo {
-  aspect-ratio: 1.07;
-  object-fit: contain;
-  object-position: center;
-  width: 73px;
-}
 
 .settings-title {
-  font-size: 24px;
+  top: -150px;
+  font-size: 34px;
   font-weight: 700;
   margin: 0;
 }

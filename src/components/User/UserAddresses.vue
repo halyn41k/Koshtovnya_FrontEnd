@@ -783,7 +783,7 @@ export default {
 
   .save-button,
   .cancel-button {
-    width: 50%;
+    width: 250px;
     gap: 10px;
     background-color: #6b1f1f;
     color: white;
