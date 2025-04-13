@@ -174,7 +174,7 @@ export default {
     async fetchUsers() {
   try {
     const response = await axios.get(
-      "http://26.235.139.202:8080/api/admin/users",
+      "https://koshtovnya.api-dev.bmax-edu.website/api/admin/users",
       {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -194,7 +194,7 @@ async onSearch() {
   }
   try {
     const response = await axios.get(
-      `http://26.235.139.202:8080/api/admin/users/search/${this.searchQuery}`,
+      `https://koshtovnya.api-dev.bmax-edu.website/api/admin/users/search/${this.searchQuery}`,
       {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -212,7 +212,7 @@ async onSearch() {
     async addUser(userData) {
       try {
         const response = await axios.post(
-          "http://26.235.139.202:8080/api/admin/user",
+          "https://koshtovnya.api-dev.bmax-edu.website/api/admin/user",
           {
             first_name: userData.first_name,
             second_name: userData.second_name,
@@ -253,7 +253,7 @@ async onSearch() {
           payload.email = userData.email;
         }
         const response = await axios.patch(
-          `http://26.235.139.202:8080/api/admin/user/${userData.id}`,
+          `https://koshtovnya.api-dev.bmax-edu.website/api/admin/user/${userData.id}`,
           payload,
           {
             headers: {
@@ -270,7 +270,7 @@ async onSearch() {
     },
     deleteUser(id) {
       axios
-        .delete(`http://26.235.139.202:8080/api/admin/users/${id}`, {
+        .delete(`https://koshtovnya.api-dev.bmax-edu.website/api/admin/users/${id}`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
             Accept: "application/json"

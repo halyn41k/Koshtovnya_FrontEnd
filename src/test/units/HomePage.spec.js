@@ -108,13 +108,13 @@ describe('HomePage.vue', () => {
 
   it('має отримати популярні продукти на монтуванні', async () => {
     await wrapper.vm.fetchPopularProducts();
-    expect(global.fetch).toHaveBeenCalledWith('http://26.235.139.202:8080/api/popular-products');
+    expect(global.fetch).toHaveBeenCalledWith('https://koshtovnya.api-dev.bmax-edu.website/api/popular-products');
   });
 
   // Тестування API запитів (нові надходження)
   it('повинен отримати нових надходжень', async () => {
     await wrapper.vm.fetchNewArrivals();
-    expect(global.fetch).toHaveBeenCalledWith('http://26.235.139.202:8080/api/new-arrivals');
+    expect(global.fetch).toHaveBeenCalledWith('https://koshtovnya.api-dev.bmax-edu.website/api/new-arrivals');
   });
 
   // Тестування IntersectionObserver

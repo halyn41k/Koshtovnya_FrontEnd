@@ -53,7 +53,7 @@ export default {
       },
       logoPreview: null,
       // Вказуємо endpoint для оновлення налаштувань
-      apiUrl: "http://26.235.139.202:8080/api/admin/site-settings",
+      apiUrl: "https://koshtovnya.api-dev.bmax-edu.website/api/admin/site-settings",
     };
   },
   methods: {

@@ -77,7 +77,7 @@ export default {
     this.isVisible = false;
     return;
   }
-  const apiUrl = `http://26.235.139.202:8080/api/products/search/${encodeURIComponent(trimmedQuery)}`;
+  const apiUrl = `https://koshtovnya.api-dev.bmax-edu.website/api/products/search/${encodeURIComponent(trimmedQuery)}`;
   this.loading = true;
   this.isVisible = true;
   axios

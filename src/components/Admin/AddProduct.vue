@@ -158,7 +158,7 @@ export default {
     async fetchFormData() {
       try {
         const token = localStorage.getItem("token");
-        const response = await fetch('http://26.235.139.202:8080/api/admin/products/form-data', {
+        const response = await fetch('https://koshtovnya.api-dev.bmax-edu.website/api/admin/products/form-data', {
           headers: {
             'Accept': 'application/json',
             'Authorization': `Bearer ${token}`,
@@ -230,7 +230,7 @@ export default {
 
       try {
         const token = localStorage.getItem("token");
-        const response = await fetch('http://26.235.139.202:8080/api/admin/products', {
+        const response = await fetch('https://koshtovnya.api-dev.bmax-edu.website/api/admin/products', {
           method: 'POST',
           body: formData,
           headers: {

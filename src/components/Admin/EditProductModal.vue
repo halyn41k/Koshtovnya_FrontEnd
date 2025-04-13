@@ -287,7 +287,7 @@ export default {
     fetchFormData() {
       axios
         .get(
-          "http://26.235.139.202:8080/api/admin/products/form-data",
+          "https://koshtovnya.api-dev.bmax-edu.website/api/admin/products/form-data",
           { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
         )
         .then(r => {
@@ -347,7 +347,7 @@ export default {
       });
       axios
         .post(
-          `http://26.235.139.202:8080/api/admin/products/${this.product.id}`,
+          `https://koshtovnya.api-dev.bmax-edu.website/api/admin/products/${this.product.id}`,
           fd,
           {
             headers: {

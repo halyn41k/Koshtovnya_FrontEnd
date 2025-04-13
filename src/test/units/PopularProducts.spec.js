@@ -318,7 +318,7 @@ describe('PopularProducts.vue', () => {
     await wrapper.vm.fetchProducts();
   
     // Перевіряємо, що fetch був викликаний з правильним URL
-    expect(global.fetch).toHaveBeenCalledWith('http://26.235.139.202:8080/api/popular-products?page=1');
+    expect(global.fetch).toHaveBeenCalledWith('https://koshtovnya.api-dev.bmax-edu.website/api/popular-products?page=1');
   
     // Перевіряємо, чи дані API збережено у змінну products
     expect(wrapper.vm.products).toEqual([

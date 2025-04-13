@@ -82,7 +82,7 @@ export default {
     async submitPasswordChange() {
       if (this.newPassword === this.confirmPassword) {
         try {
-          const response = await fetch('http://26.235.139.202:8080/api/change-password', {
+          const response = await fetch('https://koshtovnya.api-dev.bmax-edu.website/api/change-password', {
             method: 'PATCH', // Зміна методу на PATCH
             headers: {
               'Content-Type': 'application/json',

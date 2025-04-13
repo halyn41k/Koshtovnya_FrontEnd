@@ -236,7 +236,7 @@ export default {
       }
 
       try {
-        const response = await axios.get("http://26.235.139.202:8080/api/wishlist", {
+        const response = await axios.get("https://koshtovnya.api-dev.bmax-edu.website/api/wishlist", {
           headers: this.getAuthHeaders(),
         });
         const wishlistItems = response.data.products || [];
@@ -247,7 +247,7 @@ export default {
     },
     async fetchReviews() {
       try {
-        const response = await axios.get(`http://26.235.139.202:8080/api/products/${this.productId}`, {
+        const response = await axios.get(`https://koshtovnya.api-dev.bmax-edu.website/api/products/${this.productId}`, {
           headers: this.getAuthHeaders(),
         });
         console.log("Відповідь API:", response.data);
@@ -272,14 +272,14 @@ export default {
 
       try {
         if (this.isInWishlist(product.id)) {
-          await axios.delete(`http://26.235.139.202:8080/api/wishlist/${product.id}`, {
+          await axios.delete(`https://koshtovnya.api-dev.bmax-edu.website/api/wishlist/${product.id}`, {
             headers: this.getAuthHeaders(),
           });
           this.wishlist = this.wishlist.filter((id) => id !== product.id);
           alert(`${product.name} видалено зі списку бажаного.`);
         } else {
           await axios.post(
-            "http://26.235.139.202:8080/api/wishlist",
+            "https://koshtovnya.api-dev.bmax-edu.website/api/wishlist",
             { product_id: product.id },
             { headers: this.getAuthHeaders() }
           );
@@ -319,7 +319,7 @@ export default {
         }
 
         const response = await axios.post(
-          "http://26.235.139.202:8080/api/cart",
+          "https://koshtovnya.api-dev.bmax-edu.website/api/cart",
           cartData,
           { headers: this.getAuthHeaders() }
         );
@@ -346,7 +346,7 @@ export default {
 
       try {
         await axios.post(
-          "http://26.235.139.202:8080/api/notification",
+          "https://koshtovnya.api-dev.bmax-edu.website/api/notification",
           { product_id: this.productId },
           { headers: this.getAuthHeaders() }
         );
@@ -385,7 +385,7 @@ export default {
     if (productIdFromRoute) {
       this.productId = productIdFromRoute;
       axios
-        .get(`http://26.235.139.202:8080/api/products/${this.productId}`, {
+        .get(`https://koshtovnya.api-dev.bmax-edu.website/api/products/${this.productId}`, {
           headers: this.getAuthHeaders(),
         })
         .then((response) => {

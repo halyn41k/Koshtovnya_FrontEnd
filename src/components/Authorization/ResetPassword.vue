@@ -66,7 +66,7 @@
     methods: {
       async sendResetCode() {
         // Відправка запиту для отримання коду
-        await fetch('http://26.235.139.202:8080/api/send-code', {
+        await fetch('https://koshtovnya.api-dev.bmax-edu.website/api/send-code', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email: this.email })
@@ -75,7 +75,7 @@
       },
       async verifyCode() {
         // Перевірка коду
-        const response = await fetch('http://26.235.139.202:8080/api/verify-reset-code', {
+        const response = await fetch('https://koshtovnya.api-dev.bmax-edu.website/api/verify-reset-code', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email: this.email, code: this.code })
@@ -90,7 +90,7 @@
           alert('Паролі не співпадають');
           return;
         }
-        await fetch('http://26.235.139.202:8080/api/reset-password', {
+        await fetch('https://koshtovnya.api-dev.bmax-edu.website/api/reset-password', {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({

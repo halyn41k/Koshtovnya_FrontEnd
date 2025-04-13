@@ -59,7 +59,7 @@
         }
         try {
           const res = await fetch(
-            "http://26.235.139.202:8080/api/admin/profile",
+            "https://koshtovnya.api-dev.bmax-edu.website/api/admin/profile",
             {
               headers: {
                 "Content-Type": "application/json",
@@ -112,7 +112,7 @@
         };
         try {
           const res = await fetch(
-            "http://26.235.139.202:8080/api/admin/profile",
+            "https://koshtovnya.api-dev.bmax-edu.website/api/admin/profile",
             {
               method: "PATCH",
               headers: {

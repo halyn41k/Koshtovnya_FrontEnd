@@ -172,7 +172,7 @@ describe('ChangePassword.vue', () => {
     await form.trigger('submit.prevent');
 
     // Очікуємо виклику fetch
-    expect(fetch).toHaveBeenCalledWith('http://26.235.139.202:8080/api/change-password', expect.any(Object));
+    expect(fetch).toHaveBeenCalledWith('https://koshtovnya.api-dev.bmax-edu.website/api/change-password', expect.any(Object));
 
     // Очікуємо, що alert викликається з повідомленням про успіх
     expect(global.alert).toHaveBeenCalledWith('Пароль успішно змінено!');
@@ -250,7 +250,7 @@ describe('ChangePassword.vue', () => {
     await form.trigger('submit.prevent');
   
     expect(fetch).toHaveBeenCalledWith(
-      'http://26.235.139.202:8080/api/change-password',
+      'https://koshtovnya.api-dev.bmax-edu.website/api/change-password',
       expect.objectContaining({
         method: 'PATCH',
         body: JSON.stringify({

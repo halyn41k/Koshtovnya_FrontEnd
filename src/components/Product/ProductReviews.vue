@@ -105,7 +105,7 @@ export default {
   methods: {
     async fetchReviews(page = 1) {
       try {
-        const response = await fetch(`http://26.235.139.202:8080/api/products/${this.productId}/reviews?page=${page}&limit=${this.reviewsPerPage}`);
+        const response = await fetch(`https://koshtovnya.api-dev.bmax-edu.website/api/products/${this.productId}/reviews?page=${page}&limit=${this.reviewsPerPage}`);
         const data = await response.json();
         this.reviews = data?.data ?? [];
         this.totalReviews = data?.total ?? 0;
@@ -135,7 +135,7 @@ export default {
           rating: this.newReview.rating,
         }));
 
-        const response = await fetch(`http://26.235.139.202:8080/api/products/${this.productId}/reviews`, {
+        const response = await fetch(`https://koshtovnya.api-dev.bmax-edu.website/api/products/${this.productId}/reviews`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -197,7 +197,7 @@ export default {
       this.loading = true;
 
       try {
-        const response = await fetch(`http://26.235.139.202:8080/api/reviews/${this.replyTo}/reply`, {
+        const response = await fetch(`https://koshtovnya.api-dev.bmax-edu.website/api/reviews/${this.replyTo}/reply`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

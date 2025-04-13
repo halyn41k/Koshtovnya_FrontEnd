@@ -377,7 +377,7 @@ export default {
   
       try {
         const response = await axios.get(
-          "http://26.235.139.202:8080/api/nova-poshta/cities",
+          "https://koshtovnya.api-dev.bmax-edu.website/api/nova-poshta/cities",
           {
             headers: { Authorization: `Bearer ${token}` },
             params: {
@@ -416,7 +416,7 @@ export default {
       }
       const token = localStorage.getItem("token");
       try {
-        const response = await axios.get("http://26.235.139.202:8080/api/nova-poshta/ware-houses", {
+        const response = await axios.get("https://koshtovnya.api-dev.bmax-edu.website/api/nova-poshta/ware-houses", {
           headers: { Authorization: `Bearer ${token}` },
           params: {
             city: this.formData.city,
@@ -445,7 +445,7 @@ export default {
       }
       const token = localStorage.getItem("token");
       try {
-        const response = await axios.get("http://26.235.139.202:8080/api/nova-poshta/streets", {
+        const response = await axios.get("https://koshtovnya.api-dev.bmax-edu.website/api/nova-poshta/streets", {
           headers: { Authorization: `Bearer ${token}` },
           params: {
             city: this.formData.city,
@@ -486,7 +486,7 @@ export default {
   }
   this.loading = true;
   try {
-    const response = await axios.get("http://26.235.139.202:8080/api/user-address", {
+    const response = await axios.get("https://koshtovnya.api-dev.bmax-edu.website/api/user-address", {
       headers: { Authorization: `Bearer ${token}` }
     });
     console.log("Отримана адреса:", response.data);
@@ -527,7 +527,7 @@ export default {
       const token = localStorage.getItem("token");
       if (!token) return;
       try {
-        const response = await axios.get("http://26.235.139.202:8080/api/user/phone-number", {
+        const response = await axios.get("https://koshtovnya.api-dev.bmax-edu.website/api/user/phone-number", {
           headers: { Authorization: `Bearer ${token}` }
         });
         if (response.data !== null) {
@@ -545,7 +545,7 @@ export default {
         return;
       }
       try {
-        const response = await axios.get("http://26.235.139.202:8080/api/delivery-types", {
+        const response = await axios.get("https://koshtovnya.api-dev.bmax-edu.website/api/delivery-types", {
           headers: { Authorization: `Bearer ${token}` }
         });
         this.deliveryOptions = response.data.data;
@@ -604,7 +604,7 @@ export default {
     if (this.addressAvailable) {
       // Якщо адреса вже існує, викликаємо метод оновлення (наприклад, PUT або PATCH)
       response = await axios.patch(
-          `http://26.235.139.202:8080/api/user-address/${this.addressId}`,
+          `https://koshtovnya.api-dev.bmax-edu.website/api/user-address/${this.addressId}`,
           postData,
           { headers: { Authorization: `Bearer ${token}` } }
         );
@@ -612,7 +612,7 @@ export default {
     } else {
       // Якщо адреса відсутня – викликаємо створення нової адреси
       response = await axios.post(
-        "http://26.235.139.202:8080/api/user-address",
+        "https://koshtovnya.api-dev.bmax-edu.website/api/user-address",
         postData,
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -692,7 +692,7 @@ export default {
         return;
       }
       try {
-        await axios.delete(`http://26.235.139.202:8080/api/user-address/${this.addressId}`, {
+        await axios.delete(`https://koshtovnya.api-dev.bmax-edu.website/api/user-address/${this.addressId}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         alert("Адресу успішно видалено");

@@ -129,7 +129,7 @@ export default {
       try {
         console.log('Відправлені параметри:', params);
         const response = await axios.get(
-          `http://26.235.139.202:8080/api/categories/6/products?page=${page}`,
+          `https://koshtovnya.api-dev.bmax-edu.website/api/categories/6/products?page=${page}`,
           { params }
         );
         this.products = response.data.data || [];
@@ -146,7 +146,7 @@ export default {
         return;
       }
       try {
-        const response = await axios.get('http://26.235.139.202:8080/api/wishlist', {
+        const response = await axios.get('https://koshtovnya.api-dev.bmax-edu.website/api/wishlist', {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -181,14 +181,14 @@ export default {
       try {
         if (this.isInWishlist(product.id)) {
           // Видалення зі списку бажаного
-          await axios.delete(`http://26.235.139.202:8080/api/wishlist/${product.id}`, {
+          await axios.delete(`https://koshtovnya.api-dev.bmax-edu.website/api/wishlist/${product.id}`, {
             headers: { Authorization: `Bearer ${token}` },
           });
           this.wishlist = this.wishlist.filter((id) => id !== product.id);
         } else {
           // Додавання до списку бажаного
           await axios.post(
-            'http://26.235.139.202:8080/api/wishlist',
+            'https://koshtovnya.api-dev.bmax-edu.website/api/wishlist',
             { product_id: product.id },
             { headers: { Authorization: `Bearer ${token}` } }
           );
@@ -242,7 +242,7 @@ export default {
         }
 
         const response = await axios.post(
-          'http://26.235.139.202:8080/api/cart',
+          'https://koshtovnya.api-dev.bmax-edu.website/api/cart',
           cartData,
           { headers: { Authorization: `Bearer ${token}` } }
         );

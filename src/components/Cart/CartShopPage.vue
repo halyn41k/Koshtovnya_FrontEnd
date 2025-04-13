@@ -55,7 +55,7 @@ export default {
       }
       this.loading = true;
       try {
-        const response = await axios.get("http://26.235.139.202:8080/api/cart", {
+        const response = await axios.get("https://koshtovnya.api-dev.bmax-edu.website/api/cart", {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -107,7 +107,7 @@ export default {
           : { operation, quantity }; // Якщо змінюємо кількість
 
         await axios.patch(
-          `http://26.235.139.202:8080/api/cart/${id}`,
+          `https://koshtovnya.api-dev.bmax-edu.website/api/cart/${id}`,
           data,
           { headers: { Authorization: `Bearer ${token}` } }
         );
@@ -138,7 +138,7 @@ export default {
         return;
       }
       try {
-        await axios.delete(`http://26.235.139.202:8080/api/cart/${id}`, {
+        await axios.delete(`https://koshtovnya.api-dev.bmax-edu.website/api/cart/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         this.cartItems = this.cartItems.filter(item => item.id !== id);

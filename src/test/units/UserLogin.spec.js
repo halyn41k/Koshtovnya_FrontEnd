@@ -247,7 +247,7 @@ describe('UserLogin.vue', () => {
     await loginForm.trigger('submit.prevent');
   
     expect(global.fetch).toHaveBeenCalledWith(
-      'http://26.235.139.202:8080/api/login',
+      'https://koshtovnya.api-dev.bmax-edu.website/api/login',
       expect.any(Object)
     );
     expect(global.alert).toHaveBeenCalledWith('Не вдалося увійти. Перевірте ваші дані.');
@@ -265,7 +265,7 @@ describe('UserLogin.vue', () => {
     await loginForm.trigger('submit.prevent');
 
     expect(global.fetch).toHaveBeenCalledWith(
-      'http://26.235.139.202:8080/api/login',
+      'https://koshtovnya.api-dev.bmax-edu.website/api/login',
       expect.any(Object)
     );
     expect(global.alert).toHaveBeenCalledWith('Не вдалося увійти. Перевірте ваші дані.');
@@ -282,7 +282,7 @@ describe('UserLogin.vue', () => {
     await loginForm.trigger('submit.prevent');
   
     expect(global.fetch).toHaveBeenCalledWith(
-      'http://26.235.139.202:8080/api/login',
+      'https://koshtovnya.api-dev.bmax-edu.website/api/login',
       expect.objectContaining({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -334,7 +334,7 @@ describe('UserLogin.vue', () => {
     await wrapper.find('.login-form').trigger('submit.prevent');
   
     // Перевіряємо, що fetch був викликаний з правильними аргументами
-    expect(fetchMock).toHaveBeenCalledWith('http://26.235.139.202:8080/api/login', {
+    expect(fetchMock).toHaveBeenCalledWith('https://koshtovnya.api-dev.bmax-edu.website/api/login', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

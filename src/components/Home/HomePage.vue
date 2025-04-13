@@ -177,7 +177,7 @@ export default {
     },
     async fetchPopularProducts() { // Завантаження популярних товарів з API
       try {
-        const response = await fetch("http://26.235.139.202:8080/api/popular-products"); // Запит до API
+        const response = await fetch("https://koshtovnya.api-dev.bmax-edu.website/api/popular-products"); // Запит до API
         if (!response.ok) throw new Error(`HTTP error: ${response.status}`); // Обробка помилки відповіді
         const data = await response.json();
 
@@ -197,7 +197,7 @@ export default {
     },
     async fetchNewArrivals() { // Завантаження нових надходжень з API
       try {
-        const response = await fetch("http://26.235.139.202:8080/api/new-arrivals");
+        const response = await fetch("https://koshtovnya.api-dev.bmax-edu.website/api/new-arrivals");
         if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
         const data = await response.json();
         this.newArrivals = data.data; // Збереження отриманих даних

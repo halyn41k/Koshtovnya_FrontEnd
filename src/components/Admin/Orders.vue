@@ -189,7 +189,7 @@ export default {
   methods: {
     async fetchOrders() {
       try {
-        const response = await axios.get("http://26.235.139.202:8080/api/admin/orders", {
+        const response = await axios.get("https://koshtovnya.api-dev.bmax-edu.website/api/admin/orders", {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
             Accept: "application/json"
@@ -203,7 +203,7 @@ export default {
     },
     async showOrderDetails(orderId) {
       try {
-        const response = await axios.get(`http://26.235.139.202:8080/api/orders/${orderId}`, {
+        const response = await axios.get(`https://koshtovnya.api-dev.bmax-edu.website/api/orders/${orderId}`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
             Accept: "application/json"
@@ -219,7 +219,7 @@ export default {
     /*
     async deleteOrder(orderId) {
       try {
-        await axios.delete(`http://26.235.139.202:8080/api/admin/orders/${orderId}`, {
+        await axios.delete(`https://koshtovnya.api-dev.bmax-edu.website/api/admin/orders/${orderId}`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
             Accept: "application/json"

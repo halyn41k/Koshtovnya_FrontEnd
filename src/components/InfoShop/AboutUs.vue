@@ -3,45 +3,47 @@
     <header class="about-us__header">
       <h1 class="section-title-container">
         <div class="line"></div>
-        <span class="main-title">Історія заснування "Коштовня</span>
+        <span class="main-title">Про нас</span>
         <div class="line"></div>
       </h1>
     </header>
-
+    
     <section class="about-us__content">
       <div class="about-us__text-section">
-        <h2 class="section-title fade-in">У 2015 році зародилася ідея, що почалася як просте захоплення — створення традиційних герданів із бісеру. Спочатку це було заняттям для душі, відтворюючи автентичні візерунки та орнаменти. Кожен виріб випромінював свою унікальну енергію, поєднуючи традиційні українські мотиви з сучасними елементами. Це дозволяло створювати прикраси, які мали не лише естетичну цінність, а й несли в собі глибокий символізм.</h2>
+        <h2 class="section-title fade-in">Історія заснування "Коштовня"</h2>
         <p class="about-us__text fade-in">
-          "Коштовня" виросла з простого захоплення у справжній бренд, де кожна прикраса створюється з душею та повагою до традицій. У виробах поєднується багатовікова українська культура та сучасні тенденції, що робить кожну річ унікальною і неповторною.
+          У 2015 році зародилася ідея, яка почалася з простого захоплення — створення традиційних герданів із бісеру.
+            Спочатку це було заняттям для душі, відтворюючи автентичні візерунки та орнаменти. Кожен виріб випромінював
+            свою унікальну енергію, об'єднуючи традиційні українські мотиви з сучасними елементами. Це дозволяло
+            створювати прикраси, які мали не лише естетичну цінність, але й несли в собі глибокий символізм.
         </p>
       </div>
       <div class="about-us__image-wrapper fade-in">
-        <img src="@/assets/ukrainepattern.png" alt="Традиційні гердани та прикраси" class="about-us__image"
-          loading="lazy" />
+        <img src="@/assets/ukrainepattern.png" alt="Традиційні гердани та прикраси" class="about-us__image" loading="lazy" />
       </div>
     </section>
-
+    
     <section class="about-us__growth fade-in">
       <div class="about-us__image-container">
-        <img src="@/assets/woman.png" alt="Розвиток бренду Коштовня"
-          class="about-us__background-image with-frame fade-in" />
+        <img src="@/assets/woman.png" alt="Розвиток бренду Коштовня" class="about-us__background-image with-frame fade-in" />
       </div>
       <div class="about-us__text-content fade-in">
         <p class="about-us__description fade-in">
-          {{ $t('aboutUsDescription') }}
+          Із часом прикраси почали привертати увагу друзів, знайомих, а потім і ширшого кола людей. Інтерес до виробів
+            ручної роботи зростав, і це стало поштовхом до розвитку маленького бізнесу. Тоді стало зрозуміло, що це більше,
+            ніж просто хобі, і цей проект має потенціал вирости в щось більше.
         </p>
       </div>
       <div class="about-us__process-image-container">
-        <img src="@/assets/deliverypattern.png" alt="Процес створення прикрас" class="about-us__process-image"
-          loading="lazy" />
+        <img src="@/assets/deliverypattern.png" alt="Процес створення прикрас" class="about-us__process-image" loading="lazy" />
       </div>
     </section>
-
+    
     <footer class="about-us__footer">
       <p class="about-us__conclusion fade-in">
         "Коштовня" виросла з простого захоплення у справжній бренд, де кожна прикраса створюється з душею та повагою до
-        традицій. У виробах поєднується багатовікова українська культура та сучасні тенденції, що робить кожну річ
-        унікальною і неповторною.
+            традицій. У виробах поєднується багатовікова українська культура та сучасні тенденції, що робить кожну річ
+            унікальною і неповторною.
       </p>
     </footer>
 
@@ -52,42 +54,40 @@
         <span>Часті запитання</span>
         <div class="line"></div>
       </h2>
-
+      
       <div class="faq-item">
         <button class="faq-question" @click="toggleFAQ(0)">
           У чому різниця між виробниками бісерів?
-          <span :class="{ 'rotate-icon': faqOpen[0] }" class="arrow-icon">▼</span>
+          <span :class="{'rotate-icon': faqOpen[0]}" class="arrow-icon">▼</span>
         </button>
         <div v-if="faqOpen[0]" class="faq-answer">
-          Дорожчий бісер часто відрізняється якістю матеріалів та процесом виробництва.
-          Наприклад, японський бісер зазвичай вирізняється точністю розмірів і форми, що полегшує роботу і забезпечує
-          більш
-          естетичний результат. Чеський бісер також славиться високою якістю, тоді як китайський бісер може мати
-          варіації у формі,
+          Дорожчий бісер часто відрізняється якістю матеріалів та процесом виробництва. 
+          Наприклад, японський бісер зазвичай вирізняється точністю розмірів і форми, що полегшує роботу і забезпечує більш 
+          естетичний результат. Чеський бісер також славиться високою якістю, тоді як китайський бісер може мати варіації у формі, 
           що впливає на зовнішній вигляд готового виробу.
         </div>
       </div>
-
+      
       <div class="faq-item">
         <button class="faq-question" @click="toggleFAQ(1)">
           Як доглядати за прикрасами з бісеру?
-          <span :class="{ 'rotate-icon': faqOpen[1] }" class="arrow-icon">▼</span>
+          <span :class="{'rotate-icon': faqOpen[1]}" class="arrow-icon">▼</span>
         </button>
         <div v-if="faqOpen[1]" class="faq-answer">
-          Для збереження якості прикрас з бісеру важливо уникати їх контакту з водою, особливо з хлорованою чи солоною.
-          Не рекомендується носити такі прикраси під час купання чи занять спортом.
+          Для збереження якості прикрас з бісеру важливо уникати їх контакту з водою, особливо з хлорованою чи солоною. 
+          Не рекомендується носити такі прикраси під час купання чи занять спортом. 
           Зберігайте їх у сухому місці, у м’якому мішечку чи коробочці, щоб уникнути пошкоджень чи подряпин.
         </div>
       </div>
-
+      
       <div class="faq-item">
         <button class="faq-question" @click="toggleFAQ(2)">
           Чи можливо замовити індивідуальну прикрасу?
-          <span :class="{ 'rotate-icon': faqOpen[2] }" class="arrow-icon">▼</span>
+          <span :class="{'rotate-icon': faqOpen[2]}" class="arrow-icon">▼</span>
         </button>
         <div v-if="faqOpen[2]" class="faq-answer">
-          Так, ми пропонуємо можливість створення прикрас за індивідуальним запитом.
-          Ви можете обрати дизайн, кольори та розміри, які відповідають вашим особистим вподобанням.
+          Так, ми пропонуємо можливість створення прикрас за індивідуальним запитом. 
+          Ви можете обрати дизайн, кольори та розміри, які відповідають вашим особистим вподобанням. 
           Зв'яжіться з нами для обговорення деталей, і ми створимо унікальний виріб спеціально для вас.
         </div>
       </div>
@@ -101,12 +101,23 @@
       </h2>
       <form @submit.prevent="handleSubmit">
         <label for="email" class="form-label">Електронна пошта</label>
-        <input type="email" id="email" v-model="form.email" required class="form-input"
-          placeholder="Ваша електронна адреса" />
+        <input 
+          type="email" 
+          id="email" 
+          v-model="form.email" 
+          required 
+          class="form-input" 
+          placeholder="Ваша електронна адреса" 
+        />
 
         <label for="message" class="form-label">Повідомлення</label>
-        <textarea id="message" v-model="form.message" required class="form-textarea"
-          placeholder="Ваше повідомлення"></textarea>
+        <textarea 
+          id="message" 
+          v-model="form.message" 
+          required 
+          class="form-textarea" 
+          placeholder="Ваше повідомлення"
+        ></textarea>
         <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
 
         <button type="submit" class="form-submit">Надіслати</button>
@@ -129,32 +140,31 @@ export default {
     };
   },
   mounted() {
-    this.observeElements();
-    document.title = "Про нас";
-  },
+  this.observeElements();
+},
   methods: {
     observeElements() {
-      const elements = document.querySelectorAll('.fade-in');
-      const observer = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              entry.target.classList.add('show');
-              observer.unobserve(entry.target); // Зупинити спостереження після появи
-            }
-          });
-        },
-        { threshold: 0.1 } // Показувати при 10% видимості
-      );
+    const elements = document.querySelectorAll('.fade-in');
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('show');
+            observer.unobserve(entry.target); // Зупинити спостереження після появи
+          }
+        });
+      },
+      { threshold: 0.1 } // Показувати при 10% видимості
+    );
 
-      elements.forEach((el) => observer.observe(el));
-    },
+    elements.forEach((el) => observer.observe(el));
+  },
     toggleFAQ(index) {
       this.faqOpen[index] = !this.faqOpen[index];
     },
     handleSubmit() {
       const trimmedMessage = this.form.message.trim();
-
+      
       // Валідація
       if (trimmedMessage.length < 10 || trimmedMessage.length > 200) {
         this.errorMessage = 'Повідомлення має містити від 10 до 200 символів.';
@@ -387,7 +397,6 @@ export default {
 .rotate-icon {
   transform: rotate(180deg);
 }
-
 .contact-section {
   margin-top: 50px;
   padding: 40px;
@@ -493,9 +502,9 @@ export default {
   }
 
   .error-message {
-    color: red;
-    font-size: 0.9em;
-    margin-top: 5px;
-  }
+  color: red;
+  font-size: 0.9em;
+  margin-top: 5px;
+}
 }
 </style>

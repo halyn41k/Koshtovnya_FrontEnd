@@ -291,7 +291,7 @@ describe('ViewOtherProduct.vue - Тестування іконки сердеч�
 
     await wrapper.vm.fetchProducts();
 
-    expect(mockFetch).toHaveBeenCalledWith('http://26.235.139.202:8080/api/popular-products');
+    expect(mockFetch).toHaveBeenCalledWith('https://koshtovnya.api-dev.bmax-edu.website/api/popular-products');
     expect(mockFetch).toHaveBeenCalledTimes(1);
 
     // Очищення мока
@@ -320,7 +320,7 @@ describe('ViewOtherProduct.vue - Тестування іконки сердеч�
     await wrapper.vm.fetchWishlist();
   
     // Перевіряємо, що запит виконувався з правильними заголовками
-    expect(axiosMock.get).toHaveBeenCalledWith('http://26.235.139.202:8080/api/wishlist', {
+    expect(axiosMock.get).toHaveBeenCalledWith('https://koshtovnya.api-dev.bmax-edu.website/api/wishlist', {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -385,7 +385,7 @@ describe('ViewOtherProduct.vue - Тестування іконки сердеч�
   
     // Перевіряємо, чи був викликаний POST із правильними параметрами
     expect(axiosMock.post).toHaveBeenCalledWith(
-      'http://26.235.139.202:8080/api/wishlist',
+      'https://koshtovnya.api-dev.bmax-edu.website/api/wishlist',
       { product_id: 1 }, // product_id має бути переданий
       {
         headers: {

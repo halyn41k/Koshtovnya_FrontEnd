@@ -186,7 +186,7 @@
       },
       async fetchFormData() {
         try {
-          const response = await axios.get("http://26.235.139.202:8080/api/products/form-data");
+          const response = await axios.get("https://koshtovnya.api-dev.bmax-edu.website/api/products/form-data");
           // Припускаємо, що сервер повертає об'єкт з потрібними масивами (category, bead_producer, country_of_manufacture, type_of_bead, colors, fitting, material)
           this.formData = response.data;
         } catch (error) {
@@ -239,7 +239,7 @@
           formData.append("colors", JSON.stringify(this.product.colors));
           formData.append("sizes", JSON.stringify(this.product.sizes));
   
-          const response = await axios.post("http://26.235.139.202:8080/api/admin/products", formData, {
+          const response = await axios.post("https://koshtovnya.api-dev.bmax-edu.website/api/admin/products", formData, {
             headers: {
               Authorization: `Bearer ${token}`,
               "Content-Type": "multipart/form-data"

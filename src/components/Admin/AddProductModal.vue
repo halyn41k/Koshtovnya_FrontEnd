@@ -268,7 +268,7 @@ export default {
   },
   mounted() {
     axios
-      .get("http://26.235.139.202:8080/api/admin/products/form-data", {
+      .get("https://koshtovnya.api-dev.bmax-edu.website/api/admin/products/form-data", {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
@@ -325,7 +325,7 @@ export default {
         fd.append(`fittings[${i}][quantity]`, f.quantity);
       });
       axios
-        .post("http://26.235.139.202:8080/api/admin/products", fd, {
+        .post("https://koshtovnya.api-dev.bmax-edu.website/api/admin/products", fd, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
             "Content-Type": "multipart/form-data",

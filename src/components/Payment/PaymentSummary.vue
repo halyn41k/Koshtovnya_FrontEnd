@@ -92,7 +92,7 @@ export default {
         return;
       }
       try {
-        const response = await axios.get("http://26.235.139.202:8080/api/cart", {
+        const response = await axios.get("https://koshtovnya.api-dev.bmax-edu.website/api/cart", {
           headers: { Authorization: `Bearer ${token}` }
         });
         const data = response.data.products || [];
@@ -120,7 +120,7 @@ export default {
         ? "WarehouseDoors"
         : "WarehouseWarehouse";
       try {
-        const response = await axios.get("http://26.235.139.202:8080/api/nova-poshta/delivery/cost", {
+        const response = await axios.get("https://koshtovnya.api-dev.bmax-edu.website/api/nova-poshta/delivery/cost", {
           headers: { Authorization: `Bearer ${token}` },
           params: {
             CityRecipient: this.effectiveCityRef,
@@ -185,7 +185,7 @@ export default {
       console.log("[submitOrder] Сформований payload замовлення:", orderData);
       try {
         // Створення замовлення
-        const orderResponse = await axios.post("http://26.235.139.202:8080/api/orders", orderData, {
+        const orderResponse = await axios.post("https://koshtovnya.api-dev.bmax-edu.website/api/orders", orderData, {
           headers: { Authorization: `Bearer ${token}` }
         });
         const orderId = orderResponse.data?.data?.order?.id;

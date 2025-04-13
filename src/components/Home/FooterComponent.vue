@@ -92,7 +92,7 @@ export default {
   methods: {
     async fetchSiteSettings() {
       try {
-        const response = await axios.get('http://26.235.139.202:8080/api/site-settings');
+        const response = await axios.get('https://koshtovnya.api-dev.bmax-edu.website/api/site-settings');
         const settings = response.data.data;
         settings.forEach(setting => {
           this.siteSettings[setting.setting_key] = setting.setting_value;

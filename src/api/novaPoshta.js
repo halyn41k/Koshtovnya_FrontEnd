@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const BASE_API_URL = "http://26.235.139.202:8080/api/nova-poshta";
+const BASE_API_URL = "https://koshtovnya.api-dev.bmax-edu.website/api/nova-poshta";
 
 const validDeliveryTypes = [
   "Самовивіз з Нової Пошти",

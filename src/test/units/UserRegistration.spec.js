@@ -6,7 +6,7 @@ import UserRegistration from '../../components/UserRegistration.vue';
 // Mock global fetch
 global.fetch = jest.fn((url, options) => {
   // Перевіряємо правильність URL та параметрів запиту
-  if (url === "http://26.235.139.202:8080/api/register" && options.method === "POST") {
+  if (url === "https://koshtovnya.api-dev.bmax-edu.website/api/register" && options.method === "POST") {
     const body = JSON.parse(options.body);
 
     // Симулюємо успішну відповідь з використанням даних із запиту
@@ -160,7 +160,7 @@ describe('UserRegistration.vue', () => {
   
     // Перевіряємо виклик fetch
     expect(global.fetch).toHaveBeenCalledWith(
-      "http://26.235.139.202:8080/api/register",
+      "https://koshtovnya.api-dev.bmax-edu.website/api/register",
       expect.objectContaining({
         method: "POST",
         headers: { "Content-Type": "application/json" },

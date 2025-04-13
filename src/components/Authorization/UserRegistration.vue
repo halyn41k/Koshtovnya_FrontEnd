@@ -216,7 +216,7 @@ export default {
 
       try {
         console.log("Відправка запиту на сервер...");
-        const response = await fetch("http://26.235.139.202:8080/api/register", {
+        const response = await fetch("https://koshtovnya.api-dev.bmax-edu.website/api/register", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

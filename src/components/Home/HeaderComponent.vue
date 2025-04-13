@@ -1,9 +1,14 @@
 <template>
+  <!-- Хедер із стандартним контентом -->
   <header class="header">
     <div class="top-bar">
       <ul class="nav-links">
-        <li><router-link to="/aboutus">{{ $t('aboutUs') }}</router-link></li>
-        <li><router-link to="/aboutdelivery">{{ $t('aboutDelivery') }}</router-link></li>
+        <li>
+          <router-link to="/aboutus">{{ $t('aboutUs') }}</router-link>
+        </li>
+        <li>
+          <router-link to="/aboutdelivery">{{ $t('aboutDelivery') }}</router-link>
+        </li>
       </ul>
 
       <div class="language-currency">
@@ -11,7 +16,11 @@
         <div class="language">
           <img :src="currentFlag" :alt="selectedLanguage + ' Flag'" class="flag" />
           <div class="dropdown-container" @click="toggleLanguageDropdown">
-            <select v-model="selectedLanguage" class="dropdown no-border" @change="changeLanguage">
+            <select
+              v-model="selectedLanguage"
+              class="dropdown no-border"
+              @change="changeLanguage"
+            >
               <option value="uk">Українська</option>
               <option value="en">English</option>
             </select>
@@ -22,7 +31,11 @@
         <!-- Вибір валюти -->
         <div class="currency">
           <div class="dropdown-container" @click="toggleCurrencyDropdown">
-            <select v-model="selectedCurrency" class="dropdown no-border" @change="changeCurrency">
+            <select
+              v-model="selectedCurrency"
+              class="dropdown no-border"
+              @change="changeCurrency"
+            >
               <option value="UAH">UAH ₴</option>
               <option value="USD">USD $</option>
             </select>
@@ -31,7 +44,10 @@
         </div>
 
         <!-- Список бажаних товарів -->
-        <router-link :to="{ path: '/account', query: { tab: 'wishlist' } }" class="wishlist">
+        <router-link
+          :to="{ path: '/account', query: { tab: 'wishlist' } }"
+          class="wishlist"
+        >
           {{ $t('wishlist') }}
         </router-link>
       </div>
@@ -40,48 +56,139 @@
     <div class="separator"></div>
     <div class="main-header">
       <div class="search-bar">
-        <input type="text" v-model="searchQuery" :placeholder="$t('searchPlaceholder')" @keyup.enter="startSearch" />
+        <input
+          type="text"
+          v-model="searchQuery"
+          :placeholder="$t('searchPlaceholder')"
+          @keyup.enter="startSearch"
+        />
         <div class="search-icon" @click="startSearch">
-          <img src="@/assets/magnifying-glass-svgrepo-com.svg" alt="Search Icon" />
+          <img
+            src="@/assets/magnifying-glass-svgrepo-com.svg"
+            alt="Search Icon"
+          />
         </div>
         <SearchResults v-if="searchQuery" :query="searchQuery" />
       </div>
 
       <router-link to="/" class="logo">
-      <img :src="siteSettings.site_logo" alt="Коштовня Лого" />
-      <h1>{{ $t('logo') }}</h1>
+        <img :src="siteSettings.site_logo" alt="Коштовня Лого" />
+        <h1>{{ $t('logo') }}</h1>
       </router-link>
 
-
       <div class="user-cart">
-
         <router-link to="/account" class="user-icon">
-          <img src="@/assets/user-svgrepo-com (1).svg" alt="User Icon" class="icon" />
+          <img
+            src="@/assets/user-svgrepo-com (1).svg"
+            alt="User Icon"
+            class="icon"
+          />
         </router-link>
 
+        <!-- Мобільна кнопка пошуку (відображається лише у мобільній версії) -->
+        <button class="mobile-search-button" @click="toggleMobileSearch">
+          <img src="@/assets/icons/search1.svg" alt="Mobile Search" />
+        </button>
+
         <router-link to="/cart" class="cart-icon">
-          <img src="@/assets/cart-svgrepo-com.svg" alt="Cart Icon" class="icon" />
+          <img
+            src="@/assets/cart-svgrepo-com.svg"
+            alt="Cart Icon"
+            class="icon"
+          />
           <span class="cart-badge" v-if="cartCount > 0">{{ cartCount }}</span>
         </router-link>
       </div>
     </div>
 
+    <div class="burger-menu" @click="toggleBurger">
+      <img src="@/assets/icons/burger.svg" alt="Menu" />
+    </div>
+
+    <div class="mobile-nav" v-if="isBurgerOpen">
+      <ul>
+        <li @click="toggleCategories">
+          Категорії
+          <ul v-if="isCategoriesOpen" class="sub-menu">
+            <li>
+              <router-link to="/bracelets">{{ $t('bracelets') }}</router-link>
+            </li>
+            <li>
+              <router-link to="/herdany">{{ $t('herdany') }}</router-link>
+            </li>
+            <li>
+              <router-link to="/dukats">{{ $t('dukats') }}</router-link>
+            </li>
+            <li>
+              <router-link to="/earrings">{{ $t('earrings') }}</router-link>
+            </li>
+            <li>
+              <router-link to="/sylyanky">{{ $t('sylyanky') }}</router-link>
+            </li>
+            <li>
+              <router-link to="/belts">{{ $t('belts') }}</router-link>
+            </li>
+          </ul>
+        </li>
+        <li>
+          <router-link to="/aboutus">{{ $t('aboutUs') }}</router-link>
+        </li>
+        <li>
+          <router-link to="/aboutdelivery">{{ $t('aboutDelivery') }}</router-link>
+        </li>
+        <li>
+          <router-link to="/account">Кабінет користувача</router-link>
+        </li>
+      </ul>
+    </div>
+
     <nav class="nav-menu">
       <ul>
-        <li><router-link to="/bracelets">{{ $t('bracelets') }}</router-link></li>
-        <li><router-link to="/herdany">{{ $t('herdany') }}</router-link></li>
-        <li><router-link to="/dukats">{{ $t('dukats') }}</router-link></li>
-        <li><router-link to="/sylyanky">{{ $t('sylyanky') }}</router-link></li>
-        <li><router-link to="/earrings">{{ $t('earrings') }}</router-link></li>
-        <li><router-link to="/belts">{{ $t('belts') }}</router-link></li>
+        <li>
+          <router-link to="/bracelets">{{ $t('bracelets') }}</router-link>
+        </li>
+        <li>
+          <router-link to="/herdany">{{ $t('herdany') }}</router-link>
+        </li>
+        <li>
+          <router-link to="/dukats">{{ $t('dukats') }}</router-link>
+        </li>
+        <li>
+          <router-link to="/sylyanky">{{ $t('sylyanky') }}</router-link>
+        </li>
+        <li>
+          <router-link to="/earrings">{{ $t('earrings') }}</router-link>
+        </li>
+        <li>
+          <router-link to="/belts">{{ $t('belts') }}</router-link>
+        </li>
       </ul>
     </nav>
   </header>
+
+  <!-- Блок мобільного пошуку, який «випадає» нижче хедера -->
+  <div class="mobile-search" v-if="mobileSearchActive">
+    <div class="search-bar">
+      <input
+        type="text"
+        v-model="searchQuery"
+        :placeholder="$t('searchPlaceholder')"
+        @keyup.enter="startSearch"
+      />
+      <div class="search-icon" @click="startSearch">
+        <img
+          src="@/assets/magnifying-glass-svgrepo-com.svg"
+          alt="Search Icon"
+        />
+      </div>
+      <SearchResults v-if="searchQuery" :query="searchQuery" />
+    </div>
+  </div>
 </template>
 
 <script>
-import SearchResults from './SearchResults.vue';
-import axios from 'axios';
+import SearchResults from "./SearchResults.vue";
+import axios from "axios";
 
 export default {
   components: {
@@ -89,41 +196,54 @@ export default {
   },
   data() {
     return {
-      selectedLanguage: 'uk',
-      selectedCurrency: 'UAH',
+      selectedLanguage: "uk",
+      selectedCurrency: "UAH",
       cartCount: 0,
-      searchQuery: '',
+      searchQuery: "",
       isLanguageDropdownOpen: false,
       isCurrencyDropdownOpen: false,
+      isBurgerOpen: false,
+      isCategoriesOpen: false,
+      mobileSearchActive: false, // прапорець для мобільного пошуку
       siteSettings: {
-      site_logo: '',
-    },
+        site_logo: "",
+      },
     };
   },
   computed: {
     currentFlag() {
-      return this.selectedLanguage === 'uk'
-        ? 'https://flagcdn.com/w320/ua.png'
-        : 'https://flagcdn.com/w320/gb.png';
+      return this.selectedLanguage === "uk"
+        ? "https://flagcdn.com/w320/ua.png"
+        : "https://flagcdn.com/w320/gb.png";
     },
   },
   methods: {
+    toggleBurger() {
+      this.isBurgerOpen = !this.isBurgerOpen;
+      if (!this.isBurgerOpen) {
+        this.isCategoriesOpen = false;
+      }
+    },
+    toggleCategories() {
+      this.isCategoriesOpen = !this.isCategoriesOpen;
+    },
     async fetchCartCount() {
       try {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem("token");
         if (!token) return;
-
-        const response = await axios.get('http://26.235.139.202:8080/api/cart/cart-count', {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
+        const response = await axios.get(
+          "https://koshtovnya.api-dev.bmax-edu.website/api/cart/cart-count",
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
         this.cartCount = response.data.cart_count || 0;
       } catch (error) {
-        console.error('Помилка завантаження кількості товарів у кошику:', error);
+        console.error("Помилка завантаження кількості товарів у кошику:", error);
       }
     },
     startSearch() {
-      console.log('Searching:', this.searchQuery);
+      console.log("Searching:", this.searchQuery);
     },
     changeLanguage() {
       this.$i18n.locale = this.selectedLanguage;
@@ -141,62 +261,68 @@ export default {
       this.isCurrencyDropdownOpen = !this.isCurrencyDropdownOpen;
     },
     async fetchSiteSettings() {
-    try {
-      const response = await axios.get('http://26.235.139.202:8080/api/site-settings');
-      const settings = response.data.data;
-      settings.forEach(setting => {
-        if (setting.setting_key === 'site_logo') {
-          this.siteSettings.site_logo = setting.setting_value;
-        }
-      });
-    } catch (error) {
-      console.error('Помилка завантаження логотипу:', error);
-    }
-  },
+      try {
+        const response = await axios.get(
+          "https://koshtovnya.api-dev.bmax-edu.website/api/site-settings"
+        );
+        const settings = response.data.data;
+        settings.forEach((setting) => {
+          if (setting.setting_key === "site_logo") {
+            this.siteSettings.site_logo = setting.setting_value;
+          }
+        });
+      } catch (error) {
+        console.error("Помилка завантаження логотипу:", error);
+      }
+    },
+    toggleMobileSearch() {
+      this.mobileSearchActive = !this.mobileSearchActive;
+      console.log("Toggle Mobile Search, now:", this.mobileSearchActive);
+    },
   },
   async mounted() {
-  await this.fetchSiteSettings();
-  this.fetchCartCount();
-},
+    await this.fetchSiteSettings();
+    this.fetchCartCount();
+  },
 };
 </script>
 
-
-
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Montserrat:wght@400&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Montserrat:wght@400&display=swap");
 
 @font-face {
-  font-family: 'KyivType Titling';
-  src: url('@/assets/fonts/KyivType2020-14-12/KyivType-NoVariable/TTF/KyivTypeTitling-Bold.ttf') format('truetype');
+  font-family: "KyivType Titling";
+  src: url("@/assets/fonts/KyivType2020-14-12/KyivType-NoVariable/TTF/KyivTypeTitling-Bold.ttf")
+    format("truetype");
   font-weight: bold;
   font-style: normal;
 }
 
 @font-face {
-  font-family: 'KyivType Titling';
-  src: url('@/assets/fonts/KyivType2020-14-12/KyivType-NoVariable/TTF/KyivTypeTitling-Black2.ttf') format('truetype');
+  font-family: "KyivType Titling";
+  src: url("@/assets/fonts/KyivType2020-14-12/KyivType-NoVariable/TTF/KyivTypeTitling-Black2.ttf")
+    format("truetype");
   font-weight: 900;
   font-style: normal;
 }
 
 body {
   margin: 0;
-  font-family: 'Merriweather', serif;
+  font-family: "Merriweather", serif;
 }
 
 .nav-links a,
 .wishlist,
 .language-currency select,
 .search-bar input {
-  font-family: 'Montserrat', serif;
+  font-family: "Montserrat", serif;
   font-weight: 400;
   font-size: 14px;
 }
 
 .search-bar {
   margin-left: 40px;
-  font-family: 'Montserrat', serif;
+  font-family: "Montserrat", serif;
 }
 
 .header {
@@ -205,6 +331,8 @@ body {
   top: 0;
   width: 100%;
   z-index: 1000;
+  /* Додаємо overflow: visible, щоб поза хедером могло відображатись */
+  overflow: visible;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
@@ -258,7 +386,7 @@ body {
   border: 1px solid #ccc;
   border-radius: 4px;
   padding: 5px 25px 5px 10px;
-  font-family: 'Montserrat', sans-serif;
+  font-family: "Montserrat", sans-serif;
   font-size: 14px;
   color: #333;
   cursor: pointer;
@@ -272,8 +400,6 @@ body {
   box-shadow: 0 0 5px rgba(107, 31, 31, 0.4);
   outline: none;
 }
-
-
 
 .language:hover .dropdown-container select,
 .currency:hover .dropdown-container select {
@@ -301,7 +427,6 @@ body {
 .flag {
   margin-right: 10px;
 }
-
 
 .no-border {
   border: none;
@@ -347,7 +472,7 @@ body {
   border-radius: 5px;
   background-color: #F1E6E6;
   border: none;
-  font-family: 'Montserrat', sans-serif;
+  font-family: "Montserrat", sans-serif;
   font-weight: 400;
 }
 
@@ -377,7 +502,7 @@ body {
 .logo h1 {
   color: #111111;
   font-size: 20px;
-  font-family: 'KyivType Titling', sans-serif;
+  font-family: "KyivType Titling", sans-serif;
   font-weight: 900;
 }
 
@@ -412,7 +537,7 @@ body {
 .nav-menu a {
   text-decoration: none;
   color: #6B1F1F;
-  font-family: 'KyivType Titling', sans-serif;
+  font-family: "KyivType Titling", sans-serif;
   font-weight: bold;
   padding: 8px 10px;
   font-size: 14px;
@@ -424,7 +549,6 @@ body {
   border-bottom: 3px solid #6B1F1F;
   background-color: white;
 }
-
 
 .search-results {
   position: absolute;
@@ -443,7 +567,7 @@ body {
 .search-results h2 {
   margin: 0 0 10px;
   text-align: center;
-  font-family: 'Montserrat', sans-serif;
+  font-family: "Montserrat", sans-serif;
   font-weight: bold;
 }
 
@@ -476,12 +600,12 @@ body {
 }
 
 .product-name {
-  font-family: 'Montserrat', sans-serif;
+  font-family: "Montserrat", sans-serif;
   font-weight: bold;
 }
 
 .product-price {
-  font-family: 'Montserrat', sans-serif;
+  font-family: "Montserrat", sans-serif;
   font-weight: normal;
 }
 
@@ -519,33 +643,26 @@ body {
 }
 
 @keyframes shake {
-
   0%,
   100% {
     transform: translateX(0);
   }
-
   25% {
     transform: translateX(-5px);
   }
-
   50% {
     transform: translateX(5px);
   }
-
   75% {
     transform: translateX(-5px);
   }
 }
 
-
 @keyframes bounce {
-
   0%,
   100% {
     transform: scale(1);
   }
-
   50% {
     transform: scale(1.2);
   }
@@ -554,11 +671,8 @@ body {
 .nav-links a,
 .wishlist {
   color: #333;
-  /* Основний колір тексту */
   text-decoration: none;
-  /* Прибрали підкреслення */
   position: relative;
-  /* Для створення псевдоелементів */
   display: inline-block;
   transition: color 0.3s ease;
 }
@@ -569,25 +683,20 @@ body {
   position: absolute;
   left: 0;
   bottom: -2px;
-  /* Відступ від тексту */
   width: 0;
   height: 1.5px;
-  /* Товщина лінії */
   background: linear-gradient(90deg, #420d0d, #e17f7f);
-  /* Градієнт */
   transition: width 0.3s ease;
 }
 
 .nav-links a:hover,
 .wishlist:hover {
   color: #6B1F1F;
-  /* Зміна кольору тексту */
 }
 
 .nav-links a:hover::after,
 .wishlist:hover::after {
   width: 100%;
-  /* Розтягування лінії під текстом */
 }
 
 .dropdown-container {
@@ -647,70 +756,125 @@ select {
   appearance: none;
 }
 
-
-@media (max-width: 1200px) {
-  .logo {
-    margin-left: 0;
-  }
-  .search-bar {
-    width: 200px;
-  }
-}
-
-@media (max-width: 992px) {
-  .top-bar {
-    flex-direction: column;
-    align-items: center;
-  }
-  .nav-links {
-    gap: 10px;
-  }
-  .search-bar {
-    margin-left: 0;
-    width: 180px;
-  }
-}
-
+/* ---------------------- */
+/* Мобільні стилі (до 768px) */
+/* ---------------------- */
 @media (max-width: 768px) {
+  .top-bar,
+  .nav-menu,
+  .nav-links,
+  .language-currency,
+  .search-bar {
+    display: none;
+  }
+  
   .main-header {
-    flex-direction: column;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 10px 15px;
+    padding-right: 60px;
+    position: relative;
+  }
+  
+  .logo {
+    margin-left: 15px;
+    position: relative;
+    z-index: 2;
+  }
+  
+  .user-cart {
+    margin-left: 20px;
+    position: relative;
+    z-index: 2;
+    display: flex;
     align-items: center;
   }
-  .nav-links {
-    flex-direction: column;
-    text-align: center;
-    gap: 8px;
+  
+  /* Показ мобільної кнопки пошуку */
+  .mobile-search-button {
+    display: block;
+    background: none;
+    border: none;
+    cursor: pointer;
+    margin-right: 10px;
   }
-  .nav-menu ul {
-    flex-direction: column;
+  
+  .burger-menu {
+    display: block;
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 3;
+    cursor: pointer;
   }
-  .search-bar {
+  
+  .burger-menu img {
+    width: 30px;
+    height: 30px;
+  }
+  
+  .mobile-nav {
+    position: absolute;
+    top: 100%;
+    left: 0;
     width: 100%;
-    max-width: 250px;
+    background-color: white;
+    padding: 10px 15px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    z-index: 1;
+  }
+  
+  .mobile-nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .mobile-nav li {
+    padding: 8px 0;
+    font-family: "Montserrat", sans-serif;
+    font-weight: bold;
+    color: #6B1F1F;
+    border-bottom: 1px solid #eaeaea;
+  }
+  
+  .mobile-nav li:last-child {
+    border-bottom: none;
+  }
+  
+  .mobile-nav a {
+    text-decoration: none;
+    color: #6B1F1F;
+    font-family: "Montserrat", sans-serif;
+  }
+  
+  /* Блок мобільного пошуку розташовується поза хедером */
+  .mobile-search {
+    position: fixed;
+    top: 80px; /* змініть це значення відповідно до висоти вашого хедера */
+    left: 0;
+    width: 100%;
+    background-color: white;
+    padding: 10px 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    z-index: 1100;
+  }
+  
+  .mobile-search .search-bar {
+    width: 100%;
   }
 }
 
-@media (max-width: 576px) {
-  .header {
-    position: static;
-  }
-  .top-bar {
-    padding: 5px;
-  }
-  .logo img {
-    width: 50px;
-  }
-  .search-bar input {
-    padding: 6px;
-  }
-  .user-cart .icon {
-    width: 25px;
-  }
-  .cart-badge {
-    width: 15px;
-    height: 15px;
-    font-size: 8px;
+/* ---------------------- */
+/* Десктопна версія (від 769px і більше) */
+/* ---------------------- */
+@media (min-width: 769px) {
+  .burger-menu,
+  .mobile-search,
+  .mobile-search-button {
+    display: none;
   }
 }
-
 </style>

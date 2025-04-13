@@ -72,7 +72,7 @@ export default {
       }
 
       try {
-        const response = await axios.get("http://26.235.139.202:8080/api/orders", {
+        const response = await axios.get("https://koshtovnya.api-dev.bmax-edu.website/api/orders", {
           headers: { Authorization: `Bearer ${token}` },
         });
 

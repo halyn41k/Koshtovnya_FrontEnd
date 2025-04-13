@@ -496,7 +496,7 @@ describe('ProductPage Component', () => {
 
     expect(wrapper.vm.wishlist).toContain(mockProduct.id);
     expect(axios.post).toHaveBeenCalledWith(
-      'http://26.235.139.202:8080/api/wishlist',
+      'https://koshtovnya.api-dev.bmax-edu.website/api/wishlist',
       { product_id: mockProduct.id },
       { headers: { Authorization: 'Bearer mock-token' } }
     );
@@ -512,7 +512,7 @@ describe('ProductPage Component', () => {
 
     expect(wrapper.vm.wishlist).not.toContain(mockProduct.id);
     expect(axios.delete).toHaveBeenCalledWith(
-      `http://26.235.139.202:8080/api/wishlist/${mockProduct.id}`,
+      `https://koshtovnya.api-dev.bmax-edu.website/api/wishlist/${mockProduct.id}`,
       { headers: { Authorization: 'Bearer mock-token' } }
     );
   });
@@ -539,7 +539,7 @@ describe('ProductPage Component', () => {
     await wrapper.vm.notifyWhenAvailable();
 
     expect(axios.post).toHaveBeenCalledWith(
-      'http://26.235.139.202:8080/api/notification',
+      'https://koshtovnya.api-dev.bmax-edu.website/api/notification',
       { product_id: mockProduct.id },
       { headers: { Authorization: 'Bearer mock-token' } }
     );
@@ -557,7 +557,7 @@ describe('ProductPage Component', () => {
     await wrapper.vm.toggleWishlist(mockProduct);
 
     expect(axios.post).toHaveBeenCalledWith(
-      'http://26.235.139.202:8080/api/wishlist',
+      'https://koshtovnya.api-dev.bmax-edu.website/api/wishlist',
       { product_id: mockProduct.id },
       { headers: { Authorization: 'Bearer mock-token' } }
     );
@@ -574,7 +574,7 @@ describe('ProductPage Component', () => {
     await wrapper.vm.toggleWishlist(mockProduct);
 
     expect(axios.delete).toHaveBeenCalledWith(
-      `http://26.235.139.202:8080/api/wishlist/${mockProduct.id}`,
+      `https://koshtovnya.api-dev.bmax-edu.website/api/wishlist/${mockProduct.id}`,
       { headers: { Authorization: 'Bearer mock-token' } }
     );
     expect(wrapper.vm.wishlist).not.toContain(mockProduct.id);
@@ -590,7 +590,7 @@ describe('ProductPage Component', () => {
     await wrapper.vm.notifyWhenAvailable();
 
     expect(axios.post).toHaveBeenCalledWith(
-      'http://26.235.139.202:8080/api/notification',
+      'https://koshtovnya.api-dev.bmax-edu.website/api/notification',
       { product_id: mockProduct.id },
       { headers: { Authorization: 'Bearer mock-token' } }
     );

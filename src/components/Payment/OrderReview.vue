@@ -72,7 +72,7 @@ export default {
 
       this.loading = true;
       try {
-        const response = await axios.get("http://26.235.139.202:8080/api/cart", {
+        const response = await axios.get("https://koshtovnya.api-dev.bmax-edu.website/api/cart", {
           headers: { Authorization: `Bearer ${token}` },
         });
 

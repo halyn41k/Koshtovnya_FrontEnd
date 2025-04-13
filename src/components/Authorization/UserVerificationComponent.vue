@@ -88,7 +88,7 @@ export default {
   }
 
   try {
-    const response = await fetch("http://26.235.139.202:8080/api/verify-code", {
+    const response = await fetch("https://koshtovnya.api-dev.bmax-edu.website/api/verify-code", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -120,7 +120,7 @@ export default {
             }
 
             try {
-                const response = await fetch("http://26.235.139.202:8080/api/resend-code", {
+                const response = await fetch("https://koshtovnya.api-dev.bmax-edu.website/api/resend-code", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",

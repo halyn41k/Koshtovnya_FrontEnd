@@ -86,7 +86,7 @@ export default {
       };
       
       try {
-        const response = await fetch(`http://26.235.139.202:8080/api/user/${this.userId}`, {
+        const response = await fetch(`https://koshtovnya.api-dev.bmax-edu.website/api/user/${this.userId}`, {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',

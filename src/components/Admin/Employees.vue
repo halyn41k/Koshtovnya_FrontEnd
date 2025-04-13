@@ -218,7 +218,7 @@ export default {
   methods: {
     async fetchUsers() {
       try {
-        const response = await axios.get("http://26.235.139.202:8080/api/admin/users", {
+        const response = await axios.get("https://koshtovnya.api-dev.bmax-edu.website/api/admin/users", {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
             Accept: "application/json"
@@ -237,7 +237,7 @@ export default {
       }
       try {
         const response = await axios.get(
-          `http://26.235.139.202:8080/api/admin/users/search/${this.searchQuery}`,
+          `https://koshtovnya.api-dev.bmax-edu.website/api/admin/users/search/${this.searchQuery}`,
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -275,7 +275,7 @@ export default {
     async addUser() {
       try {
         await axios.post(
-          "http://26.235.139.202:8080/api/admin/user",
+          "https://koshtovnya.api-dev.bmax-edu.website/api/admin/user",
           {
             first_name: this.form.first_name,
             second_name: this.form.second_name,
@@ -312,7 +312,7 @@ export default {
           payload.email = this.form.email;
         }
         await axios.patch(
-          `http://26.235.139.202:8080/api/admin/user/${this.form.id}`,
+          `https://koshtovnya.api-dev.bmax-edu.website/api/admin/user/${this.form.id}`,
           payload,
           {
             headers: {
@@ -331,7 +331,7 @@ export default {
     async deleteEmployee(id) {
       try {
         await axios.delete(
-          `http://26.235.139.202:8080/api/admin/users/${id}`,
+          `https://koshtovnya.api-dev.bmax-edu.website/api/admin/users/${id}`,
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`,

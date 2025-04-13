@@ -259,7 +259,7 @@ export default {
         return;
       }
       try {
-        const response = await axios.get("http://26.235.139.202:8080/api/delivery-types", {
+        const response = await axios.get("https://koshtovnya.api-dev.bmax-edu.website/api/delivery-types", {
           headers: { Authorization: `Bearer ${token}` },
         });
         // Якщо потрібно зберегти типи доставки
@@ -277,7 +277,7 @@ export default {
         return [];
       }
       try {
-        const response = await axios.get("http://26.235.139.202:8080/api/cart", {
+        const response = await axios.get("https://koshtovnya.api-dev.bmax-edu.website/api/cart", {
           headers: { Authorization: `Bearer ${token}` },
         });
         const cartData = response.data.data || [];
@@ -298,7 +298,7 @@ export default {
       const token = localStorage.getItem("token");
       if (!token) return;
       try {
-        const response = await axios.get("http://26.235.139.202:8080/api/profile", {
+        const response = await axios.get("https://koshtovnya.api-dev.bmax-edu.website/api/profile", {
           headers: { Authorization: `Bearer ${token}` },
         });
         const user = response.data.user;
@@ -313,7 +313,7 @@ export default {
       const token = localStorage.getItem("token");
       if (!token) return;
       try {
-        const response = await axios.get("http://26.235.139.202:8080/api/user-address", {
+        const response = await axios.get("https://koshtovnya.api-dev.bmax-edu.website/api/user-address", {
           headers: { Authorization: `Bearer ${token}` },
         });
         const addressData = response.data.data;

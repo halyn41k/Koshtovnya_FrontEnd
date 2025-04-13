@@ -163,7 +163,7 @@ export default {
     },
     async fetchSiteSettings() {
       try {
-        const response = await this.$axios.get('http://26.235.139.202:8080/api/site-settings');
+        const response = await this.$axios.get('https://koshtovnya.api-dev.bmax-edu.website/api/site-settings');
         const settings = response.data.data;
         settings.forEach(s => {
           if (s.setting_key === 'site_logo') {

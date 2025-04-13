@@ -95,7 +95,7 @@ export default {
       return;
     }
 
-    const response = await fetch("http://26.235.139.202:8080/api/login", {
+    const response = await fetch("https://koshtovnya.api-dev.bmax-edu.website/api/login", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

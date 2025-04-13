@@ -24,7 +24,7 @@
     methods: {
       confirmDelete() {
         axios
-          .delete(`http://26.235.139.202:8080/api/admin/products/${this.product.id}`, {
+          .delete(`https://koshtovnya.api-dev.bmax-edu.website/api/admin/products/${this.product.id}`, {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`
             }

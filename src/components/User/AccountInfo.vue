@@ -107,7 +107,7 @@ export default {
       return;
     }
 
-    const response = await fetch('http://26.235.139.202:8080/api/profile', {
+    const response = await fetch('https://koshtovnya.api-dev.bmax-edu.website/api/profile', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -159,7 +159,7 @@ export default {
     async selectTab(index) {
       if (index === 4) {
         try {
-          const response = await fetch('http://26.235.139.202:8080/api/logout', {
+          const response = await fetch('https://koshtovnya.api-dev.bmax-edu.website/api/logout', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',

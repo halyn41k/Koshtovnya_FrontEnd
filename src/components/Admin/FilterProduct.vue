@@ -271,7 +271,7 @@ export default {
     async loadFilters() {
       const token = localStorage.getItem("token");
       try {
-        const response = await axios.get("http://26.235.139.202:8080/api/admin/product-filter", {
+        const response = await axios.get("https://koshtovnya.api-dev.bmax-edu.website/api/admin/product-filter", {
           headers: { Authorization: `Bearer ${token}` }
         });
         const data = response.data;

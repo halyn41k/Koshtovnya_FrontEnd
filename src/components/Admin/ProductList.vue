@@ -199,7 +199,7 @@ export default {
     document.title = "Товари";
   },
   methods: {
-    fetchProducts(pageUrl = "http://26.235.139.202:8080/api/admin/products") {
+    fetchProducts(pageUrl = "https://koshtovnya.api-dev.bmax-edu.website/api/admin/products") {
       axios
         .get(pageUrl, {
           headers: {
@@ -288,7 +288,7 @@ export default {
 },
 applyFilters(filters) {
   const query = this.serializeFilters(filters);
-  const url = `http://26.235.139.202:8080/api/admin/products?${query}`;
+  const url = `https://koshtovnya.api-dev.bmax-edu.website/api/admin/products?${query}`;
   this.fetchProducts(url);
 },
 

@@ -187,7 +187,7 @@
       async fetchCities() {
         const token = localStorage.getItem("token");
         try {
-          const response = await axios.get("http://26.235.139.202:8080/api/nova-poshta/cities", {
+          const response = await axios.get("https://koshtovnya.api-dev.bmax-edu.website/api/nova-poshta/cities", {
             headers: { Authorization: `Bearer ${token}` },
             params: {
               city: this.localData.city,
@@ -221,7 +221,7 @@
         }
         if (this.localData.streetSearch.length >= 3) {
           try {
-            const response = await axios.get("http://26.235.139.202:8080/api/nova-poshta/streets", {
+            const response = await axios.get("https://koshtovnya.api-dev.bmax-edu.website/api/nova-poshta/streets", {
               headers: { Authorization: `Bearer ${token}` },
               params: {
                 Ref: this.localData.cityRef,
@@ -260,7 +260,7 @@
       async fetchWarehouses() {
         const token = localStorage.getItem("token");
         try {
-          const response = await axios.get("http://26.235.139.202:8080/api/nova-poshta/ware-houses", {
+          const response = await axios.get("https://koshtovnya.api-dev.bmax-edu.website/api/nova-poshta/ware-houses", {
             headers: { Authorization: `Bearer ${token}` },
             params: {
               city: this.localData.city,

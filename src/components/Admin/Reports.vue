@@ -108,7 +108,7 @@ export default {
     async fetchOrders() {
       try {
         const res = await axios.get(
-          "http://26.235.139.202:8080/api/admin/orders",
+          "https://koshtovnya.api-dev.bmax-edu.website/api/admin/orders",
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`,
