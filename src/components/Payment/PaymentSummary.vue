@@ -204,7 +204,7 @@ export default {
           console.log("[submitOrder] Спосіб оплати - Оплата картою, сума для оплати:", amount);
           try {
             const paymentResponse = await axios.post(
-              "https://b9ca-176-121-4-31.ngrok-free.app/api/payment",
+              "https://koshtovnya.api-dev.bmax-edu.website/api/payment",
               {
                 amount,
                 order_id: orderId,

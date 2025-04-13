@@ -4,7 +4,7 @@
   "private": false,
   "scripts": {
     "serve": "vue-cli-service serve ./src/main.js --open",
-    "build": "vue-cli-service build --name koshtovnya --entry ./src/index.js --target lib",
+    "build": "vue-cli-service build",
     "lint": "eslint .",
     "doc:build": "npx vuedoc.md --section API --output ./README.md ./src/components/HomePage.vue",
     "prepublishOnly": "npm run lint && npm run build && npm run styleguide:build && npm run doc:build",
