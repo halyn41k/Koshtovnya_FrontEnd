@@ -3,14 +3,23 @@
     <h2 class="section-title">{{ $t('shopByCategory') }}</h2>
     <div class="category-container">
       <div class="category-grid">
-        <router-link v-for="(category, index) in categories" :key="category.id" :to="category.url"
-          class="category-item with-squares">
+        <router-link
+          v-for="(category, index) in categories"
+          :key="category.id"
+          :to="category.url"
+          class="category-item with-squares"
+        >
           <template v-if="index === 0 || index === 2 || index === 4">
             <div class="square light-square"></div>
             <div class="square dark-square"></div>
           </template>
           <div class="image-wrapper">
-            <img loading="lazy" :src="category.image_url" :alt="category.name" class="category-image" />
+            <img
+              loading="lazy"
+              :src="category.image_url"
+              :alt="category.name"
+              class="category-image"
+            />
           </div>
           <div class="category-title-wrapper">
             <h2 class="category-title">{{ $t(category.name) }}</h2>
@@ -22,92 +31,45 @@
   </section>
 </template>
 
-
 <script>
+import api from '@/services/api';
+
 export default {
+  name: 'BuyByCategory',
   data() {
     return {
-      // Масив для зберігання категорій, отриманих із API
+      // Список категорій з API або fallback
       categories: [],
-
-      // Запасний масив категорій, якщо API недоступне
       fallbackCategories: [
-        {
-          id: 1,
-          name: 'Браслети',
-          url: '/bracelets', // Фіксована URL-адреса
-          image_url: require('@/assets/testpicture.png'),
-        },
-        {
-          id: 2,
-          name: 'Гердани',
-          url: '/herdany', // Фіксована URL-адреса
-          image_url: require('@/assets/testpicture.png'),
-        },
-        {
-          id: 3,
-          name: 'Силянки',
-          url: '/sylyanky', // Фіксована URL-адреса
-          image_url: require('@/assets/testpicture.png'),
-        },
-        {
-          id: 4,
-          name: 'Дукати',
-          url: '/dukats', // Фіксована URL-адреса
-          image_url: require('@/assets/testpicture.png'),
-        },
-        {
-          id: 5,
-          name: 'Сережки',
-          url: '/earrings', // Фіксована URL-адреса
-          image_url: require('@/assets/testpicture.png'),
-        },
-        {
-          id: 6,
-          name: 'Пояси',
-          url: '/belts', // Фіксована URL-адреса
-          image_url: require('@/assets/testpicture.png'),
-        },
+        { id: 1, name: 'Браслети', url: '/bracelets', image_url: require('@/assets/testpicture.png') },
+        { id: 2, name: 'Гердани', url: '/herdany', image_url: require('@/assets/testpicture.png') },
+        { id: 3, name: 'Силянки', url: '/sylyanky', image_url: require('@/assets/testpicture.png') },
+        { id: 4, name: 'Дукати', url: '/dukats', image_url: require('@/assets/testpicture.png') },
+        { id: 5, name: 'Сережки', url: '/earrings', image_url: require('@/assets/testpicture.png') },
+        { id: 6, name: 'Пояси', url: '/belts', image_url: require('@/assets/testpicture.png') },
       ],
     };
   },
   methods: {
     async fetchCategories() {
       try {
-        const response = await fetch("https://koshtovnya.api-dev.bmax-edu.website/api/categories");
+        const response = await api.getCategories();
+        // API повертає { data: [ ... ] }
+        const items = Array.isArray(response.data) ? response.data : response.data.data;
+        const fixedUrls = ['/bracelets', '/herdany', '/sylyanky', '/dukats', '/earrings', '/belts'];
 
-        if (!response.ok) {
-          throw new Error(`HTTP помилка: ${response.status}`);
-        }
-
-        const data = await response.json();
-        if (!Array.isArray(data.data)) {
-          throw new Error("Очікував масив категорій з API");
-        }
-
-        const fixedUrls = [
-          '/bracelets',
-          '/herdany',
-          '/sylyanky',
-          '/dukats',
-          '/earrings',
-          '/belts',
-        ];
-
-        this.categories = data.data.map((category, index) => ({
-          id: category.id,
-          name: category.name,
-          image_url: category.image_url,
-          url: fixedUrls[index] || '#',
+        this.categories = items.map((cat, idx) => ({
+          id: cat.id,
+          name: cat.name,
+          image_url: cat.image_url,
+          url: fixedUrls[idx] || `/category/${cat.id}`,
         }));
-      } catch (error) {
-        console.error("Помилка при отриманні категорій:", error.message);
+      } catch (err) {
+        console.error('Помилка отримання категорій:', err);
         this.categories = this.fallbackCategories;
       }
     },
-
   },
-  // Викликаємо fetchCategories одразу після монтуння компонента
   mounted() {
     this.fetchCategories();
   },

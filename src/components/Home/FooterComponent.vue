@@ -1,4 +1,4 @@
-<template> 
+<template>
   <footer class="footer">
     <div class="footer-content">
       <div class="logo-section">
@@ -73,9 +73,10 @@
 </template>
 
 <script>
-import axios from 'axios';
+import api from '@/services/api';
 
 export default {
+  name: 'AppFooter',
   data() {
     return {
       siteSettings: {
@@ -86,16 +87,24 @@ export default {
       }
     };
   },
-  mounted() {
-    this.fetchSiteSettings();
+  async mounted() {
+    await this.fetchSiteSettings();
   },
   methods: {
     async fetchSiteSettings() {
       try {
-        const response = await axios.get('https://koshtovnya.api-dev.bmax-edu.website/api/site-settings');
-        const settings = response.data.data;
-        settings.forEach(setting => {
-          this.siteSettings[setting.setting_key] = setting.setting_value;
+        // Використовуємо загальний API-клієнт
+        const response = await api.getSiteSettings();
+        // API повертає об'єкт { data: [...] }
+        const settingsArray = Array.isArray(response.data)
+          ? response.data
+          : response.data.data || [];
+
+        settingsArray.forEach(({ setting_key, setting_value }) => {
+          // Правильна перевірка наявності властивості без direct hasOwnProperty
+          if (Object.prototype.hasOwnProperty.call(this.siteSettings, setting_key)) {
+            this.siteSettings[setting_key] = setting_value;
+          }
         });
       } catch (error) {
         console.error('Помилка завантаження налаштувань сайту:', error);

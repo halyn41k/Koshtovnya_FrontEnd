@@ -10,12 +10,11 @@
         {{ $t('exclusiveJewelry') }}
       </div>
       <router-link
-  to="/allproduct"
-  class="view-products-button fade-in"
->
-  {{ $t('viewProducts') }}
-</router-link>
-
+        to="/allproduct"
+        class="view-products-button fade-in"
+      >
+        {{ $t('viewProducts') }}
+      </router-link>
     </div>
 
     <div class="content-container fade-in">
@@ -34,53 +33,40 @@
     </div>
 
     <section>
-      <PopularProducts fade-in />
+      <PopularProducts class="fade-in" :products="visibleProducts" />
     </section>
 
     <section>
-      <NewArrivals fade-in />
+      <NewArrivals class="fade-in" :arrivals="visibleNewArrivals" />
     </section>
 
     <div class="instagram-section fade-in">
       <div class="instagram-text-container fade-in">
         <img src="@/assets/instapattern.png" alt="Instagram pattern" class="insta-pattern-image fade-in" />
         <p class="follow-text">
-          {{ $t('followInsta') }}<br /> <!-- Використовуємо <br /> для переходу на новий рядок -->
-          {{ $t('dontMissTheMost') }} <!-- Текст на другому рядку -->
+          {{ $t('followInsta') }}<br />
+          {{ $t('dontMissTheMost') }}
         </p>
         <p class="instagram-handle fade-in">
-  <a href="https://www.instagram.com/koshtovnya_jewelry/" class="instagram-handle-link fade-in" target="_blank" style="text-decoration: none;">@koshtovnya_jewelry</a>
-</p>
+          <a
+            href="https://www.instagram.com/koshtovnya_jewelry/"
+            class="instagram-handle-link fade-in"
+            target="_blank"
+            style="text-decoration: none;"
+          >
+            @koshtovnya_jewelry
+          </a>
+        </p>
       </div>
 
       <div class="instagram-grid fade-in">
-        <div class="instagram-image">
-          <img src="@/assets/pic1.png" alt="Instagram Image 1" />
-        </div>
-        <div class="instagram-image">
-          <img src="@/assets/pic2.png" alt="Instagram Image 2" />
-        </div>
-        <div class="instagram-image">
-          <img src="@/assets/pic3.png" alt="Instagram Image 3" />
-        </div>
-        <div class="instagram-image">
-          <img src="@/assets/pic4.png" alt="Instagram Image 4" />
-        </div>
-        <div class="instagram-image">
-          <img src="@/assets/pic5.png" alt="Instagram Image 5" />
-        </div>
-        <div class="instagram-image">
-          <img src="@/assets/pic6.png" alt="Instagram Image 6" />
-        </div>
-        <div class="instagram-image">
-          <img src="@/assets/pic7.png" alt="Instagram Image 7" />
-        </div>
-        <div class="instagram-image">
-          <img src="@/assets/pic8.png" alt="Instagram Image 8" />
+        <div class="instagram-image" v-for="n in 8" :key="n">
+          <img :src="getInstagramImage(n)" :alt="'Instagram Image ' + n" />
         </div>
       </div>
     </div>
-    <CategoryProduct fade-in />
+
+    <CategoryProduct class="fade-in" />
   </div>
 </template>
 
@@ -88,132 +74,110 @@
 import PopularProducts from "./PopularProducts.vue";
 import NewArrivals from "./NewArrivals.vue";
 import CategoryProduct from "./CategoryProduct.vue";
+import api from '@/services/api';
 
 export default {
+  name: 'HomePage',
   components: {
     PopularProducts,
     NewArrivals,
     CategoryProduct,
   },
-  mounted() {
-    this.fetchPopularProducts(); // Завантаження популярних продуктів при монтуванні компонента
-    this.fetchNewArrivals(); // Завантаження нових надходжень при монтуванні компонента
-    this.observeElements();
-    document.title = "Головна";
-  },
   data() {
     return {
-      products: [], // Дані з API
-      newArrivals: [], // Дані з API
+      products: [],
+      newArrivals: [],
       visibleProducts: [],
       visibleNewArrivals: [],
       currentPage: 0,
       newArrivalsPage: 0,
       productsPerPage: 3,
       testPopularProducts: [
-        {
-          id: 1,
-          name: "Браслет",
-          price: 250,
-          image_url: "@/assets/testpicture.png",
-          bead_producer_name: "Чешський бісер",
-        },
-        {
-          id: 2,
-          name: "Гердан",
-          price: 450,
-          image_url: "@/assets/testpicture.png",
-          bead_producer_name: "Чешський бісер",
-        },
-        {
-          id: 3,
-          name: "Сережки",
-          price: 200,
-          image_url: "@/assets/testpicture.png",
-          bead_producer_name: "Чешський бісер",
-        },
+        { id: 1, name: "Браслет", price: 250, image_url: require('@/assets/testpicture.png'), bead_producer_name: "Чешський бісер" },
+        { id: 2, name: "Гердан", price: 450, image_url: require('@/assets/testpicture.png'), bead_producer_name: "Чешський бісер" },
+        { id: 3, name: "Сережки", price: 200, image_url: require('@/assets/testpicture.png'), bead_producer_name: "Чешський бісер" },
       ],
       testNewArrivals: [
-        {
-          id: 4,
-          name: "Силянка",
-          price: 300,
-          image_url: "@/assets/testpicture.png",
-          bead_producer_name: "Чешський бісер",
-        },
-        {
-          id: 5,
-          name: "Дукати",
-          price: 550,
-          image_url: "@/assets/testpicture.png",
-          bead_producer_name: "Чешський бісер",
-        },
-        {
-          id: 6,
-          name: "Пояс",
-          price: 600,
-          image_url: "@/assets/testpicture.png",
-          bead_producer_name: "Чешський бісер",
-        },
+        { id: 4, name: "Силянка", price: 300, image_url: require('@/assets/testpicture.png'), bead_producer_name: "Чешський бісер" },
+        { id: 5, name: "Дукати", price: 550, image_url: require('@/assets/testpicture.png'), bead_producer_name: "Чешський бісер" },
+        { id: 6, name: "Пояс", price: 600, image_url: require('@/assets/testpicture.png'), bead_producer_name: "Чешський бісер" },
       ],
     };
+  },
+  mounted() {
+    this.fetchPopularProducts();
+    this.fetchNewArrivals();
+    this.observeElements();
+    document.title = "Головна";
   },
   methods: {
     observeElements() {
       const elements = document.querySelectorAll('.fade-in');
       const observer = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
+        entries => {
+          entries.forEach(entry => {
             if (entry.isIntersecting) {
               entry.target.classList.add('show');
-              observer.unobserve(entry.target); // Зупинити спостереження після появи
+              observer.unobserve(entry.target);
             }
           });
         },
-        { threshold: 0.1 } // Показувати при 10% видимості
+        { threshold: 0.1 }
       );
-
-      elements.forEach((el) => observer.observe(el));
+      elements.forEach(el => observer.observe(el));
     },
-    async fetchPopularProducts() { // Завантаження популярних товарів з API
+
+    getInstagramImage(n) {
+      // Динамічний імпорт зображень
       try {
-        const response = await fetch("https://koshtovnya.api-dev.bmax-edu.website/api/popular-products"); // Запит до API
-        if (!response.ok) throw new Error(`HTTP error: ${response.status}`); // Обробка помилки відповіді
-        const data = await response.json();
+        return require(`@/assets/pic${n}.png`);
+      } catch (e) {
+        console.error('Error loading image', e);
+        return '';
+      }
+    },
 
-        // Очищення та збереження отриманих даних
-        this.products = data.data.map(product => ({
+    async fetchPopularProducts() {
+      try {
+        const response = await api.getPopularProducts();
+        const items = Array.isArray(response.data)
+          ? response.data
+          : response.data.data || [];
+        this.products = items.map(product => ({
           ...product,
-          name: product.name.trim(), // Видалення зайвих пробілів у назві
-          image_url: product.image_url.trim(), // Видалення зайвих пробілів у URL зображення
+          name: product.name.trim(),
+          image_url: product.image_url.trim(),
         }));
-
-        this.updateVisibleProducts(); // Оновлення списку видимих товарів
       } catch (error) {
-        console.error("Помилка при отриманні популярних товарів:", error.message); // Лог помилки
-        this.products = this.testPopularProducts; // Використовуємо тестові дані у разі помилки
+        console.error('Помилка при отриманні популярних товарів:', error);
+        this.products = this.testPopularProducts;
+      } finally {
         this.updateVisibleProducts();
       }
     },
-    async fetchNewArrivals() { // Завантаження нових надходжень з API
+
+    async fetchNewArrivals() {
       try {
-        const response = await fetch("https://koshtovnya.api-dev.bmax-edu.website/api/new-arrivals");
-        if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
-        const data = await response.json();
-        this.newArrivals = data.data; // Збереження отриманих даних
+        const response = await api.getNewArrivals();
+        const items = Array.isArray(response.data)
+          ? response.data
+          : response.data.data || [];
+        this.newArrivals = items;
       } catch (error) {
-        console.error("Помилка при отриманні новинок:", error.message);
-        this.newArrivals = this.testNewArrivals; // Використовуємо тестові дані у разі помилки
+        console.error('Помилка при отриманні новинок:', error);
+        this.newArrivals = this.testNewArrivals;
       } finally {
-        this.updateVisibleNewArrivals(); // Оновлення списку видимих новинок
+        this.updateVisibleNewArrivals();
       }
     },
-    updateVisibleProducts() { // Оновлення видимих популярних товарів на основі поточної сторінки
+
+    updateVisibleProducts() {
       const start = this.currentPage * this.productsPerPage;
       const end = start + this.productsPerPage;
       this.visibleProducts = this.products.slice(start, end);
     },
-    updateVisibleNewArrivals() { // Оновлення видимих нових надходжень на основі поточної сторінки
+
+    updateVisibleNewArrivals() {
       const start = this.newArrivalsPage * this.productsPerPage;
       const end = start + this.productsPerPage;
       this.visibleNewArrivals = this.newArrivals.slice(start, end);

@@ -63,6 +63,16 @@ const routes = [
     component: () => import('@/components/authorization/UserRegistration.vue'),
   },
   {
+    path: '/aboutus',
+    name: 'AboutUs',
+    component: () => import('@/components/infoshop/AboutUs.vue'),
+  },
+  {
+    path: '/aboutdelivery',
+    name: 'AboutDelivery',
+    component: () => import('@/components/infoshop/AboutDelivery.vue'),
+  },
+  {
     path: '/productpage/:id',
     name: 'ProductPage',
     component: () => import('@/components/product/ProductPage.vue'),

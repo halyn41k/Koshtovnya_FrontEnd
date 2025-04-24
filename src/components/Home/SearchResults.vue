@@ -3,21 +3,28 @@
     <div v-if="isVisible" class="search-results" @mousedown.stop>
       <h2>Результати пошуку:</h2>
 
-      <!-- Лоадер з анімацією крапок -->
+      <!-- Loader animation -->
       <div v-if="loading" class="loader">
         Завантаження<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span>
       </div>
 
-      <!-- Якщо пошук завершено, але нічого не знайдено -->
-      <div v-else-if="results.length === 0">
+      <!-- No results found -->
+      <div v-else-if="!loading && results.length === 0">
         <p>Нічого не знайдено.</p>
       </div>
 
-      <!-- Якщо є результати -->
+      <!-- Display results -->
       <ul v-else>
-        <li v-for="product in highlightedResults" :key="product.id" class="search-result-item">
-          <router-link :to="`/productpage/${product.id}`" class="product-link">
-            <img :src="product.image_url" alt="Product Image" />
+        <li
+          v-for="product in highlightedResults"
+          :key="product.id"
+          class="search-result-item"
+        >
+          <router-link
+            :to="`/productpage/${product.id}`"
+            class="product-link"
+          >
+            <img :src="product.image_url" :alt="product.name" />
             <div class="product-details">
               <h3 v-html="product.highlightedName"></h3>
               <p>Ціна: {{ product.price }} ₴</p>
@@ -30,82 +37,77 @@
 </template>
 
 <script>
-import axios from "axios";
+import { debounce } from 'lodash';
+import api from '@/services/api';
 
 export default {
+  name: 'SearchResults',
   props: {
     query: {
       type: String,
-      required: false,
-      default: "",
-    },
+      default: ''
+    }
   },
   data() {
     return {
       results: [],
       isVisible: false,
-      loading: false,
+      loading: false
     };
   },
   computed: {
     highlightedResults() {
-      const query = this.query.trim();
-      if (!query) return this.results;
-
-      const regex = new RegExp(`(${query})`, "gi");
-      return this.results.map((product) => ({
-        ...product,
-        highlightedName: product.name.replace(regex, '<span class="highlight">$1</span>'),
+      const q = this.query.trim();
+      if (!q) return this.results;
+      const regex = new RegExp(`(${q})`, 'gi');
+      return this.results.map(p => ({
+        ...p,
+        highlightedName: p.name.replace(regex, '<span class="highlight">$1</span>')
       }));
-    },
+    }
   },
   watch: {
-    query(newQuery) {
-      if (newQuery.trim()) {
-        this.search(newQuery);
+    query: debounce(async function (newQuery) {
+      const trimmed = newQuery.trim();
+      if (trimmed) {
+        await this.performSearch(trimmed);
       } else {
-        this.results = [];
-        this.isVisible = false;
+        this.resetResults();
       }
-    },
+    }, 300)
   },
   methods: {
-    search(query) {
-  const trimmedQuery = query.trim();
-  if (!trimmedQuery) {
-    this.results = [];
-    this.isVisible = false;
-    return;
-  }
-  const apiUrl = `https://koshtovnya.api-dev.bmax-edu.website/api/products/search/${encodeURIComponent(trimmedQuery)}`;
-  this.loading = true;
-  this.isVisible = true;
-  axios
-    .get(apiUrl)
-    .then((response) => {
-      this.results = response.data.data;
-    })
-    .catch((error) => {
-      console.error("Error fetching search results:", error);
+    async performSearch(text) {
+      this.loading = true;
+      this.isVisible = true;
+      try {
+        const resp = await api.searchProducts(encodeURIComponent(text));
+        const items = Array.isArray(resp.data) ? resp.data : resp.data?.data || [];
+        this.results = items;
+      } catch (error) {
+        console.error('Search error:', error);
+        this.results = [];
+      } finally {
+        this.loading = false;
+      }
+    },
+    resetResults() {
       this.results = [];
       this.isVisible = false;
-    })
-    .finally(() => {
       this.loading = false;
-    });
-},
+    },
     handleOutsideClick(event) {
       if (!this.$el.contains(event.target)) {
         this.isVisible = false;
       }
-    },
+    }
   },
   mounted() {
-    document.addEventListener("mousedown", this.handleOutsideClick);
+    document.addEventListener('mousedown', this.handleOutsideClick);
   },
   beforeUnmount() {
-    document.removeEventListener("mousedown", this.handleOutsideClick);
-  },
+    document.removeEventListener('mousedown', this.handleOutsideClick);
+  }
 };
 </script>
 

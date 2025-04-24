@@ -17,37 +17,33 @@
           <p class="material-wishlist">
             <span class="product-material">{{ product.bead_producer_name }}</span>
             <span class="wishlist-icon" @click.stop="toggleWishlist(product)">
-              <svg v-if="product.is_in_wishlist" class="filled-heart" xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24" fill="currentColor">
-                <path
-                  d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+              <svg v-if="product.is_in_wishlist" class="filled-heart" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
               </svg>
-              <svg v-else class="empty-heart" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path
-                  d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z" />
+              <svg v-else class="empty-heart" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z" />
               </svg>
             </span>
           </p>
           <button class="buy-button" @click="addToCart(product)">
-          <span>{{ $t('buyButton') }}</span>
-          <img src="@/assets/miniarrow.png" alt="Arrow icon" class="button-icon" />
-        </button>
+            <span>{{ $t('buyButton') }}</span>
+            <img src="@/assets/miniarrow.png" alt="Arrow icon" class="button-icon" />
+          </button>
         </article>
       </div>
       <img src="@/assets/arrow_big.png" alt="right-arrow" class="arrow right-arrow" @click="showNextProducts" />
     </div>
     <div class="dots-container">
-      <span v-for="(dot, index) in totalPages" :key="index"
-        :class="['dot', index === currentPage ? 'dark' : 'light']"></span>
+      <span v-for="(_, index) in totalPages" :key="index" :class="['dot', index === currentPage ? 'dark' : 'light']"></span>
     </div>
   </section>
 </template>
 
 <script>
-import axios from 'axios';
+import api from '@/services/api';
 
 export default {
+  name: 'NewArrivals',
   data() {
     return {
       products: [],
@@ -59,146 +55,69 @@ export default {
     };
   },
   methods: {
-    async fetchProducts() {
+    async fetchProducts(page = 1) {
       try {
-        const response = await fetch("https://koshtovnya.api-dev.bmax-edu.website/api/new-arrivals?page=1");
-        if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
+        const response = await api.getNewArrivals(page); // Реалізуйте в сервісі параметр page
+        const items = Array.isArray(response.data)
+          ? response.data
+          : response.data.data || [];
 
-        const data = await response.json();
-        this.products = data.data;
-        this.totalPages = data.totalPages || Math.ceil(this.products.length / this.productsPerPage);
+        this.products = items;
+        this.totalPages = response.data.meta?.last_page || Math.ceil(this.products.length / this.productsPerPage);
         this.updateVisibleProducts();
-
         await this.fetchWishlist();
       } catch (error) {
-        console.error("Error fetching popular products:", error.message);
+        console.error('Помилка при завантаженні новинок:', error);
       }
     },
+
     async fetchWishlist() {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        console.warn('Користувач не авторизований');
-        return;
-      }
-
-      const cachedWishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
-      this.wishlist = cachedWishlist;
-
       try {
-        const response = await axios.get('https://koshtovnya.api-dev.bmax-edu.website/api/wishlist', {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        if (response.data && response.data.products) {
-          this.wishlist = response.data.products.map((item) => item.id);
-          localStorage.setItem('wishlist', JSON.stringify(this.wishlist));
+        const resp = await api.getWishlist();
+        // Обробка різних форматів відповіді
+        let items = [];
+        if (Array.isArray(resp)) {
+          items = resp;
+        } else if (Array.isArray(resp.data)) {
+          items = resp.data;
         } else {
-          console.warn('Некоректна структура відповіді API для списку бажаного:', response.data);
-          this.wishlist = [];
+          console.warn('Unexpected wishlist response:', resp);
         }
-
-        this.products.forEach((product) => {
-          product.is_in_wishlist = this.isInWishlist(product.id);
+        // Зберігаємо тільки id продуктів
+        this.wishlist = items.map(item => item.id);
+        // Встановлюємо прапорець для кожного продукту
+        this.products.forEach(p => {
+          p.is_in_wishlist = this.wishlist.includes(p.id);
         });
       } catch (error) {
-        console.error('Помилка завантаження списку бажаного:', error);
+        console.error('Помилка при завантаженні списку бажаного:', error);
       }
     },
-    async addToCart(item, size = null) {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        alert('Будь ласка, увійдіть у свій обліковий запис.');
-        this.$router.push('/login');
-        return;
-      }
 
+    async addToCart(product) {
       try {
-        // Додаємо базові параметри для запиту
-        const cartData = {
-          product_id: item.id,
-          quantity: 1, // Ви можете змінити це значення, залежно від потреб
-        };
-
-        // Додаємо size, якщо передано
-        if (size) {
-          cartData.size = size;
-        }
-
-        const response = await axios.post(
-          'https://koshtovnya.api-dev.bmax-edu.website/api/cart',
-          cartData,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-
-        console.log('Відповідь після додавання товару:', response.data); // Логування відповіді
-
-        // Перевірка, чи додавання успішне
-        if (response.data && response.data.message === 'Product added to cart') {
-          alert('Товар успішно додано до кошика.');
-        } else {
-          console.error('Товар не був доданий:', response.data);
-          alert('Не вдалося додати товар до кошика.');
-        }
+        await api.addToCart({ product_id: product.id, quantity: 1 });
+        alert('Товар успішно додано до кошика');
       } catch (error) {
-        console.error('Помилка додавання товару до кошика:', error.response || error);
-        alert('Не вдалося додати товар до кошика.');
+        console.error('Помилка додавання до кошика:', error);
+        alert('Не вдалося додати товар до кошика');
       }
     },
-    async fetchAdditionalProducts(page) {
+
+    async toggleWishlist(product) {
       try {
-        const response = await fetch(`https://koshtovnya.api-dev.bmax-edu.website/api/new-arrivals?page=${page}`);
-        if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
-        const data = await response.json();
-        this.products.push(...data.data);
+        if (product.is_in_wishlist) await api.deleteWishlistItem(product.id);
+        else await api.addToWishlist({ product_id: product.id });
+
+        product.is_in_wishlist = !product.is_in_wishlist;
       } catch (error) {
-        console.error("Error pre-fetching additional products:", error.message);
-      }
-    },
-
-
-    isInWishlist(productId) {
-      return this.wishlist.includes(productId);
-    },
-
-    async toggleWishlist(product, size = null) {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        alert('Будь ласка, увійдіть у свій обліковий запис.');
-        this.$router.push('/login');
-        return;
-      }
-      try {
-        if (this.isInWishlist(product.id)) {
-          // Видалення зі списку бажаного
-          await axios.delete(`https://koshtovnya.api-dev.bmax-edu.website/api/wishlist/${product.id}`, {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          this.wishlist = this.wishlist.filter((id) => id !== product.id);
-        } else {
-          // Додавання до списку бажаного
-          const requestData = { product_id: product.id };
-          if (size) {
-            requestData.size = size; // Додаємо поле size, якщо воно передане
-          }
-
-          await axios.post(
-            'https://koshtovnya.api-dev.bmax-edu.website/api/wishlist',
-            requestData,
-            { headers: { Authorization: `Bearer ${token}` } }
-          );
-          this.wishlist.push(product.id);
-        }
-        // Оновлюємо стан продукту напряму
-        product.is_in_wishlist = this.isInWishlist(product.id);
-      } catch (error) {
-        console.error('Помилка при оновленні списку бажаного:', error);
+        console.error('Помилка оновлення списку бажаного:', error);
       }
     },
 
     updateVisibleProducts() {
       const start = this.currentPage * this.productsPerPage;
-      const end = start + this.productsPerPage;
-      this.visibleProducts = this.products.slice(start, end);
+      this.visibleProducts = this.products.slice(start, start + this.productsPerPage);
     },
 
     showPreviousProducts() {
@@ -215,7 +134,6 @@ export default {
       }
     },
   },
-
   mounted() {
     this.fetchProducts();
   },

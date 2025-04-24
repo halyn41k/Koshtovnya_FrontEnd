@@ -143,27 +143,27 @@
     </div>
 
     <nav class="nav-menu">
-    <ul>
-      <li>
-        <router-link to="/bracelets">{{ $t('bracelets') }}</router-link>
-      </li>
-      <li>
-        <router-link to="/herdany">{{ $t('herdany') }}</router-link>
-      </li>
-      <li>
-        <router-link to="/dukats">{{ $t('dukats') }}</router-link>
-      </li>
-      <li>
-        <router-link to="/earrings">{{ $t('earrings') }}</router-link>
-      </li>
-      <li>
-        <router-link to="/sylyanky">{{ $t('sylyanky') }}</router-link>
-      </li>
-      <li>
-        <router-link to="/belts">{{ $t('belts') }}</router-link>
-      </li>
-    </ul>
-  </nav>
+      <ul>
+        <li>
+          <router-link to="/bracelets">{{ $t('bracelets') }}</router-link>
+        </li>
+        <li>
+          <router-link to="/herdany">{{ $t('herdany') }}</router-link>
+        </li>
+        <li>
+          <router-link to="/dukats">{{ $t('dukats') }}</router-link>
+        </li>
+        <li>
+          <router-link to="/earrings">{{ $t('earrings') }}</router-link>
+        </li>
+        <li>
+          <router-link to="/sylyanky">{{ $t('sylyanky') }}</router-link>
+        </li>
+        <li>
+          <router-link to="/belts">{{ $t('belts') }}</router-link>
+        </li>
+      </ul>
+    </nav>
   </header>
 
   <!-- Блок мобільного пошуку, який «випадає» нижче хедера -->
@@ -188,102 +188,89 @@
 
 <script>
 import SearchResults from "./SearchResults.vue";
-import axios from "axios";
+import api from '@/services/api';
 
 export default {
-  components: {
-    SearchResults,
-  },
+  name: 'HeaderComponent',
+  components: { SearchResults },
   data() {
     return {
-      selectedLanguage: "uk",
-      selectedCurrency: "UAH",
+      selectedLanguage: 'uk',
+      selectedCurrency: 'UAH',
       cartCount: 0,
-      searchQuery: "",
+      searchQuery: '',
       isLanguageDropdownOpen: false,
       isCurrencyDropdownOpen: false,
       isBurgerOpen: false,
       isCategoriesOpen: false,
-      mobileSearchActive: false, // прапорець для мобільного пошуку
+      mobileSearchActive: false,
       siteSettings: {
-        site_logo: "",
-      },
+        site_logo: ''
+      }
     };
   },
   computed: {
     currentFlag() {
-      return this.selectedLanguage === "uk"
-        ? "https://flagcdn.com/w320/ua.png"
-        : "https://flagcdn.com/w320/gb.png";
-    },
+      return this.selectedLanguage === 'uk'
+        ? 'https://flagcdn.com/w320/ua.png'
+        : 'https://flagcdn.com/w320/gb.png';
+    }
   },
   methods: {
     toggleBurger() {
       this.isBurgerOpen = !this.isBurgerOpen;
-      if (!this.isBurgerOpen) {
-        this.isCategoriesOpen = false;
-      }
+      if (!this.isBurgerOpen) this.isCategoriesOpen = false;
     },
     toggleCategories() {
       this.isCategoriesOpen = !this.isCategoriesOpen;
     },
     async fetchCartCount() {
       try {
-        const token = localStorage.getItem("token");
-        if (!token) return;
-        const response = await axios.get(
-          "https://koshtovnya.api-dev.bmax-edu.website/api/cart/cart-count",
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-        this.cartCount = response.data.cart_count || 0;
+        const response = await api.getCartCount();
+        this.cartCount = response.cart_count || 0;
       } catch (error) {
-        console.error("Помилка завантаження кількості товарів у кошику:", error);
+        console.error('Помилка завантаження кількості товарів у кошику:', error);
       }
     },
     startSearch() {
-      console.log("Searching:", this.searchQuery);
+      console.log('Searching:', this.searchQuery);
     },
     changeLanguage() {
       this.$i18n.locale = this.selectedLanguage;
-      this.isLanguageDropdownOpen = true; // Закриваємо меню після вибору
+      this.isLanguageDropdownOpen = false;
     },
     changeCurrency() {
-      this.isCurrencyDropdownOpen = true; // Закриваємо меню після вибору
+      this.isCurrencyDropdownOpen = false;
     },
     toggleLanguageDropdown() {
-      console.log("Language dropdown toggled:", this.isLanguageDropdownOpen);
       this.isLanguageDropdownOpen = !this.isLanguageDropdownOpen;
     },
     toggleCurrencyDropdown() {
-      console.log("Currency dropdown toggled:", this.isCurrencyDropdownOpen);
       this.isCurrencyDropdownOpen = !this.isCurrencyDropdownOpen;
     },
     async fetchSiteSettings() {
       try {
-        const response = await axios.get(
-          "https://koshtovnya.api-dev.bmax-edu.website/api/site-settings"
-        );
-        const settings = response.data.data;
-        settings.forEach((setting) => {
-          if (setting.setting_key === "site_logo") {
-            this.siteSettings.site_logo = setting.setting_value;
+        const response = await api.getSiteSettings();
+        const settingsArray = Array.isArray(response.data)
+          ? response.data
+          : response.data.data || [];
+        settingsArray.forEach(({ setting_key, setting_value }) => {
+          if (setting_key === 'site_logo') {
+            this.siteSettings.site_logo = setting_value;
           }
         });
       } catch (error) {
-        console.error("Помилка завантаження логотипу:", error);
+        console.error('Помилка завантаження налаштувань сайту:', error);
       }
     },
     toggleMobileSearch() {
       this.mobileSearchActive = !this.mobileSearchActive;
-      console.log("Toggle Mobile Search, now:", this.mobileSearchActive);
-    },
+    }
   },
   async mounted() {
     await this.fetchSiteSettings();
-    this.fetchCartCount();
-  },
+    await this.fetchCartCount();
+  }
 };
 </script>
 

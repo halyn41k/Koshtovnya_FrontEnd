@@ -1,15 +1,29 @@
+// main.js
 import { createApp } from 'vue';
 import App from './App.vue';
 import router from './index.js';
-import i18n from './i18n';  // Імпортуємо i18n
+import i18n from './i18n';
 import store from './store/index.js';
-import axios from 'axios';  // Імпортуємо axios
+import axios from 'axios';
+
+// імпортуємо плагін і його стилі
+import Toast, { POSITION } from 'vue-toastification';
+import 'vue-toastification/dist/index.css';
 
 const app = createApp(App);
 
-app.config.globalProperties.$axios = axios; // Реєструємо axios як $axios
+// робимо axios глобально доступним
+app.config.globalProperties.$axios = axios;
 
-app.use(router)  // Використовуємо роутер
-   .use(i18n)   // Використовуємо i18n
+// реєструємо плагін нотифікацій
+app.use(Toast, {
+  // приклад опцій — положення, тривалість тощо
+  position: POSITION.TOP_RIGHT,
+  timeout: 5000,
+  closeOnClick: true,
+});
+
+app.use(router)
+   .use(i18n)
    .use(store)
-   .mount('#app');  // Монтуємо застосунок
+   .mount('#app');
