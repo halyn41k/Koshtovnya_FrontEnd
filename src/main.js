@@ -1,9 +1,9 @@
 // main.js
 import { createApp } from 'vue';
 import App from './App.vue';
-import router from './index.js';
+import router from './index';
 import i18n from './i18n';
-import store from './store/index.js';
+import store from './store/index';
 import axios from 'axios';
 
 // імпортуємо плагін і його стилі

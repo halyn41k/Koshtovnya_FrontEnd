@@ -1,5 +1,5 @@
 import { mount } from '@vue/test-utils';
-import FooterComponent from '../../components/FooterComponent.vue';
+import FooterComponent from '../../components/home/FooterComponent.vue';
 
 describe('FooterComponent.vue', () => {
   let wrapper;

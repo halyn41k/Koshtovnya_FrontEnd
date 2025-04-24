@@ -1,5 +1,5 @@
 import { mount } from '@vue/test-utils';
-import FilterComponent from '../../components/FilterComponent.vue';
+import FilterComponent from '../../components/product/FilterComponent.vue';
 import axios from 'axios';
 
 // Мокаємо axios

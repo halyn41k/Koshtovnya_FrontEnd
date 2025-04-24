@@ -1,5 +1,5 @@
 import { shallowMount } from '@vue/test-utils';
-import ProductPage from '@/components/ProductPage.vue';
+import ProductPage from '@/components/product/ProductPage.vue';
 import axios from 'axios';
 
 jest.mock('axios', () => ({

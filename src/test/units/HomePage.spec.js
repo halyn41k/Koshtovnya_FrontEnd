@@ -1,5 +1,5 @@
 import { shallowMount } from '@vue/test-utils';
-import HomePage from '@/components/HomePage.vue';
+import HomePage from '@/components/home/HomePage.vue';
 
 jest.mock('axios', () => ({
   get: jest.fn(),

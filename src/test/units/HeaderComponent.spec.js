@@ -1,5 +1,5 @@
 import { mount } from '@vue/test-utils';
-import HeaderComponent from '../../components/HeaderComponent.vue';
+import HeaderComponent from '../../components/home/HeaderComponent.vue';
 
 // Замокати axios, щоб уникнути помилок з ESM
 jest.mock('axios', () => ({

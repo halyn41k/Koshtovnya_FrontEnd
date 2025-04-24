@@ -1,7 +1,7 @@
 // src/test/units/UserRegistration.spec.js
 
 import { mount } from '@vue/test-utils';
-import UserRegistration from '../../components/UserRegistration.vue';
+import UserRegistration from '../../components/authorization/UserRegistration.vue';
 
 // Mock global fetch
 global.fetch = jest.fn((url, options) => {

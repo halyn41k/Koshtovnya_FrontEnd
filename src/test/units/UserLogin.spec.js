@@ -1,5 +1,5 @@
 import { mount } from '@vue/test-utils';
-import UserLogin from '../../components/UserLogin.vue';
+import UserLogin from '../../components/authorization/UserLogin.vue';
 
 // Мок для глобального fetch
 global.fetch = jest.fn(() =>

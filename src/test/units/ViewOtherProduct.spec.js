@@ -1,5 +1,5 @@
 import { mount } from '@vue/test-utils';
-import ViewOtherProduct from '../../components/ViewOtherProduct.vue';
+import ViewOtherProduct from '../../components/product/ViewOtherProduct.vue';
 
 jest.mock('axios', () => ({
   get: jest.fn(),

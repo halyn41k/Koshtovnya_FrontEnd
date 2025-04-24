@@ -1,5 +1,5 @@
 import { shallowMount } from '@vue/test-utils';
-import Loader from '../../components/Loader.vue';
+import Loader from '../../components/home/Loader.vue';
 
 describe('Loader.vue', () => {
   let wrapper;

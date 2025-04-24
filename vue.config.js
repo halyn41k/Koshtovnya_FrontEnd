@@ -1,9 +1,12 @@
-const { defineConfig } = require('@vue/cli-service')
-module.exports = defineConfig({
-  transpileDependencies: true,
+// vue.config.js
+const path = require('path');
+
+module.exports = {
   configureWebpack: {
-    devServer: {
-      proxy: 'http://localhost:8080'
-    }
-  }
-})
+    resolve: {
+      alias: {
+        '@': path.resolve(__dirname, 'src'),
+      },
+    },
+  },
+};

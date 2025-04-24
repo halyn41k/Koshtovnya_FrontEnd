@@ -1,5 +1,5 @@
 import { shallowMount } from '@vue/test-utils';
-import AboutDelivery from '../../components/AboutDelivery.vue';
+import AboutDelivery from '../../components/infoshop/AboutDelivery.vue';
 
 // Мок для IntersectionObserver
 global.IntersectionObserver = class {

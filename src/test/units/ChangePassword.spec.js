@@ -1,5 +1,5 @@
 import { shallowMount } from '@vue/test-utils';
-import ChangePassword from '../../components/ChangePassword.vue';
+import ChangePassword from '../../components/authorization/ChangePassword.vue';
 
 describe('ChangePassword.vue', () => {
   let wrapper;

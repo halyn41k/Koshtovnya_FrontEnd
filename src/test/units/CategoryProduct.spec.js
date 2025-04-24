@@ -1,5 +1,5 @@
 import { shallowMount } from '@vue/test-utils';
-import CategoryProduct from '../../components/CategoryProduct.vue';
+import CategoryProduct from '../../components/home/CategoryProduct.vue';
 
 describe('CategoryProduct.vue', () => {
   let wrapper;
