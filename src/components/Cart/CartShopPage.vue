@@ -26,19 +26,14 @@
 </template>
 
 <script>
-import axios from "axios";
+import api from '@/services/api';
 import CartItem from './CartItem.vue';
 import Summary from './Summary.vue';
-import Loader from '../Home/Loader.vue'; 
-
+import Loader from '../home/Loader.vue';
 
 export default {
   name: "CartShopPage",
-  components: {
-    CartItem,
-    Summary,
-    Loader,  // Register the Loader component
-  },
+  components: { CartItem, Summary, Loader },
   data() {
     return {
       cartItems: [],
@@ -47,104 +42,53 @@ export default {
   },
   methods: {
     async fetchCartItems() {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        alert("Будь ласка, увійдіть у свій обліковий запис.");
-        this.$router.push("/login");
-        return;
-      }
       this.loading = true;
       try {
-        const response = await axios.get("https://koshtovnya.api-dev.bmax-edu.website/api/cart", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        // Оновлюємо cartItems, включаючи нові поля
-        this.cartItems = response.data.products.map(item => ({
+        const data = await api.getCart();
+        // припустимо API повертає { products: [...] }
+        this.cartItems = data.products.map(item => ({
           id: item.id,
           image: item.image_url,
           title: item.name,
           price: item.price,
           quantity: item.quantity,
           isAvailable: item.is_available,
-          selectedSize: item.selected_size || item.variants[0]?.size || '', // Вибираємо перший доступний розмір
-          variants: item.variants.map(variant => ({
-            size: variant.size,
-            quantity: variant.quantity,
-            isAvailable: variant.is_available,
+          selectedSize: item.selected_size || item.variants[0]?.size || '',
+          variants: item.variants.map(v => ({
+            size: v.size,
+            quantity: v.quantity,
+            isAvailable: v.is_available,
           })),
         }));
-
-
-        // Обробка помилок (якщо є недоступні товари)
-        if (response.data.errors && response.data.errors.length > 0) {
-          response.data.errors.forEach(error => {
-            const itemIndex = this.cartItems.findIndex(item => item.title === error.product_name);
-            if (itemIndex !== -1) {
-              this.cartItems[itemIndex].isAvailable = false;
-              this.cartItems[itemIndex].errorMessage = error.message;
-            }
-          });
-        }
-      } catch (error) {
-        console.error("Помилка завантаження кошика:", error);
+      } catch (err) {
+        console.error("Помилка завантаження кошика:", err);
         alert("Не вдалося завантажити кошик.");
       } finally {
         this.loading = false;
       }
     },
     async updateCartItem({ id, quantity = null, operation = null, size = null }) {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        alert("Будь ласка, увійдіть у свій обліковий запис.");
-        this.$router.push("/login");
-        return;
-      }
-
       try {
-        const data = size
-          ? { size } // Якщо змінюємо розмір
-          : { operation, quantity }; // Якщо змінюємо кількість
-
-        await axios.patch(
-          `https://koshtovnya.api-dev.bmax-edu.website/api/cart/${id}`,
-          data,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-
-        const itemIndex = this.cartItems.findIndex(item => item.id === id);
-        if (itemIndex !== -1) {
-          if (size) {
-            this.cartItems[itemIndex].selectedSize = size; // Оновлюємо локально
-          } else if (quantity !== null) {
-            this.cartItems[itemIndex].quantity = quantity;
-          }
+        const payload = size ? { size } : { operation, quantity };
+        await api.updateCartItem(id, payload);
+        const idx = this.cartItems.findIndex(i => i.id === id);
+        if (idx !== -1) {
+          if (size) this.cartItems[idx].selectedSize = size;
+          else if (quantity !== null) this.cartItems[idx].quantity = quantity;
         }
-
         alert("Товар успішно оновлено.");
-      } catch (error) {
-        console.error("Помилка оновлення товару в кошику:", error.response?.data || error.message);
-        alert(error.response?.data?.message || "Не вдалося оновити товар у кошику.");
+      } catch (err) {
+        console.error("Помилка оновлення:", err);
+        alert(err.response?.data?.message || "Не вдалося оновити.");
       }
     },
-
-
-
     async removeItem(id) {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        alert("Будь ласка, увійдіть у свій обліковий запис.");
-        this.$router.push("/login");
-        return;
-      }
       try {
-        await axios.delete(`https://koshtovnya.api-dev.bmax-edu.website/api/cart/${id}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        this.cartItems = this.cartItems.filter(item => item.id !== id);
-      } catch (error) {
-        console.error("Помилка видалення товару:", error);
-        alert("Не вдалося видалити товар із кошика.");
+        await api.removeFromCart(id);
+        this.cartItems = this.cartItems.filter(i => i.id !== id);
+      } catch (err) {
+        console.error("Помилка видалення:", err);
+        alert("Не вдалося видалити товар.");
       }
     },
   },
@@ -154,6 +98,7 @@ export default {
   }
 };
 </script>
+
 
 <style scoped>
 @font-face {

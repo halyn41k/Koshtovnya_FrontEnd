@@ -51,104 +51,75 @@
 </template>
 
 <script>
+import api from "@/services/api";
+
 export default {
-    data() {
-        return {
-            email: "",
-            code: "",
-            emailError: "",
-            codeError: "",
-        };
-    },
-    created() {
-        if (this.$route.query.email) {
-            this.email = this.$route.query.email;
-        }
-    },
-    methods: {
-        validateEmail() {
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            this.emailError = emailRegex.test(this.email)
-                ? ""
-                : "Введіть дійсний email.";
-        },
-        validateCode() {
-            this.codeError = this.code.trim()
-                ? ""
-                : "Код підтвердження не може бути порожнім.";
-        },
-        async submitVerification() {
-  console.log("Відправка коду підтвердження...");
-  this.validateEmail();
-  this.validateCode();
-
-  if (this.emailError || this.codeError) {
-    alert("Будь ласка, виправте помилки.");
-    return;
-  }
-
-  try {
-    const response = await fetch("https://koshtovnya.api-dev.bmax-edu.website/api/verify-code", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        email: this.email,
-        code: this.code,
-      }),
-    });
-
-    const data = await response.json();
-    console.log("Відповідь API:", data);
-
-    if (!response.ok) {
-      throw new Error(data.message || "Неправильний код підтвердження.");
+  data() {
+    return {
+      email: "",
+      code: "",
+      emailError: "",
+      codeError: "",
+    };
+  },
+  created() {
+    if (this.$route.query.email) {
+      this.email = this.$route.query.email;
     }
-
-    alert("Реєстрація успішна! Тепер ви можете увійти.");
-    this.$router.push({ name: "Login" }); // Перенаправлення на сторінку входу
-  } catch (error) {
-    console.error("Помилка верифікації:", error);
-    alert(`Помилка верифікації: ${error.message}`);
-  }
-},
-        async resendCode() {
-            if (!this.email) {
-                alert("Будь ласка, введіть email перед повторним надсиланням коду.");
-                return;
-            }
-
-            try {
-                const response = await fetch("https://koshtovnya.api-dev.bmax-edu.website/api/resend-code", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({
-                        email: this.email,
-                    }),
-                });
-
-                const data = await response.json();
-
-                if (!response.ok) {
-                    throw new Error(data.message || "Не вдалося надіслати код.");
-                }
-
-                alert(data.message || "Новий код підтвердження надіслано на вашу пошту.");
-            } catch (error) {
-                console.error("Помилка надсилання коду:", error);
-                alert(`Помилка надсилання коду: ${error.message}`);
-            }
-        },
+  },
+  methods: {
+    validateEmail() {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      this.emailError = emailRegex.test(this.email)
+        ? ""
+        : "Введіть дійсний email.";
     },
-    mounted() {
-        document.title = "Підтвердження пошти";
-    }
+    validateCode() {
+      this.codeError = this.code.trim()
+        ? ""
+        : "Код підтвердження не може бути порожнім.";
+    },
+    async submitVerification() {
+      this.validateEmail();
+      this.validateCode();
+
+      if (this.emailError || this.codeError) {
+        alert("Будь ласка, виправте помилки.");
+        return;
+      }
+
+      try {
+        await api.login({ email: this.email, code: this.code });
+
+        alert("Реєстрація успішна! Тепер ви можете увійти.");
+        this.$router.push({ name: "Login" });
+      } catch (error) {
+        console.error("Помилка верифікації:", error);
+        alert(`Помилка верифікації: ${error.response?.data?.message || error.message}`);
+      }
+    },
+    async resendCode() {
+      if (!this.email) {
+        alert("Будь ласка, введіть email перед повторним надсиланням коду.");
+        return;
+      }
+
+      try {
+        const response = await api.resendCode({ email: this.email });
+
+        alert(response.data.message || "Новий код підтвердження надіслано на вашу пошту.");
+      } catch (error) {
+        console.error("Помилка надсилання коду:", error);
+        alert(`Помилка надсилання коду: ${error.response?.data?.message || error.message}`);
+      }
+    },
+  },
+  mounted() {
+    document.title = "Підтвердження пошти";
+  }
 };
-
 </script>
+
 
 <style scoped>
 .verification-container {

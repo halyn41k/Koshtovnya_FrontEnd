@@ -15,13 +15,14 @@
       <hr class="divider" />
       <div class="input-box">
         <div class="min-box">
+          <!-- Показує абсолютне значення -->
           <input 
             type="number" 
-            v-model.number="sizeRange[0]" 
+            v-model.number="sizeAbsolute[0]" 
             :min="sizeOptions.min" 
             :max="sizeOptions.max" 
             step="1"
-            @input="validateInput('size', 0)" 
+            @input="onSizeInput(0)" 
           />
           <span class="unit-label">см</span>
         </div>
@@ -29,35 +30,37 @@
         <div class="max-box">
           <input 
             type="number" 
-            v-model.number="sizeRange[1]" 
+            v-model.number="sizeAbsolute[1]" 
             :min="sizeOptions.min" 
             :max="sizeOptions.max" 
             step="1"
-            @input="validateInput('size', 1)" 
+            @input="onSizeInput(1)" 
           />
           <span class="unit-label">см</span>
         </div>
       </div>
       <div class="range-slider">
+        <!-- Слайдер працює у нормалізованому діапазоні 0-100 -->
         <input 
           type="range" 
-          v-model.number="sizeRange[0]" 
-          :min="sizeOptions.min" 
-          :max="sizeOptions.max" 
+          v-model.number="sizeSlider[0]" 
+          min="0" 
+          max="100" 
           class="slider min-slider" 
-          @input="updateSliderValue($event, 'size', 'min')"
+          @input="onSizeSliderInput('min')"
         />
         <input 
           type="range" 
-          v-model.number="sizeRange[1]" 
-          :min="sizeOptions.min" 
-          :max="sizeOptions.max" 
+          v-model.number="sizeSlider[1]" 
+          min="0" 
+          max="100" 
           class="slider max-slider" 
-          @input="updateSliderValue($event, 'size', 'max')"
+          @input="onSizeSliderInput('max')"
         />
-        <div class="slider-track" :style="getTrackStyle(sizeRange[0], sizeRange[1], sizeOptions.min, sizeOptions.max)"></div>
+        <div class="slider-track" :style="getNormalizedTrackStyle(sizeSlider[0], sizeSlider[1])"></div>
       </div>
 
+      <!-- Колір -->
       <h3 class="subsection-title">Колір</h3>
       <hr class="divider" />
       <div class="dropdown-menu">
@@ -69,6 +72,7 @@
         </select>
       </div>
 
+      <!-- Тип бісеру -->
       <h3 class="subsection-title">Тип бісеру</h3>
       <hr class="divider" />
       <div class="bead-type-options">
@@ -78,6 +82,7 @@
         </div>
       </div>
 
+      <!-- Виробник бісеру -->
       <h3 class="subsection-title">Виробник бісеру</h3>
       <hr class="divider" />
       <div class="manufacturer-options">
@@ -94,11 +99,11 @@
         <div class="min-box">
           <input 
             type="number" 
-            v-model.number="weightRange[0]" 
+            v-model.number="weightAbsolute[0]" 
             :min="weightOptions.min" 
             :max="weightOptions.max" 
             step="1"
-            @input="validateInput('weight', 0)" 
+            @input="onWeightInput(0)" 
           />
           <span class="unit-label">г</span>
         </div>
@@ -106,11 +111,11 @@
         <div class="max-box">
           <input 
             type="number" 
-            v-model.number="weightRange[1]" 
+            v-model.number="weightAbsolute[1]" 
             :min="weightOptions.min" 
             :max="weightOptions.max" 
             step="1"
-            @input="validateInput('weight', 1)" 
+            @input="onWeightInput(1)" 
           />
           <span class="unit-label">г</span>
         </div>
@@ -118,21 +123,21 @@
       <div class="range-slider">
         <input 
           type="range" 
-          v-model.number="weightRange[0]" 
-          :min="weightOptions.min" 
-          :max="weightOptions.max" 
+          v-model.number="weightSlider[0]" 
+          min="0" 
+          max="100" 
           class="slider min-slider" 
-          @input="updateSliderValue($event, 'weight', 'min')"
+          @input="onWeightSliderInput('min')"
         />
         <input 
           type="range" 
-          v-model.number="weightRange[1]" 
-          :min="weightOptions.min" 
-          :max="weightOptions.max" 
+          v-model.number="weightSlider[1]" 
+          min="0" 
+          max="100" 
           class="slider max-slider" 
-          @input="updateSliderValue($event, 'weight', 'max')"
+          @input="onWeightSliderInput('max')"
         />
-        <div class="slider-track" :style="getTrackStyle(weightRange[0], weightRange[1], weightOptions.min, weightOptions.max)"></div>
+        <div class="slider-track" :style="getNormalizedTrackStyle(weightSlider[0], weightSlider[1])"></div>
       </div>
 
       <!-- Ціна -->
@@ -142,11 +147,11 @@
         <div class="min-box">
           <input 
             type="number" 
-            v-model.number="priceRange[0]" 
+            v-model.number="priceAbsolute[0]" 
             :min="priceOptions.min" 
             :max="priceOptions.max" 
             step="1"
-            @input="validateInput('price', 0)" 
+            @input="onPriceInput(0)" 
           />
           <span class="unit-label">грн</span>
         </div>
@@ -154,11 +159,11 @@
         <div class="max-box">
           <input 
             type="number" 
-            v-model.number="priceRange[1]" 
+            v-model.number="priceAbsolute[1]" 
             :min="priceOptions.min" 
             :max="priceOptions.max" 
             step="1"
-            @input="validateInput('price', 1)" 
+            @input="onPriceInput(1)" 
           />
           <span class="unit-label">грн</span>
         </div>
@@ -166,27 +171,26 @@
       <div class="range-slider">
         <input 
           type="range" 
-          v-model.number="priceRange[0]" 
-          :min="priceOptions.min" 
-          :max="priceOptions.max" 
+          v-model.number="priceSlider[0]" 
+          min="0" 
+          max="100" 
           class="slider min-slider" 
-          @input="updateSliderValue($event, 'price', 'min')"
+          @input="onPriceSliderInput('min')"
         />
         <input 
           type="range" 
-          v-model.number="priceRange[1]" 
-          :min="priceOptions.min" 
-          :max="priceOptions.max" 
+          v-model.number="priceSlider[1]" 
+          min="0" 
+          max="100" 
           class="slider max-slider" 
-          @input="updateSliderValue($event, 'price', 'max')"
+          @input="onPriceSliderInput('max')"
         />
-        <div class="slider-track" :style="getTrackStyle(priceRange[0], priceRange[1], priceOptions.min, priceOptions.max)"></div>
+        <div class="slider-track" :style="getNormalizedTrackStyle(priceSlider[0], priceSlider[1])"></div>
       </div>
 
       <div class="apply-filters">
         <button @click="applyFilters" class="results-button">Результати</button>
       </div>
-
       <div class="pattern-background"></div>
     </section>
   </div>
@@ -205,72 +209,186 @@ export default {
   },
   data() {
     return {
+      // Фільтри з бекенду
       availabilityOptions: [],
       sizeOptions: { min: 0, max: 100 },
-      selectedSize: "",
-      sizeRange: [0, 100],
+      weightOptions: { min: 0, max: 1000 },
+      priceOptions: { min: 0, max: 10000 },
       colorOptions: [],
       beadTypeOptions: [],
       beadProducerOptions: [],
-      weightOptions: { min: 0, max: 1000 },
-      priceOptions: { min: 0, max: 10000 },
+
+      // Абсолютні значення (відповідають даним із бекенду)
+      sizeAbsolute: [0, 100],
+      weightAbsolute: [0, 1000],
+      priceAbsolute: [0, 10000],
+
+      // Нормалізовані значення для слайдерів (діапазон 0-100)
+      sizeSlider: [0, 100],
+      weightSlider: [0, 100],
+      priceSlider: [0, 100],
+
+      // Вибрані значення з інпутів/чекбоксів
       selectedAvailability: [],
       selectedColor: "",
       selectedBeadTypes: [],
       selectedProducers: [],
-      weightRange: [0, 1000],
-      priceRange: [0, 10000],
     };
   },
   created() {
     this.loadFilters();
   },
   methods: {
-    updateSliderValue(event, type, thumb) {
-      const value = parseFloat(event.target.value);
-      let range, options;
-      
-      switch(type) {
-        case 'size':
-          range = this.sizeRange;
-          options = this.sizeOptions;
-          break;
-        case 'weight':
-          range = this.weightRange;
-          options = this.weightOptions;
-          break;
-        case 'price':
-          range = this.priceRange;
-          options = this.priceOptions;
-          break;
-      }
-
-      if (thumb === 'min') {
-        if (value >= range[1]) {
-          range[0] = range[1];
-        } else {
-          range[0] = value;
-        }
-      } else {
-        if (value <= range[0]) {
-          range[1] = range[0];
-        } else {
-          range[1] = value;
-        }
-      }
+    // Функції для нормалізації та денормалізації
+    normalize(absolute, min, max) {
+      return ((absolute - min) / (max - min)) * 100;
+    },
+    denormalize(normalized, min, max) {
+      return (normalized / 100) * (max - min) + min;
     },
 
-    getTrackStyle(min, max, rangeMin, rangeMax) {
-      const leftPercent = ((min - rangeMin) / (rangeMax - rangeMin)) * 100;
-      const rightPercent = ((max - rangeMin) / (rangeMax - rangeMin)) * 100;
-      
+    // ============================
+    // Логіка для слайдера "Розмір"
+    // ============================
+    updateSizeFromSlider() {
+      this.sizeAbsolute = [
+        Math.round(this.denormalize(this.sizeSlider[0], this.sizeOptions.min, this.sizeOptions.max)),
+        Math.round(this.denormalize(this.sizeSlider[1], this.sizeOptions.min, this.sizeOptions.max))
+      ];
+    },
+    updateSizeSliderFromAbsolute() {
+      this.sizeSlider = [
+        this.normalize(this.sizeAbsolute[0], this.sizeOptions.min, this.sizeOptions.max),
+        this.normalize(this.sizeAbsolute[1], this.sizeOptions.min, this.sizeOptions.max)
+      ];
+    },
+    onSizeSliderInput(thumb) {
+      if (thumb === 'min') {
+        if (this.sizeSlider[0] > this.sizeSlider[1]) {
+          this.sizeSlider[0] = this.sizeSlider[1];
+        }
+      } else {
+        if (this.sizeSlider[1] < this.sizeSlider[0]) {
+          this.sizeSlider[1] = this.sizeSlider[0];
+        }
+      }
+      this.updateSizeFromSlider();
+    },
+    onSizeInput(index) {
+      // Коригуємо абсолютні значення при введенні
+      if(this.sizeAbsolute[index] < this.sizeOptions.min) {
+        this.sizeAbsolute[index] = this.sizeOptions.min;
+      }
+      if(this.sizeAbsolute[index] > this.sizeOptions.max) {
+        this.sizeAbsolute[index] = this.sizeOptions.max;
+      }
+      if(index === 0 && this.sizeAbsolute[0] > this.sizeAbsolute[1]) {
+        this.sizeAbsolute[0] = this.sizeAbsolute[1];
+      }
+      if(index === 1 && this.sizeAbsolute[1] < this.sizeAbsolute[0]) {
+        this.sizeAbsolute[1] = this.sizeAbsolute[0];
+      }
+      this.updateSizeSliderFromAbsolute();
+    },
+
+    // ============================
+    // Логіка для слайдера "Вага"
+    // ============================
+    updateWeightFromSlider() {
+      this.weightAbsolute = [
+        Math.round(this.denormalize(this.weightSlider[0], this.weightOptions.min, this.weightOptions.max)),
+        Math.round(this.denormalize(this.weightSlider[1], this.weightOptions.min, this.weightOptions.max))
+      ];
+    },
+    updateWeightSliderFromAbsolute() {
+      this.weightSlider = [
+        this.normalize(this.weightAbsolute[0], this.weightOptions.min, this.weightOptions.max),
+        this.normalize(this.weightAbsolute[1], this.weightOptions.min, this.weightOptions.max)
+      ];
+    },
+    onWeightSliderInput(thumb) {
+      if (thumb === 'min') {
+        if (this.weightSlider[0] > this.weightSlider[1]) {
+          this.weightSlider[0] = this.weightSlider[1];
+        }
+      } else {
+        if (this.weightSlider[1] < this.weightSlider[0]) {
+          this.weightSlider[1] = this.weightSlider[0];
+        }
+      }
+      this.updateWeightFromSlider();
+    },
+    onWeightInput(index) {
+      if(this.weightAbsolute[index] < this.weightOptions.min) {
+        this.weightAbsolute[index] = this.weightOptions.min;
+      }
+      if(this.weightAbsolute[index] > this.weightOptions.max) {
+        this.weightAbsolute[index] = this.weightOptions.max;
+      }
+      if(index === 0 && this.weightAbsolute[0] > this.weightAbsolute[1]) {
+        this.weightAbsolute[0] = this.weightAbsolute[1];
+      }
+      if(index === 1 && this.weightAbsolute[1] < this.weightAbsolute[0]) {
+        this.weightAbsolute[1] = this.weightAbsolute[0];
+      }
+      this.updateWeightSliderFromAbsolute();
+    },
+
+    // ============================
+    // Логіка для слайдера "Ціна"
+    // ============================
+    updatePriceFromSlider() {
+      this.priceAbsolute = [
+        Math.round(this.denormalize(this.priceSlider[0], this.priceOptions.min, this.priceOptions.max)),
+        Math.round(this.denormalize(this.priceSlider[1], this.priceOptions.min, this.priceOptions.max))
+      ];
+    },
+    updatePriceSliderFromAbsolute() {
+      this.priceSlider = [
+        this.normalize(this.priceAbsolute[0], this.priceOptions.min, this.priceOptions.max),
+        this.normalize(this.priceAbsolute[1], this.priceOptions.min, this.priceOptions.max)
+      ];
+    },
+    onPriceSliderInput(thumb) {
+      if (thumb === 'min') {
+        if (this.priceSlider[0] > this.priceSlider[1]) {
+          this.priceSlider[0] = this.priceSlider[1];
+        }
+      } else {
+        if (this.priceSlider[1] < this.priceSlider[0]) {
+          this.priceSlider[1] = this.priceSlider[0];
+        }
+      }
+      this.updatePriceFromSlider();
+    },
+    onPriceInput(index) {
+      if(this.priceAbsolute[index] < this.priceOptions.min) {
+        this.priceAbsolute[index] = this.priceOptions.min;
+      }
+      if(this.priceAbsolute[index] > this.priceOptions.max) {
+        this.priceAbsolute[index] = this.priceOptions.max;
+      }
+      if(index === 0 && this.priceAbsolute[0] > this.priceAbsolute[1]) {
+        this.priceAbsolute[0] = this.priceAbsolute[1];
+      }
+      if(index === 1 && this.priceAbsolute[1] < this.priceAbsolute[0]) {
+        this.priceAbsolute[1] = this.priceAbsolute[0];
+      }
+      this.updatePriceSliderFromAbsolute();
+    },
+
+    // Функція для формування стилю заповненого треку слайдера
+    getNormalizedTrackStyle(minNorm, maxNorm) {
       return {
-        left: `${leftPercent}%`,
-        right: `${100 - rightPercent}%`,
+        left: `${minNorm}%`,
+        right: `${100 - maxNorm}%`,
         background: "#6B1F1F"
       };
     },
 
+    // ============================
+    // Завантаження фільтрів з бекенду
+    // ============================
     async loadFilters() {
       try {
         const response = await axios.get("https://koshtovnya.api-dev.bmax-edu.website/api/product-filter");
@@ -281,142 +399,89 @@ export default {
         console.error("Помилка завантаження фільтрів:", error);
       }
     },
-
     updateFilterOptions(data) {
       this.availabilityOptions = data["Доступність"] || [];
+      
+      // Налаштовуємо фільтр "Розмір"
       this.sizeOptions = {
         min: parseFloat(data["Розмір"].min) || 0,
         max: parseFloat(data["Розмір"].max) || 100,
       };
-      this.sizeRange = [this.sizeOptions.min, this.sizeOptions.max];
-      console.log("Розмір із бекенду:", data["Розмір"]);
+      // Абсолютні значення = повний діапазон
+      this.sizeAbsolute = [this.sizeOptions.min, this.sizeOptions.max];
+      // Нормалізовані значення = [0, 100]
+      this.sizeSlider = [0, 100];
 
       this.colorOptions = data["Колір"] || [];
       this.beadTypeOptions = data["Тип бісеру"] || [];
       this.beadProducerOptions = data["Виробник бісеру"] || [];
+
+      // Фільтр "Вага"
       this.weightOptions = {
         min: parseFloat(data["Вага"].min) || 0,
         max: parseFloat(data["Вага"].max) || 1000,
       };
-      this.weightRange = [this.weightOptions.min, this.weightOptions.max];
+      this.weightAbsolute = [this.weightOptions.min, this.weightOptions.max];
+      this.weightSlider = [0, 100];
 
+      // Фільтр "Ціна"
       this.priceOptions = {
         min: parseFloat(data["Ціна"].min) || 0,
         max: parseFloat(data["Ціна"].max) || 10000,
       };
-      this.priceRange = [this.priceOptions.min, this.priceOptions.max];
+      this.priceAbsolute = [this.priceOptions.min, this.priceOptions.max];
+      this.priceSlider = [0, 100];
+
+      console.log("Розмір із бекенду:", data["Розмір"]);
     },
 
-    trackStyle(min, max, maxRange, minRange = 0) {
-      const adjustedMaxRange = maxRange - minRange;
-      const minPercent = ((min - minRange) / adjustedMaxRange) * 100;
-      const maxPercent = ((max - minRange) / adjustedMaxRange) * 100;
-      return {
-        left: `${minPercent}%`,
-        right: `${100 - maxPercent}%`,
-        background: "linear-gradient(to right, #ccc, #6B1F1F, #ccc)",
-      };
-    },
-
+    // ============================
+    // Застосування фільтрів
+    // ============================
     applyFilters() {
       const filters = {};
-
       if (this.selectedAvailability.length > 0) {
-        filters.is_available = this.selectedAvailability.map((availability) =>
-          availability === "В наявності" ? "1" : "0"
+        filters.is_available = this.selectedAvailability.map(av =>
+          av === "В наявності" ? "1" : "0"
         );
       }
-
-      if (this.sizeRange[0] !== this.sizeOptions.min || this.sizeRange[1] !== this.sizeOptions.max) {
-        filters.size_from = parseFloat(this.sizeRange[0]);
-        filters.size_to = parseFloat(this.sizeRange[1]);
+      // Передаємо абсолютні значення
+      if (
+        this.sizeAbsolute[0] !== this.sizeOptions.min ||
+        this.sizeAbsolute[1] !== this.sizeOptions.max
+      ) {
+        filters.size_from = this.sizeAbsolute[0];
+        filters.size_to = this.sizeAbsolute[1];
       }
-
       if (this.selectedColor) {
         filters.color = this.selectedColor;
       }
-
       if (this.selectedBeadTypes.length > 0) {
         filters.type_of_bead = this.selectedBeadTypes;
       }
-
       if (this.selectedProducers.length > 0) {
         filters.bead_producer = this.selectedProducers;
       }
-
-      if (this.weightRange[0] !== this.weightOptions.min || this.weightRange[1] !== this.weightOptions.max) {
-        filters.weight_from = parseFloat(this.weightRange[0]);
-        filters.weight_to = parseFloat(this.weightRange[1]);
+      if (
+        this.weightAbsolute[0] !== this.weightOptions.min ||
+        this.weightAbsolute[1] !== this.weightOptions.max
+      ) {
+        filters.weight_from = this.weightAbsolute[0];
+        filters.weight_to = this.weightAbsolute[1];
       }
-
-      if (this.priceRange[0] !== this.priceOptions.min || this.priceRange[1] !== this.priceOptions.max) {
-        filters.price_from = parseFloat(this.priceRange[0]);
-        filters.price_to = parseFloat(this.priceRange[1]);
+      if (
+        this.priceAbsolute[0] !== this.priceOptions.min ||
+        this.priceAbsolute[1] !== this.priceOptions.max
+      ) {
+        filters.price_from = this.priceAbsolute[0];
+        filters.price_to = this.priceAbsolute[1];
       }
-
       this.fetchProducts(1, filters);
       console.log("Вибрані фільтри:", filters);
-    },
-
-    validateInput(type, index) {
-      let range, options;
-      
-      switch(type) {
-        case "size":
-          range = this.sizeRange;
-          options = this.sizeOptions;
-          break;
-        case "weight":
-          range = this.weightRange;
-          options = this.weightOptions;
-          break;
-        case "price":
-          range = this.priceRange;
-          options = this.priceOptions;
-          break;
-      }
-
-      range[index] = Number(range[index]);
-
-      if (range[index] < options.min) {
-        range[index] = options.min;
-      }
-      
-      if (range[index] > options.max) {
-        range[index] = options.max;
-      }
-
-      if (index === 0 && range[0] > range[1]) {
-        range[0] = range[1];
-      } else if (index === 1 && range[1] < range[0]) {
-        range[1] = range[0];
-      }
-
-      this.$forceUpdate();
-    },
-
-    updateRangeValue(event, type, thumb) {
-      const index = thumb === "min" ? 0 : 1;
-      switch(type) {
-        case "size":
-          this.sizeRange[index] = parseFloat(event.target.value);
-          this.validateInput("size", index);
-          break;
-        case "weight":
-          this.weightRange[index] = parseFloat(event.target.value);
-          this.validateInput("weight", index);
-          break;
-        case "price":
-          this.priceRange[index] = parseFloat(event.target.value);
-          this.validateInput("price", index);
-          break;
-      }
     },
   },
 };
 </script>
-
-
 
 
 <style scoped>

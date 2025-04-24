@@ -53,16 +53,16 @@
   </section>
 </template>
 
-<script>
-import axios from 'axios';
-import { defineAsyncComponent, toRaw } from 'vue';
 
+<script>
+import { defineAsyncComponent, toRaw } from 'vue';
+import api from '@/services/api';
 
 export default {
   name: 'AllProducts',
   components: {
-    FilterComponent: defineAsyncComponent(() => import('../Product/FilterComponent.vue')),
-    CategoryProduct: defineAsyncComponent(() => import('../Home/CategoryProduct.vue')),
+    FilterComponent: defineAsyncComponent(() => import('../product/FilterComponent.vue')),
+    CategoryProduct: defineAsyncComponent(() => import('../home/CategoryProduct.vue')),
   },
   data() {
     return {
@@ -70,211 +70,96 @@ export default {
       currentPage: 1,
       totalPages: 1,
       itemsPerPage: 15,
-      wishlist: [], // Список ID продуктів у списку бажаного
-      filters: {}, // Ініціалізація filters для уникнення помилок
-
+      wishlist: [],
+      filters: {},
     };
   },
   methods: {
     async fetchProducts(page = 1, filters = {}) {
       const params = { page };
-
-      // Перетворення реактивних фільтрів у звичайні значення
-      const processedFilters = toRaw(filters);
-
-      // Фільтри
-      if (processedFilters.is_available) {
-        params.is_available = Array.isArray(processedFilters.is_available)
-          ? processedFilters.is_available.filter(value => value === '1' || value === '0') // Фільтруємо тільки допустимі значення
-          : [String(processedFilters.is_available)].filter(value => value === '1' || value === '0');
+      const processed = toRaw(filters);
+      // побудова params як раніше...
+      if (processed.is_available) params.is_available = processed.is_available;
+      if (processed.size) params.size = processed.size;
+      if (processed.color) params.color = processed.color;
+      if (processed.type_of_bead) params.type_of_bead = processed.type_of_bead;
+      if (processed.bead_producer) params.bead_producer = processed.bead_producer;
+      if (processed.weight_from !== undefined || processed.weight_to !== undefined) {
+        params.weight_from = processed.weight_from || 0;
+        params.weight_to = processed.weight_to || this.weightOptions.max;
       }
-
-
-      if (processedFilters.size) {
-        params.size = parseFloat(processedFilters.size);
-      }
-
-      if (processedFilters.color) {
-        params.color = processedFilters.color;
-      }
-
-      if (processedFilters.type_of_bead) {
-        params.type_of_bead = processedFilters.type_of_bead;
-      }
-
-      if (processedFilters.bead_producer) {
-        params.bead_producer = processedFilters.bead_producer;
-      }
-
-      if (
-        processedFilters.weight_from !== undefined ||
-        processedFilters.weight_to !== undefined
-      ) {
-        params.weight_from = parseFloat(processedFilters.weight_from) || 0;
-        params.weight_to =
-          parseFloat(processedFilters.weight_to) || this.weightOptions.max;
-      }
-
-      if (
-        processedFilters.price_from !== undefined ||
-        processedFilters.price_to !== undefined
-      ) {
-        params.price_from = parseFloat(processedFilters.price_from) || 0;
-        params.price_to =
-          parseFloat(processedFilters.price_to) || this.priceOptions.max;
+      if (processed.price_from !== undefined || processed.price_to !== undefined) {
+        params.price_from = processed.price_from || 0;
+        params.price_to = processed.price_to || this.priceOptions.max;
       }
 
       try {
-        console.log('Відправлені параметри:', params);
-        const response = await axios.get(
-          'https://koshtovnya.api-dev.bmax-edu.website/api/products',
-          { params }
-        );
-        this.products = response.data.data || [];
-        this.totalPages = response.data.meta.last_page || 1;
-        this.currentPage = response.data.meta.current_page || 1;
-      } catch (error) {
-        console.error('Помилка запиту продуктів:', error.response || error);
+        // виклик через api.js, передаємо params
+        const data = await api.getAllProducts({ params });
+        this.products = data.data || [];
+        this.totalPages = data.meta.last_page;
+        this.currentPage = data.meta.current_page;
+      } catch (err) {
+        console.error('Помилка запиту продуктів:', err);
       }
     },
-
-
 
     async fetchWishlist() {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        console.warn('Користувач не авторизований');
-        return;
-      }
       try {
-        const response = await axios.get('https://koshtovnya.api-dev.bmax-edu.website/api/wishlist', {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        // Перевіряємо, чи ключ `products` існує в відповіді
-        if (response.data && response.data.products) {
-          this.wishlist = response.data.products.map((item) => item.id);
-        } else {
-          console.warn('Некоректна структура відповіді API для списку бажаного:', response.data);
-          this.wishlist = [];
-        }
-
-        // Синхронізуємо стан продуктів
-        this.products.forEach((product) => {
-          product.is_in_wishlist = this.isInWishlist(product.id);
-        });
-      } catch (error) {
-        console.error('Помилка завантаження списку бажаного:', error);
+        const data = await api.getWishlist();
+        this.wishlist = data.products.map(item => item.id);
+        this.products.forEach(p => p.is_in_wishlist = this.wishlist.includes(p.id));
+      } catch (err) {
+        console.error('Помилка завантаження wishlist:', err);
       }
     },
 
-    isInWishlist(productId) {
-      return this.wishlist.includes(productId);
+    isInWishlist(id) {
+      return this.wishlist.includes(id);
     },
 
     async toggleWishlist(product, size = null) {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        alert('Будь ласка, увійдіть у свій обліковий запис.');
-        this.$router.push('/login');
-        return;
-      }
       try {
         if (this.isInWishlist(product.id)) {
-          // Видалення зі списку бажаного
-          await axios.delete(`https://koshtovnya.api-dev.bmax-edu.website/api/wishlist/${product.id}`, {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          this.wishlist = this.wishlist.filter((id) => id !== product.id);
+          await api.deleteWishlistItem(product.id);
+          this.wishlist = this.wishlist.filter(id => id !== product.id);
         } else {
-          // Додавання до списку бажаного
-          const requestData = { product_id: product.id };
-          if (size) {
-            requestData.size = size; // Додаємо поле size, якщо воно передане
-          }
-
-          await axios.post(
-            'https://koshtovnya.api-dev.bmax-edu.website/api/wishlist',
-            requestData,
-            { headers: { Authorization: `Bearer ${token}` } }
-          );
+          await api.addToWishlist({ product_id: product.id, size });
           this.wishlist.push(product.id);
         }
-        // Оновлюємо стан продукту напряму
         product.is_in_wishlist = this.isInWishlist(product.id);
-      } catch (error) {
-        console.error('Помилка при оновленні списку бажаного:', error);
+      } catch (err) {
+        console.error('Помилка оновлення wishlist:', err);
       }
     },
 
     updateFilters(filters) {
-      console.log('filters to update:', filters); // Для дебагу
       this.filters = filters;
-
-      // Перевірка перед викликом fetchProducts
-      if (typeof this.fetchProducts === 'function') {
-        this.fetchProducts(this.currentPage, this.filters);
-      } else {
-        console.error("fetchProducts не є функцією");
-      }
+      this.fetchProducts(this.currentPage, this.filters);
     },
-
-
-
 
     changePage(page) {
       if (page > 0 && page <= this.totalPages) {
         this.fetchProducts(page, this.filters);
       }
     },
+
     async addToCart(item, size = null) {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        alert('Будь ласка, увійдіть у свій обліковий запис.');
-        this.$router.push('/login');
-        return;
-      }
-
       try {
-        // Додаємо базові параметри для запиту
-        const cartData = {
-          product_id: item.id,
-          quantity: 1, // Ви можете змінити це значення, залежно від потреб
-        };
-
-        // Додаємо size, якщо передано
-        if (size) {
-          cartData.size = size;
-        }
-
-        const response = await axios.post(
-          'https://koshtovnya.api-dev.bmax-edu.website/api/cart',
-          cartData,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-
-        console.log('Відповідь після додавання товару:', response.data); // Логування відповіді
-
-        // Перевірка, чи додавання успішне
-        if (response.data && response.data.message === 'Product added to cart') {
-          alert('Товар успішно додано до кошика.');
-        } else {
-          console.error('Товар не був доданий:', response.data);
-          alert('Не вдалося додати товар до кошика.');
-        }
-      } catch (error) {
-        console.error('Помилка додавання товару до кошика:', error.response || error);
+        await api.addToCart({ product_id: item.id, quantity: 1, size });
+        alert('Товар успішно додано до кошика.');
+      } catch (err) {
+        console.error('Помилка додавання до кошика:', err);
         alert('Не вдалося додати товар до кошика.');
       }
-    },
-
-
+    }
   },
-  mounted() {
-    console.log(this.fetchProducts); // Має бути функцією
-    this.fetchProducts(this.currentPage, this.filters);
+
+  async mounted() {
+    await this.fetchProducts(this.currentPage, this.filters);
+    await this.fetchWishlist();
     document.title = "Всі продукти";
-  },
+  }
 };
 </script>
 

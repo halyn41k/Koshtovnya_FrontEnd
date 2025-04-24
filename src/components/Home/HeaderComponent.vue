@@ -143,27 +143,27 @@
     </div>
 
     <nav class="nav-menu">
-      <ul>
-        <li>
-          <router-link to="/bracelets">{{ $t('bracelets') }}</router-link>
-        </li>
-        <li>
-          <router-link to="/herdany">{{ $t('herdany') }}</router-link>
-        </li>
-        <li>
-          <router-link to="/dukats">{{ $t('dukats') }}</router-link>
-        </li>
-        <li>
-          <router-link to="/sylyanky">{{ $t('sylyanky') }}</router-link>
-        </li>
-        <li>
-          <router-link to="/earrings">{{ $t('earrings') }}</router-link>
-        </li>
-        <li>
-          <router-link to="/belts">{{ $t('belts') }}</router-link>
-        </li>
-      </ul>
-    </nav>
+    <ul>
+      <li>
+        <router-link to="/bracelets">{{ $t('bracelets') }}</router-link>
+      </li>
+      <li>
+        <router-link to="/herdany">{{ $t('herdany') }}</router-link>
+      </li>
+      <li>
+        <router-link to="/dukats">{{ $t('dukats') }}</router-link>
+      </li>
+      <li>
+        <router-link to="/earrings">{{ $t('earrings') }}</router-link>
+      </li>
+      <li>
+        <router-link to="/sylyanky">{{ $t('sylyanky') }}</router-link>
+      </li>
+      <li>
+        <router-link to="/belts">{{ $t('belts') }}</router-link>
+      </li>
+    </ul>
+  </nav>
   </header>
 
   <!-- Блок мобільного пошуку, який «випадає» нижче хедера -->

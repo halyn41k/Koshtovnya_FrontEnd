@@ -254,7 +254,7 @@
 </template>
 
 <script>
-import Loader from '../Home/Loader.vue';
+import Loader from '../home/Loader.vue';
 import axios from "axios";
 
 export default {

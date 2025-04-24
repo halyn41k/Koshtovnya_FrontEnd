@@ -39,11 +39,11 @@
         </div>
 
         <p class="signup-prompt">
-  Немає облікового запису?
-  <router-link to="/registration" class="signup-link">Створіть його тут</router-link>
-  | 
-  <router-link to="/reset-password" class="signup-link">Забули пароль?</router-link>
-</p>
+          Немає облікового запису?
+          <router-link to="/registration" class="signup-link">Створіть його тут</router-link>
+          |
+          <router-link to="/reset-password" class="signup-link">Забули пароль?</router-link>
+        </p>
 
         <button type="submit" class="login-button">
           <span>Увійти</span>
@@ -59,6 +59,8 @@
 <script>
 import eyeOpenIcon from "@/assets/eye-hide-svgrepo-com.svg";
 import eyeClosedIcon from "@/assets/eye-1-svgrepo-com.svg";
+import api from '../../services/api';
+
 
 export default {
   data() {
@@ -89,41 +91,25 @@ export default {
             : "";
     },
     async submitLogin() {
-  try {
-    if (this.emailError || this.passwordError) {
-      alert("Виправте помилки у формі.");
-      return;
-    }
+      try {
+        if (this.emailError || this.passwordError) {
+          alert("Виправте помилки у формі.");
+          return;
+        }
 
-    const response = await fetch("https://koshtovnya.api-dev.bmax-edu.website/api/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        email: this.email,
-        password: this.password,
-      }),
-    });
+        // Викликаємо метод login з api.js
+        const data = await api.login({ email: this.email, password: this.password });
 
-    // Розбираємо JSON-відповідь
-    const data = await response.json();
-
-    if (response.ok) {
-      // Зберігаємо токен та інформацію про користувача
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
-      alert("Вхід успішний!");
-      this.$router.push('/account'); // Перенаправляємо на сторінку акаунта
-    } else {
-      console.error('Помилка авторизації:', data.message);
-      alert(data.message || "Помилка авторизації");
-    }
-  } catch (error) {
-    console.error('Помилка під час авторизації:', error);
-    alert("Сталася помилка. Спробуйте ще раз.");
-  }
-},
+        // Зберігаємо токен та інформацію про користувача
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+        alert("Вхід успішний!");
+        this.$router.push('/account');
+      } catch (error) {
+        console.error('Помилка авторизації:', error);
+        alert(error.response?.data?.message || "Сталася помилка. Спробуйте ще раз.");
+      }
+    },
 
     togglePasswordVisibility() {
       this.showPassword = !this.showPassword;

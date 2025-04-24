@@ -130,6 +130,7 @@
 <script>
 import eyeOpenIcon from "@/assets/eye-hide-svgrepo-com.svg";
 import eyeClosedIcon from "@/assets/eye-1-svgrepo-com.svg";
+import api from '../../services/api';
 
 export default {
   name: "Registration",
@@ -195,7 +196,6 @@ export default {
       }
     },
     async submitRegistration() {
-      // Викликаємо валідацію для всіх полів
       this.validateName();
       this.validateLastName();
       this.validateSecondName();
@@ -209,42 +209,28 @@ export default {
         this.emailError ||
         this.passwordError
       ) {
-        console.log("Є помилки валідації.");
         alert("Будь ласка, виправте помилки.");
         return;
       }
 
       try {
-        console.log("Відправка запиту на сервер...");
-        const response = await fetch("https://koshtovnya.api-dev.bmax-edu.website/api/register", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            first_name: this.first_name,
-            last_name: this.last_name,
-            second_name: this.second_name,
-            email: this.email,
-            password: this.password,
-          }),
+        // Викликаємо метод реєстрації з api.js
+        const data = await api.register({
+          first_name: this.first_name,
+          last_name: this.last_name,
+          second_name: this.second_name,
+          email: this.email,
+          password: this.password
         });
 
-        const data = await response.json();
-        console.log("Відповідь API:", data);
-
-        if (!response.ok) {
-          throw new Error(data.message || "Помилка реєстрації.");
-        }
-
-        // Перенаправлення на сторінку верифікації
+        // Після успішної реєстрації переходимо до верифікації
         this.$router.push({
           name: "Verify",
           query: { email: this.email }
         });
       } catch (error) {
         console.error("Помилка реєстрації:", error);
-        alert(`Помилка реєстрації: ${error.message}`);
+        alert(error.response?.data?.message || `Помилка реєстрації`);
       }
     },
     togglePasswordVisibility() {
@@ -256,6 +242,7 @@ export default {
   }
 };
 </script>
+
 
 <style scoped>
 /* Загальні стилі контейнера та фону */

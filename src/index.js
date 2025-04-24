@@ -1,4 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
+import CategorySection from '@/components/categories/CategorySection.vue';
+
 
 const routes = [
   {
@@ -8,72 +10,72 @@ const routes = [
   {
     path: '/homepage',
     name: 'Home',
-    component: () => import('@/components/Home/HomePage.vue'),
+    component: () => import('@/components/home/HomePage.vue')
+  },
+  {
+    path: '/category/:categoryId',
+    name: 'Category',
+    component: CategorySection,
+    props: route => ({
+      categoryId: Number(route.params.categoryId),
+      title: route.meta.title
+    }),
+    meta: { title: 'Категорія' }
   },
   {
     path: '/bracelets',
-    name: 'BraceletSection',
-    component: () => import('@/components/Categories/BraceletSection.vue'),
+    redirect: { name: 'Category', params: { categoryId: 1 } },
+    meta: { title: 'Браслети' }
   },
   {
     path: '/herdany',
-    name: 'Gerdany',
-    component: () => import('@/components/Categories/GerdanSection.vue'),
+    redirect: { name: 'Category', params: { categoryId: 2 } },
+    meta: { title: 'Гердани' }
   },
   {
     path: '/dukats',
-    name: 'Dukats',
-    component: () => import('@/components/Categories/DucatsSection.vue'),
-  },
-  {
-    path: '/sylyanky',
-    name: 'Sylyanky',
-    component: () => import('@/components/Categories/SyluankaSection.vue'),
+    redirect: { name: 'Category', params: { categoryId: 3 } },
+    meta: { title: 'Дукати' }
   },
   {
     path: '/earrings',
-    name: 'Earrings',
-    component: () => import('@/components/Categories/EaringsSection.vue'),
+    redirect: { name: 'Category', params: { categoryId: 4 } },
+    meta: { title: 'Силянки' }
+  },
+  {
+    path: '/sylyanky',
+    redirect: { name: 'Category', params: { categoryId: 5 } },
+    meta: { title: 'Сережки' }
   },
   {
     path: '/belts',
-    name: 'Belts',
-    component: () => import('@/components/Categories/BeltsSection.vue'),
-  },
-  {
-    path: '/aboutus',
-    name: 'Aboutus',
-    component: () => import('@/components/InfoShop/AboutUs.vue'),
-  },
-  {
-    path: '/aboutdelivery',
-    name: 'AboutDelivery',
-    component: () => import('@/components/InfoShop/AboutDelivery.vue'),
+    redirect: { name: 'Category', params: { categoryId: 6 } },
+    meta: { title: 'Пояси' }
   },
   {
     path: '/login',
     name: 'Login',
-    component: () => import('@/components/Authorization/UserLogin.vue'),
+    component: () => import('@/components/authorization/UserLogin.vue'),
   },
   {
     path: '/registration',
     name: 'Registration',
-    component: () => import('@/components/Authorization/UserRegistration.vue'),
+    component: () => import('@/components/authorization/UserRegistration.vue'),
   },
   {
     path: '/productpage/:id',
     name: 'ProductPage',
-    component: () => import('@/components/Product/ProductPage.vue'),
+    component: () => import('@/components/product/ProductPage.vue'),
   },
   {
     path: '/wishlist',
     name: 'UserWishlist',
-    component: () => import('@/components/User/UserWishlist.vue'),
+    component: () => import('@/components/user/UserWishlist.vue'),
   },
   {
     path: '/account',
     name: 'AccountInfo',
-    component: () => import('@/components/User/AccountInfo.vue'),
+    component: () => import('@/components/user/AccountInfo.vue'),
     beforeEnter: (to, from, next) => {
       const token = localStorage.getItem('token');
       if (!token) {
@@ -86,42 +88,42 @@ const routes = [
   {
     path: '/cart',
     name: 'CartShop',
-    component: () => import('@/components/Cart/CartShopPage.vue'),
+    component: () => import('@/components/cart/CartShopPage.vue'),
   },
   {
     path: '/allproduct',
     name: 'AllProductsPage',
-    component: () => import('@/components/Categories/AllProductsPage.vue'),
+    component: () => import('@/components/categories/AllProductsPage.vue'),
   },
   {
     path: '/changepassword',
     name: 'ChangePassword',
-    component: () => import('@/components/Authorization/ChangePassword.vue'),
+    component: () => import('@/components/authorization/ChangePassword.vue'),
   },
   {
     path: '/payment',
     name: 'PaymentComponent',
-    component: () => import('@/components/Payment/PaymentComponent.vue'),
+    component: () => import('@/components/payment/PaymentComponent.vue'),
   },
   {
     path: '/verify',
     name: 'Verify',
-    component: () => import('@/components/Authorization/UserVerificationComponent.vue')
+    component: () => import('@/components/authorization/UserVerificationComponent.vue')
   },
   {
     path: '/payment-confirmed',
     name: 'PaymentConfirmed',
-    component: () => import('@/components/Payment/PaymentConfirmed.vue')
+    component: () => import('@/components/payment/PaymentConfirmed.vue')
   },
   {
     path: '/reset-password',
     name: 'ResetPassword',
-    component: () => import('@/components/Authorization/ResetPassword.vue')
+    component: () => import('@/components/authorization/ResetPassword.vue')
   },
   {
     path: '/admin',
     name: 'AdminPanel',
-    component: () => import('@/components/Admin/AdminPanel.vue'),
+    component: () => import('@/components/admin/AdminPanel.vue'),
     meta: {
       requiresAdmin: true,
     },
@@ -132,7 +134,9 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(),
   routes,
-});
+  // робимо так, щоб клас "active" ставився на активний <router-link>
+  linkActiveClass: 'active'
+})
 
 router.beforeEach((to, from, next) => {
   if (to.meta.requiresAdmin) {

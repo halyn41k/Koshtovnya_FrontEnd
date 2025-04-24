@@ -38,7 +38,7 @@
 
 <script>
 import axios from "axios";
-import Loader from '../Home/Loader.vue'
+import Loader from '../home/Loader.vue'
 
 export default {
   name: "UserWishlist",
