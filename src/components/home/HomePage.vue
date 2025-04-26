@@ -1,78 +1,87 @@
 <template>
-  <div class="main-container">
-    <div class="welcome-image fade-in"></div>
-
-    <div class="text-container">
-      <div class="handmade-beaded-products fade-in">
-        {{ $t('handmadeProducts') }}
-      </div>
-      <div class="exclusive-necklaces-bracelets-earrings fade-in">
-        {{ $t('exclusiveJewelry') }}
-      </div>
-      <router-link
-        to="/allproduct"
-        class="view-products-button fade-in"
-      >
-        {{ $t('viewProducts') }}
-      </router-link>
-    </div>
-
-    <div class="content-container fade-in">
-      <div class="left-image-container fade-in">
-        <div class="girl-image fade-in"></div>
-        <div class="pattern-image"></div>
-      </div>
-      <div class="right-text-container fade-in">
-        <div class="quote-text fade-in">
-          <span class="ukrainian-heritage fade-in">
-            {{ $t('quoteText') }}
-          </span>
+  <div class="container mx-auto mt-[150px] flex flex-col overflow-hidden">
+    <!-- Hero Banner -->
+    <div
+      class="w-full h-[510px] bg-cover bg-center relative mb-6 lg:mb-8"
+      :style="{ backgroundImage: `url(${require('@/assets/welcome.png')})` }"
+    >
+      <!-- Hero Text: центр на мобілці, ліворуч на десктопі -->
+      <div class="absolute inset-0 flex flex-col items-center lg:items-start justify-center text-center lg:text-left px-4 lg:px-24 space-y-4">
+        <div class="text-white font-kyivtype font-bold text-[32px] lg:text-[45px]">
+          {{ $t('handmadeProducts') }}
         </div>
-        <span class="gnat-khotkevich fade-in">{{ $t('gnatKhotkevich') }}</span>
+        <div class="text-white font-kyivtype font-bold text-[20px] lg:text-[30px]">
+          {{ $t('exclusiveJewelry') }}
+        </div>
+        <router-link
+          to="/allproduct"
+          class="view-products-button mt-4 lg:mt-6"
+        >
+          {{ $t('viewProducts') }}
+        </router-link>
       </div>
     </div>
 
-    <section>
-      <PopularProducts class="fade-in" :products="visibleProducts" />
+    <!-- Popular & New Arrivals Sections -->
+    <section class="px-4 sm:px-6 lg:px-8">
+      <PopularProducts :products="visibleProducts" />
+    </section>
+    <section class="mt-4 px-4 sm:px-6 lg:px-8">
+      <NewArrivals :arrivals="visibleNewArrivals" />
     </section>
 
-    <section>
-      <NewArrivals class="fade-in" :arrivals="visibleNewArrivals" />
-    </section>
-
-    <div class="instagram-section fade-in">
-      <div class="instagram-text-container fade-in">
-        <img src="@/assets/instapattern.png" alt="Instagram pattern" class="insta-pattern-image fade-in" />
-        <p class="follow-text">
-          {{ $t('followInsta') }}<br />
-          {{ $t('dontMissTheMost') }}
-        </p>
-        <p class="instagram-handle fade-in">
+    <!-- Instagram Embed -->
+    <div class="mt-24 px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col lg:flex-row items-center lg:items-start lg:justify-between gap-8">
+        <!-- Text Left on Desktop -->
+        <div class="flex-1 text-center lg:text-left">
+          <p class="font-montserrat font-semibold text-3xl lg:text-4xl leading-tight">
+            Слідкуй за нами в Instagram, щоб<br />
+            не пропустити найцікавіше!
+          </p>
           <a
             href="https://www.instagram.com/koshtovnya_jewelry/"
-            class="instagram-handle-link fade-in"
             target="_blank"
-            style="text-decoration: none;"
+            class="font-montserrat text-2xl lg:text-3xl underline mt-4 inline-block"
           >
             @koshtovnya_jewelry
           </a>
-        </p>
+        </div>
+        <!-- Pattern Image Right on Desktop -->
+        <div class="flex-1 flex justify-center lg:justify-end">
+          <img
+            src="@/assets/instapattern.png"
+            alt="Instagram pattern"
+            class="w-[300px] sm:w-[400px] lg:w-[680px] h-auto"
+          />
+        </div>
       </div>
-
-      <div class="instagram-grid fade-in">
-        <div class="instagram-image" v-for="n in 8" :key="n">
-          <img :src="getInstagramImage(n)" :alt="'Instagram Image ' + n" />
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+        <div
+          v-for="n in 8"
+          :key="n"
+          class="overflow-hidden rounded-lg"
+        >
+          <img
+            :src="getInstagramImage(n)"
+            :alt="`Instagram Image ${n}`"
+            class="w-full h-full object-cover transition-transform duration-300 hover:scale-110"
+          />
         </div>
       </div>
     </div>
 
-    <CategoryProduct class="fade-in" />
+    <!-- Categories -->
+    <CategoryProduct class="mt-20 px-4 sm:px-6 lg:px-8" />
   </div>
 </template>
 
 <script>
+// eslint-disable-next-line 
 import PopularProducts from "./PopularProducts.vue";
+// eslint-disable-next-line 
 import NewArrivals from "./NewArrivals.vue";
+// eslint-disable-next-line 
 import CategoryProduct from "./CategoryProduct.vue";
 import api from '@/services/api';
 
@@ -128,7 +137,6 @@ export default {
     },
 
     getInstagramImage(n) {
-      // Динамічний імпорт зображень
       try {
         return require(`@/assets/pic${n}.png`);
       } catch (e) {
@@ -184,266 +192,39 @@ export default {
     },
   },
 };
+
 </script>
 
-
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Podkova:wght@400..800&family=Inter:wght@600&display=swap');
-
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&display=swap');
 @font-face {
-  font-family: 'KyivType Titling';
-  src: url('@/assets/fonts/KyivType2020-14-12/KyivType-NoVariable/TTF/KyivTypeTitling-Heavy2.ttf') format('truetype');
+  font-family: 'KyivType';
+  src: url('@/assets/fonts/KyivType2020-14-12/KyivType-NoVariable/TTF/KyivTypeTitling-Black2.ttf') format('truetype');
   font-weight: 900;
   font-style: normal;
+  font-display: swap;
 }
 
-.main-container {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  max-width: 1920px;
-  margin: 0 auto;
-  overflow: hidden;
-  margin-top: 180px;
+.font-montserrat {
+  font-family: 'Montserrat', sans-serif;
 }
 
-.welcome-image {
-  width: 100%;
-  height: 510px;
-  background: url(@/assets/welcome.png) no-repeat center;
-  background-size: cover;
-}
-
-.text-container {
-  position: relative;
-  margin-top: -450px;
-  padding: 100px;
-  text-align: left;
-}
-
-.handmade-beaded-products,
-.exclusive-necklaces-bracelets-earrings {
-  color: #F6F8F6;
-  font-family: 'KyivType Titling', sans-serif;
-  font-weight: 840;
-  line-height: 1.2;
-  text-align: left;
-}
-
-.handmade-beaded-products {
-  font-size: 45px;
-  margin-top: -50px;
-}
-
-.exclusive-necklaces-bracelets-earrings {
-  font-size: 30px;
-  margin-top: 30px;
-}
-
-.button-container {
-  margin-top: 550px;
-}
-
-.content-container {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 40px;
-  align-items: center;
-}
-
-.left-image-container {
-  display: flex;
-  align-items: center;
-}
-
-.girl-image {
-  width: 350px;
-  height: 450px;
-  background: url(@/assets/girl.png) no-repeat left;
-  background-size: cover;
-  border-radius: 140px;
-  margin-left: 200px;
-  margin-top: 150px;
-  z-index: 1;
-}
-
-.pattern-image {
-  width: 200px;
-  height: 450px;
-  background: url(@/assets/patern_ethno.png) no-repeat center;
-  background-size: cover;
-  opacity: 0.5;
-  margin-left: -100px;
-  margin-top: 150px;
-}
-
-.right-text-container {
-  max-width: 600px;
-  margin-top: 100px;
-  margin-right: 150px;
-}
-
-.quote-text {
-  text-align: left;
-  margin-left: -50px;
-}
-
-.ukrainian-heritage {
-  font-family: 'Podkova', sans-serif;
-  font-size: 28px;
-  font-weight: 400;
-  line-height: 1.3;
-  color: #000;
-}
-
-.gnat-khotkevich {
-  font-family: 'Podkova', sans-serif;
-  font-size: 30px;
-  font-weight: 700;
-  margin-top: 20px;
-  color: #000;
-  margin-left: 350px;
+.font-kyivtype {
+  font-family: 'KyivType', sans-serif;
 }
 
 .view-products-button {
-  display: inline-block;        /* Ensures margin/padding work nicely */
-  margin-top: 50px;             /* Increase or decrease to move down */
-  text-decoration: none;        /* Removes the hyperlink underline */
-  font-family: 'Merriweather', sans-serif;
-  color: #fff;
   background-color: #6B1F1F;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 18px;
-  transition: background-color 0.3s ease, transform 0.3s ease;
+  padding: 0.75rem 2.5rem; /* matches px-10 py-3 */
+  border-radius: 0.5rem;
+  color: #fff;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: background-color 0.3s ease;
 }
 
 .view-products-button:hover {
-  background-color: #a01212;
-  text-decoration: none; /* Keep it off on hover as well */
-}
-
-
-.view-products-button:hover {
-  background-color: #a01212;
-}
-
-.instagram-section {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  margin-top: 100px;
-  margin-left: 150px;
-}
-
-.instagram-text-container {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 10px;
-  margin-bottom: 20px;
-}
-
-.follow-text {
-  font-family: 'Montserrat', sans-serif;
-  font-weight: bold;
-  font-size: 30px;
-  gap: 10px;
-}
-
-.instagram-handle {
-  font-family: 'Montserrat', sans-serif;
-  font-size: 25px;
-  color: #000;
-  margin-top: -20px;
-}
-
-.insta-pattern-image {
-  width: 680px;
-  height: 90px;
-  margin-left: 560px;
-  margin-bottom: -130px;
-}
-
-.instagram-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 15px;
-  justify-content: flex-start;
-}
-
-.instagram-handle-link {
-  font-size: 25px;
-  font-family: 'Montserrat', sans-serif;
-  color: black;
-  position: relative;
-  cursor: pointer;
-  transition: color 0.3s ease;
-}
-
-.instagram-handle-link::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  bottom: -2px;
-  height: 2px;
-  width: 0;
-  background-color: #333;
-  transition: width 0.3s ease;
-}
-
-.instagram-handle-link:hover::after {
-  width: 100%;
-}
-
-.instagram-handle-link:hover {
-  color: #333;
-}
-
-.instagram-image {
-  width: 300px;
-  height: 300px;
-  overflow: hidden;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.instagram-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.3s ease;
-}
-
-.instagram-image:hover img {
-  transform: scale(1.1);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-
-@media (max-width: 991px) {
-  .product-row {
-    flex-direction: column;
-  }
-
-  .product-column {
-    width: 100%;
-  }
-
-  .product-card {
-    margin-top: 15px;
-  }
-}
-
-.fade-in {
-  opacity: 0;
-  transform: translateY(20px);
-  transition: opacity 0.8s ease-out, transform 0.8s ease-out;
-}
-
-.fade-in.show {
-  opacity: 1;
-  transform: translateY(0);
+  background-color: #A01212;
 }
 </style>

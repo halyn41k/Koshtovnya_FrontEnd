@@ -1,29 +1,54 @@
 <template>
-  <section class="buy-by-category">
-    <h2 class="section-title">{{ $t('shopByCategory') }}</h2>
-    <div class="category-container">
-      <div class="category-grid">
+  <section class="flex flex-col items-center bg-[#fff7f6] py-12">
+    <!-- Section title -->
+    <h2
+      class="text-[#333] text-[32px] font-black font-kyivtype text-center mb-12"
+    >
+      {{ $t('shopByCategory') }}
+    </h2>
+
+    <!-- Categories grid -->
+    <div class="w-full max-w-screen-lg px-4">
+      <div class="grid grid-cols-1 gap-y-12 gap-x-12 sm:grid-cols-2 lg:grid-cols-3 lg:gap-x-24">
         <router-link
-          v-for="(category, index) in categories"
+          v-for="category in categories"
           :key="category.id"
           :to="category.url"
-          class="category-item with-squares"
+          class="group block"
         >
-          <template v-if="index === 0 || index === 2 || index === 4">
-            <div class="square light-square"></div>
-            <div class="square dark-square"></div>
-          </template>
-          <div class="image-wrapper">
+          <!-- Контейнер для квадратиків + зображення -->
+          <div class="relative w-72 h-72 mt-5 mx-auto">
+            <!-- Світлий квадрат -->
+            <div
+              class="absolute -left-4 -top-4 w-72 h-72 bg-[#EADCDB]
+                     transform transition-transform duration-500 ease-out
+                     group-hover:-translate-x-2 group-hover:-translate-y-2 z-0"
+            ></div>
+            <!-- Темний квадрат -->
+            <div
+              class="absolute -right-3 top-3 w-72 h-72 bg-[#C4AEAC]
+                     transform transition-transform duration-500 ease-out
+                     group-hover:translate-x-2 group-hover:translate-y-2 z-0"
+            ></div>
+            <!-- Зображення -->
             <img
               loading="lazy"
               :src="category.image_url"
               :alt="category.name"
-              class="category-image"
+              class="relative z-10 w-full h-full object-cover"
             />
           </div>
-          <div class="category-title-wrapper">
-            <h2 class="category-title">{{ $t(category.name) }}</h2>
-            <span class="arrow">→</span>
+
+          <!-- Підпис категорії трохи нижче -->
+          <div
+            class="mt-12 flex items-center justify-center text-[1.5rem] font-black text-[#6B1F1F] font-kyivtype letter-tight"
+          >
+            <h3>{{ $t(category.name) }}</h3>
+            <span
+              class="ml-2 text-2xl transform transition-transform duration-300 ease-out group-hover:translate-x-2"
+            >
+              →
+            </span>
           </div>
         </router-link>
       </div>
@@ -38,7 +63,6 @@ export default {
   name: 'BuyByCategory',
   data() {
     return {
-      // Список категорій з API або fallback
       categories: [],
       fallbackCategories: [
         { id: 1, name: 'Браслети', url: '/bracelets', image_url: require('@/assets/testpicture.png') },
@@ -54,15 +78,18 @@ export default {
     async fetchCategories() {
       try {
         const response = await api.getCategories();
-        // API повертає { data: [ ... ] }
-        const items = Array.isArray(response.data) ? response.data : response.data.data;
-        const fixedUrls = ['/bracelets', '/herdany', '/sylyanky', '/dukats', '/earrings', '/belts'];
-
+        const items = Array.isArray(response.data)
+          ? response.data
+          : response.data.data || [];
+        const fixedUrls = [
+          '/bracelets', '/herdany', '/sylyanky',
+          '/dukats', '/earrings', '/belts'
+        ];
         this.categories = items.map((cat, idx) => ({
           id: cat.id,
           name: cat.name,
           image_url: cat.image_url,
-          url: fixedUrls[idx] || `/category/${cat.id}`,
+          url: fixedUrls[idx] || `/category/${cat.id}`
         }));
       } catch (err) {
         console.error('Помилка отримання категорій:', err);
@@ -76,174 +103,20 @@ export default {
 };
 </script>
 
-
 <style scoped>
 @font-face {
-  font-family: 'KyivType Titling';
-  src: url('@/assets/fonts/KyivType2020-14-12/KyivType-NoVariable/TTF/KyivTypeTitling-Bold3.ttf') format('truetype');
+  font-family: 'KyivType';
+  src: url('@/assets/fonts/KyivType2020-14-12/KyivType-NoVariable/TTF/KyivTypeTitling-Black2.ttf') format('truetype');
   font-weight: 900;
   font-style: normal;
+  font-display: swap;
 }
 
-@font-face {
-  font-family: 'KyivType Titling Heavy';
-  src: url('@/assets/fonts/KyivType2020-14-12/KyivType-NoVariable/TTF/KyivTypeTitling-Heavy2.ttf') format('truetype');
-  font-weight: 900;
-  font-style: normal;
+.font-kyivtype {
+  font-family: 'KyivType', sans-serif;
 }
 
-.section-title {
-  color: #333;
-  font-family: 'KyivType Titling Heavy', sans-serif;
-  font-weight: 900;
-  text-shadow: 0 4px 4px rgba(99, 2, 2, 0.22);
-  letter-spacing: -2px;
-  text-align: center;
-  margin-top: 50px;
-  font-size: 30px;
-  margin-bottom: 40px;
-}
-
-.buy-by-category {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 5px;
-  background-color: #fff7f6;
-  margin-top: 20px;
-}
-
-.category-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 100px;
-  width: 100%;
-  max-width: 1200px;
-}
-
-.category-item {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  position: relative;
-  text-decoration: none;
-  color: inherit;
-}
-
-.category-item:hover {
-  text-decoration: none;
-}
-
-.image-wrapper {
-  position: relative;
-  width: 300px;
-  height: 300px;
-  overflow: hidden;
-  margin-top: 20px;
-}
-
-.category-title-wrapper {
-  display: flex;
-  align-items: center;
-  font-size: 24px;
-  font-weight: bold;
-  letter-spacing: -1px;
-  color: rgb(107, 31, 31);
-  margin-top: 10px;
-  font-family: 'KyivType Titling', sans-serif;
-}
-
-.category-title {
-  font-family: 'KyivType Titling';
-  font-weight: 900;
-  margin-right: 10px;
-}
-
-.square {
-  position: absolute;
-  width: 300px;
-  height: 340px;
-  z-index: 1;
-  pointer-events: none;
-  transition: transform 0.5s ease;
-}
-
-.light-square {
-  background-color: #EADCDB;
-  top: -20px;
-  left: -50px;
-}
-
-.dark-square {
-  background-color: #C4AEAC;
-  top: 20px;
-  right: -50px;
-}
-
-.category-item:hover .light-square {
-  transform: translate(-10px, -10px);
-}
-
-.category-item:hover .dark-square {
-  transform: translate(10px, 10px);
-}
-
-.category-grid .category-item:nth-child(1) .light-square,
-.category-grid .category-item:nth-child(1) .dark-square,
-.category-grid .category-item:nth-child(3) .light-square,
-.category-grid .category-item:nth-child(3) .dark-square,
-.category-grid .category-item:nth-child(5) .light-square,
-.category-grid .category-item:nth-child(5) .dark-square {
-  display: block;
-}
-
-.category-item .light-square,
-.category-item .dark-square {
-  display: none;
-}
-
-@media (max-width: 768px) {
-  .category-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 15px;
-  }
-}
-
-@media (max-width: 480px) {
-  .category-grid {
-    grid-template-columns: 1fr;
-    gap: 10px;
-  }
-}
-
-.category-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  position: relative;
-  z-index: 2;
-}
-
-.arrow {
-  font-size: 24px;
-  transition: transform 0.3s ease;
-}
-
-.category-item:hover .arrow {
-  transform: translateX(10px);
-}
-
-@media (max-width: 768px) {
-  .category-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 15px;
-  }
-}
-
-@media (max-width: 480px) {
-  .category-grid {
-    grid-template-columns: 1fr;
-    gap: 10px;
-  }
+.letter-tight {
+  letter-spacing: -0.025em;
 }
 </style>

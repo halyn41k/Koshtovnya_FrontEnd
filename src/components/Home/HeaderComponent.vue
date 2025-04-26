@@ -164,7 +164,7 @@
     <li v-for="cat in categories" :key="cat.link">
       <router-link
         :to="cat.link"
-        class="relative inline-block px-4 py-1 text-[#6B1F1F] transition-colors duration-300 ease-in-out
+        class="relative inline-block px-2 py-1 text-[#6B1F1F] transition-colors duration-300 ease-in-out
                hover:bg-[#fafafa] hover:text-[#6B1F1F]
                before:content-[''] before:absolute before:left-0 before:right-0 before:bottom-0
                before:h-[2px] before:bg-[#6B1F1F] before:scale-x-0 hover:before:scale-x-100
@@ -334,7 +334,7 @@ export default {
   src: url('@/assets/fonts/KyivType2020-14-12/KyivType-NoVariable/TTF/KyivTypeTitling-Black2.ttf') format('truetype');
   font-weight: 900; font-style: normal; font-display: swap;
 }
-.font-base { font-family: 'Montserrat', sans-serif; }
+.font-base { font-family: 'Montserrat', sans-serif; font-weight: 600; }
 .font-heading { font-family: 'KyivType Titling Black2', sans-serif; }
 .text-body3 { font-size: 14px; line-height: 18px; font-weight: 500; }
 .text-h3    { font-size: 18px; line-height: 32px; }

@@ -83,6 +83,9 @@
         </div>
       </main>
     </section>
+    <section class="category-product-section">
+    <CategoryProduct />
+  </section>
   </template>
   
   <script>
@@ -92,9 +95,8 @@
   export default {
     name: 'CategorySection',
     components: {
-      FilterComponent: defineAsyncComponent(() =>
-        import('@/components/product/FilterComponent.vue')
-      ),
+      FilterComponent: defineAsyncComponent(() => import('../product/FilterComponent.vue')),
+    CategoryProduct: defineAsyncComponent(() => import('../home/CategoryProduct.vue')),
     },
     props: {
       categoryId: { type: Number, required: true },

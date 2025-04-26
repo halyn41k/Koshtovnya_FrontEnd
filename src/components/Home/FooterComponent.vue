@@ -9,8 +9,8 @@
             alt="Коштовня Лого"
             class="w-20 h-auto"
           />
-          <h1 class="text-2xl font-black font-['KyivType Titling Black2']">
-            {{ $t('logo') }}
+          <h1 class="font-heading text-h3 text-semantic-primary font-black">
+            Коштовня
           </h1>
         </router-link>
         <p class="text-base leading-relaxed font-['Montserrat']">
@@ -153,8 +153,11 @@ export default {
 @font-face {
   font-family: 'KyivType Titling Black2';
   src: url('@/assets/fonts/KyivType2020-14-12/KyivType-NoVariable/TTF/KyivTypeTitling-Black2.ttf') format('truetype');
-  font-weight: 900;
-  font-style: normal;
-  font-display: swap;
+  font-weight: 900; font-style: normal; font-display: swap;
 }
+.font-base { font-family: 'Montserrat', sans-serif; }
+.font-heading { font-family: 'KyivType Titling Black2', sans-serif; }
+.text-body3 { font-size: 14px; line-height: 18px; font-weight: 500; }
+.text-h3    { font-size: 18px; line-height: 32px; }
+
 </style>
