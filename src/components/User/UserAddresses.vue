@@ -1,253 +1,272 @@
 <template>
-  <div class="address-container">
-    <Loader v-if="loading" />
+  <div class="max-w-3xl p-5 overflow-y-auto h-[90vh] font-sans">
+    <!-- Loader -->
+    <div v-if="loading" class="flex justify-center py-10">
+      <Loader />
+    </div>
 
-    <!-- Блок відсутності адреси -->
-    <div v-if="!addressAvailable && !loading && !showForm" class="no-address">
-      <p class="no-address-text">
+    <!-- No address block -->
+    <div
+      v-if="!addressAvailable && !loading && !showForm"
+      class="text-center space-y-4"
+    >
+      <p class="text-lg text-gray-700">
         Немає адреси доставки. Додайте або створіть нову адресу!
       </p>
-      <button class="add-address-button" @click="openForm">
-        <span class="plus-icon">+</span> Створити нову адресу
+      <button
+        @click="openForm"
+        class="inline-flex items-center bg-red-700 text-white px-4 py-2 rounded-lg hover:bg-red-800 transition"
+      >
+        <span class="text-2xl mr-2">+</span> Створити нову адресу
       </button>
     </div>
 
-    <!-- Форма для додавання/оновлення адреси -->
-    <div v-if="showForm" class="address-form">
-      <h2>{{ addressAvailable ? "Оновити адресу" : "Додати нову адресу" }}</h2>
-      <form @submit.prevent="submitAddress">
-        <!-- Телефон -->
-        <label>
-          <span>Телефон:</span>
+    <!-- Address form -->
+    <div v-if="showForm" class="bg-white p-6 rounded-lg shadow space-y-6">
+      <h2 class="text-xl font-semibold">
+        {{ addressAvailable ? 'Оновити адресу' : 'Додати нову адресу' }}
+      </h2>
+      <form @submit.prevent="submitAddress" class="space-y-4">
+        <!-- Phone -->
+        <div>
+          <label class="block text-sm font-medium mb-1">Телефон:</label>
           <input
             type="tel"
             v-model="phoneNumber"
-            :class="{ 'input-error': errors.phoneNumber }"
             placeholder="+380XXXXXXXXX"
-            required
+            :class="[
+              'w-full border rounded-lg px-3 py-2',
+              errors.phoneNumber ? 'border-red-500' : 'border-gray-300'
+            ]"
           />
-          <span v-if="errors.phoneNumber" class="error-message">{{ errors.phoneNumber }}</span>
-        </label>
+          <p v-if="errors.phoneNumber" class="text-red-500 text-sm mt-1">
+            {{ errors.phoneNumber }}
+          </p>
+        </div>
 
-        <!-- Тип доставки -->
-        <label>
-          <span>Тип доставки:</span>
+        <!-- Delivery type -->
+        <div>
+          <label class="block text-sm font-medium mb-1">Тип доставки:</label>
           <select
             v-model="formData.deliveryType"
             @change="updateDeliveryOptions"
-            :class="{ 'input-error': errors.deliveryType }"
-            required
+            :class="[
+              'w-full border rounded-lg px-3 py-2',
+              errors.deliveryType ? 'border-red-500' : 'border-gray-300'
+            ]"
           >
             <option disabled value="">Оберіть тип доставки</option>
             <option value="courier">Кур'єр</option>
             <option value="pickup">Самовивіз</option>
           </select>
-          <span v-if="errors.deliveryType" class="error-message">{{ errors.deliveryType }}</span>
-        </label>
+          <p v-if="errors.deliveryType" class="text-red-500 text-sm mt-1">
+            {{ errors.deliveryType }}
+          </p>
+        </div>
 
-        <!-- Для кур'єра -->
-        <template v-if="formData.deliveryType === 'courier'">
-          <label>
-            <span>Спосіб доставки:</span>
-            <input type="text" value="Кур'єр Нової Пошти" readonly />
-          </label>
-          <label>
-            <span>Місто:</span>
-            <div class="city-dropdown-wrapper" style="position: relative;">
+        <!-- Courier fields -->
+        <div v-if="formData.deliveryType === 'courier'" class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium mb-1">Спосіб доставки:</label>
+            <input
+              type="text"
+              value="Кур'єр Нової Пошти"
+              readonly
+              class="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 cursor-not-allowed"
+            />
+          </div>
+          <div class="relative">
+            <label class="block text-sm font-medium mb-1">Місто:</label>
+            <input
+              type="text"
+              v-model="formData.city"
+              @input="onCityInput"
+              @focus="showCityDropdown = true"
+              placeholder="Введіть назву міста"
+              :class="[
+                'w-full border rounded-lg px-3 py-2',
+                errors.city ? 'border-red-500' : 'border-gray-300'
+              ]"
+            />
+            <ul
+              v-if="showCityDropdown && cities.length"
+              class="absolute z-10 left-0 right-0 bg-white border border-t-0 rounded-b-lg shadow max-h-48 overflow-auto"
+            >
+              <li
+                v-for="city in cities"
+                :key="city.Ref"
+                @mousedown.prevent="selectCity(city)"
+                class="px-3 py-2 hover:bg-gray-100 cursor-pointer"
+              >
+                {{ city.city }}
+              </li>
+            </ul>
+            <p v-if="errors.city" class="text-red-500 text-sm mt-1">{{ errors.city }}</p>
+          </div>
+          <div class="relative">
+            <label class="block text-sm font-medium mb-1">Вулиця:</label>
+            <input
+              v-model="formData.streetSearch"
+              @input="handleStreetSearch"
+              placeholder="Введіть назву вулиці"
+              class="w-full border rounded-lg px-3 py-2"
+            />
+            <ul
+              v-if="streets.length"
+              class="absolute z-10 left-0 right-0 bg-white border border-t-0 rounded-b-lg shadow max-h-48 overflow-auto"
+            >
+              <li
+                v-for="(street, idx) in streets"
+                :key="idx"
+                @click="selectStreet(street)"
+                class="px-3 py-2 hover:bg-gray-100 cursor-pointer"
+              >
+                {{ street.street || street.Name }}
+              </li>
+            </ul>
+            <p v-if="errors.street" class="text-red-500 text-sm mt-1">{{ errors.street }}</p>
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">Будинок/Квартира:</label>
+            <input
+              type="text"
+              v-model="deliveryAddress.number"
+              :class="[
+                'w-full border rounded-lg px-3 py-2',
+                errors.number ? 'border-red-500' : 'border-gray-300'
+              ]"
+            />
+            <p v-if="errors.number" class="text-red-500 text-sm mt-1">{{ errors.number }}</p>
+          </div>
+        </div>
+
+        <!-- Pickup fields -->
+        <div v-if="formData.deliveryType === 'pickup'" class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium mb-1">Спосіб доставки:</label>
+            <select
+              v-model="formData.selectedDeliveryMethod"
+              @change="onDeliveryMethodChange"
+              class="w-full border rounded-lg px-3 py-2"
+            >
+              <option disabled value="">Оберіть спосіб доставки</option>
+              <option
+                v-for="opt in pickupOptions"
+                :key="opt.id"
+                :value="opt"
+              >
+                {{ opt.name }}
+              </option>
+            </select>
+            <p
+              v-if="errors.selectedDeliveryMethod"
+              class="text-red-500 text-sm mt-1"
+            >{{ errors.selectedDeliveryMethod }}</p>
+          </div>
+
+          <template v-if="formData.selectedDeliveryMethod?.is_store">
+            <p><strong>Адреса:</strong> вул. Степана Бандери 22, Коломия</p>
+          </template>
+
+          <template v-else>
+            <div class="relative">
+              <label class="block text-sm font-medium mb-1">Місто:</label>
               <input
-                type="text"
                 v-model="formData.city"
                 @input="onCityInput"
                 @focus="showCityDropdown = true"
-                placeholder="Введіть назву міста"
-                :class="{ 'input-error': errors.city }"
-                required
+                placeholder="Введіть місто"
+                class="w-full border rounded-lg px-3 py-2"
               />
-              <ul v-if="showCityDropdown && cities.length" class="city-dropdown">
+              <ul
+                v-if="showCityDropdown && cities.length"
+                class="absolute z-10 left-0 right-0 bg-white border border-t-0 rounded-b-lg shadow max-h-48 overflow-auto"
+              >
                 <li
                   v-for="city in cities"
                   :key="city.Ref"
                   @mousedown.prevent="selectCity(city)"
+                  class="px-3 py-2 hover:bg-gray-100 cursor-pointer"
                 >
                   {{ city.city }}
                 </li>
               </ul>
+              <p v-if="errors.city" class="text-red-500 text-sm mt-1">{{ errors.city }}</p>
             </div>
-            <span v-if="errors.city" class="error-message">{{ errors.city }}</span>
-          </label>
-          <label>
-            <span>Вулиця:</span>
-            <input
-              class="input-field"
-              v-model="formData.streetSearch"
-              placeholder="Введіть назву вулиці"
-              @input="handleStreetSearch"
-            />
-            <!-- Street Suggestions -->
-            <div v-if="streets.length > 0" class="street-suggestions">
-              <ul>
-                <li v-for="(street, index) in streets" :key="index" @click="selectStreet(street)">
-                  {{ street.street || street.Name }}
-                </li>
-              </ul>
-            </div>
-            <div v-else-if="formData.streetSearch">
-              <p>Немає вулиць для цього запиту.</p>
-            </div>
-            <span v-if="errors.street" class="error-message">{{ errors.street }}</span>
-          </label>
-          <label>
-            <span>Будинок/Квартира:</span>
-            <input
-              type="text"
-              v-model="deliveryAddress.number"
-              :class="{ 'input-error': errors.number }"
-              required
-            />
-            <span v-if="errors.number" class="error-message">{{ errors.number }}</span>
-          </label>
-        </template>
 
-        <!-- Для самовивозу -->
-        <template v-if="formData.deliveryType === 'pickup'">
-          <label>
-            <span>Спосіб доставки:</span>
-            <select
-              v-model="formData.selectedDeliveryMethod"
-              @change="onDeliveryMethodChange"
-              required
-            >
-              <option disabled value="">Оберіть спосіб доставки</option>
-              <option
-                v-for="option in pickupOptions"
-                :key="option.id"
-                :value="option"
+            <div>
+              <label class="block text-sm font-medium mb-1">Відділення / Поштомат:</label>
+              <select
+                v-model="selectedWarehouse"
+                class="w-full border rounded-lg px-3 py-2"
               >
-                {{ option.name }}
-              </option>
-            </select>
-            <span v-if="errors.selectedDeliveryMethod" class="error-message">{{ errors.selectedDeliveryMethod }}</span>
-          </label>
-
-          <!-- Якщо вибрано "Самовивіз з нашого магазину" -->
-          <template v-if="formData.selectedDeliveryMethod && formData.selectedDeliveryMethod.is_store">
-            <p><strong>Місто:</strong> Коломия</p>
-            <p><strong>Адреса:</strong> вул. Степана Бандери 22, Коломия</p>
-          </template>
-
-          <!-- Якщо вибрано "Самовивіз з Нової Пошти" -->
-          <template v-else-if="formData.selectedDeliveryMethod && formData.selectedDeliveryMethod.name === 'Самовивіз з Нової Пошти'">
-            <label>
-              <span>Місто:</span>
-              <div class="city-dropdown-wrapper" style="position: relative;">
-                <input
-                  class="input-field"
-                  v-model="formData.city"
-                  placeholder="Введіть місто"
-                  @input="handleCityInput"
-                  @focus="showCityDropdown = true"
-                  required
-                />
-                <ul v-if="showCityDropdown && cities.length" class="city-dropdown">
-                  <li
-                    v-for="city in cities"
-                    :key="city.Ref"
-                    @mousedown.prevent="selectCity(city)"
-                  >
-                    {{ city.city }}
-                  </li>
-                </ul>
-              </div>
-              <span v-if="errors.city" class="error-message">{{ errors.city }}</span>
-            </label>
-            <label>
-              <span>Відділення:</span>
-              <select v-model="deliveryAddress.branch" :class="{ 'input-error': errors.branch }" required>
-                <option disabled value="">Оберіть відділення</option>
+                <option disabled value="">Оберіть</option>
                 <option
-                  v-for="warehouse in warehouses"
-                  :key="warehouse.id"
-                  :value="warehouse.name"
+                  v-for="wh in warehouses"
+                  :key="wh.id"
+                  :value="wh.name"
                 >
-                  {{ warehouse.name }}
+                  {{ wh.name }}
                 </option>
               </select>
-              <span v-if="errors.branch" class="error-message">{{ errors.branch }}</span>
-            </label>
+              <p
+                v-if="errors.branch || errors.postomat"
+                class="text-red-500 text-sm mt-1"
+              >
+                {{ errors.branch || errors.postomat }}
+              </p>
+            </div>
           </template>
+        </div>
 
-          <!-- Якщо вибрано "Самовивіз з поштоматів Нової Пошти" -->
-          <template v-else-if="formData.selectedDeliveryMethod && formData.selectedDeliveryMethod.name === 'Самовивіз з поштоматів Нової Пошти'">
-            <label>
-              <span>Місто:</span>
-              <div class="city-dropdown-wrapper" style="position: relative;">
-                <input
-                  class="input-field"
-                  v-model="formData.city"
-                  placeholder="Введіть місто"
-                  @input="handleCityInput"
-                  @focus="showCityDropdown = true"
-                  required
-                />
-                <ul v-if="showCityDropdown && cities.length" class="city-dropdown">
-                  <li
-                    v-for="city in cities"
-                    :key="city.Ref"
-                    @mousedown.prevent="selectCity(city)"
-                  >
-                    {{ city.city }}
-                  </li>
-                </ul>
-              </div>
-              <span v-if="errors.city" class="error-message">{{ errors.city }}</span>
-            </label>
-            <label>
-              <span>Поштомат:</span>
-              <select v-model="deliveryAddress.postomat" :class="{ 'input-error': errors.postomat }" required>
-                <option disabled value="">Оберіть поштомат</option>
-                <option
-                  v-for="warehouse in warehouses"
-                  :key="warehouse.id"
-                  :value="warehouse.name"
-                >
-                  {{ warehouse.name }}
-                </option>
-              </select>
-              <span v-if="errors.postomat" class="error-message">{{ errors.postomat }}</span>
-            </label>
-          </template>
-        </template>
-
-        <div class="form-actions">
-          <button type="submit" class="save-button">Зберегти</button>
-          <button type="button" class="cancel-button" @click="cancelEdit">Скасувати</button>
+        <!-- Form actions -->
+        <div class="flex space-x-4 pt-4">
+          <button
+            type="submit"
+            class="bg-red-700 text-white px-4 py-2 rounded-lg hover:bg-red-800 transition"
+          >Зберегти</button>
+          <button
+            type="button"
+            @click="cancelEdit"
+            class="bg-gray-300 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-400 transition"
+          >Скасувати</button>
         </div>
       </form>
     </div>
 
-    <!-- Відображення збереженої адреси -->
-    <div v-else-if="addressAvailable && !loading && !showForm" class="address-card">
-      <h2 class="card-title">Ваша адреса доставки</h2>
+    <!-- Address card -->
+    <div
+      v-else-if="addressAvailable && !loading && !showForm"
+      class="bg-white p-6 rounded-lg shadow space-y-3"
+    >
+      <h2 class="text-xl font-semibold">Ваша адреса доставки</h2>
       <p><strong>Телефон:</strong> {{ phoneNumber }}</p>
-
-
       <p><strong>Тип доставки:</strong> {{ formData.deliveryName }}</p>
+
       <template v-if="formData.deliveryType === 'courier'">
         <p><strong>Місто:</strong> {{ formData.city }}</p>
         <p><strong>Адреса:</strong> {{ deliveryAddress.street }} {{ deliveryAddress.number }}</p>
       </template>
-      <template v-else-if="formData.deliveryType === 'pickup'">
-        <p v-if="formData.selectedDeliveryMethod && formData.selectedDeliveryMethod.is_store">
-          <strong>Адреса:</strong> вул. Степана Бандери 22, Коломия
-        </p>
-        <p v-else>
-          <strong>Місто:</strong> {{ formData.city }}<br />
-          <strong>Відділення/Поштомат:</strong> {{ deliveryAddress.branch || deliveryAddress.postomat }}
-        </p>
+
+      <template v-else>
+        <template v-if="formData.selectedDeliveryMethod.is_store">
+          <p><strong>Адреса:</strong> вул. Степана Бандери 22, Коломия</p>
+        </template>
+        <template v-else>
+          <p><strong>Місто:</strong> {{ formData.city }}</p>
+          <p><strong>Відділення/Поштомат:</strong> {{ selectedWarehouse }}</p>
+        </template>
       </template>
-      <div class="button-group">
-        <button class="update-button" @click="editAddress">Оновити</button>
-        <button class="delete-button" @click="deleteAddress">Видалити</button>
+
+      <div class="flex space-x-4 pt-4">
+        <button
+          @click="editAddress"
+          class="bg-red-700 text-white px-4 py-2 rounded-lg hover:bg-red-800 transition"
+        >Оновити</button>
+        <button
+          @click="deleteAddress"
+          class="bg-red-700 text-white px-4 py-2 rounded-lg hover:bg-red-800 transition"
+        >Видалити</button>
       </div>
     </div>
   </div>
@@ -255,7 +274,8 @@
 
 <script>
 import Loader from '../home/Loader.vue';
-import axios from "axios";
+import api from '@/services/api';
+import { debounce } from 'lodash';
 
 export default {
   name: "UserAddresses",
@@ -264,6 +284,7 @@ export default {
     return {
       addressAvailable: false,
       showForm: false,
+      loading: true,
       phoneNumber: "",
       formData: {
         city: "",
@@ -277,18 +298,14 @@ export default {
         street: "",
         number: "",
         branch: "",
-        postomat: "",
-        warehouse: ""
+        postomat: ""
       },
       streets: [],
       warehouses: [],
       cities: [],
-      cityLoading: false,
       showCityDropdown: false,
       errors: {},
-      loading: true,
-      addressId: null,
-      deliveryOptions: {}
+      addressId: null
     };
   },
   computed: {
@@ -298,58 +315,82 @@ export default {
         { id: 2, name: "Самовивіз з Нової Пошти" },
         { id: 3, name: "Самовивіз з поштоматів Нової Пошти" }
       ];
+    },
+    selectedWarehouse: {
+      get() {
+        return this.deliveryAddress.branch || this.deliveryAddress.postomat;
+      },
+      set(val) {
+        if (this.formData.selectedDeliveryMethod?.name.includes('поштомат')) {
+          this.deliveryAddress.postomat = val;
+          this.deliveryAddress.branch = "";
+        } else {
+          this.deliveryAddress.branch = val;
+          this.deliveryAddress.postomat = "";
+        }
+      }
     }
   },
   created() {
+    this.debouncedFetchCities = debounce(this.fetchCities, 300);
     this.fetchUserAddress();
     this.fetchDeliveryTypes();
-    if (!this.addressAvailable) {
-      this.fetchUserPhoneNumber();
-    }
-    // Прив'язуємо fetchCities до контексту компонента з дебаунсом
-    this.debouncedFetchCities = this.debounce(this.fetchCities.bind(this), 300);
   },
   methods: {
-    debounce(func, wait) {
-      let timeout;
-      return function (...args) {
-        clearTimeout(timeout);
-        timeout = setTimeout(() => func.apply(this, args), wait);
-      };
+    async fetchUserAddress() {
+      this.loading = true;
+      try {
+        const res = await api.getUserAddress();
+        // support both { data: { … } } and direct {...}
+        const payload = res.data?.data ?? res.data ?? {};
+        this.phoneNumber = payload.phone_number ?? "";
+        this.formData.city = payload.city ?? "";
+        this.formData.deliveryType = payload.delivery_type ?? "";
+        this.formData.deliveryName = payload.delivery_name ?? "";
+        this.addressId = payload.id ?? null;
+        if (payload.delivery_type === "courier") {
+          const [street, ...num] = (payload.delivery_address ?? "").split(" ");
+          this.deliveryAddress.street = street || "";
+          this.deliveryAddress.number = num.join(" ") || "";
+        } else {
+          this.deliveryAddress.branch = payload.delivery_address ?? "";
+        }
+        this.addressAvailable = !!payload.id;
+      } catch (e) {
+        console.error('fetchUserAddress error', e);
+        this.addressAvailable = false;
+      } finally {
+        this.loading = false;
+      }
+    },
+    async fetchDeliveryTypes() {
+      try {
+        const res = await api.getDeliveryTypes();
+        const types = Array.isArray(res.data?.data)
+          ? res.data.data
+          : Array.isArray(res.data)
+            ? res.data
+            : [];
+        const match = types.find(d => d.id === this.formData.deliveryType);
+        this.formData.deliveryName = match?.name ?? "";
+      } catch (e) {
+        console.error('fetchDeliveryTypes error', e);
+      }
     },
     updateDeliveryOptions() {
       this.formData.selectedDeliveryMethod = null;
-      this.deliveryAddress = { street: "", number: "", branch: "", postomat: "", warehouse: "" };
-      if (this.formData.deliveryType === "courier") {
-        this.fetchStreets();
-      }
-      if (this.formData.deliveryType === "pickup") {
-        this.formData.city = "";
-        this.formData.cityRef = "";
-        this.warehouses = [];
-      }
+      this.deliveryAddress = { street: "", number: "", branch: "", postomat: "" };
+      this.warehouses = [];
     },
     onDeliveryMethodChange() {
-      if (
-        this.formData.deliveryType === "pickup" &&
-        this.formData.selectedDeliveryMethod &&
-        this.formData.selectedDeliveryMethod.is_store
-      ) {
+      if (this.formData.selectedDeliveryMethod?.is_store) {
         this.formData.city = "Коломия";
         this.deliveryAddress.branch = "";
         this.deliveryAddress.postomat = "";
-      } else {
-        this.formData.city = "";
-        this.formData.cityRef = "";
       }
     },
     onCityInput() {
-      if (this.formData.city.trim().length < 2) {
-        this.cities = [];
-        this.showCityDropdown = false;
-        return;
-      }
-      if (this.formData.deliveryType === "courier" || this.formData.deliveryType === "pickup") {
+      if (this.formData.city.trim().length >= 2) {
         this.debouncedFetchCities();
         this.showCityDropdown = true;
       } else {
@@ -358,361 +399,120 @@ export default {
       }
     },
     async fetchCities() {
-      const token = localStorage.getItem("token");
-      let deliveryTypeParam = "";
-      if (this.formData.deliveryType === "courier") {
-        deliveryTypeParam = "Кур'єр Нової Пошти";
-      } else if (this.formData.deliveryType === "pickup") {
-        if (this.formData.selectedDeliveryMethod && this.formData.selectedDeliveryMethod.name) {
-          deliveryTypeParam = this.formData.selectedDeliveryMethod.name;
-        } else {
-          deliveryTypeParam = "Самовивіз з Нової Пошти";
-        }
-      }
-      
-      console.log("Fetching cities with:", {
-        city: this.formData.city,
-        delivery_type: deliveryTypeParam,
-      });
-  
       try {
-        const response = await axios.get(
-          "https://koshtovnya.api-dev.bmax-edu.website/api/nova-poshta/cities",
-          {
-            headers: { Authorization: `Bearer ${token}` },
-            params: {
-              city: this.formData.city,
-              delivery_type: deliveryTypeParam,
-            },
-          }
-        );
-        console.log("Cities API Response:", response.data);
-  
-        if (response.data.success && Array.isArray(response.data.data)) {
-          this.cities = response.data.data;
-        } else {
-          console.error("Incorrect response format:", response.data);
-          this.cities = [];
-        }
-      } catch (error) {
-        console.error("Error fetching cities:", error.response?.data || error.message);
+        const res = await api.getNovaPoshtaCities({
+          city: this.formData.city,
+          delivery_type: this.formData.deliveryType === 'courier'
+            ? "Кур'єр Нової Пошти"
+            : this.formData.selectedDeliveryMethod?.name
+        });
+        this.cities = res.data?.data || [];
+      } catch (e) {
+        console.error('fetchCities error', e);
       }
-    },
-    hideCityDropdown() {
-      setTimeout(() => {
-        this.showCityDropdown = false;
-      }, 300);
     },
     selectCity(city) {
       this.formData.city = city.city;
       this.formData.cityRef = city.Ref;
       this.showCityDropdown = false;
-      this.fetchWarehouses();
+      if (this.formData.deliveryType === 'pickup') this.fetchWarehouses();
     },
     async fetchWarehouses() {
-      if (!this.formData.cityRef) {
-        console.error("CityRef is required.");
-        return;
-      }
-      const token = localStorage.getItem("token");
       try {
-        const response = await axios.get("https://koshtovnya.api-dev.bmax-edu.website/api/nova-poshta/ware-houses", {
-          headers: { Authorization: `Bearer ${token}` },
-          params: {
-            city: this.formData.city,
-            Ref: this.formData.cityRef,
-            delivery_type: this.formData.deliveryType
-          }
+        const res = await api.getNovaPoshtaWarehouses({
+          city: this.formData.city,
+          Ref: this.formData.cityRef,
+          delivery_type: this.formData.deliveryType
         });
-        if (response.status === 200 && Array.isArray(response.data?.data)) {
-          this.warehouses = response.data.data.map((item, index) => ({
-            id: index + 1,
-            name: item.warehouse
-          }));
-        } else {
-          this.warehouses = [];
-        }
-      } catch (error) {
-        console.error("Error fetching warehouses:", error.response?.data || error.message);
-        this.warehouses = [];
+        this.warehouses = (res.data?.data || []).map((w, i) => ({ id: i+1, name: w.warehouse }));
+      } catch (e) {
+        console.error('fetchWarehouses error', e);
       }
     },
     async fetchStreets() {
-      // Якщо місто не обране, припиняємо запит
-      if (!this.formData.city || !this.formData.cityRef) {
-        this.streets = [];
-        return;
-      }
-      const token = localStorage.getItem("token");
       try {
-        const response = await axios.get("https://koshtovnya.api-dev.bmax-edu.website/api/nova-poshta/streets", {
-          headers: { Authorization: `Bearer ${token}` },
-          params: {
-            city: this.formData.city,
-            Ref: this.formData.cityRef,
-            street: this.formData.streetSearch // передаємо запит для пошуку
-          }
+        const res = await api.getNovaPoshtaStreets({
+          city: this.formData.city,
+          Ref: this.formData.cityRef,
+          street: this.formData.streetSearch
         });
-        if (response.status === 200 && Array.isArray(response.data?.data)) {
-          this.streets = response.data.data;
-        } else {
-          this.streets = [];
-        }
-      } catch (error) {
-        console.error("Error fetching streets:", error.response?.data || error.message);
-        this.streets = [];
+        this.streets = res.data?.data || [];
+      } catch (e) {
+        console.error('fetchStreets error', e);
       }
     },
-    // Метод, що викликається при введенні в полі пошуку вулиць
     handleStreetSearch() {
-      if (this.formData.streetSearch.trim().length < 2) {
+      if (this.formData.streetSearch.trim().length >= 2) {
+        this.fetchStreets();
+      } else {
         this.streets = [];
-        return;
       }
-      this.fetchStreets();
     },
     selectStreet(street) {
-      const streetName = street.street || street.Name;
-      this.deliveryAddress.street = streetName;
-      this.formData.streetSearch = streetName;
+      this.deliveryAddress.street = street.street || street.Name;
+      this.formData.streetSearch = this.deliveryAddress.street;
       this.streets = [];
-      console.log("Вибрана вулиця:", this.deliveryAddress.street);
-    },
-    async fetchUserAddress() {
-  const token = localStorage.getItem("token");
-  if (!token) {
-    this.$router.push("/login");
-    return;
-  }
-  this.loading = true;
-  try {
-    const response = await axios.get("https://koshtovnya.api-dev.bmax-edu.website/api/user-address", {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    console.log("Отримана адреса:", response.data);
-    
-    // Ось тут зміни
-    if (response.data && response.data.data) {
-      const address = response.data.data; 
-      // Підставляємо ключі з address
-      this.phoneNumber = address.phone_number || "";
-      this.formData.city = address.city || "";
-      this.formData.deliveryType = address.delivery_type || "";
-      this.formData.deliveryName = address.delivery_name || "";
-      this.addressId = address.id;
-
-      // Логіка розділення адреси на "street" і "number", якщо потрібно
-      if (address.delivery_type === "courier") {
-        const parts = address.delivery_address.split(" ");
-        this.deliveryAddress.street = parts[0];
-        this.deliveryAddress.number = parts.slice(1).join(" ");
-      } else if (address.delivery_type === "pickup") {
-        this.deliveryAddress.branch = address.delivery_address;
-      }
-
-      // Якщо дані були знайдені, встановлюємо addressAvailable = true
-      this.addressAvailable = true;
-    } else {
-      this.addressAvailable = false;
-    }
-  } catch (error) {
-    console.error("Помилка отримання адреси:", error);
-    this.addressAvailable = false;
-  } finally {
-    this.loading = false;
-  }
-},
-
-    async fetchUserPhoneNumber() {
-      const token = localStorage.getItem("token");
-      if (!token) return;
-      try {
-        const response = await axios.get("https://koshtovnya.api-dev.bmax-edu.website/api/user/phone-number", {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        if (response.data !== null) {
-          this.phoneNumber = response.data.phone;
-        }
-      } catch (error) {
-        console.error("Помилка отримання номера телефону:", error);
-      }
-    },
-    async fetchDeliveryTypes() {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        alert("Будь ласка, увійдіть у свій обліковий запис.");
-        this.$router.push("/login");
-        return;
-      }
-      try {
-        const response = await axios.get("https://koshtovnya.api-dev.bmax-edu.website/api/delivery-types", {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        this.deliveryOptions = response.data.data;
-      } catch (error) {
-        console.error("Error fetching delivery types:", error);
-      }
-    },
-    handleCityInput() {
-      console.log("Введене місто:", this.formData.city);
-      if (this.formData.city.length >= 3) {
-        this.fetchCities();
-      }
-    },
-    async submitAddress() {
-  if (!this.validateForm()) return;
-  const token = localStorage.getItem("token");
-  if (!token) {
-    this.$router.push("/login");
-    return;
-  }
-  
-  // Формуємо дані для збереження адреси
-  let deliveryAddressValue = "";
-  if (this.formData.deliveryType === "courier") {
-    deliveryAddressValue = `${this.deliveryAddress.street} ${this.deliveryAddress.number}`;
-  } else if (this.formData.deliveryType === "pickup") {
-    if (this.formData.selectedDeliveryMethod.is_store) {
-      deliveryAddressValue = "вул. Степана Бандери 22, Коломия";
-    } else if (this.formData.selectedDeliveryMethod.name === "Самовивіз з Нової Пошти") {
-      deliveryAddressValue = this.deliveryAddress.branch;
-    } else if (this.formData.selectedDeliveryMethod.name === "Самовивіз з поштоматів Нової Пошти") {
-      deliveryAddressValue = this.deliveryAddress.postomat;
-    }
-  }
-  
-  let deliveryName = "";
-  if (this.formData.deliveryType === "courier") {
-    deliveryName = "Кур'єр Нової Пошти";
-  } else if (this.formData.deliveryType === "pickup") {
-    deliveryName = this.formData.selectedDeliveryMethod.name;
-  }
-  
-  // Дані для запиту
-  const postData = {
-    phone_number: this.phoneNumber,
-    city: this.formData.city,
-    city_ref: this.formData.cityRef,
-    delivery_name: deliveryName,
-    delivery_address: deliveryAddressValue
-  };
-  
-  console.log("Submit address data:", postData);
-  
-  try {
-    let response;
-    if (this.addressAvailable) {
-      // Якщо адреса вже існує, викликаємо метод оновлення (наприклад, PUT або PATCH)
-      response = await axios.patch(
-          `https://koshtovnya.api-dev.bmax-edu.website/api/user-address/${this.addressId}`,
-          postData,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-
-    } else {
-      // Якщо адреса відсутня – викликаємо створення нової адреси
-      response = await axios.post(
-        "https://koshtovnya.api-dev.bmax-edu.website/api/user-address",
-        postData,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-    }
-    console.log("Response data:", response.data);
-    console.log("Адресу успішно збережено!");
-    this.fetchUserAddress();
-    this.showForm = false;
-  } catch (error) {
-    console.error("Помилка збереження адреси:", error);
-    if (error.response) {
-      console.error("Error response data:", error.response.data);
-    }
-  }
-},
-    resetAddressForm() {
-      this.phoneNumber = "";
-      this.formData.city = "";
-      this.formData.cityRef = "";
-      this.formData.deliveryType = "";
-      this.formData.selectedDeliveryMethod = null;
-      this.formData.streetSearch = "";
-      this.deliveryAddress = { street: "", number: "", branch: "", postomat: "", warehouse: "" };
-      this.addressId = null;
     },
     validateForm() {
-  const errors = {};
-  const ukrPhoneRegex = /^\+380\d{9}$/;
-
-  // Валідація номера телефону
-  if (!this.phoneNumber) {
-    errors.phoneNumber = "Номер телефону є обов'язковим";
-  } else if (!ukrPhoneRegex.test(this.phoneNumber)) {
-    errors.phoneNumber = "Невірний формат номера телефону. Приклад: +380XXXXXXXXX";
-  }
-
-  if (this.formData.deliveryType === "courier") {
-    // Валідація для доставки кур'єром
-    if (!this.formData.city) {
-      errors.city = "Місто є обов'язковим";
-    }
-    if (!this.deliveryAddress.street) {
-      errors.street = "Оберіть вулицю";
-    }
-    if (!this.deliveryAddress.number) {
-      errors.number = "Введіть номер будинку/квартири";
-    }
-  }
-
-  if (this.formData.deliveryType === "pickup") {
-    // Валідація для самовивозу
-    if (!this.formData.selectedDeliveryMethod) {
-      errors.selectedDeliveryMethod = "Оберіть спосіб доставки";
-    }
-    // Перевірка міста незалежно від вибору способу доставки
-    if (!this.formData.city) {
-      errors.city = "Місто є обов'язковим";
-    }
-    // Якщо обраний спосіб доставки не з магазину – перевіряємо відділення або поштомат
-    if (this.formData.selectedDeliveryMethod) {
-      if (this.formData.selectedDeliveryMethod.name === "Самовивіз з Нової Пошти" && !this.deliveryAddress.branch) {
-        errors.branch = "Введіть номер відділення";
+      const e = {};
+      if (!/^\+380\d{9}$/.test(this.phoneNumber)) {
+        e.phoneNumber = "Невірний формат номера телефону";
       }
-      if (this.formData.selectedDeliveryMethod.name === "Самовивіз з поштоматів Нової Пошти" && !this.deliveryAddress.postomat) {
-        errors.postomat = "Введіть номер поштомата";
+      if (this.formData.deliveryType === 'courier') {
+        if (!this.formData.city) e.city = "Місто потрібне";
+        if (!this.deliveryAddress.street) e.street = "Вулиця потрібна";
+        if (!this.deliveryAddress.number) e.number = "Номер потрібен";
+      } else {
+        if (!this.formData.selectedDeliveryMethod) e.selectedDeliveryMethod = "Оберіть спосіб";
+        if (!this.formData.city) e.city = "Місто потрібне";
+        if (!this.deliveryAddress.branch && !this.deliveryAddress.postomat) {
+          e.branch = "Оберіть відділення чи поштомат";
+        }
       }
-    }
-  }
-
-  this.errors = errors;
-  return Object.keys(errors).length === 0;
-},
-    async deleteAddress() {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        this.$router.push("/login");
-        return;
-      }
+      this.errors = e;
+      return !Object.keys(e).length;
+    },
+    async submitAddress() {
+      if (!this.validateForm()) return;
+      const data = {
+        phone_number: this.phoneNumber,
+        city: this.formData.city,
+        city_ref: this.formData.cityRef,
+        delivery_name: this.formData.deliveryType === 'courier'
+          ? "Кур'єр Нової Пошти"
+          : this.formData.selectedDeliveryMethod?.name,
+        delivery_address: this.formData.deliveryType === 'courier'
+          ? `${this.deliveryAddress.street} ${this.deliveryAddress.number}`
+          : this.selectedWarehouse
+      };
       try {
-        await axios.delete(`https://koshtovnya.api-dev.bmax-edu.website/api/user-address/${this.addressId}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        alert("Адресу успішно видалено");
-        this.addressAvailable = false;
-        this.resetAddressForm();
-      } catch (error) {
-        console.error("Помилка видалення адреси:", error);
-        alert(error.response?.data?.message || "Не вдалося видалити адресу");
+        if (this.addressAvailable) {
+          await api.updateUserAddress(this.addressId, data);
+        } else {
+          await api.createUserAddress(data);
+        }
+        this.fetchUserAddress();
+        this.showForm = false;
+      } catch (e) {
+        console.error('submitAddress error', e);
       }
     },
-    editAddress() {
-      this.showForm = true;
-    },
+    editAddress() { this.showForm = true },
     openForm() {
-      if (!this.phoneNumber) {
-        this.fetchUserPhoneNumber();
-      }
+      if (!this.phoneNumber) this.fetchUserAddress();
       this.showForm = true;
     },
     cancelEdit() {
+      this.showForm = false;
+      this.errors = {};
+    },
+    async deleteAddress() {
+      try {
+        await api.deleteUserAddress(this.addressId);
+      } catch (e) {
+        console.error('deleteAddress error', e);
+      }
+      this.addressAvailable = false;
       this.showForm = false;
     }
   },
@@ -723,173 +523,6 @@ export default {
 </script>
 
 <style scoped>
-  /* Контейнер для форми та збереженої адреси */
-  .address-container {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 20px;
-    margin-left: -10px;
-  }
-
-  /* Стилізація блоку, коли адреса відсутня */
-  .no-address {
-    margin-bottom: 20px;
-    font-family: 'Merriweather', sans-serif;
-    color: #555;
-    font-size: 18px;
-    margin-left: -10px;
-  }
-
-  .add-address-button {
-    background-color: #6b1f1f;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    cursor: pointer;
-    border-radius: 8px;
-    display: inline-flex;
-    align-items: center;
-    margin-bottom: 20px;
-    font-family: 'Merriweather', sans-serif;
-  }
-
-  .plus-icon {
-    font-size: 24px;
-    margin-right: 8px;
-  }
-
-  /* Стилізація форми адреси */
-  .address-form form {
-    display: flex;
-    flex-direction: column;
-    gap: 15px; /* Відстань між рядками форми */
-  }
-
-  .address-form label {
-    display: grid;
-    grid-template-columns: 30% 70%;
-    align-items: center;
-  }
-
-  .address-form input,
-  .address-form select {
-    width: 100%;
-    padding: 8px;
-    font-size: 16px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    box-sizing: border-box;
-  }
-
-  .save-button,
-  .cancel-button {
-    width: 250px;
-    gap: 10px;
-    background-color: #6b1f1f;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    padding: 10px;
-    cursor: pointer;
-    font-size: 16px;
-    margin-top: 10px;
-    font-family: 'Merriweather', sans-serif;
-  }
-
-  .save-button:hover {
-    background-color: #4f1414;
-  }
-
-  .cancel-button {
-    background-color: #888;
-  }
-
-  /* Стилізація кнопок оновлення та видалення */
-  .button-group {
-    display: flex;
-    gap: 10px;
-    margin-top: 20px;
-  }
-
-  .update-button,
-  .delete-button {
-    background: none;
-    border: 2px solid #6b1f1f;
-    border-radius: 8px;
-    color: #6b1f1f;
-    font-size: 16px;
-    padding: 10px 20px;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    transition: background-color 0.3s ease, color 0.3s ease;
-    font-family: 'Merriweather', sans-serif;
-  }
-
-  .update-button:hover,
-  .delete-button:hover {
-    background-color: #6b1f1f;
-    color: white;
-  }
-
-  /* Стилізація збереженої адреси */
-  .address-card p {
-    margin-bottom: 10px;
-  }
-
-  /* Стилізація лоадера */
-  .loader {
-    width: 100px;
-    height: 100px;
-    background-color: #6b1f1f;
-    animation: spin 1s infinite linear;
-  }
-
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
-
-  /* Списки для випадаючих підказок (міста, вулиці) */
-  .city-dropdown,
-  .city-suggestions ul,
-  .street-suggestions ul {
-    position: absolute;
-    z-index: 1000;
-    width: 100%;
-    max-height: 200px;
-    overflow-y: auto;
-    background-color: #fff;
-    border: 1px solid #ccc;
-    border-top: none;
-    border-radius: 0 0 4px 4px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-    margin-top: -1px; /* Злиття з полем вводу */
-    list-style: none;
-    padding: 0;
-  }
-
-  .city-dropdown li,
-  .street-suggestions li,
-  .city-suggestions li {
-    padding: 8px 12px;
-    cursor: pointer;
-  }
-
-  .city-dropdown li:hover,
-  .street-suggestions li:hover,
-  .city-suggestions li:hover,
-  .city-dropdown li.active {
-    background-color: #f2f2f2;
-  }
-
-  /* Додаткові стилі для помилок */
-  .error-message {
-    color: red;
-    font-size: 14px;
-  }
-
-  .input-error {
-    border-color: red;
-  }
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');
+.font-sans { font-family: 'Montserrat', sans-serif; }
 </style>

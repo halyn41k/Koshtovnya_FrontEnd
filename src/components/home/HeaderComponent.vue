@@ -191,7 +191,7 @@
         </div>
 
         <!-- Logo -->
-        <router-link to="/" class="relative flex items-center space-x-2 md:left-[-100px]">
+        <router-link to="/" class="relative flex items-center space-x-2 md:left-[-150px]">
           <img :src="siteSettings.site_logo" alt="Logo" class="w-14 h-12"/>
           <h1 class="font-heading text-h3 text-semantic-primary font-black">Коштовня</h1>
         </router-link>

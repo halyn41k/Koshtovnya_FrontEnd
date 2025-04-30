@@ -1,53 +1,76 @@
 <template>
-  <div class="personal-info-card">
-    <h2 class="info-title">Ваша особиста інформація</h2>
-    <div class="info-field">
-      <label for="first_name">Ім’я:</label>
-      <input id="first_name" type="text" v-model="localFirstName" />
+  <div class="font-sans p-5 rounded-lg">
+    <h2 class="text-2xl font-bold text-gray-800 mb-5">Ваша особиста інформація</h2>
+
+    <div class="mb-5 flex items-center">
+      <label for="first_name" class="w-[150px] font-bold mr-3">Ім’я:</label>
+      <input
+        id="first_name"
+        type="text"
+        v-model="localFirstName"
+        class="w-[487px] h-8 bg-[#EBDBDA] border border-black rounded-lg px-3 text-base"
+      />
     </div>
-    <div class="info-field">
-      <label for="last_name">Прізвище:</label>
-      <input id="last_name" type="text" v-model="localLastName" />
+
+    <div class="mb-5 flex items-center">
+      <label for="last_name" class="w-[150px] font-bold mr-3">Прізвище:</label>
+      <input
+        id="last_name"
+        type="text"
+        v-model="localLastName"
+        class="w-[487px] h-8 bg-[#EBDBDA] border border-black rounded-lg px-3 text-base"
+      />
     </div>
-    <div class="info-field">
-      <label for="second_name">По батькові:</label>
-      <input id="second_name" type="text" v-model="localSecondName" />
+
+    <div class="mb-5 flex items-center">
+      <label for="second_name" class="w-[150px] font-bold mr-3">По батькові:</label>
+      <input
+        id="second_name"
+        type="text"
+        v-model="localSecondName"
+        class="w-[487px] h-8 bg-[#EBDBDA] border border-black rounded-lg px-3 text-base"
+      />
     </div>
-    <div class="info-field">
-      <label for="email">Email:</label>
-      <input id="email" type="email" v-model="localEmail" readonly />
+
+    <div class="mb-5 flex items-center">
+      <label for="email" class="w-[150px] font-bold mr-3">Email:</label>
+      <input
+        id="email"
+        type="email"
+        v-model="localEmail"
+        readonly
+        class="w-[487px] h-8 bg-[#EBDBDA] border border-black rounded-lg px-3 text-base cursor-not-allowed"
+      />
     </div>
-    <div class="button-group">
-      <button class="update-button" @click="updateUser">Оновити інформацію</button>
-      <button class="change-password-button" @click="changePassword">Змінити пароль</button>
+
+    <div class="flex gap-5 mt-6">
+      <button
+        @click="updateUser"
+        class="w-[200px] h-[40px] bg-[#6B1F1F] text-white text-base font-medium rounded-lg hover:bg-[#A01212] transition-colors"
+      >
+        Оновити інформацію
+      </button>
+      <button
+        @click="changePassword"
+        class="w-[200px] h-[40px] bg-[#6B1F1F] text-white text-base font-medium rounded-lg hover:bg-[#A01212] transition-colors"
+      >
+        Змінити пароль
+      </button>
     </div>
   </div>
 </template>
 
 <script>
+import api from '@/services/api';
+
 export default {
   name: "PersonalInfoCard",
   props: {
-    userId: {
-      type: [String, Number],
-      required: true
-    },
-    first_name: {
-      type: String,
-      default: "Ім’я"
-    },
-    last_name: {
-      type: String,
-      default: "Прізвище"
-    },
-    second_name: {
-      type: String,
-      default: "По батькові"
-    },
-    email: {
-      type: String,
-      default: "email@example.com"
-    }
+    userId: { type: [String, Number], required: true },
+    first_name: { type: String, default: "Ім’я" },
+    last_name: { type: String, default: "Прізвище" },
+    second_name: { type: String, default: "По батькові" },
+    email: { type: String, default: "email@example.com" }
   },
   data() {
     return {
@@ -58,132 +81,36 @@ export default {
     };
   },
   watch: {
-    first_name(newVal) {
-      this.localFirstName = newVal;
-    },
-    last_name(newVal) {
-      this.localLastName = newVal;
-    },
-    second_name(newVal) {
-      this.localSecondName = newVal;
-    },
-    email(newVal) {
-      this.localEmail = newVal;
-    }
+    first_name(newVal) { this.localFirstName = newVal },
+    last_name(newVal) { this.localLastName = newVal },
+    second_name(newVal) { this.localSecondName = newVal },
+    email(newVal) { this.localEmail = newVal }
   },
   methods: {
     async updateUser() {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        alert('Ви не авторизовані. Увійдіть у систему.');
-        return;
-      }
-      
-      const updateData = {
-        first_name: this.localFirstName,
-        last_name: this.localLastName,
-        second_name: this.localSecondName
-      };
-      
       try {
-        const response = await fetch(`https://koshtovnya.api-dev.bmax-edu.website/api/user/${this.userId}`, {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify(updateData)
+        await api.updateUser(this.userId, {
+          first_name: this.localFirstName,
+          last_name: this.localLastName,
+          second_name: this.localSecondName
         });
-        if (!response.ok) {
-          alert('Помилка оновлення даних');
-        } else {
-          alert('Дані успішно оновлено');
-        }
+        alert('Дані успішно оновлено');
       } catch (error) {
         console.error(error);
-        alert('Сталася помилка');
+        alert('Помилка оновлення даних');
       }
     },
     changePassword() {
       this.$router.push("/changepassword");
     }
   },
-  mounted(){
+  mounted() {
     document.title = "Ваша особиста інформація";
   }
 };
 </script>
 
-
 <style scoped>
-.personal-info-card {
-  padding: 20px;
-  border-radius: 8px;
-  font-family: 'Merriweather', sans-serif;
-}
-
-.info-title {
-  font-size: 24px;
-  font-weight: bold;
-  color: #333;
-  margin-bottom: 15px;
-  text-align: left;
-}
-
-.info-field {
-  margin-bottom: 20px;
-  display: flex;
-  align-items: center;
-}
-
-.info-field label {
-  width: 150px;
-  font-weight: bold;
-  margin-right: 10px;
-  text-align: left;
-}
-
-.info-field input {
-  width: 487px;
-  height: 30px;
-  background-color: #EBDBDA;
-  border: 1px solid #000;
-  border-radius: 8px;
-  padding: 0 10px;
-  font-size: 16px;
-}
-
-.button-group {
-  display: flex;
-  gap: 20px;
-  margin-top: 20px;
-}
-
-.update-button, .change-password-button {
-  width: 200px;
-  height: 40px;
-  font-size: 16px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-family: 'Merriweather', sans-serif;
-}
-
-.update-button {
-  background-color: #6B1F1F;
-  color: white;
-}
-
-.change-password-button {
-  background-color: #6b1f1f;
-  color: white;
-}
-
-.update-button:hover {
-  background-color: #A01212;
-}
-
-.change-password-button:hover {
-  background-color: #a01212;
-}
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');
+.font-sans { font-family: 'Montserrat', sans-serif; }
 </style>
