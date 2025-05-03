@@ -1,25 +1,26 @@
 <template>
-  <div class="flex flex-col relative w-screen overflow-x-hidden pt-12">
+  <div class="flex flex-col relative w-screen overflow-x-hidden pt-[200px] pb-[100px] font-montserrat">
     <!-- Фон -->
     <div class="absolute inset-0 bg-[url('@/assets/logins.png')] bg-cover bg-center -z-10"></div>
 
-    <!-- Хедер: лінія зверху -->
-    <header class="z-10 flex w-full">
-      <div class="h-[2px] bg-stroke w-full"></div>
+    <!-- Заголовок з лініями -->
+    <header class="relative z-10 flex items-center justify-center mb-10 w-full">
+      <div class="hidden md:flex flex-1 h-[2px] bg-gray-300"></div>
+      <h1 class="px-4 title-kyiv">
+        Вхід
+      </h1>
+      <div class="hidden md:flex flex-1 h-[2px] bg-gray-300"></div>
     </header>
 
-    <!-- Заголовок -->
-    <h1 class="mt-[180px] text-center font-heading text-h1 text-primary font-black">
-      Вхід
-    </h1>
-
     <!-- Основний контейнер форми -->
-    <main class="relative z-20 flex flex-col items-center justify-center w-full max-w-4xl mx-auto px-6 py-12 bg-body-4 border border-stroke rounded-lg">
-      <form @submit.prevent="submitLogin" class="w-full space-y-6">
+    <main
+      class="relative z-20 flex flex-col items-center justify-center w-full md:max-w-xl mx-auto px-6 py-8 bg-white bg-opacity-90 backdrop-blur-md border border-gray-200 rounded-2xl shadow-md"
+    >
+      <form @submit.prevent="submitLogin" class="w-full space-y-5">
         <!-- Email -->
         <div class="flex flex-col">
-          <label for="email" class="mb-2 text-label font-base text-semantic-secondary">
-            Email:
+          <label for="email" class="mb-1 text-sm font-medium text-gray-600">
+            Email
           </label>
           <div class="relative">
             <input
@@ -28,11 +29,11 @@
               v-model="email"
               @input="validateEmail"
               placeholder="Введіть ваш email"
-              aria-label="Email"
               required
-              class="w-full h-10 rounded-lg border border-semantic-secondary bg-card px-3 text-input focus:outline-none"
+              class="w-full h-12 rounded-lg border border-gray-300 bg-white px-4 text-gray-800 placeholder-gray-400
+                     hover:shadow-md focus:outline-none focus:border-[#6B1F1F] focus:shadow-lg transition-all duration-200"
             />
-            <span v-if="emailError" class="absolute top-full left-0 mt-1 text-error-main text-input">
+            <span v-if="emailError" class="absolute top-full left-0 mt-1 text-xs text-red-600">
               {{ emailError }}
             </span>
           </div>
@@ -40,8 +41,8 @@
 
         <!-- Password -->
         <div class="flex flex-col">
-          <label for="password" class="mb-2 text-label font-base text-semantic-secondary">
-            Пароль:
+          <label for="password" class="mb-1 text-sm font-medium text-gray-600">
+            Пароль
           </label>
           <div class="relative">
             <input
@@ -50,27 +51,41 @@
               v-model="password"
               @input="validatePassword"
               placeholder="Введіть пароль"
-              aria-label="Пароль"
               required
-              class="w-full h-10 rounded-lg border border-semantic-secondary bg-card px-3 text-input focus:outline-none"
+              class="w-full h-12 rounded-lg border border-gray-300 bg-white px-4 text-gray-800 placeholder-gray-400
+                     hover:shadow-md focus:outline-none focus:border-[#6B1F1F] focus:shadow-lg transition-all duration-200"
             />
-            <button type="button" @click="togglePasswordVisibility" class="absolute right-3 top-1/2 -translate-y-1/2 focus:outline-none">
-              <img :src="showPassword ? eyeOpenIcon : eyeClosedIcon" alt="Toggle" class="w-5 h-5 object-contain" />
+            <button
+              type="button"
+              @click="togglePasswordVisibility"
+              class="absolute right-4 top-1/2 -translate-y-1/2 focus:outline-none"
+            >
+              <img
+                :src="showPassword ? eyeClosedIcon : eyeOpenIcon"
+                alt="Toggle"
+                class="w-5 h-5 object-contain transition-transform duration-200 hover:scale-110"
+              />
             </button>
-            <span v-if="passwordError" class="absolute top-full left-0 mt-1 text-error-main text-input">
+            <span v-if="passwordError" class="absolute top-full left-0 mt-1 text-xs text-red-600">
               {{ passwordError }}
             </span>
           </div>
         </div>
 
         <!-- Посилання реєстрації та відновлення -->
-        <p class="text-center text-input text-semantic-secondary">
+        <p class="text-center text-xs text-gray-500">
           Немає облікового запису?
-          <router-link to="/registration" class="font-semibold text-primary hover:text-primary-hover">
-            Створіть його тут
+          <router-link
+            to="/registration"
+            class="font-medium text-[#6B1F1F] hover:text-[#A01212] transition-colors duration-200"
+          >
+            Створіть тут
           </router-link>
           |
-          <router-link to="/reset-password" class="font-semibold text-primary hover:text-primary-hover">
+          <router-link
+            to="/reset-password"
+            class="font-medium text-[#6B1F1F] hover:text-[#A01212] transition-colors duration-200"
+          >
             Забули пароль?
           </router-link>
         </p>
@@ -78,12 +93,12 @@
         <!-- Кнопка входу -->
         <div class="flex justify-center">
           <button
-  type="submit"
-  class="bg-[#6B1F1F] hover:bg-[#A01212] active:bg-[#A01212] text-white text-[16px] leading-[140%] px-5 py-2 rounded-[8px] transition-colors duration-200 w-full"
->
-  Увійти
-</button>
-
+            type="submit"
+            class="w-full h-12 flex items-center justify-center bg-[#6B1F1F] hover:bg-[#A01212] active:bg-[#A01212]
+                   text-white text-base font-semibold rounded-xl transition-colors duration-200 shadow-sm hover:shadow-md"
+          >
+            Увійти
+          </button>
         </div>
       </form>
     </main>
@@ -148,3 +163,25 @@ export default {
   },
 };
 </script>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');
+
+@font-face {
+  font-family: 'KyivType Titling Black2';
+  src: url('@/assets/fonts/KyivType2020-14-12/KyivType-NoVariable/TTF/KyivTypeTitling-Black2.ttf') format('truetype');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+.font-montserrat {
+  font-family: 'Montserrat', sans-serif;
+}
+
+.title-kyiv {
+  font-family: 'KyivType Titling Black2', sans-serif;
+  font-size: 30px;
+  color: #000;
+}
+</style>

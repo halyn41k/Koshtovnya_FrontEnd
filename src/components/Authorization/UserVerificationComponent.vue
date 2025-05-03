@@ -1,300 +1,138 @@
 <template>
-    <div class="verification-container">
-        <header class="verification-header">
-            <div class="header-line"></div>
-        </header>
-        <h1 class="verification-title-container">
-            <div class="line"></div>
-            <span class="verification-title">Підтвердження акаунту</span>
-            <div class="line"></div>
-        </h1>
-
-        <main class="verification-main">
-            <div class="verification-background-image"></div>
-            <form class="verification-form" @submit.prevent="submitVerification">
-                <div class="form-group">
-                    <div class="form-labels">
-                        <label for="email" class="form-label">Email:</label>
-                        <label for="verification-code" class="form-label">Код:</label>
-                    </div>
-                    <div class="form-inputs">
-                        <div class="form-input-container">
-                            <input type="email" id="email" class="form-input" v-model="email" @input="validateEmail"
-                                placeholder="Введіть ваш email" required />
-                            <transition name="fade">
-                                <small v-if="emailError" class="error-message">{{ emailError }}</small>
-                            </transition>
-                        </div>
-                        <div class="form-input-container">
-                            <input type="text" id="verification-code" class="form-input" v-model="code"
-                                @input="validateCode" placeholder="Введіть код підтвердження" maxlength="6" required />
-                            <transition name="fade">
-                                <small v-if="codeError" class="error-message">{{ codeError }}</small>
-                            </transition>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="action-links">
-                    <router-link to="/registration" class="action-link">Змінити email</router-link>
-                    <a @click="resendCode" class="action-link">Надіслати код ще раз</a>
-                </div>
-
-                <button type="submit" class="verification-button">
-                    <span>Підтвердити</span>
-                    <img src="https://cdn.builder.io/api/v1/image/assets/TEMP/436b738744905f60c6a542e2cd314f5694db20045d36b8991f8dab9a31b316a0?placeholderIfAbsent=true&apiKey=c3e46d0a629546c7a48302a5db3297d5"
-                        alt="" class="verification-icon" />
-                </button>
-            </form>
-        </main>
+    <div class="flex flex-col relative w-screen overflow-x-hidden pt-[200px] pb-[100px] font-montserrat">
+      <!-- Фон -->
+      <div class="absolute inset-0 bg-[url('@/assets/logins.png')] bg-cover bg-center -z-10"></div>
+  
+      <!-- Заголовок з лініями -->
+      <header class="relative z-10 flex items-center justify-center mb-10 w-full">
+        <div class="hidden md:flex flex-1 h-[2px] bg-gray-300"></div>
+        <h1 class="px-4 title-kyiv">Підтвердження акаунту</h1>
+        <div class="hidden md:flex flex-1 h-[2px] bg-gray-300"></div>
+      </header>
+  
+      <!-- Основний контейнер форми -->
+      <main class="relative z-20 flex flex-col items-center justify-center w-full md:max-w-xl mx-auto px-6 py-8 bg-white bg-opacity-90 backdrop-blur-md border border-gray-200 rounded-2xl shadow-md">
+        <form @submit.prevent="submitVerification" class="w-full space-y-5">
+          <!-- Email та Код -->
+          <div class="grid grid-cols-1 gap-4">
+            <!-- Email -->
+            <div class="flex flex-col relative">
+              <label for="email" class="mb-1 text-sm font-medium text-gray-600">Email</label>
+              <input
+                id="email"
+                type="email"
+                v-model="email"
+                @input="validateEmail"
+                placeholder="Введіть ваш email"
+                required
+                class="w-full h-12 rounded-lg border border-gray-300 bg-white px-4 text-gray-800 placeholder-gray-400 hover:shadow-md focus:outline-none focus:border-[#6B1F1F] focus:shadow-lg transition-all duration-200"
+              />
+              <span v-if="emailError" class="absolute top-full left-0 mt-1 text-xs text-red-600">{{ emailError }}</span>
+            </div>
+            <!-- Код підтвердження -->
+            <div class="flex flex-col relative">
+              <label for="code" class="mb-1 text-sm font-medium text-gray-600">Код підтвердження</label>
+              <input
+                id="code"
+                type="text"
+                maxlength="6"
+                v-model="code"
+                @input="validateCode"
+                placeholder="Введіть код"
+                required
+                class="w-full h-12 rounded-lg border border-gray-300 bg-white px-4 text-gray-800 placeholder-gray-400 hover:shadow-md focus:outline-none focus:border-[#6B1F1F] focus:shadow-lg transition-all duration-200"
+              />
+              <span v-if="codeError" class="absolute top-full left-0 mt-1 text-xs text-red-600">{{ codeError }}</span>
+            </div>
+          </div>
+  
+          <!-- Дії -->
+          <div class="flex justify-between text-sm text-gray-500">
+            <router-link to="/registration" class="hover:underline text-[#6B1F1F]">Змінити email</router-link>
+            <button type="button" @click="resendCode" class="hover:underline text-[#6B1F1F]">Надіслати код ще раз</button>
+          </div>
+  
+          <!-- Кнопка підтвердження -->
+          <div class="flex justify-center">
+            <button
+              type="submit"
+              class="w-full h-12 flex items-center justify-center bg-[#6B1F1F] hover:bg-[#A01212] active:bg-[#A01212] text-white text-base font-semibold rounded-xl transition-colors duration-200 shadow-sm hover:shadow-md"
+            >
+              Підтвердити
+            </button>
+          </div>
+        </form>
+      </main>
     </div>
-</template>
-
-<script>
-import api from "@/services/api";
-
-export default {
-  data() {
-    return {
-      email: "",
-      code: "",
-      emailError: "",
-      codeError: "",
-    };
-  },
-  created() {
-    if (this.$route.query.email) {
-      this.email = this.$route.query.email;
+  </template>
+  
+  <script>
+  export default {
+    name: 'VerificationComponent',
+    data() {
+      return {
+        email: this.$route.query.email || '',
+        code: '',
+        emailError: '',
+        codeError: '',
+      };
+    },
+    methods: {
+      validateEmail() {
+        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        this.emailError = re.test(this.email) ? '' : 'Введіть дійсний email.';
+      },
+      validateCode() {
+        this.codeError = this.code.trim() ? '' : 'Код не може бути порожнім.';
+      },
+      async submitVerification() {
+        this.validateEmail();
+        this.validateCode();
+        if (this.emailError || this.codeError) return;
+        try {
+          await fetch('https://koshtovnya.api-dev.bmax-edu.website/api/verify', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: this.email, code: this.code }),
+          });
+          alert('Акаунт успішно підтверджено!');
+          this.$router.push('/login');
+        } catch (err) {
+          console.error('Помилка верифікації:', err);
+          alert('Помилка підтвердження. Спробуйте ще раз.');
+        }
+      },
+      async resendCode() {
+        if (!this.email) { this.emailError = 'Введіть email.'; return; }
+        try {
+          await fetch('https://koshtovnya.api-dev.bmax-edu.website/api/resend-code', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: this.email }),
+          });
+          alert('Код надіслано ще раз.');
+        } catch (err) {
+          console.error('Помилка повторної відправки:', err);
+          alert('Не вдалося надіслати код.');
+        }
+      }
+    },
+    mounted() {
+      document.title = 'Підтвердження акаунту';
     }
-  },
-  methods: {
-    validateEmail() {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      this.emailError = emailRegex.test(this.email)
-        ? ""
-        : "Введіть дійсний email.";
-    },
-    validateCode() {
-      this.codeError = this.code.trim()
-        ? ""
-        : "Код підтвердження не може бути порожнім.";
-    },
-    async submitVerification() {
-      this.validateEmail();
-      this.validateCode();
-
-      if (this.emailError || this.codeError) {
-        alert("Будь ласка, виправте помилки.");
-        return;
-      }
-
-      try {
-        await api.login({ email: this.email, code: this.code });
-
-        alert("Реєстрація успішна! Тепер ви можете увійти.");
-        this.$router.push({ name: "Login" });
-      } catch (error) {
-        console.error("Помилка верифікації:", error);
-        alert(`Помилка верифікації: ${error.response?.data?.message || error.message}`);
-      }
-    },
-    async resendCode() {
-      if (!this.email) {
-        alert("Будь ласка, введіть email перед повторним надсиланням коду.");
-        return;
-      }
-
-      try {
-        const response = await api.resendCode({ email: this.email });
-
-        alert(response.data.message || "Новий код підтвердження надіслано на вашу пошту.");
-      } catch (error) {
-        console.error("Помилка надсилання коду:", error);
-        alert(`Помилка надсилання коду: ${error.response?.data?.message || error.message}`);
-      }
-    },
-  },
-  mounted() {
-    document.title = "Підтвердження пошти";
-  }
-};
-</script>
-
-
-<style scoped>
-.verification-container {
-    display: flex;
-    flex-direction: column;
-    position: relative;
-    max-width: 100vw;
-    overflow-x: hidden;
-}
-
-.verification-background-image {
-    background-image: url('@/assets/logins.png');
-    background-size: cover;
-    position: absolute;
-    z-index: -1;
-    width: 100%;
-    height: 100%;
-    top: 0;
-    left: 0;
-}
-
-.verification-header {
-    z-index: 10;
-    display: flex;
-    width: 100%;
-    flex-direction: column;
-    align-items: flex-end;
-    padding: 63px 80px 0;
-}
-
-.verification-title-container {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 20px 0;
-}
-
-.line {
-    flex: 1;
-    height: 2px;
-    background-color: grey;
-    margin: 0 10px;
-    margin-top: 120px;
-}
-
-.verification-title {
-    color: #333;
-    font-family: 'KyivType Titling', sans-serif;
+  };
+  </script>
+  
+  <style>
+  @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');
+  
+  @font-face {
+    font-family: 'KyivType Titling Black2';
+    src: url('@/assets/fonts/KyivType2020-14-12/KyivType-NoVariable/TTF/KyivTypeTitling-Black2.ttf') format('truetype');
     font-weight: 900;
-    text-shadow: 0 4px 4px rgba(99, 2, 2, 0.22);
-    letter-spacing: -2px;
-    text-align: center;
-    margin-top: 120px;
-    font-size: 30px;
-    margin-bottom: 0px;
-}
-
-.verification-main {
-    background-color: rgba(255, 247, 246, 0.9);
-    display: flex;
-    width: 1440px;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 96px 80px;
-    border: 1px solid rgba(0, 0, 0, 0.5);
-    position: relative;
-    z-index: 2;
-}
-
-.verification-form {
-    display: flex;
-    width: 1159px;
-    max-width: 100%;
-    flex-direction: column;
-    align-items: center;
-}
-
-.form-group {
-    align-self: stretch;
-    display: flex;
-    gap: 20px;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    margin-bottom: 20px;
-}
-
-.form-labels {
-    display: flex;
-    gap: 40px;
-    flex-direction: column;
-    color: var(--Grays-Black, #000);
-    white-space: nowrap;
-    margin: auto 0;
-    padding: 0 1px 6px;
-    font: 400 18px/1.3 Merriweather, sans-serif;
-    align-items: baseline;
-}
-
-.form-input {
-    border-radius: 8px;
-    border: 1px solid var(--Grays-Black, #000);
-    background-color: #E6D7D7;
-    display: flex;
-    height: 35px;
-    width: 800px;
-    gap: 10px;
-    font-size: 18px;
-    margin-bottom: 20px;
-    transition: background-color 0.3s ease;
-}
-
-.form-input:focus {
-    background-color: #E6D7D7;
-    outline: none;
-}
-
-.action-links {
-    display: flex;
-    gap: 20px;
-    margin: 10px 0;
-}
-
-.action-link {
-    color: #852221;
-    font: 400 18px/1.3 Merriweather, sans-serif;
-    text-decoration: none;
-    cursor: pointer;
-}
-
-.action-link:hover {
-    text-decoration: underline;
-}
-
-.verification-button {
-    background-color: #6b1f1f;
-    border-radius: 8px;
-    border: none;
-    color: white;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin: 20px 0;
-    min-height: 50px;
-    width: 290px;
-    max-width: 100%;
-    padding: 0 20px;
-    font: 400 18px/1.3 Merriweather, sans-serif;
-    transition: background-color 0.3s ease;
-}
-
-.verification-button:hover {
-    background-color: #a01212;
-}
-
-.error-message {
-    color: red;
-    font-size: 0.8rem;
-    position: absolute;
-    top: 100%;
-    left: 0;
-}
-
-.fade-enter-active,
-.fade-leave-active {
-    transition: opacity 0.3s;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-    opacity: 0;
-}
-
-.form-input-container {
-    position: relative;
-    margin-bottom: 1.5rem;
-}
-</style>
+    font-style: normal;
+    font-display: swap;
+  }
+  
+  .font-montserrat { font-family: 'Montserrat', sans-serif; }
+  .title-kyiv { font-family: 'KyivType Titling Black2', sans-serif; font-size: 30px; color: #000; }
+  </style>

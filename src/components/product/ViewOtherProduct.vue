@@ -5,32 +5,46 @@
       <hr class="flex-grow border-t-2 border-gray-300" />
       <h2 class="mx-4 text-2xl font-bold text-gray-900">Перегляньте інші товари</h2>
       <hr class="flex-grow border-t-2 border-gray-300" />
-    </div> <!-- Ось тут було забуто -->
+    </div>
 
     <div class="relative flex items-center justify-center max-w-[1400px] mx-auto">
-      <!-- Ліва стрілка -->
-      <button @click="showPreviousProducts" class="hidden sm:block absolute left-36 transform hover:scale-125 transition-all duration-500 ease-in-out z-10">
+      <!-- Ліва стрілка (зсунули ближче до контейнера) -->
+      <button
+        @click="showPreviousProducts"
+        class="hidden sm:block absolute left-20 transform hover:scale-125 transition-all duration-500 ease-in-out z-10"
+      >
         <img src="@/assets/left_arrow.png" alt="left-arrow" class="w-10 h-10" />
       </button>
 
       <!-- Свайп/Грід товарів -->
-      <div class="flex gap-4 overflow-x-auto snap-x snap-mandatory sm:grid sm:grid-cols-3 sm:gap-6 sm:overflow-visible sm:snap-none justify-center">
-        <article v-for="product in visibleProducts" :key="product.id" class="snap-start w-72 flex-shrink-0 h-[440px] bg-[#fff7f6] border-2 border-gray-200 rounded-2xl shadow-md hover:shadow-lg transform hover:-translate-y-1 transition-all duration-500 ease-in-out flex flex-col overflow-hidden">
+      <div
+        class="flex gap-4 overflow-x-auto snap-x snap-mandatory sm:grid sm:grid-cols-3 sm:gap-6 sm:overflow-visible sm:snap-none justify-center"
+      >
+        <article
+          v-for="product in visibleProducts"
+          :key="product.id"
+          class="snap-start w-72 flex-shrink-0 h-[440px] bg-[#fff7f6] border-2 border-gray-200 rounded-2xl shadow-md hover:shadow-lg transform hover:-translate-y-1 transition-all duration-500 ease-in-out flex flex-col overflow-hidden"
+        >
           <router-link :to="`/productpage/${product.id}`" class="flex-1 flex flex-col">
             <div class="h-48 overflow-hidden">
-              <img :src="product.image_url" :alt="product.name" class="w-full h-full object-cover hover:scale-105 transition-all duration-500 ease-in-out" />
+              <img
+                :src="product.image_url"
+                :alt="product.name"
+                class="w-full h-full object-cover hover:scale-105 transition-all duration-500 ease-in-out"
+              />
             </div>
-            <div class="px-3 py-2 flex-1 flex flex-col justify-between space-y-0">
-              <div>
-                <!-- Назва та ціна -->
-                <h3 class="text-lg font-montserrat font-semibold line-clamp-2 h-12" style="font-family: 'Montserrat', sans-serif;">{{ product.name }}</h3>
-                <p class="text-xl font-semibold text-red-700 mt-1" style="font-family: 'Inter', sans-serif;">{{ product.price }} грн</p>
-              </div>
+            <div class="px-3 py-2 flex-1 flex flex-col justify-between">
+              <h3 class="text-lg font-montserrat font-semibold line-clamp-2 h-12">
+                {{ product.name }}
+              </h3>
+              <p class="text-xl font-semibold mt-1" style="color:#6B1F1F;">
+                {{ product.price }} грн
+              </p>
             </div>
           </router-link>
 
-          <!-- Рейтинг та кількість відгуків -->
-          <div class="px-3 mb-2 flex items-center space-x-2">
+         <!-- Рейтинг та кількість відгуків -->
+         <div class="px-3 mb-2 flex items-center space-x-2">
             <div class="flex items-center">
               <span v-for="n in 5" :key="n">
                 <svg v-if="n <= Math.round(product.rating)" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="#FFD700" class="w-4 h-4">
@@ -57,24 +71,39 @@
             </button>
           </div>
 
-          <div class="px-4 pb-4 mt-0">
-            <button @click="addToCart(product)" class="w-full bg-[#6B1F1F] hover:bg-[#A01212] text-white font-montserrat font-semibold py-2 rounded-lg flex items-center justify-between px-4 transition-all duration-500 ease-in-out" style="font-family: 'Montserrat', sans-serif;">
+          <!-- Кнопка "Купити" -->
+          <div class="px-4 pb-4">
+            <button
+              @click="addToCart(product)"
+              class="w-full bg-[#6B1F1F] hover:bg-[#A01212] text-white font-montserrat font-semibold py-2 rounded-lg
+                     flex items-center justify-between px-4 transition-all duration-500 ease-in-out"
+            >
               <span>{{ $t('buyButton') }}</span>
-              <img src="@/assets/miniarrow.png" alt="Arrow icon" class="w-5 h-4 transition-all duration-500 ease-in-out" />
+              <img src="@/assets/miniarrow.png" alt="Arrow icon" class="w-5 h-4" />
             </button>
           </div>
         </article>
       </div>
 
-      <!-- Права стрілка -->
-      <button @click="showNextProducts" class="hidden sm:block absolute right-36 transform hover:scale-125 transition-all duration-500 ease-in-out z-10">
+      <!-- Права стрілка (зсунули ближче до контейнера) -->
+      <button
+        @click="showNextProducts"
+        class="hidden sm:block absolute right-20 transform hover:scale-125 transition-all duration-500 ease-in-out z-10"
+      >
         <img src="@/assets/arrow_big.png" alt="right-arrow" class="w-10 h-10" />
       </button>
     </div>
 
     <!-- Дотси (лише на десктопі) -->
     <div class="hidden sm:flex justify-center items-center gap-2 mt-6">
-      <span v-for="(_, index) in totalPages" :key="index" :class="['w-3 h-3 rounded-full', index === currentPage ? 'bg-red-900 opacity-75' : 'bg-red-900 opacity-25']"></span>
+      <span
+        v-for="(_, index) in totalPages"
+        :key="index"
+        :class="[
+          'w-3 h-3 rounded-full',
+          index === currentPage ? 'bg-red-900 opacity-75' : 'bg-red-900 opacity-25'
+        ]"
+      />
     </div>
   </section>
 </template>
@@ -91,57 +120,27 @@ export default {
       currentPage: 0,
       productsPerPage: 3,
       totalPages: 0,
-      wishlist: [],
     };
   },
   methods: {
     updateProductsPerPage() {
-      this.productsPerPage = window.innerWidth < 640 ? 6 : 3;
-      this.totalPages = Math.ceil(this.products.length / (window.innerWidth < 640 ? 6 : 3));
+      const perPage = window.innerWidth < 640 ? 6 : 3;
+      this.productsPerPage = perPage;
+      this.totalPages = Math.ceil(this.products.length / perPage);
       this.currentPage = 0;
       this.updateVisibleProducts();
     },
 
-    async fetchProducts(page = 1) {
+    async fetchProducts() {
       try {
-        const response = await api.getNewArrivals(page);
-        const items = Array.isArray(response.data) ? response.data : response.data.data || [];
-        // Зберігаємо товари з початковим полем is_in_wishlist з API
-        this.products = items.map(item => ({ ...item }));
+        const response = await api.getPopularProducts();
+        const items = Array.isArray(response.data)
+          ? response.data
+          : response.data?.data || [];
+        this.products = items;
         this.updateProductsPerPage();
-        // Після завантаження товарів отримуємо актуальний wishlist
-        // await this.fetchWishlist();  // прибрано, бо API вже повертає is_in_wishlist
       } catch (error) {
         console.error('Помилка при завантаженні популярних товарів:', error);
-      }
-    },
-
-    async fetchWishlist() {
-      try {
-        const resp = await api.getWishlist();
-        const items = Array.isArray(resp.data) ? resp.data : [];
-        this.wishlist = items.map(i => i.id);
-        // Оновлюємо прапорець для всіх продуктів
-        this.products.forEach(p => {
-          p.is_in_wishlist = this.wishlist.includes(p.id);
-        });
-        this.updateVisibleProducts();
-      } catch (error) {
-        console.error('Помилка при завантаженні списку бажаного:', error);
-      }
-    },
-
-    async toggleWishlist(product) {
-      try {
-        if (product.is_in_wishlist) await api.deleteWishlistItem(product.id);
-        else await api.addToWishlist({ product_id: product.id });
-        // Операція успішна – перемикаємо стан локально
-        product.is_in_wishlist = !product.is_in_wishlist;
-        // Оновлюємо локальний масив wishlist
-        if (product.is_in_wishlist) this.wishlist.push(product.id);
-        else this.wishlist = this.wishlist.filter(id => id !== product.id);
-      } catch (error) {
-        console.error('Помилка оновлення списку бажаного:', error);
       }
     },
 
@@ -163,6 +162,28 @@ export default {
         this.updateVisibleProducts();
       }
     },
+
+    async toggleWishlist(product) {
+      try {
+        if (product.is_in_wishlist) {
+          await api.deleteWishlistItem(product.id);
+        } else {
+          await api.addToWishlist({ product_id: product.id });
+        }
+        product.is_in_wishlist = !product.is_in_wishlist;
+      } catch (error) {
+        console.error('Помилка оновлення списку бажаного:', error);
+      }
+    },
+
+    async addToCart(product) {
+      try {
+        const res = await api.addToCart({ product_id: product.id, quantity: 1 });
+        console.log('Додано до кошика:', res.data);
+      } catch (error) {
+        console.error('Помилка додавання в кошик:', error.response?.data || error);
+      }
+    },
   },
   mounted() {
     window.addEventListener('resize', this.updateProductsPerPage);
@@ -170,6 +191,23 @@ export default {
   },
   beforeUnmount() {
     window.removeEventListener('resize', this.updateProductsPerPage);
-  }
+  },
 };
 </script>
+
+<style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');
+
+.font-montserrat {
+  font-family: 'Montserrat', sans-serif;
+}
+
+/* Приховати рідний скролбар */
+.flex::-webkit-scrollbar {
+  display: none;
+}
+.flex {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+</style>

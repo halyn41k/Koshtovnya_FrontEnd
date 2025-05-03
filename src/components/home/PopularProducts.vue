@@ -172,7 +172,6 @@ export default {
       currentPage: 0,
       productsPerPage: 3,
       totalPages: 0,
-      wishlist: [],
     };
   },
   methods: {
@@ -190,7 +189,7 @@ export default {
         const items = Array.isArray(response.data)
           ? response.data
           : response.data?.data || [];
-        this.products = items.map(item => ({ ...item }));
+        this.products = items;
         this.updateProductsPerPage();
       } catch (error) {
         console.error('Помилка при завантаженні популярних товарів:', error);
@@ -229,12 +228,19 @@ export default {
       }
     },
 
-    addToCart(product) {
-      api.addToCart({ product_id: product.id })
-        .then(() => {
-          // можлива анімація чи повідомлення
-        })
-        .catch(console.error);
+    // Оновлений метод addToCart
+    async addToCart(product) {
+      try {
+        // ОБОВ'ЯЗКОВО повертаємо проміс з api
+        const res = await api.addToCart({
+          product_id: product.id,
+          quantity: 1               // тепер quantity є, бекенд не скаржиться
+        });
+        // тут можна показати тост чи анімацію:
+        console.log('Додано в кошик:', res.data);
+      } catch (error) {
+        console.error('Помилка додавання в кошик:', error.response?.data || error);
+      }
     },
   },
   mounted() {

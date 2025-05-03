@@ -85,57 +85,27 @@ export default {
       currentPage: 0,
       productsPerPage: 3,
       totalPages: 0,
-      wishlist: [],
     };
   },
   methods: {
     updateProductsPerPage() {
-      this.productsPerPage = window.innerWidth < 640 ? 6 : 3;
-      this.totalPages = Math.ceil(this.products.length / (window.innerWidth < 640 ? 6 : 3));
+      const perPage = window.innerWidth < 640 ? 6 : 3;
+      this.productsPerPage = perPage;
+      this.totalPages = Math.ceil(this.products.length / perPage);
       this.currentPage = 0;
       this.updateVisibleProducts();
     },
 
-    async fetchProducts(page = 1) {
+    async fetchProducts() {
       try {
-        const response = await api.getNewArrivals(page);
-        const items = Array.isArray(response.data) ? response.data : response.data.data || [];
-        // Зберігаємо товари з початковим полем is_in_wishlist з API
-        this.products = items.map(item => ({ ...item }));
+        const response = await api.getNewArrivals();
+        const items = Array.isArray(response.data)
+          ? response.data
+          : response.data?.data || [];
+        this.products = items;
         this.updateProductsPerPage();
-        // Після завантаження товарів отримуємо актуальний wishlist
-        // await this.fetchWishlist();  // прибрано, бо API вже повертає is_in_wishlist
       } catch (error) {
         console.error('Помилка при завантаженні популярних товарів:', error);
-      }
-    },
-
-    async fetchWishlist() {
-      try {
-        const resp = await api.getWishlist();
-        const items = Array.isArray(resp.data) ? resp.data : [];
-        this.wishlist = items.map(i => i.id);
-        // Оновлюємо прапорець для всіх продуктів
-        this.products.forEach(p => {
-          p.is_in_wishlist = this.wishlist.includes(p.id);
-        });
-        this.updateVisibleProducts();
-      } catch (error) {
-        console.error('Помилка при завантаженні списку бажаного:', error);
-      }
-    },
-
-    async toggleWishlist(product) {
-      try {
-        if (product.is_in_wishlist) await api.deleteWishlistItem(product.id);
-        else await api.addToWishlist({ product_id: product.id });
-        // Операція успішна – перемикаємо стан локально
-        product.is_in_wishlist = !product.is_in_wishlist;
-        // Оновлюємо локальний масив wishlist
-        if (product.is_in_wishlist) this.wishlist.push(product.id);
-        else this.wishlist = this.wishlist.filter(id => id !== product.id);
-      } catch (error) {
-        console.error('Помилка оновлення списку бажаного:', error);
       }
     },
 
@@ -157,6 +127,34 @@ export default {
         this.updateVisibleProducts();
       }
     },
+
+    async toggleWishlist(product) {
+      try {
+        if (product.is_in_wishlist) {
+          await api.deleteWishlistItem(product.id);
+        } else {
+          await api.addToWishlist({ product_id: product.id });
+        }
+        product.is_in_wishlist = !product.is_in_wishlist;
+      } catch (error) {
+        console.error('Помилка оновлення списку бажаного:', error);
+      }
+    },
+
+    // Оновлений метод addToCart
+    async addToCart(product) {
+      try {
+        // ОБОВ'ЯЗКОВО повертаємо проміс з api
+        const res = await api.addToCart({
+          product_id: product.id,
+          quantity: 1               // тепер quantity є, бекенд не скаржиться
+        });
+        // тут можна показати тост чи анімацію:
+        console.log('Додано в кошик:', res.data);
+      } catch (error) {
+        console.error('Помилка додавання в кошик:', error.response?.data || error);
+      }
+    },
   },
   mounted() {
     window.addEventListener('resize', this.updateProductsPerPage);
@@ -164,6 +162,6 @@ export default {
   },
   beforeUnmount() {
     window.removeEventListener('resize', this.updateProductsPerPage);
-  }
+  },
 };
 </script>

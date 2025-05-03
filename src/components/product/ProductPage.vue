@@ -12,8 +12,8 @@
         />
         <button
           @click="openModal"
-          class="absolute top-4 right-4 bg-white p-2 rounded-full shadow hover:bg-gray-100"
-        >
+          class="absolute top-4 right-4 bg-white/90 p-2 rounded-full shadow-md hover:bg-white/100 transition-colors duration-200"
+          >
           <img src="@/assets/size_change.png" alt="Змінити розмір" class="w-6 h-6" />
         </button>
       </div>

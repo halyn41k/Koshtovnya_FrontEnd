@@ -197,289 +197,179 @@
 </template>
 
 <script>
-import axios from "axios";
+import api from '@/services/api';
 
 export default {
   name: "FilterComponent",
   props: {
     fetchProducts: {
       type: Function,
-      required: true,
-    },
+      required: true
+    }
   },
   data() {
     return {
-      // Фільтри з бекенду
+      // опції
       availabilityOptions: [],
-      sizeOptions: { min: 0, max: 100 },
-      weightOptions: { min: 0, max: 1000 },
-      priceOptions: { min: 0, max: 10000 },
-      colorOptions: [],
-      beadTypeOptions: [],
+      sizeOptions:    { min: 0, max: 100 },
+      weightOptions:  { min: 0, max: 1000 },
+      priceOptions:   { min: 0, max: 10000 },
+      colorOptions:   [],
+      beadTypeOptions:     [],
       beadProducerOptions: [],
+      categoryOptions:     [],
+      statusOptions:       [],
 
-      // Абсолютні значення (відповідають даним із бекенду)
-      sizeAbsolute: [0, 100],
+      // абсолютні значення та слайдери
+      sizeAbsolute:   [0, 100],
+      sizeSlider:     [0, 100],
       weightAbsolute: [0, 1000],
-      priceAbsolute: [0, 10000],
-
-      // Нормалізовані значення для слайдерів (діапазон 0-100)
-      sizeSlider: [0, 100],
-      weightSlider: [0, 100],
-      priceSlider: [0, 100],
-
-      // Вибрані значення з інпутів/чекбоксів
+      weightSlider:   [0, 100],
+      priceAbsolute:  [0, 10000],
+      priceSlider:    [0, 100],
+      
+      // вибрані фільтри
       selectedAvailability: [],
-      selectedColor: "",
-      selectedBeadTypes: [],
-      selectedProducers: [],
+      selectedColor:        '',
+      selectedBeadTypes:    [],
+      selectedProducers:    [],
+      selectedCategory:     [],
+      selectedStatus:       []
     };
   },
   created() {
     this.loadFilters();
   },
   methods: {
-    // Функції для нормалізації та денормалізації
-    normalize(absolute, min, max) {
-      return ((absolute - min) / (max - min)) * 100;
+    normalize(abs, min, max) {
+      return ((abs - min) / (max - min)) * 100;
     },
-    denormalize(normalized, min, max) {
-      return (normalized / 100) * (max - min) + min;
+    denormalize(norm, min, max) {
+      return (norm / 100) * (max - min) + min;
     },
-
-    // ============================
-    // Логіка для слайдера "Розмір"
-    // ============================
-    updateSizeFromSlider() {
+    updateSize() {
       this.sizeAbsolute = [
         Math.round(this.denormalize(this.sizeSlider[0], this.sizeOptions.min, this.sizeOptions.max)),
         Math.round(this.denormalize(this.sizeSlider[1], this.sizeOptions.min, this.sizeOptions.max))
       ];
     },
-    updateSizeSliderFromAbsolute() {
+    updateSizeSlider() {
       this.sizeSlider = [
         this.normalize(this.sizeAbsolute[0], this.sizeOptions.min, this.sizeOptions.max),
         this.normalize(this.sizeAbsolute[1], this.sizeOptions.min, this.sizeOptions.max)
       ];
     },
-    onSizeSliderInput(thumb) {
-      if (thumb === 'min') {
-        if (this.sizeSlider[0] > this.sizeSlider[1]) {
-          this.sizeSlider[0] = this.sizeSlider[1];
-        }
-      } else {
-        if (this.sizeSlider[1] < this.sizeSlider[0]) {
-          this.sizeSlider[1] = this.sizeSlider[0];
-        }
-      }
-      this.updateSizeFromSlider();
+    onSizeSliderInput() {
+      this.updateSize();
     },
-    onSizeInput(index) {
-      // Коригуємо абсолютні значення при введенні
-      if(this.sizeAbsolute[index] < this.sizeOptions.min) {
-        this.sizeAbsolute[index] = this.sizeOptions.min;
-      }
-      if(this.sizeAbsolute[index] > this.sizeOptions.max) {
-        this.sizeAbsolute[index] = this.sizeOptions.max;
-      }
-      if(index === 0 && this.sizeAbsolute[0] > this.sizeAbsolute[1]) {
-        this.sizeAbsolute[0] = this.sizeAbsolute[1];
-      }
-      if(index === 1 && this.sizeAbsolute[1] < this.sizeAbsolute[0]) {
-        this.sizeAbsolute[1] = this.sizeAbsolute[0];
-      }
-      this.updateSizeSliderFromAbsolute();
+    onSizeInput() {
+      this.updateSizeSlider();
     },
-
-    // ============================
-    // Логіка для слайдера "Вага"
-    // ============================
-    updateWeightFromSlider() {
+    updateWeight() {
       this.weightAbsolute = [
         Math.round(this.denormalize(this.weightSlider[0], this.weightOptions.min, this.weightOptions.max)),
         Math.round(this.denormalize(this.weightSlider[1], this.weightOptions.min, this.weightOptions.max))
       ];
     },
-    updateWeightSliderFromAbsolute() {
+    updateWeightSlider() {
       this.weightSlider = [
         this.normalize(this.weightAbsolute[0], this.weightOptions.min, this.weightOptions.max),
         this.normalize(this.weightAbsolute[1], this.weightOptions.min, this.weightOptions.max)
       ];
     },
-    onWeightSliderInput(thumb) {
-      if (thumb === 'min') {
-        if (this.weightSlider[0] > this.weightSlider[1]) {
-          this.weightSlider[0] = this.weightSlider[1];
-        }
-      } else {
-        if (this.weightSlider[1] < this.weightSlider[0]) {
-          this.weightSlider[1] = this.weightSlider[0];
-        }
-      }
-      this.updateWeightFromSlider();
+    onWeightSliderInput() {
+      this.updateWeight();
     },
-    onWeightInput(index) {
-      if(this.weightAbsolute[index] < this.weightOptions.min) {
-        this.weightAbsolute[index] = this.weightOptions.min;
-      }
-      if(this.weightAbsolute[index] > this.weightOptions.max) {
-        this.weightAbsolute[index] = this.weightOptions.max;
-      }
-      if(index === 0 && this.weightAbsolute[0] > this.weightAbsolute[1]) {
-        this.weightAbsolute[0] = this.weightAbsolute[1];
-      }
-      if(index === 1 && this.weightAbsolute[1] < this.weightAbsolute[0]) {
-        this.weightAbsolute[1] = this.weightAbsolute[0];
-      }
-      this.updateWeightSliderFromAbsolute();
+    onWeightInput() {
+      this.updateWeightSlider();
     },
-
-    // ============================
-    // Логіка для слайдера "Ціна"
-    // ============================
-    updatePriceFromSlider() {
+    updatePrice() {
       this.priceAbsolute = [
         Math.round(this.denormalize(this.priceSlider[0], this.priceOptions.min, this.priceOptions.max)),
         Math.round(this.denormalize(this.priceSlider[1], this.priceOptions.min, this.priceOptions.max))
       ];
     },
-    updatePriceSliderFromAbsolute() {
+    updatePriceSlider() {
       this.priceSlider = [
         this.normalize(this.priceAbsolute[0], this.priceOptions.min, this.priceOptions.max),
         this.normalize(this.priceAbsolute[1], this.priceOptions.min, this.priceOptions.max)
       ];
     },
-    onPriceSliderInput(thumb) {
-      if (thumb === 'min') {
-        if (this.priceSlider[0] > this.priceSlider[1]) {
-          this.priceSlider[0] = this.priceSlider[1];
-        }
-      } else {
-        if (this.priceSlider[1] < this.priceSlider[0]) {
-          this.priceSlider[1] = this.priceSlider[0];
-        }
-      }
-      this.updatePriceFromSlider();
+    onPriceSliderInput() {
+      this.updatePrice();
     },
-    onPriceInput(index) {
-      if(this.priceAbsolute[index] < this.priceOptions.min) {
-        this.priceAbsolute[index] = this.priceOptions.min;
-      }
-      if(this.priceAbsolute[index] > this.priceOptions.max) {
-        this.priceAbsolute[index] = this.priceOptions.max;
-      }
-      if(index === 0 && this.priceAbsolute[0] > this.priceAbsolute[1]) {
-        this.priceAbsolute[0] = this.priceAbsolute[1];
-      }
-      if(index === 1 && this.priceAbsolute[1] < this.priceAbsolute[0]) {
-        this.priceAbsolute[1] = this.priceAbsolute[0];
-      }
-      this.updatePriceSliderFromAbsolute();
+    onPriceInput() {
+      this.updatePriceSlider();
     },
-
-    // Функція для формування стилю заповненого треку слайдера
     getNormalizedTrackStyle(minNorm, maxNorm) {
       return {
-        left: `${minNorm}%`,
-        right: `${100 - maxNorm}%`,
-        background: "#6B1F1F"
+        left:   minNorm + '%',
+        right:  (100 - maxNorm) + '%',
+        backgroundColor: '#6B1F1F'
       };
     },
-
-    // ============================
-    // Завантаження фільтрів з бекенду
-    // ============================
     async loadFilters() {
       try {
-        const response = await axios.get("https://koshtovnya.api-dev.bmax-edu.website/api/product-filter");
-        const data = response.data;
-        this.updateFilterOptions(data);
-        console.log("Фільтри завантажені з сервера");
+        const data = await api.getFilter();
+
+        // Доступність
+        this.availabilityOptions = data['Доступність'] || [];
+
+        // Розмір
+        const sz = data['Розмір'] || { min: '0', max: '100' };
+        this.sizeOptions.min = parseFloat(sz.min);
+        this.sizeOptions.max = parseFloat(sz.max);
+        this.sizeAbsolute = [ this.sizeOptions.min, this.sizeOptions.max ];
+        this.sizeSlider   = [ 0, 100 ];
+
+        // Колір
+        this.colorOptions = data['Колір'] || [];
+
+        // Тип бісеру
+        this.beadTypeOptions = data['Тип бісеру'] || [];
+
+        // Виробник бісеру
+        this.beadProducerOptions = data['Виробник бісеру'] || [];
+
+        // Вага
+        const wt = data['Вага'] || { min: '0', max: '1000' };
+        this.weightOptions.min = parseFloat(wt.min);
+        this.weightOptions.max = parseFloat(wt.max);
+        this.weightAbsolute = [ this.weightOptions.min, this.weightOptions.max ];
+        this.weightSlider   = [ 0, 100 ];
+
+        // Ціна
+        const pr = data['Ціна'] || { min: '0', max: '10000' };
+        this.priceOptions.min = parseFloat(pr.min);
+        this.priceOptions.max = parseFloat(pr.max);
+        this.priceAbsolute = [ this.priceOptions.min, this.priceOptions.max ];
+        this.priceSlider   = [ 0, 100 ];
+
+        // Категорія
+        this.categoryOptions = data['Категорія'] || [];
+
+        // Статус
+        this.statusOptions = data['Статус'] || [];
+
       } catch (error) {
-        console.error("Помилка завантаження фільтрів:", error);
+        console.warn('Не вдалося завантажити фільтри:', error);
       }
     },
-    updateFilterOptions(data) {
-      this.availabilityOptions = data["Доступність"] || [];
-      
-      // Налаштовуємо фільтр "Розмір"
-      this.sizeOptions = {
-        min: parseFloat(data["Розмір"].min) || 0,
-        max: parseFloat(data["Розмір"].max) || 100,
-      };
-      // Абсолютні значення = повний діапазон
-      this.sizeAbsolute = [this.sizeOptions.min, this.sizeOptions.max];
-      // Нормалізовані значення = [0, 100]
-      this.sizeSlider = [0, 100];
-
-      this.colorOptions = data["Колір"] || [];
-      this.beadTypeOptions = data["Тип бісеру"] || [];
-      this.beadProducerOptions = data["Виробник бісеру"] || [];
-
-      // Фільтр "Вага"
-      this.weightOptions = {
-        min: parseFloat(data["Вага"].min) || 0,
-        max: parseFloat(data["Вага"].max) || 1000,
-      };
-      this.weightAbsolute = [this.weightOptions.min, this.weightOptions.max];
-      this.weightSlider = [0, 100];
-
-      // Фільтр "Ціна"
-      this.priceOptions = {
-        min: parseFloat(data["Ціна"].min) || 0,
-        max: parseFloat(data["Ціна"].max) || 10000,
-      };
-      this.priceAbsolute = [this.priceOptions.min, this.priceOptions.max];
-      this.priceSlider = [0, 100];
-
-      console.log("Розмір із бекенду:", data["Розмір"]);
-    },
-
-    // ============================
-    // Застосування фільтрів
-    // ============================
     applyFilters() {
-      const filters = {};
-      if (this.selectedAvailability.length > 0) {
-        filters.is_available = this.selectedAvailability.map(av =>
-          av === "В наявності" ? "1" : "0"
-        );
-      }
-      // Передаємо абсолютні значення
-      if (
-        this.sizeAbsolute[0] !== this.sizeOptions.min ||
-        this.sizeAbsolute[1] !== this.sizeOptions.max
-      ) {
-        filters.size_from = this.sizeAbsolute[0];
-        filters.size_to = this.sizeAbsolute[1];
-      }
-      if (this.selectedColor) {
-        filters.color = this.selectedColor;
-      }
-      if (this.selectedBeadTypes.length > 0) {
-        filters.type_of_bead = this.selectedBeadTypes;
-      }
-      if (this.selectedProducers.length > 0) {
-        filters.bead_producer = this.selectedProducers;
-      }
-      if (
-        this.weightAbsolute[0] !== this.weightOptions.min ||
-        this.weightAbsolute[1] !== this.weightOptions.max
-      ) {
-        filters.weight_from = this.weightAbsolute[0];
-        filters.weight_to = this.weightAbsolute[1];
-      }
-      if (
-        this.priceAbsolute[0] !== this.priceOptions.min ||
-        this.priceAbsolute[1] !== this.priceOptions.max
-      ) {
-        filters.price_from = this.priceAbsolute[0];
-        filters.price_to = this.priceAbsolute[1];
-      }
+      const filters = {
+        availability: this.selectedAvailability,
+        size:         this.sizeAbsolute,
+        color:        this.selectedColor,
+        beadTypes:    this.selectedBeadTypes,
+        producers:    this.selectedProducers,
+        weight:       this.weightAbsolute,
+        price:        this.priceAbsolute,
+        category:     this.selectedCategory,
+        status:       this.selectedStatus
+      };
       this.fetchProducts(1, filters);
-      console.log("Вибрані фільтри:", filters);
-    },
-  },
+    }
+  }
 };
 </script>
 

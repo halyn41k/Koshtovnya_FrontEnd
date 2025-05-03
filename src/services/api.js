@@ -253,7 +253,7 @@ export default {
     return data;
   },
   getFilter: async () => {
-    const { data } = await apiClient.get('/api/filter');
+    const { data } = await apiClient.get('/api/product-filter');
     return data;
   },
 

@@ -1,27 +1,36 @@
 <template>
-  <main class="cart">
-    <header class="cart-header">
-      <div class="line"></div>
-      <h1 class="main-title">Кошик</h1>
-      <div class="line"></div>
+  <main class="min-h-screen font-sans pt-[150px] bg-[url('@/assets/cartpattern.png')] bg-cover">
+    <header class="flex items-center justify-center gap-4 py-8">
+      <div class="h-px bg-gray-300 flex-1"></div>
+      <h1 class="text-4xl font-black text-center" style="font-family: 'KyivType Titling Black2';">
+        Кошик
+      </h1>
+      <div class="h-px bg-gray-300 flex-1"></div>
     </header>
-    <div class="cart-content">
-      <section class="cart-items">
-        <div v-if="loading" class="loading">
-          <Loader />
-        </div>
-        <div v-else-if="cartItems.length === 0" class="empty-cart">
+
+    <section class="container mx-auto px-4 md:px-8 lg:px-16 flex flex-col lg:flex-row gap-8">
+      <!-- Items List із скролом -->
+      <div class="flex-1 space-y-6 max-h-[calc(3*9rem)] overflow-y-auto">
+        <Loader v-if="loading" class="mx-auto" />
+        <p v-else-if="cartItems.length === 0" class="text-center text-lg text-gray-500">
           Ваш кошик порожній.
-        </div>
-        <CartItem v-for="(item, index) in cartItems" :key="item.id" :id="item.id" :itemNumber="index + 1"
-          :imageSrc="item.image" :title="item.title" :price="item.price" :quantity="item.quantity"
-          :selectedSize="item.selectedSize" :variants="item.variants" @change-quantity="updateCartItem"
-          @remove-item="removeItem" @change-size="updateCartItem" />
+        </p>
+        <CartItem
+          v-else
+          v-for="item in cartItems"
+          :key="item.id"
+          :item="item"
+          @change-quantity="updateCartItem"
+          @remove-item="removeItem"
+          @change-size="updateCartItem"
+        />
+      </div>
 
-
-      </section>
-      <Summary v-if="cartItems.length > 0" :cartItems="cartItems" />
-    </div>
+      <!-- Summary: mobile first, desktop last -->
+      <div class="w-full order-first lg:order-last lg:w-auto">
+        <Summary v-if="cartItems.length > 0" :cart-items="cartItems" />
+      </div>
+    </section>
   </main>
 </template>
 
@@ -32,7 +41,7 @@ import Summary from './Summary.vue';
 import Loader from '../home/Loader.vue';
 
 export default {
-  name: "CartShopPage",
+  name: 'CartShopPage',
   components: { CartItem, Summary, Loader },
   data() {
     return {
@@ -45,41 +54,38 @@ export default {
       this.loading = true;
       try {
         const data = await api.getCart();
-        // припустимо API повертає { products: [...] }
         this.cartItems = data.products.map(item => ({
           id: item.id,
           image: item.image_url,
-          title: item.name,
+          name: item.name,
           price: item.price,
           quantity: item.quantity,
-          isAvailable: item.is_available,
-          selectedSize: item.selected_size || item.variants[0]?.size || '',
-          variants: item.variants.map(v => ({
-            size: v.size,
-            quantity: v.quantity,
-            isAvailable: v.is_available,
-          })),
+          selectedSize: item.selected_size,
+          variants: item.variants.map(v => ({ size: v.size, quantity: v.quantity, isAvailable: v.is_available })),
         }));
       } catch (err) {
-        console.error("Помилка завантаження кошика:", err);
-        alert("Не вдалося завантажити кошик.");
+        console.error('Помилка завантаження кошика:', err);
+        alert('Не вдалося завантажити кошик.');
       } finally {
         this.loading = false;
       }
     },
-    async updateCartItem({ id, quantity = null, operation = null, size = null }) {
+    async updateCartItem({ id, operation = null, size = null }) {
       try {
-        const payload = size ? { size } : { operation, quantity };
+        const payload = {};
+        if (size !== null) payload.size = size;
+        else if (operation) payload.operation = operation;
+        else return;
         await api.updateCartItem(id, payload);
         const idx = this.cartItems.findIndex(i => i.id === id);
         if (idx !== -1) {
-          if (size) this.cartItems[idx].selectedSize = size;
-          else if (quantity !== null) this.cartItems[idx].quantity = quantity;
+          if (size !== null) this.cartItems[idx].selectedSize = size;
+          else if (operation === 'increase') this.cartItems[idx].quantity++;
+          else if (operation === 'decrease' && this.cartItems[idx].quantity > 1) this.cartItems[idx].quantity--;
         }
-        alert("Товар успішно оновлено.");
       } catch (err) {
-        console.error("Помилка оновлення:", err);
-        alert(err.response?.data?.message || "Не вдалося оновити.");
+        console.error('Помилка оновлення:', err);
+        alert(err.response?.data?.message || 'Не вдалося оновити.');
       }
     },
     async removeItem(id) {
@@ -87,99 +93,26 @@ export default {
         await api.removeFromCart(id);
         this.cartItems = this.cartItems.filter(i => i.id !== id);
       } catch (err) {
-        console.error("Помилка видалення:", err);
-        alert("Не вдалося видалити товар.");
+        console.error('Помилка видалення:', err);
+        alert('Не вдалося видалити товар.');
       }
     },
   },
   mounted() {
     this.fetchCartItems();
-    document.title = "Кошик";
-  }
+    document.title = 'Кошик';
+  },
 };
 </script>
 
-
 <style scoped>
 @font-face {
-  font-family: 'KyivType Medium';
-  src: url('@/assets/fonts/KyivType2020-14-12/KyivType-NoVariable/TTF/KyivTypeSans-Medium2.ttf') format('truetype');
-  font-weight: 500;
-  font-style: normal;
-}
-
-.cart {
-  display: flex;
-  flex-direction: column;
-  padding: 0 46.67px;
-  margin-top: 180px;
-  background-image: url('@/assets/cartpattern.png');
-  /* Додаємо фон */
-  background-size: cover;
-}
-
-.cart-header {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 30px;
-  margin-bottom: 40px;
-}
-
-.line {
-  flex: 1;
-  height: 2px;
-  background-color: grey;
-  width: 45%;
-}
-
-.main-title {
-  font-family: 'KyivType Titling', sans-serif;
-  font-size: 34px;
+  font-family: 'KyivType Titling Black2';
+  src: url('@/assets/fonts/KyivType2020-14-12/KyivType-NoVariable/TTF/KyivTypeTitling-Black2.ttf') format('truetype');
   font-weight: 900;
-  letter-spacing: -1.2px;
-  text-shadow: 0 2px 3px rgba(99, 2, 2, 0.22);
-  text-align: center;
-
+  font-style: normal;
+  font-display: swap;
 }
-
-.cart-content {
-  display: flex;
-  gap: 10px;
-  margin-top: 10px;
-}
-
-.cart-items {
-  width: 50%;
-  height: 500px;
-  overflow-y: auto;
-  /* Тонкий скрол */
-  scrollbar-width: thin;
-  /* Для Firefox */
-}
-
-/* Стиль для скроллбару */
-.cart-items::-webkit-scrollbar {
-  width: 8px;
-}
-
-.cart-items::-webkit-scrollbar-thumb {
-  background-color: rgba(0, 0, 0, 0.3);
-  border-radius: 10px;
-}
-
-.cart-items::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(0, 0, 0, 0.5);
-}
-
-.loading {
-  text-align: center;
-  color: grey;
-}
-
-.empty-cart {
-  text-align: center;
-  font-size: 18px;
-  color: grey;
-}
+:root { --font-body: 'Montserrat', sans-serif; }
+main, section, *, input, select, button { font-family: var(--font-body); }
 </style>

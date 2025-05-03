@@ -1,284 +1,186 @@
 <template>
-  <div class="password-change-container">
-    <header class="password-change-header">
-      <div class="header-line"></div>
-    </header>
-    <h1 class="password-change-title-container">
-      <div class="line"></div>
-      <span class="password-change-title">Зміна паролю</span>
-      <div class="line"></div>
-    </h1>
+  <div class="flex flex-col relative w-screen overflow-x-hidden pt-[200px] pb-[100px] font-montserrat">
+    <!-- Фон -->
+    <div class="absolute inset-0 bg-[url('@/assets/logins.png')] bg-cover bg-center -z-10"></div>
 
-    <main class="password-change-main">
-      <div class="password-change-background-image"></div>
-      <form class="password-change-form" @submit.prevent="submitPasswordChange">
-        <div class="form-group">
-          <div class="form-labels">
-            <label for="currentPassword" class="form-label">Поточний пароль:</label>
-            <label for="newPassword" class="form-label">Новий пароль:</label>
-            <label for="confirmPassword" class="form-label">Підтвердьте новий пароль:</label>
-          </div>
-          <div class="form-inputs">
-            <div class="password-input-container">
-              <input :type="showCurrentPassword ? 'text' : 'password'" id="currentPassword" class="form-input"
-                v-model="currentPassword" aria-label="Поточний пароль" placeholder="Введіть ваш поточний пароль"
-                required />
-              <button type="button" @click="toggleCurrentPasswordVisibility" class="toggle-password-button">
-                <span v-html="showCurrentPassword ? eyeOpenIcon : eyeClosedIcon"></span>
-              </button>
-            </div>
-            <div class="password-input-container">
-              <input :type="showNewPassword ? 'text' : 'password'" id="newPassword" class="form-input"
-                v-model="newPassword" aria-label="Новий пароль" placeholder="Введіть новий пароль" required />
-              <button type="button" @click="toggleNewPasswordVisibility" class="toggle-password-button">
-                <span v-html="showNewPassword ? eyeOpenIcon : eyeClosedIcon"></span>
-              </button>
-            </div>
-            <div class="password-input-container">
-              <input :type="showConfirmPassword ? 'text' : 'password'" id="confirmPassword" class="form-input"
-                v-model="confirmPassword" aria-label="Підтвердьте новий пароль" placeholder="Підтвердіть новий пароль"
-                required />
-              <button type="button" @click="toggleConfirmPasswordVisibility" class="toggle-password-button">
-                <span v-html="showConfirmPassword ? eyeOpenIcon : eyeClosedIcon"></span>
-              </button>
-            </div>
+    <!-- Заголовок з лініями -->
+    <header class="relative z-10 flex items-center justify-center mb-10 w-full">
+      <div class="hidden md:flex flex-1 h-[2px] bg-gray-300"></div>
+      <h1 class="px-4 title-kyiv">Зміна паролю</h1>
+      <div class="hidden md:flex flex-1 h-[2px] bg-gray-300"></div>
+    </header>
+
+    <!-- Основний контейнер форми -->
+    <main class="relative z-20 flex flex-col items-center justify-center w-full md:max-w-xl mx-auto px-6 py-8 bg-white bg-opacity-90 backdrop-blur-md border border-gray-200 rounded-2xl shadow-md">
+      <form @submit.prevent="submitPasswordChange" class="w-full space-y-5">
+        <!-- Поточний пароль -->
+        <div class="flex flex-col">
+          <label for="currentPassword" class="mb-1 text-sm font-medium text-gray-600">Поточний пароль</label>
+          <div class="relative">
+            <input
+              id="currentPassword"
+              :type="showCurrentPassword ? 'text' : 'password'"
+              v-model="currentPassword"
+              placeholder="Введіть ваш поточний пароль"
+              required
+              class="w-full h-12 rounded-lg border border-gray-300 bg-white px-4 text-gray-800 placeholder-gray-400 hover:shadow-md focus:outline-none focus:border-[#6B1F1F] focus:shadow-lg transition-all duration-200"
+            />
+            <button
+              type="button"
+              @click="toggleCurrentPasswordVisibility"
+              class="absolute inset-y-0 right-4 flex items-center justify-center focus:outline-none"
+            >
+              <img
+                :src="showCurrentPassword ? eyeClosedIcon : eyeOpenIcon"
+                alt="Toggle password visibility"
+                class="w-5 h-5"
+              />
+            </button>
           </div>
         </div>
-        <button type="submit" class="password-change-button">
-          <span>Змінити пароль</span>
-          <img
-            src="https://cdn.builder.io/api/v1/image/assets/TEMP/436b738744905f60c6a542e2cd314f5694db20045d36b8991f8dab9a31b316a0?placeholderIfAbsent=true&apiKey=c3e46d0a629546c7a48302a5db3297d5"
-            alt="" class="password-change-icon" />
-        </button>
+
+        <!-- Новий пароль -->
+        <div class="flex flex-col">
+          <label for="newPassword" class="mb-1 text-sm font-medium text-gray-600">Новий пароль</label>
+          <div class="relative">
+            <input
+              id="newPassword"
+              :type="showNewPassword ? 'text' : 'password'"
+              v-model="newPassword"
+              placeholder="Введіть новий пароль"
+              required
+              class="w-full h-12 rounded-lg border border-gray-300 bg-white px-4 text-gray-800 placeholder-gray-400 hover:shadow-md focus:outline-none focus:border-[#6B1F1F] focus:shadow-lg transition-all duration-200"
+            />
+            <button
+              type="button"
+              @click="toggleNewPasswordVisibility"
+              class="absolute inset-y-0 right-4 flex items-center justify-center focus:outline-none"
+            >
+              <img
+                :src="showNewPassword ? eyeClosedIcon : eyeOpenIcon"
+                alt="Toggle password visibility"
+                class="w-5 h-5"
+              />
+            </button>
+          </div>
+        </div>
+
+        <!-- Підтвердження пароля -->
+        <div class="flex flex-col">
+          <label for="confirmPassword" class="mb-1 text-sm font-medium text-gray-600">Підтвердьте пароль</label>
+          <div class="relative">
+            <input
+              id="confirmPassword"
+              :type="showConfirmPassword ? 'text' : 'password'"
+              v-model="confirmPassword"
+              placeholder="Підтвердіть новий пароль"
+              required
+              class="w-full h-12 rounded-lg border border-gray-300 bg-white px-4 text-gray-800 placeholder-gray-400 hover:shadow-md focus:outline-none focus:border-[#6B1F1F] focus:shadow-lg transition-all duration-200"
+            />
+            <button
+              type="button"
+              @click="toggleConfirmPasswordVisibility"
+              class="absolute inset-y-0 right-4 flex items-center justify-center focus:outline-none"
+            >
+              <img
+                :src="showConfirmPassword ? eyeClosedIcon : eyeOpenIcon"
+                alt="Toggle password visibility"
+                class="w-5 h-5"
+              />
+            </button>
+          </div>
+        </div>
+
+        <!-- Кнопка зміни паролю -->
+        <div class="flex justify-center">
+          <button
+            type="submit"
+            class="w-full h-12 flex items-center justify-center bg-[#6B1F1F] hover:bg-[#A01212] active:bg-[#A01212] text-white text-base font-semibold rounded-xl transition-colors duration-200 shadow-sm hover:shadow-md"
+          >
+            Змінити пароль
+          </button>
+        </div>
       </form>
     </main>
   </div>
 </template>
 
 <script>
+import eyeOpenIcon from "@/assets/eye-hide-svgrepo-com.svg";
+import eyeClosedIcon from "@/assets/eye-1-svgrepo-com.svg";
+
 export default {
-  // Об'єкт data містить дані компонента
+  name: 'PasswordChangeComponent',
   data() {
     return {
-      currentPassword: '', // Поточний пароль
-      newPassword: '', // Новий пароль
-      confirmPassword: '', // Підтвердження нового пароля
-      showCurrentPassword: false, // Видимість поточного пароля
-      showNewPassword: false, // Видимість нового пароля
-      showConfirmPassword: false, // Видимість підтвердження пароля
-      // SVG-іконки для кнопок показу/приховування пароля
-      eyeOpenIcon: `
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5C21.27 7.61 17 4.5 12 4.5z" stroke="#555" stroke-width="2"/>
-            <circle cx="12" cy="12" r="3" fill="#555"/>
-          </svg>`, // Іконка "око відкрите"
-      eyeClosedIcon: `
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M2 2L22 22M12 4.5C7 4.5 2.73 7.61 1 12c1.23 2.9 3.37 5.15 6.13 6.3m5.87-2.8c-2.5 0-4.5-2-4.5-4.5s2-4.5 4.5-4.5m0 0l6.57 6.57M16.87 16.87c1.9-1.02 3.37-2.77 4.13-4.87-1.73-4.39-6-7.5-11-7.5-1.08 0-2.13.14-3.13.4" stroke="#555" stroke-width="2"/>
-          </svg>` // Іконка "око закрите"
+      currentPassword: '',
+      newPassword: '',
+      confirmPassword: '',
+      showCurrentPassword: false,
+      showNewPassword: false,
+      showConfirmPassword: false,
+      eyeOpenIcon,
+      eyeClosedIcon,
     };
   },
   methods: {
     async submitPasswordChange() {
-      if (this.newPassword === this.confirmPassword) {
-        try {
-          const response = await fetch('https://koshtovnya.api-dev.bmax-edu.website/api/change-password', {
-            method: 'PATCH', // Зміна методу на PATCH
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${localStorage.getItem('token')}`, // Токен для авторизації, якщо потрібен
-            },
-            body: JSON.stringify({
-              current_password: this.currentPassword,
-              new_password: this.newPassword,
-              new_password_confirmation: this.confirmPassword,
-            }),
-          });
-
-
-          if (response.ok) {
-            const data = await response.json();
-            alert('Пароль успішно змінено!');
-            this.$router.push('/account'); // Перенаправлення після успішної зміни
-          } else {
-            const errorData = await response.json();
-            alert(`Помилка: ${errorData.message || 'Щось пішло не так.'}`);
-          }
-        } catch (error) {
-          console.error('Помилка при зміні паролю:', error);
-          alert('Помилка під час з\'єднання з сервером. Спробуйте ще раз.');
+      if (this.newPassword !== this.confirmPassword) {
+        alert('Новий пароль і підтвердження не збігаються.');
+        return;
+      }
+      try {
+        const response = await fetch('https://koshtovnya.api-dev.bmax-edu.website/api/change-password', {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${localStorage.getItem("token")}`
+          },
+          body: JSON.stringify({
+            current_password: this.currentPassword,
+            new_password: this.newPassword,
+            new_password_confirmation: this.confirmPassword
+          })
+        });
+        if (response.ok) {
+          alert('Пароль успішно змінено!');
+          this.$router.push('/account');
+        } else {
+          const errorData = await response.json();
+          alert(`Помилка: ${errorData.message || 'Спробуйте ще раз.'}`);
         }
-      } else {
-        alert('Новий пароль і підтвердження пароля не збігаються.');
+      } catch (error) {
+        console.error('Помилка при зміні паролю:', error);
+        alert("Помилка з'єднання з сервером.");
       }
     },
-    // Метод для переключення видимості поточного пароля
     toggleCurrentPasswordVisibility() {
       this.showCurrentPassword = !this.showCurrentPassword;
     },
-    // Метод для переключення видимості нового пароля
     toggleNewPasswordVisibility() {
       this.showNewPassword = !this.showNewPassword;
     },
-    // Метод для переключення видимості підтвердження пароля
     toggleConfirmPasswordVisibility() {
       this.showConfirmPassword = !this.showConfirmPassword;
     }
   },
   mounted() {
-    document.title = "Зміна паролю";
+    document.title = 'Зміна паролю';
   }
 };
 </script>
 
-<style scoped>
-.password-change-container {
-  display: flex;
-  flex-direction: column;
-  position: relative;
-  max-width: 100vw;
-  overflow-x: hidden;
-}
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');
 
-.password-change-background-image {
-  background-image: url('@/assets/logins.png');
-  background-size: cover;
-  position: absolute;
-  z-index: -1;
-  width: 100%;
-  height: 100%;
-  top: 0;
-  left: 0;
-}
-
-.password-change-header {
-  z-index: 10;
-  display: flex;
-  width: 100%;
-  flex-direction: column;
-  align-items: flex-end;
-  padding: 63px 80px 0;
-}
-
-.password-change-title-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 20px 0;
-}
-
-.line {
-  flex: 1;
-  height: 2px;
-  background-color: grey;
-  margin: 0 10px;
-  margin-top: 120px;
-}
-
-.password-change-title {
-  color: #333;
-  font-family: 'KyivType Titling', sans-serif;
+@font-face {
+  font-family: 'KyivType Titling Black2';
+  src: url('@/assets/fonts/KyivType2020-14-12/KyivType-NoVariable/TTF/KyivTypeTitling-Black2.ttf') format('truetype');
   font-weight: 900;
-  text-shadow: 0 4px 4px rgba(99, 2, 2, 0.22);
-  letter-spacing: -2px;
-  text-align: center;
-  margin-top: 150px;
-  font-size: 30px;
-  margin-bottom: 40px;
+  font-style: normal;
+  font-display: swap;
 }
 
-.password-change-main {
-  background-color: rgba(255, 247, 246, 0.9);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 96px 80px;
-  width: 100%;
-  max-width: 1640px;
-  border: 1px solid rgba(0, 0, 0, 0.5);
-  position: relative;
-  z-index: 2;
-}
-
-.password-change-form {
-  display: flex;
-  width: 100%;
-  max-width: 1200px;
-  flex-direction: column;
-  align-items: center;
-}
-
-.form-group {
-  display: flex;
-  width: 100%;
-  gap: 20px;
-}
-
-.form-labels {
-  display: flex;
-  flex-direction: column;
-  gap: 30px;
-  color: var(--Grays-Black, #000);
-  font: 400 18px/1.3 Merriweather, sans-serif;
-  flex: 1;
-  align-items: flex-end;
-  padding-right: 20px;
-  text-align: left;
-}
-
-.form-inputs {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  flex: 2;
-}
-
-.form-input {
-  border-radius: 8px;
-  border: 1px solid var(--Grays-Black, #000);
-  background-color: #E6D7D7;
-  height: 35px;
-  width: 100%;
-  font-size: 18px;
-  transition: background-color 0.3s ease;
-}
-
-.password-input-container {
-  position: relative;
-}
-
-.toggle-password-button {
-  position: absolute;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  background: none;
-  border: none;
-  cursor: pointer;
-}
-
-.password-change-button {
-  background-color: #6b1f1f;
-  border-radius: 8px;
-  border: none;
-  color: white;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 20px;
-  min-height: 50px;
-  width: 290px;
-  padding: 0 20px;
-  font: 400 18px/1.3 Merriweather, sans-serif;
-  transition: background-color 0.3s ease;
-}
-
-.password-change-button:hover {
-  background-color: #a01212;
-}
-
-.password-change-icon {
-  margin-left: 10px;
-}
+.font-montserrat { font-family: 'Montserrat', sans-serif; }
+.title-kyiv { font-family: 'KyivType Titling Black2', sans-serif; font-size: 30px; color: #000; }
 </style>

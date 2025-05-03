@@ -1,60 +1,60 @@
 <template>
-  <div class="max-w-3xl p-5 overflow-y-auto h-[90vh] font-sans">
-    <h2 class="text-2xl font-bold text-gray-800 mb-6">Історія замовлень</h2>
+  <div class="max-w-3xl p-4 sm:p-6 overflow-y-auto h-[90vh] font-sans">
+    <h2 class="text-2xl font-bold text-gray-800 mb-5">Історія замовлень</h2>
 
     <!-- Loader при завантаженні -->
-    <Loader v-if="loading" class="mx-auto my-10" />
+    <Loader v-if="loading" class="mx-auto my-16" />
 
     <!-- Повідомлення, якщо замовлень немає -->
-    <div v-else-if="orders.length === 0" class="text-center text-lg text-gray-500 mt-8">
+    <div v-else-if="orders.length === 0" class="text-center text-lg text-gray-500 mt-10">
       Ви не розмістили жодного замовлення :(
     </div>
 
     <!-- Список замовлень -->
-    <div v-else class="space-y-6 overflow-y-auto h-[70vh] pr-4">
+    <div v-else class="space-y-6">
       <div
         v-for="order in orders"
         :key="order.id"
-        class="bg-gray-100 p-5 rounded-2xl transform transition hover:scale-[1.02]"
+        class="relative bg-white p-4 sm:p-6 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-200 flex flex-col gap-4"
       >
-        <!-- header with number, date, status, amount -->
-        <div class="flex justify-between items-center mb-4">
-          <div>
-            <span class="text-xl font-semibold text-gray-900">Замовлення №{{ order.id }}</span>
-            <span class="text-sm text-gray-600 ml-2">{{ order.order_date }}</span>
+        <!-- Header -->
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+          <div class="flex items-center gap-2">
+            <span class="text-lg sm:text-xl font-semibold text-gray-900 truncate">Замовлення №{{ order.id }}</span>
+            <span class="text-sm text-gray-600 whitespace-nowrap">{{ order.order_date }}</span>
           </div>
-          <div class="text-lg font-medium text-gray-700">
-            Статус: {{ order.status }}
-          </div>
+          <span class="text-sm sm:text-base font-medium text-gray-700 whitespace-nowrap">Статус: {{ order.status }}</span>
         </div>
 
-        <div class="space-y-4 mb-4">
+        <!-- Items -->
+        <div class="space-y-4">
           <div
             v-for="(item, i) in order.items"
             :key="i"
-            class="flex items-center gap-4"
+            class="flex flex-col sm:flex-row items-start sm:items-center gap-4"
           >
             <img
               :src="item.image_url"
               alt="Product Image"
-              class="w-24 h-24 object-cover rounded-lg"
+              class="w-full sm:w-24 h-48 sm:h-24 object-cover rounded-lg flex-shrink-0"
             />
-            <div class="flex flex-col">
-              <h3 v-if="!item.is_deleted" class="text-lg font-medium text-gray-800">
+            <div class="flex-1 flex flex-col gap-1">
+              <h3 v-if="!item.is_deleted" class="text-base sm:text-lg font-medium text-gray-800 truncate">
                 {{ item.title }}
               </h3>
-              <h3 v-else class="text-lg text-red-600">Товар видалено</h3>
-              <p class="text-sm text-gray-600">Кількість: {{ item.quantity }}</p>
-              <p class="text-sm text-gray-600">Ціна: {{ item.price }}₴</p>
+              <h3 v-else class="text-base sm:text-lg text-red-600">Товар видалено</h3>
+              <p class="text-sm text-gray-600 whitespace-nowrap">Кількість: {{ item.quantity }}</p>
+              <p class="text-sm text-gray-600 whitespace-nowrap">Ціна: {{ item.price }}₴</p>
             </div>
           </div>
         </div>
 
-        <div class="flex justify-between items-center">
-          <span class="text-lg font-semibold text-gray-800">Всього: {{ order.amount }}₴</span>
+        <!-- Footer -->
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+          <span class="text-lg font-semibold text-gray-800 whitespace-nowrap">Всього: {{ order.amount }}₴</span>
           <button
             @click="openOrderDetails(order)"
-            class="inline-flex items-center px-4 py-2 bg-[#6B1F1F] text-white rounded-xl hover:bg-[#A01212] transition"
+            class="inline-flex items-center px-4 py-2 bg-[#6B1F1F] text-white text-sm font-medium rounded-lg hover:bg-[#A01212] transition"
           >
             Деталі замовлення
           </button>
@@ -78,10 +78,7 @@ import OrderDetailModal from "./OrderDetailModal.vue";
 
 export default {
   name: "OrderHistory",
-  components: {
-    Loader,
-    OrderDetailModal,
-  },
+  components: { Loader, OrderDetailModal },
   data() {
     return {
       orders: [],
@@ -98,12 +95,12 @@ export default {
         this.$router.push("/login");
         return;
       }
-
       try {
-        const response = await axios.get("https://koshtovnya.api-dev.bmax-edu.website/api/orders", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        this.orders = (response.data.orders || []).map(order => ({
+        const { data } = await axios.get(
+          "https://koshtovnya.api-dev.bmax-edu.website/api/orders",
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        this.orders = (data.orders || []).map(order => ({
           id: order.id,
           order_date: order.order_date,
           status: order.status,
