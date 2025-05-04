@@ -36,8 +36,11 @@
 
 <script>
 import api from '@/services/api';
+// eslint-disable-next-line 
 import CartItem from './CartItem.vue';
+// eslint-disable-next-line 
 import Summary from './Summary.vue';
+// eslint-disable-next-line 
 import Loader from '../home/Loader.vue';
 
 export default {

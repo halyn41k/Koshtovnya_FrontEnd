@@ -1,146 +1,128 @@
 <template>
-  <main class="order-list">
-    <!-- Шапка з заголовком -->
-    <div class="order-header">
-      <h1 class="order-list__title">Замовлення</h1>
-      <!-- Кнопку додавання можна додати за потреби -->
-      <!-- <button class="order-add-button" @click="openAddModal">
-        <img src="@/assets/icons/plus.svg" alt="Add icon" class="order-add-button__icon" />
-        <span class="order-add-button__text">Додати</span>
-      </button> -->
+  <main class="p-6 max-w-7xl mx-auto font-montserrat">
+    <!-- Заголовок -->
+    <div class="flex justify-between items-center mb-6">
+      <h1 class="text-2xl font-semibold">Замовлення</h1>
     </div>
 
-    <!-- Поле пошуку -->
-    <div class="order-search-container">
-      <div class="order-search-input-wrapper">
+    <!-- Пошук -->
+    <div class="mb-6">
+      <div class="relative w-80">
         <input
-          class="order-search-input"
+          v-model="searchQuery"
           type="text"
           placeholder="Пошук"
-          v-model="searchQuery"
-          @input="onSearch"
+          class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring focus:ring-pink-200"
         />
-        <img src="@/assets/icons/search.svg" alt="Search icon" class="order-search-icon" />
+        <img
+          src="@/assets/icons/search.svg"
+          alt="Search"
+          class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 pointer-events-none"
+        />
       </div>
     </div>
 
-    <!-- 1) Є замовлення -->
-    <div v-if="orders.length > 0" class="order-table-container">
-      <header class="order-table__header">
-        <span class="order-sortable-header" @click="cycleSort('id')">
-          ID
-          <img :src="getSortIcon(sortState.id)" alt="Sort Icon" class="order-sort-icon" />
-        </span>
-        <span class="order-sortable-header" @click="cycleSort('order_date')">
-          Дата
-          <img :src="getSortIcon(sortState.order_date)" alt="Sort Icon" class="order-sort-icon" />
-        </span>
-        <span class="order-sortable-header" @click="cycleSort('status')">
-          Статус
-          <img :src="getSortIcon(sortState.status)" alt="Sort Icon" class="order-sort-icon" />
-        </span>
-        <span class="order-sortable-header" @click="cycleSort('phone_number')">
-          Телефон
-          <img :src="getSortIcon(sortState.phone_number)" alt="Sort Icon" class="order-sort-icon" />
-        </span>
-        <span class="order-sortable-header" @click="cycleSort('products')">
-          Продукти
-          <img :src="getSortIcon(sortState.products)" alt="Sort Icon" class="order-sort-icon" />
-        </span>
-        <span>Дії</span>
-      </header>
-      <ul class="order-list__items">
-        <li
-          v-for="order in filteredOrders"
-          :key="order.id"
-          :class="['order-item', { highlighted: order.id === highlightedOrderId }]"
-        >
-          <span class="order-item__id">{{ order.id }}</span>
-          <span class="order-item__date">{{ order.order_date }}</span>
-          <span class="order-item__status">{{ order.status }}</span>
-          <span class="order-item__phone">{{ order.phone_number }}</span>
-          <span class="order-item__products">
-            {{ order.products.join(', ') }}
-          </span>
-          <div class="order-item__actions">
-            <button class="order-action-button" @click="showOrderDetails(order.id)">
-              <img
-                src="@/assets/icons/edit.svg"
-                alt="Detail icon"
-                class="order-action-button__icon"
-              />
-            </button>
-            <!-- Видалення прибрано, бо замовлення не можна видаляти -->
-            <!--
-            <button class="order-action-button" @click="deleteOrder(order.id)">
-              <img
-                src="@/assets/icons/delete.svg"
-                alt="Delete icon"
-                class="order-action-button__icon"
-              />
-            </button>
-            -->
-          </div>
-        </li>
-      </ul>
+    <!-- Таблиця замовлень -->
+    <div v-if="filteredAndSorted.length" class="overflow-x-auto">
+      <div class="inline-block min-w-full border border-gray-300 rounded-md overflow-hidden">
+        <table class="min-w-full bg-white divide-y divide-gray-200">
+          <thead class="bg-[#F6E7E7]">
+            <tr>
+              <th
+                v-for="col in columns"
+                :key="col.key"
+                @click="cycleSort(col.key)"
+                class="px-4 py-2 text-sm font-medium text-gray-700 text-left cursor-pointer select-none"
+              >
+                <div class="inline-flex items-center gap-1">
+                  {{ col.label }}
+                  <img
+                    v-if="col.sortable"
+                    :src="getSortIcon(sortState[col.key])"
+                    class="w-4 h-4"
+                    alt=""
+                  />
+                </div>
+              </th>
+              
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            <tr
+              v-for="order in filteredAndSorted"
+              :key="order.id"
+              :class="order.id === highlightedOrderId ? 'bg-green-50' : ''"
+            >
+              <td class="px-4 py-2 text-sm text-gray-800">{{ order.id }}</td>
+              <td class="px-4 py-2 text-sm text-gray-800">{{ order.order_date }}</td>
+              <td class="px-4 py-2 text-sm text-gray-800">
+                <select
+                  v-model="order.status"
+                  @change="updateStatus(order.id, order.status)"
+                  class="border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring focus:ring-pink-200"
+                >
+                  <option value="" disabled>В очікуванні</option>
+                  <option value="Відправлено">Відправлено</option>
+                  <option value="Доставлено">Доставлено</option>
+                  <option value="Скасовано">Скасовано</option>
+                </select>
+              </td>
+              <td class="px-4 py-2 text-sm text-gray-800">{{ order.phone_number }}</td>
+              <td class="px-4 py-2 text-sm text-gray-800">{{ order.products.join(', ') }}</td>
+              
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
 
-    <!-- 2) Немає замовлень і пошук не проводився -->
-    <div v-else-if="!searchQuery" class="empty-state">
+    <!-- Порожній стани -->
+    <div v-else-if="!orders.length && !searchQuery" class="py-20 text-center text-gray-500">
       Поки що не було додано жодного замовлення.
     </div>
-
-    <!-- 3) Немає результатів пошуку -->
-    <div v-else class="empty-state">
+    <div v-else-if="searchQuery && !filteredAndSorted.length" class="py-20 text-center text-gray-500">
       За запитом «<strong>{{ searchQuery }}</strong>» нічого не знайдено.
     </div>
 
     <!-- Пагінація -->
-    <div class="order-pagination-container" v-if="orders.length > 0">
+    <div v-if="orders.length" class="flex justify-center items-center gap-2 mt-6">
       <button
-        class="order-pagination-arrow"
-        :disabled="currentPage === 1"
         @click="goToPage(currentPage - 1)"
-      >
-        <img src="@/assets/icons/arrow_left.svg" alt="Arrow Left" class="order-arrow-icon" />
-      </button>
+        :disabled="currentPage === 1"
+        class="px-3 py-1 rounded bg-white border border-gray-300 hover:bg-gray-100 disabled:opacity-50"
+      >&lt;</button>
       <button
-        v-for="page in totalPages"
+        v-for="page in meta.last_page"
         :key="page"
         @click="goToPage(page)"
-        :class="['order-pagination-button', { active: currentPage === page }]"
+        :class="['px-3 py-1 rounded border border-gray-300 hover:bg-gray-100', page === currentPage ? 'bg-[#6B1F1F] text-white' : 'bg-white']"
       >
         {{ page }}
       </button>
       <button
-        class="order-pagination-arrow"
-        :disabled="currentPage === totalPages"
         @click="goToPage(currentPage + 1)"
-      >
-        <img src="@/assets/icons/arrow_right.svg" alt="Arrow Right" class="order-arrow-icon" />
-      </button>
+        :disabled="currentPage === meta.last_page"
+        class="px-3 py-1 rounded bg-white border border-gray-300 hover:bg-gray-100 disabled:opacity-50"
+      >&gt;</button>
     </div>
 
-    <!-- Модальне вікно з деталями замовлення -->
-    <div v-if="showDetailsModal" class="order-modal-overlay">
-      <div class="order-modal-dialog">
-        <div class="order-modal-header">
-          <h2>Деталі замовлення #{{ orderDetails.id }}</h2>
-          <button class="order-close-button" @click="closeDetailsModal">&times;</button>
-        </div>
-        <div class="order-modal-body">
-          <p><strong>Дата:</strong> {{ orderDetails.order_date }}</p>
-          <p><strong>Статус:</strong> {{ orderDetails.status }}</p>
-          <p><strong>Телефон:</strong> {{ orderDetails.phone_number }}</p>
-          <p><strong>Продукти:</strong> {{ orderDetails.products.join(', ') }}</p>
-        </div>
+    <!-- Модал деталів -->
+    <div
+      v-if="showDetailsModal"
+      class="fixed inset-0 bg-black bg-opacity-25 flex items-center justify-center z-50"
+      @click.self="closeDetailsModal"
+    >
+      <div class="bg-white rounded-lg p-6 w-full max-w-md shadow-lg">
+        <h3 class="text-xl font-semibold mb-4">Деталі замовлення #{{ orderDetails.id }}</h3>
+        <p class="mb-2"><strong>Дата:</strong> {{ orderDetails.order_date }}</p>
+        <p class="mb-2"><strong>Статус:</strong> {{ orderDetails.status }}</p>
+        <p class="mb-2"><strong>Телефон:</strong> {{ orderDetails.phone_number }}</p>
+        <p class="mb-4"><strong>Продукти:</strong> {{ orderDetails.products.join(', ') }}</p>
+        <button
+          @click="closeDetailsModal"
+          class="mt-2 px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400"
+        >Закрити</button>
       </div>
-    </div>
-
-    <!-- Toast повідомлення -->
-    <div v-if="showToast" class="order-toast">
-      <img src="@/assets/icons/success.svg" alt="Success" class="order-toast__icon" />
-      <span class="order-toast__text">Замовлення оновлено</span>
     </div>
   </main>
 </template>
@@ -154,8 +136,6 @@ export default {
     return {
       orders: [],
       searchQuery: "",
-      currentPage: 1,
-      totalPages: 3,
       sortState: {
         id: "none",
         order_date: "none",
@@ -163,442 +143,112 @@ export default {
         phone_number: "none",
         products: "none"
       },
+      meta: { last_page: 1 },
+      currentPage: 1,
       highlightedOrderId: null,
       showDetailsModal: false,
-      orderDetails: {},
-      showToast: false
+      orderDetails: {}
     };
   },
   computed: {
-    filteredOrders() {
-      const query = this.searchQuery.toLowerCase();
-      return this.orders.filter(order => {
+    columns() {
+      return [
+        { key: "id", label: "ID", sortable: true },
+        { key: "order_date", label: "Дата", sortable: true },
+        { key: "status", label: "Статус", sortable: true },
+        { key: "phone_number", label: "Телефон", sortable: true },
+        { key: "products", label: "Продукти", sortable: true }
+      ];
+    },
+    filteredAndSorted() {
+      let arr = this.orders.filter(o => {
+        const q = this.searchQuery.toLowerCase();
         return (
-          order.id.toString().includes(query) ||
-          order.order_date.toLowerCase().includes(query) ||
-          order.status.toLowerCase().includes(query) ||
-          order.phone_number.includes(query)
+          o.id.toString().includes(q) ||
+          o.order_date.toLowerCase().includes(q) ||
+          o.status.toLowerCase().includes(q) ||
+          o.phone_number.includes(q)
         );
       });
+      const [key, order] = Object.entries(this.sortState).find(([_, v]) => v !== "none") || [];
+      if (key) {
+        arr.sort((a, b) => {
+          let va = a[key], vb = b[key];
+          if (Array.isArray(va)) va = va.join();
+          if (order === "asc") return va > vb ? 1 : va < vb ? -1 : 0;
+          else return va < vb ? 1 : va > vb ? -1 : 0;
+        });
+      }
+      return arr;
     }
   },
   mounted() {
-    this.fetchOrders();
-    document.title = "Замовлення";
+    this.fetchOrders(1);
   },
   methods: {
-    async fetchOrders() {
+    async fetchOrders(page = 1) {
+      this.currentPage = page;
+      const params = { page };
+      const sorted = Object.entries(this.sortState).find(([_, v]) => v !== "none");
+      if (sorted) {
+        params.sort_by = sorted[0];
+        params.sort_order = sorted[1];
+      }
       try {
-        const response = await axios.get("https://koshtovnya.api-dev.bmax-edu.website/api/admin/orders", {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-            Accept: "application/json"
-          }
+        const res = await axios.get("https://koshtovnya.api-dev.bmax-edu.website/api/admin/orders", {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+          params
         });
-        // Припустимо, що API повертає список замовлень у response.data.orders
-        this.orders = response.data.orders;
-      } catch (error) {
-        console.error("Помилка отримання замовлень:", error);
+        // Ensure placeholder appears for null statuses
+        this.orders = res.data.data.map(o => ({ ...o, status: o.status || '' }));
+        this.meta.last_page = res.data.meta.last_page;
+      } catch (e) {
+        console.error(e);
       }
     },
-    async showOrderDetails(orderId) {
-      try {
-        const response = await axios.get(`https://koshtovnya.api-dev.bmax-edu.website/api/orders/${orderId}`, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-            Accept: "application/json"
-          }
-        });
-        this.orderDetails = response.data.data;
-        this.showDetailsModal = true;
-      } catch (error) {
-        console.error("Помилка отримання деталей замовлення:", error);
-      }
+    cycleSort(col) {
+      const ord = this.sortState[col];
+      Object.keys(this.sortState).forEach(k => (this.sortState[k] = "none"));
+      this.sortState[col] = ord === "none" ? "asc" : ord === "asc" ? "desc" : "none";
+      this.fetchOrders(this.currentPage);
     },
-    // Видалення прибрано, оскільки замовлення не можна видаляти
-    /*
-    async deleteOrder(orderId) {
-      try {
-        await axios.delete(`https://koshtovnya.api-dev.bmax-edu.website/api/admin/orders/${orderId}`, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-            Accept: "application/json"
-          }
-        });
-        this.fetchOrders();
-        this.showToastMessage("Замовлення видалено");
-      } catch (error) {
-        console.error("Помилка видалення замовлення:", error);
-      }
+    getSortIcon(s) {
+      if (s === "asc") return require("@/assets/icons/asc.svg");
+      if (s === "desc") return require("@/assets/icons/desc.svg");
+      return require("@/assets/icons/none_sorted.svg");
     },
-    */
+    goToPage(page) {
+      if (page < 1 || page > this.meta.last_page) return;
+      this.fetchOrders(page);
+    },
+    showOrderDetails(id) {
+      axios
+        .get(`https://koshtovnya.api-dev.bmax-edu.website/api/admin/orders/${id}`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+        })
+        .then(res => {
+          this.orderDetails = { ...res.data.data, status: res.data.data.status || '' };
+          this.showDetailsModal = true;
+        })
+        .catch(console.error);
+    },
     closeDetailsModal() {
       this.showDetailsModal = false;
       this.orderDetails = {};
     },
-    onSearch() {
-      console.log("Пошук:", this.searchQuery);
-    },
-    goToPage(page) {
-      this.currentPage = page;
-      // Логіка пагінації при потребі
-    },
-    cycleSort(column) {
-      if (this.sortState[column] === "none") {
-        this.sortState[column] = "asc";
-      } else if (this.sortState[column] === "asc") {
-        this.sortState[column] = "desc";
-      } else {
-        this.sortState[column] = "none";
-      }
-      console.log(`Сортування ${column}: ${this.sortState[column]}`);
-      // Реалізуйте локальне сортування або виклик API тут
-    },
-    getSortIcon(state) {
-      if (state === "asc") {
-        return require("@/assets/icons/asc.svg");
-      } else if (state === "desc") {
-        return require("@/assets/icons/desc.svg");
-      } else {
-        return require("@/assets/icons/none_sorted.svg");
-      }
-    },
-    showToastMessage(message) {
-      this.showToast = true;
-      setTimeout(() => {
-        this.showToast = false;
-      }, 3000);
+    updateStatus(id, status) {
+      axios
+        .patch(
+          `https://koshtovnya.api-dev.bmax-edu.website/api/admin/orders/${id}`,
+          { status },
+          { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
+        )
+        .then(() => {
+          this.highlightedOrderId = id;
+          setTimeout(() => this.highlightedOrderId = null, 3000);
+        })
+        .catch(console.error);
     }
   }
 };
 </script>
-
-<style scoped>
-/* Основний контейнер */
-.order-list {
-  max-width: 1200px;
-  margin: 20px auto;
-  padding: 20px;
-  font-family: Montserrat, sans-serif;
-  color: #000;
-}
-
-/* Шапка */
-.order-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-}
-.order-list__title {
-  font-size: 24px;
-  font-weight: 700;
-  margin: 0;
-}
-.order-add-button {
-  width: 126px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  border-radius: 4px;
-  background-color: #6b1f1f;
-  border: none;
-  cursor: pointer;
-  font-weight: 600;
-  color: #fff;
-  transition: background-color 0.3s, border 0.3s;
-}
-.order-add-button__icon {
-  width: 20px;
-  height: 20px;
-  object-fit: contain;
-}
-.order-add-button__text {
-  font-size: 14px;
-  font-weight: 600;
-  font-family: Montserrat, sans-serif;
-}
-.order-add-button:hover {
-  background-color: #a01212;
-}
-.order-add-button:active {
-  border: 1px solid #1d1d1d;
-}
-
-/* Пошук */
-.order-search-container {
-  margin-bottom: 20px;
-}
-.order-search-input-wrapper {
-  display: flex;
-  align-items: center;
-  width: 262px;
-  height: 30px;
-  background-color: #f6e7e7;
-  border-radius: 4px;
-  overflow: hidden;
-  border: 1px solid transparent;
-  transition: border 0.3s;
-}
-.order-search-input-wrapper:focus-within {
-  border: 1px solid #1d1d1d;
-}
-.order-search-input {
-  flex: 1;
-  height: 100%;
-  padding: 8px 12px;
-  border: none;
-  background: transparent;
-  color: #6b1f1f;
-  font-size: 14px;
-  outline: none;
-}
-.order-search-icon {
-  width: 16px;
-  height: 16px;
-  margin-right: 12px;
-  pointer-events: none;
-}
-
-/* Таблиця замовлень */
-.order-table-container {
-  border-radius: 6px;
-  overflow: hidden;
-  border: 1px solid #e0e0e0;
-}
-.order-table__header {
-  display: grid;
-  grid-template-columns: 100px 150px 150px 150px 500px 100px;
-  align-items: center;
-  padding: 12px 16px;
-  border-bottom: 1px solid #e0e0e0;
-  background-color: #f6e7e7;
-  font-size: 14px;
-  font-weight: 600;
-  color: #48484b;
-  text-align: left;
-}
-.order-sortable-header {
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-}
-.order-sort-icon {
-  width: 16px;
-  height: 16px;
-  object-fit: contain;
-}
-
-/* Список замовлень */
-.order-list__items {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-.order-item {
-  display: grid;
-  grid-template-columns: 100px 150px 150px 150px 500px 100px;
-  align-items: center;
-  padding: 12px 16px;
-  border-bottom: 1px solid #e0e0e0;
-  background-color: #fff;
-  font-size: 14px;
-  transition: background-color 0.3s;
-  text-align: left;
-}
-.order-item:hover {
-  background-color: #f9f9f9;
-}
-.order-item.highlighted {
-  background-color: #e4f2e7 !important;
-}
-
-/* Поля таблиці */
-.order-item__id,
-.order-item__date,
-.order-item__status,
-.order-item__phone,
-.order-item__products {
-  padding-right: 8px;
-  white-space: nowrap;
-}
-
-.order-item__products {
-  max-width: 600px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-
-/* Дії */
-.order-item__actions {
-  display: flex;
-  gap: 8px;
-  justify-content: flex-start;
-}
-.order-action-button {
-  width: 32px;
-  height: 32px;
-  border: none;
-  background-color: transparent;
-  cursor: pointer;
-  padding: 0;
-}
-.order-action-button__icon {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
-
-/* Пагінація */
-.order-pagination-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 50px;
-  margin-top: 20px;
-  gap: 8px;
-}
-.order-pagination-button {
-  width: 35px;
-  height: 35px;
-  border: none;
-  background-color: #fff;
-  border-radius: 6px;
-  font-family: Montserrat, sans-serif;
-  font-size: 14px;
-  cursor: pointer;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s, background-color 0.3s, box-shadow 0.3s;
-}
-.order-pagination-button:hover {
-  background-color: #f0f0f0;
-  transform: translateY(-2px);
-}
-.order-pagination-button.active {
-  background-color: #6b1f1f;
-  color: #fff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-.order-pagination-arrow {
-  width: 35px;
-  height: 35px;
-  border: none;
-  background-color: #fff;
-  border-radius: 6px;
-  cursor: pointer;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s, background-color 0.3s, box-shadow 0.3s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.order-pagination-arrow:hover:not(:disabled) {
-  background-color: #f0f0f0;
-  transform: translateY(-2px);
-}
-.order-pagination-arrow:disabled {
-  background-color: #aeaeae;
-  cursor: not-allowed;
-  box-shadow: none;
-}
-.order-arrow-icon {
-  width: 16px;
-  height: 16px;
-  object-fit: contain;
-}
-
-/* Empty state */
-.empty-state {
-  width: 1124px;
-  height: 199px;
-  margin: 40px auto;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: 'Montserrat', sans-serif;
-  font-weight: 600;
-  font-size: 14px;
-  color: #000;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  background-color: #fafafa;
-  text-align: center;
-}
-
-/* Модальне вікно */
-.order-modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0,0,0,0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 2000;
-}
-.order-modal-dialog {
-  background: #fff;
-  border-radius: 8px;
-  width: 400px;
-  max-width: 90%;
-  padding: 20px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-  animation: fadeIn 0.3s ease-out;
-}
-.order-modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 1px solid #ddd;
-  padding-bottom: 10px;
-  margin-bottom: 20px;
-}
-.order-close-button {
-  background: transparent;
-  border: none;
-  font-size: 24px;
-  cursor: pointer;
-}
-.order-modal-body p {
-  font-size: 16px;
-  margin: 8px 0;
-}
-
-/* Toast повідомлення */
-.order-toast {
-  position: fixed;
-  bottom: 20px;
-  left: 20px;
-  width: 300px;
-  height: 44px;
-  background-color: #e4f2e7;
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-  padding: 0 10px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-  z-index: 2000;
-}
-.order-toast__icon {
-  width: 20px;
-  height: 20px;
-  margin-right: 10px;
-}
-.order-toast__text {
-  font-family: Montserrat, sans-serif;
-  font-size: 14px;
-  color: #000;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-</style>

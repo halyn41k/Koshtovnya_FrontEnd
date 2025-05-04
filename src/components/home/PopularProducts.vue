@@ -34,9 +34,7 @@
               <h3 class="text-lg font-montserrat font-semibold line-clamp-2 h-12">
                 {{ product.name }}
               </h3>
-              <p class="text-xl font-semibold mt-1" style="color:#6B1F1F;">
-                {{ product.price }} грн
-              </p>
+              <p class="text-xl font-semibold text-red-700 mt-1" style="font-family: 'Inter', sans-serif;">{{ product.price }} грн</p>
             </div>
           </router-link>
 

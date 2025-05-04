@@ -185,8 +185,9 @@
 <script>
 import { defineAsyncComponent } from "vue";
 import api from "@/services/api";
-
+// eslint-disable-next-line 
 const ProductReviews = defineAsyncComponent(() => import("./ProductReviews.vue"));
+// eslint-disable-next-line 
 const ViewOtherProduct = defineAsyncComponent(() => import("./ViewOtherProduct.vue"));
 
 export default {

@@ -1,16 +1,23 @@
 <template>
-  <main class="cart">
-    <header class="cart-header">
-      <div class="line"></div>
-      <h1 class="main-title">Оплата підтверджена</h1>
-      <div class="line"></div>
+  <main class="min-h-screen bg-fixed bg-cover bg-center px-6 py-32" :style="{ backgroundImage: `url(${require('@/assets/cartpattern.png')})` }">
+    <header class="flex items-center justify-center gap-6 mb-12">
+      <div class="flex-1 h-px bg-gray-300"></div>
+      <h1 class="text-3xl font-extrabold tracking-tight text-center text-gray-900 drop-shadow-md">
+        Оплата підтверджена
+      </h1>
+      <div class="flex-1 h-px bg-gray-300"></div>
     </header>
-    <div class="cart-content">
-      <section class="confirmation-content">
-        <p>Ви успішно здійснили оплату. Зачекайте, будь ласка, вас перенаправляють...</p>
-        <p>
-          Якщо перенаправлення не відбулося, перейдіть за посиланням 
-          <router-link to="/account?tab=orderhistory">Історія замовлень</router-link>.
+
+    <div class="max-w-md mx-auto bg-white bg-opacity-80 backdrop-blur-md rounded-2xl shadow-lg p-8">
+      <section class="space-y-6 text-center">
+        <p class="text-lg text-gray-700">
+          Ви успішно здійснили оплату. Зачекайте, будь ласка, вас перенаправляють...
+        </p>
+        <p class="text-gray-600">
+          Якщо перенаправлення не відбулося, перейдіть за посиланням
+          <router-link to="/account?tab=orderhistory" class="text-red-600 font-medium hover:underline">
+            Історія замовлень
+          </router-link>.
         </p>
       </section>
     </div>
@@ -19,73 +26,20 @@
 
 <script>
 export default {
-  name: "PaymentConfirmed",
+  name: 'PaymentConfirmed',
   mounted() {
-    document.title = "Підтвердження оплати";
-    // Перенаправлення через 3 секунди
+    document.title = 'Підтвердження оплати';
     setTimeout(() => {
-      this.$router.push({ path: "/account", query: { tab: "orderhistory" } });
+      this.$router.push({ path: '/account', query: { tab: 'orderhistory' } });
     }, 10000);
   },
 };
 </script>
 
 <style scoped>
-@font-face {
-  font-family: 'KyivType Medium';
-  src: url('@/assets/fonts/KyivType2020-14-12/KyivType-NoVariable/TTF/KyivTypeSans-Medium2.ttf') format('truetype');
-  font-weight: 500;
-  font-style: normal;
-}
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700&display=swap');
 
-.cart {
-  display: flex;
-  flex-direction: column;
-  padding: 0 46.67px;
-  margin-top: 180px;
-  background-image: url('@/assets/cartpattern.png');
-  background-size: cover;
-}
-
-.cart-header {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 30px;
-  margin-bottom: 40px;
-}
-
-.line {
-  flex: 1;
-  height: 2px;
-  background-color: grey;
-  width: 45%;
-}
-
-.main-title {
-  font-family: 'KyivType Titling', sans-serif;
-  font-size: 34px;
-  font-weight: 900;
-  letter-spacing: -1.2px;
-  text-shadow: 0 2px 3px rgba(99, 2, 2, 0.22);
-  text-align: center;
-}
-
-.cart-content {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-top: 10px;
-}
-
-.confirmation-content {
-  text-align: center;
-  font-size: 18px;
-  color: grey;
-  padding: 20px;
-}
-
-.confirmation-content p {
-  margin-bottom: 20px;
+main, h1, p, .router-link-active {
+  font-family: 'Montserrat', sans-serif;
 }
 </style>

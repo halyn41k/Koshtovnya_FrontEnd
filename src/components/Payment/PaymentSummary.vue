@@ -1,35 +1,73 @@
 <template>
-  <section class="payment-summary">
-    <div class="order-summary">
-      <h2 class="summary-title">Сума до оплати</h2>
-      <div class="summary-details">
-        <!-- Вивід товарів з кошика -->
-        <div class="summary-row" v-for="item in safeCartItems" :key="item.id">
+  <section class="relative z-[5]">
+    <div
+      class="
+        w-full mt-5
+        lg:absolute lg:top-[300px] lg:right-[100px] lg:w-[300px] lg:mt-0
+        p-4 lg:p-5
+        bg-[#FFF7F6] border border-[#E6E6E6] rounded-lg
+        max-h-[400px] overflow-y-auto
+        transition-all duration-300
+      "
+      style="font-family: 'Montserrat', sans-serif;"
+    >
+      <!-- Заголовок -->
+      <h2 class="text-black font-bold text-[20px] leading-[1.3] mb-4">
+        Сума до оплати
+      </h2>
+
+      <!-- Деталі замовлення -->
+      <div class="font-normal text-[14px] leading-[1.3]">
+        <!-- Товари в кошику -->
+        <div
+          v-for="item in safeCartItems"
+          :key="item.id"
+          class="flex justify-between mb-2.5"
+        >
           <span>{{ item.name }}</span>
-          <span class="price">{{ item.price * item.quantity }}₴</span>
+          <span class="text-[#A01212] font-semibold text-[14px]">
+            {{ item.price * item.quantity }}₴
+          </span>
         </div>
+
         <!-- Вартість доставки -->
-        <div class="summary-row">
+        <div class="flex justify-between mb-2.5">
           <span>Доставка</span>
-          <span class="price">{{ deliveryCost }}₴</span>
+          <span class="text-[#A01212] font-semibold text-[14px]">
+            {{ deliveryCost }}₴
+          </span>
         </div>
+
         <!-- Загальна сума -->
-        <div class="summary-row total">
+        <div class="flex justify-between text-[18px] mt-4">
           <span>Загальна сума</span>
-          <span class="price">{{ totalWithDelivery }}₴</span>
+          <span class="text-[#A01212] font-semibold">
+            {{ totalWithDelivery }}₴
+          </span>
         </div>
       </div>
-      <button class="payment-button" @click="submitOrder">
+
+      <!-- Кнопка оформлення -->
+      <button
+        @click="submitOrder"
+        class="
+          w-full flex justify-between items-center
+          bg-[#6B1F1F] text-white font-bold text-[15px] leading-[1.3]
+          rounded-[8px] py-[6px] px-[15px] mt-2.5 h-[40px]
+          transition-colors duration-300
+        "
+      >
         <span>Оформити замовлення</span>
         <img
           src="https://cdn.builder.io/api/v1/image/assets/TEMP/436b738744905f60c6a542e2cd314f5694db20045d36b8991f8dab9a31b316a0?placeholderIfAbsent=true&apiKey=c3e46d0a629546c7a48302a5db3297d5"
           alt="Order icon"
-          class="login-icon"
+          class="w-6 h-6"
         />
       </button>
     </div>
   </section>
 </template>
+
 <script>
 import axios from "axios";
 import { mapGetters, mapActions } from "vuex";
@@ -258,107 +296,3 @@ export default {
 };
 </script>
 
-
-
-
-
-
-<style scoped>
-@media (max-width: 991px) {
-
-  .payment-steps,
-  .payment-summary,
-  .order-items,
-  .delivery-address {
-    width: 100%;
-  }
-
-}
-
-.order-summary {
-  position: absolute;
-  top: 300px;
-  right: 100px;
-  z-index: 100;
-  width: 300px;
-  padding: 20px;
-  border-radius: 16px;
-  background-color: rgba(255, 247, 246, 1);
-  border: 1px solid rgba(230, 230, 230, 1);
-  max-height: 400px;
-  overflow-y: auto;
-  transition: position 0.3s ease;
-  z-index: 10;
-}
-
-.order-summary.sticky {
-  position: absolute;
-  top: auto;
-  bottom: 00px;
-}
-
-.summary-title {
-  color: #000;
-  font: 700 20px/1.3 Merriweather, sans-serif;
-  margin-bottom: 16px;
-}
-
-.summary-details {
-  font: 400 14px/1.3 Merriweather, sans-serif;
-}
-
-.summary-row {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 10px;
-}
-
-.price {
-  color: rgba(160, 18, 18, 1);
-  font-family: Inter, sans-serif;
-  font-weight: 600;
-  font-size: 14px;
-}
-
-.total {
-  font-size: 18px;
-  margin-top: 16px;
-}
-
-.payment-button {
-  border-radius: 8px;
-  background-color: rgba(107, 31, 31, 1);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  color: #fff;
-  font: 700 12px/1.3 Merriweather, sans-serif;
-  padding: 6px 15px;
-  margin-top: 10px;
-  width: 100%;
-  border: none;
-  cursor: pointer;
-  transition: background-color 0.3s;
-  height: 40px;
-  font-size: 15px;
-}
-
-.button-icon {
-  width: 24px;
-  height: 24px;
-}
-
-@media (max-width: 991px) {
-  .order-summary {
-    max-width: 100%;
-    margin-top: 20px;
-    padding: 15px;
-  }
-}
-
-
-.payment-summary {
-  z-index: 5;
-  /* Встановлюємо більш високий пріоритет */
-}
-</style>

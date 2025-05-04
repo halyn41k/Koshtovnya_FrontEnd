@@ -1,92 +1,61 @@
 <template>
-    <div class="personal-info">
-      <div class="input-container">
+  <div class="personal-info">
+    <div class="flex flex-col gap-2.5 w-[200px]">
+      <div v-for="(field, key) in fields" :key="key">
         <input
-          class="input-field"
-          v-model="localData.firstName"
-          placeholder="Ім'я"
+          :type="field.type"
+          v-model="localData[key]"
+          :placeholder="field.placeholder"
           @input="updateData"
+          class="border border-gray-400 p-2 rounded text-black text-[14px] w-full montserrat"
         />
-        <span v-if="errors.firstName" class="error">{{ errors.firstName }}</span>
-  
-        <input
-          class="input-field"
-          v-model="localData.lastName"
-          placeholder="Прізвище"
-          @input="updateData"
-        />
-        <span v-if="errors.lastName" class="error">{{ errors.lastName }}</span>
-  
-        <input
-          class="input-field"
-          v-model="localData.secondName"
-          placeholder="По батькові"
-          @input="updateData"
-        />
-        <span v-if="errors.secondName" class="error">{{ errors.secondName }}</span>
-  
-        <input
-          class="input-field"
-          v-model="localData.phone"
-          placeholder="Номер телефону"
-          @input="updateData"
-        />
-        <span v-if="errors.phone" class="error">{{ errors.phone }}</span>
+        <span v-if="errors[key]" class="text-red-500 text-xs">
+          {{ errors[key] }}
+        </span>
       </div>
     </div>
-  </template>
-  
-  <script>
-  export default {
-    name: "PersonalInfo",
-    props: {
-      modelValue: {
-        type: Object,
-        required: true,
+  </div>
+</template>
+
+<script>
+export default {
+  name: 'PersonalInfo',
+  props: {
+    modelValue: { type: Object, required: true },
+    errors:     { type: Object, default: () => ({}) },
+  },
+  data() {
+    return {
+      localData: { ...this.modelValue },
+      fields: {
+        firstName:  { type: 'text', placeholder: "Ім'я" },
+        lastName:   { type: 'text', placeholder: 'Прізвище' },
+        secondName: { type: 'text', placeholder: 'По батькові' },
+        phone:      { type: 'tel',  placeholder: 'Номер телефону' },
       },
-      errors: {
-        type: Object,
-        default: () => ({}),
-      },
+    };
+  },
+  watch: {
+    modelValue: {
+      handler(val) { this.localData = { ...val }; },
+      deep: true,
     },
-    data() {
-      return {
-        localData: { ...this.modelValue },
-      };
+  },
+  methods: {
+    updateData() {
+      this.$emit('update:modelValue', this.localData);
     },
-    watch: {
-      modelValue: {
-        handler(newVal) {
-          this.localData = { ...newVal };
-        },
-        deep: true,
-      },
-    },
-    methods: {
-      updateData() {
-        this.$emit("update:modelValue", this.localData);
-      },
-    },
-  };
-  </script>
-  
-  <style scoped>
-  .input-container {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    width: 200px;
-  }
-  .input-field {
-    border: 1px solid #9d9292;
-    padding: 8px;
-    color: #6b1f1f;
-    font-family: 'Montserrat', sans-serif;
-    border-radius: 4px;
-  }
-  .error {
-    color: red;
-    font-size: 12px;
-  }
-  </style>
-  
+  },
+};
+</script>
+
+<style scoped>
+/* Імпортуємо Montserrat Medium */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@500&display=swap');
+
+/* Применяємо до полей */
+.montserrat {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 500;
+}
+</style>

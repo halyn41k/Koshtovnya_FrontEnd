@@ -3092,6 +3092,11 @@
     espree "^3.5.4"
     htmlparser2 "^3.9.2"
 
+"@vueform/slider@^2.1.10":
+  version "2.1.10"
+  resolved "https://registry.yarnpkg.com/@vueform/slider/-/slider-2.1.10.tgz#b3eb36178327b8c850e7e6f73c117663ea1cdf7f"
+  integrity sha512-L2G3Ju51Yq6yWF2wzYYsicUUaH56kL1QKGVtimUVHT1K1ADcRT94xVyIeJpS0klliVEeF6iMZFbdXtHq8AsDHw==
+
 "@vxna/mini-html-webpack-template@^0.1.7":
   version "0.1.7"
   resolved "https://registry.npmjs.org/@vxna/mini-html-webpack-template/-/mini-html-webpack-template-0.1.7.tgz"
@@ -14711,6 +14716,16 @@ pretty-format@^29.7.0:
     ansi-styles "^5.0.0"
     react-is "^18.0.0"
 
+primeicons@^7.0.0:
+  version "7.0.0"
+  resolved "https://registry.yarnpkg.com/primeicons/-/primeicons-7.0.0.tgz#6b25c3fdcb29bb745a3035bdc1ed5902f4a419cf"
+  integrity sha512-jK3Et9UzwzTsd6tzl2RmwrVY/b8raJ3QZLzoDACj+oTJ0oX7L9Hy+XnVwgo4QVKlKpnP/Ur13SXV/pVh4LzaDw==
+
+primevue@^3:
+  version "3.53.1"
+  resolved "https://registry.yarnpkg.com/primevue/-/primevue-3.53.1.tgz#d5a40010acf0f3f351047499e785934219291f92"
+  integrity sha512-Bp4peZPdhfKYXwvtsOGGh5dfgmTelm+LZEZKGs/c5mOHhsUJ6xi3EcOZoQVI6oklS946ayMQvgD5L0S7itGO0g==
+
 prismjs@^1.16.0:
   version "1.29.0"
   resolved "https://registry.npmjs.org/prismjs/-/prismjs-1.29.0.tgz"
@@ -18495,6 +18510,11 @@ void-elements@^2.0.1:
   version "2.0.1"
   resolved "https://registry.npmjs.org/void-elements/-/void-elements-2.0.1.tgz"
   integrity sha512-qZKX4RnBzH2ugr8Lxa7x+0V6XD9Sb/ouARtiasEQCHB1EVU4NXtmHsDDrx1dO4ne5fc3J6EW05BP1Dl0z0iung==
+
+vue-3-slider-component@^1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/vue-3-slider-component/-/vue-3-slider-component-1.0.2.tgz#e128c192e9f1147966f7fdfc58fa47bde88646ec"
+  integrity sha512-W2rRH/0Tye+As8IrJqjtbQQo+SY/4+Lm8OOiiKRyaU/LAqHcEwjLFicvcGf08Kgt+f9994DEqkecK2k0HSF2RQ==
 
 vue-awesome-swiper@^5.0.1:
   version "5.0.1"

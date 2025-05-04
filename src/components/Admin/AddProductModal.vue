@@ -1,156 +1,207 @@
 <template>
-  <div class="modal-overlay" @click.self="close">
-    <div class="modal-container">
-      <h2 class="modal-title">Додати товар</h2>
-      <form @submit.prevent="submitForm">
-        <!-- Назва та ціна -->
-        <div class="form-group">
-          <label for="name">Назва</label>
-          <input id="name" type="text" v-model="form.name" required />
+  <div
+    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+    @click.self="close"
+  >
+    <div
+      class="bg-white rounded-lg w-full max-w-2xl p-6 overflow-y-auto max-h-[90vh] shadow-lg"
+    >
+      <h2 class="text-2xl font-semibold text-center mb-6">Додати товар</h2>
+
+      <form @submit.prevent="submitForm" class="space-y-6">
+        <!-- Назва та Ціна -->
+        <div class="grid grid-cols-2 gap-4">
+          <div class="flex flex-col">
+            <label for="name" class="mb-1 text-sm font-medium text-gray-700">Назва</label>
+            <input
+              id="name"
+              type="text"
+              v-model="form.name"
+              required
+              class="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50"
+            />
+          </div>
+          <div class="flex flex-col">
+            <label for="price" class="mb-1 text-sm font-medium text-gray-700">Ціна</label>
+            <input
+              id="price"
+              type="number"
+              v-model="form.price"
+              required
+              class="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50"
+            />
+          </div>
         </div>
-        <div class="form-group">
-          <label for="price">Ціна</label>
-          <input id="price" type="number" v-model="form.price" required />
-        </div>
-        <!-- Селекти з даними форми -->
-        <div class="form-group">
-          <label for="category">Категорія</label>
-          <select id="category" v-model="form.category" required>
-            <option value="">Оберіть категорію</option>
-            <option
-              v-for="item in formData.categories"
-              :key="item"
-              :value="item"
+
+        <!-- Селекти -->
+        <div class="grid grid-cols-2 gap-4">
+          <div class="flex flex-col">
+            <label for="category" class="mb-1 text-sm font-medium text-gray-700">Категорія</label>
+            <select
+              id="category"
+              v-model="form.category"
+              required
+              class="border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring focus:ring-[#6B1F1F]/50"
             >
-              {{ item }}
-            </option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label for="bead_producer">Бісер виробник</label>
-          <select id="bead_producer" v-model="form.bead_producer" required>
-            <option value="">Оберіть виробника</option>
-            <option
-              v-for="item in formData.bead_producers"
-              :key="item"
-              :value="item"
-            >
-              {{ item }}
-            </option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label for="country_of_manufacture">Країна виробництва</label>
-          <select
-            id="country_of_manufacture"
-            v-model="form.country_of_manufacture"
-            required
-          >
-            <option value="">Оберіть країну</option>
-            <option
-              v-for="item in formData.countries_of_manufacture"
-              :key="item"
-              :value="item"
-            >
-              {{ item }}
-            </option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label for="type_of_bead">Тип бісеру</label>
-          <select id="type_of_bead" v-model="form.type_of_bead" required>
-            <option value="">Оберіть тип</option>
-            <option
-              v-for="item in formData.type_of_bead"
-              :key="item"
-              :value="item"
-            >
-              {{ item }}
-            </option>
-          </select>
-        </div>
-        <!-- Вага та колір -->
-        <div class="form-group">
-          <label for="weight">Вага</label>
-          <input id="weight" type="number" v-model="form.weight" required />
-        </div>
-        <div class="form-group">
-          <label>Кольори</label>
-          <div class="colors-container">
-            <div
-              v-for="color in formData.colors"
-              :key="color"
-              class="color-option"
-              :class="{ selected: form.colors.includes(color) }"
-              @click="toggleColor(color)"
-            >
-              <div
-                class="color-circle"
-                :style="{ backgroundColor: colorMap[color] || '#fff' }"
+              <option value="">Оберіть категорію</option>
+              <option
+                v-for="item in formData.categories"
+                :key="item"
+                :value="item"
               >
-                <svg
-                  v-if="form.colors.includes(color)"
-                  class="check-icon"
-                  viewBox="0 0 24 24"
-                >
-                  <polyline
-                    points="20 6 9 17 4 12"
-                    fill="none"
-                    stroke="#fff"
-                    stroke-width="2"
-                  />
-                </svg>
-              </div>
-              <span class="color-label">{{ color }}</span>
+                {{ item }}
+              </option>
+            </select>
+          </div>
+          <div class="flex flex-col">
+            <label for="bead_producer" class="mb-1 text-sm font-medium text-gray-700">Бісер виробник</label>
+            <select
+              id="bead_producer"
+              v-model="form.bead_producer"
+              required
+              class="border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring focus:ring-[#6B1F1F]/50"
+            >
+              <option value="">Оберіть виробника</option>
+              <option
+                v-for="item in formData.bead_producers"
+                :key="item"
+                :value="item"
+              >
+                {{ item }}
+              </option>
+            </select>
+          </div>
+          <div class="flex flex-col">
+            <label for="country_of_manufacture" class="mb-1 text-sm font-medium text-gray-700">
+              Країна виробництва
+            </label>
+            <select
+              id="country_of_manufacture"
+              v-model="form.country_of_manufacture"
+              required
+              class="border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring focus:ring-[#6B1F1F]/50"
+            >
+              <option value="">Оберіть країну</option>
+              <option
+                v-for="item in formData.countries_of_manufacture"
+                :key="item"
+                :value="item"
+              >
+                {{ item }}
+              </option>
+            </select>
+          </div>
+          <div class="flex flex-col">
+            <label for="type_of_bead" class="mb-1 text-sm font-medium text-gray-700">Тип бісеру</label>
+            <select
+              id="type_of_bead"
+              v-model="form.type_of_bead"
+              required
+              class="border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring focus:ring-[#6B1F1F]/50"
+            >
+              <option value="">Оберіть тип</option>
+              <option
+                v-for="item in formData.type_of_bead"
+                :key="item"
+                :value="item"
+              >
+                {{ item }}
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Вага та Кольори -->
+        <div class="grid grid-cols-2 gap-4">
+          <div class="flex flex-col">
+            <label for="weight" class="mb-1 text-sm font-medium text-gray-700">Вага</label>
+            <input
+              id="weight"
+              type="number"
+              v-model="form.weight"
+              required
+              class="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50"
+            />
+          </div>
+          <div class="flex flex-col">
+            <label class="mb-2 text-sm font-medium text-gray-700">Кольори</label>
+            <div class="flex flex-wrap gap-2">
+              <button
+                v-for="color in formData.colors"
+                :key="color"
+                type="button"
+                @click="toggleColor(color)"
+                :class="[
+                  'flex items-center px-2 py-1 border rounded-md space-x-2',
+                  form.colors.includes(color)
+                    ? 'border-[#6B1F1F] bg-[#6B1F1F]/10'
+                    : 'border-gray-300'
+                ]"
+              >
+                <span
+                  class="w-5 h-5 rounded-full border"
+                  :class="form.colors.includes(color) ? 'border-[#6B1F1F]' : 'border-gray-300'"
+                  :style="{ backgroundColor: colorMap[color] }"
+                ></span>
+                <span class="text-sm text-gray-700">{{ color }}</span>
+              </button>
             </div>
           </div>
         </div>
-        <!-- Динамічні поля для розмірів -->
-        <div class="form-group">
-          <label>Розміри</label>
+
+        <!-- Розміри -->
+        <div class="flex flex-col space-y-3">
+          <label class="text-sm font-medium text-gray-700">Розміри</label>
           <div
             v-for="(sizeItem, index) in form.sizes"
             :key="index"
-            class="dynamic-field"
+            class="flex items-center gap-2"
           >
             <input
-              type="text"
               v-model="sizeItem.size"
+              type="text"
               placeholder="Розмір"
               required
+              class="flex-1 border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50"
             />
             <input
+              v-model.number="sizeItem.quantity"
               type="number"
-              v-model="sizeItem.quantity"
-              placeholder="Кількість"
               min="1"
+              placeholder="Кількість"
               required
+              class="w-24 border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50"
             />
             <button
               type="button"
-              class="btn btn-remove"
               @click="removeSize(index)"
+              class="px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-500"
             >
               Видалити
             </button>
           </div>
           <button
             type="button"
-            class="btn btn-add"
             @click="addSize"
+            class="w-max px-4 py-2 bg-[#6B1F1F] text-white rounded-md hover:bg-[#A01212]"
           >
             Додати розмір
           </button>
         </div>
-        <!-- Динамічні поля для фурнітури -->
-        <div class="form-group">
-          <label>Фурнітура</label>
+
+        <!-- Фурнітура -->
+        <div class="flex flex-col space-y-3">
+          <label class="text-sm font-medium text-gray-700">Фурнітура</label>
           <div
             v-for="(fitItem, index) in form.fittings"
             :key="index"
-            class="dynamic-field"
+            class="flex items-center gap-2"
           >
-            <select v-model="fitItem.fitting" required>
+            <select
+              v-model="fitItem.fitting"
+              required
+              class="flex-1 border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring focus:ring-[#6B1F1F]/50"
+            >
               <option value="">Оберіть фурнітуру</option>
               <option
                 v-for="item in formData.fittings"
@@ -160,7 +211,11 @@
                 {{ item }}
               </option>
             </select>
-            <select v-model="fitItem.material" required>
+            <select
+              v-model="fitItem.material"
+              required
+              class="flex-1 border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring focus:ring-[#6B1F1F]/50"
+            >
               <option value="">Оберіть матеріал</option>
               <option
                 v-for="item in formData.materials"
@@ -171,47 +226,61 @@
               </option>
             </select>
             <input
+              v-model.number="fitItem.quantity"
               type="number"
-              v-model="fitItem.quantity"
-              placeholder="Кількість"
               min="1"
+              placeholder="Кількість"
               required
+              class="w-24 border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50"
             />
             <button
               type="button"
-              class="btn btn-remove"
               @click="removeFitting(index)"
+              class="px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-500"
             >
               Видалити
             </button>
           </div>
           <button
             type="button"
-            class="btn btn-add"
             @click="addFitting"
+            class="w-max px-4 py-2 bg-[#6B1F1F] text-white rounded-md hover:bg-[#A01212]"
           >
             Додати фурнітуру
           </button>
         </div>
+
         <!-- Зображення -->
-        <div class="form-group">
-          <label>Зображення</label>
-          <label class="file-input-label">
+        <div class="flex flex-col">
+          <label class="mb-1 text-sm font-medium text-gray-700">Зображення</label>
+          <label
+            class="inline-flex items-center px-4 py-2 border-2 border-dashed border-gray-300 rounded-md cursor-pointer text-sm text-gray-600 hover:border-[#A01212]"
+          >
             Вибрати файл
             <input
               type="file"
               @change="handleFileChange"
               accept="image/jpeg,image/png,image/jpg"
-              class="file-input"
+              class="sr-only"
             />
           </label>
         </div>
+
         <!-- Дії -->
-        <div class="modal-actions">
-          <button type="button" class="btn btn-secondary" @click="close">
+        <div class="flex justify-end space-x-4 pt-4 border-t border-gray-200">
+          <button
+            type="button"
+            @click="close"
+            class="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400"
+          >
             Скасувати
           </button>
-          <button type="submit" class="btn btn-primary">Додати</button>
+          <button
+            type="submit"
+            class="px-4 py-2 bg-[#6B1F1F] text-white rounded-md hover:bg-[#A01212]"
+          >
+            Додати
+          </button>
         </div>
       </form>
     </div>
@@ -268,11 +337,14 @@ export default {
   },
   mounted() {
     axios
-      .get("https://koshtovnya.api-dev.bmax-edu.website/api/admin/products/form-data", {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      })
+      .get(
+        "https://koshtovnya.api-dev.bmax-edu.website/api/admin/products/form-data",
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      )
       .then((res) => {
         const d = res.data.data;
         this.formData.categories = d.categories || [];
@@ -303,15 +375,15 @@ export default {
       this.form.fittings.splice(i, 1);
     },
     toggleColor(c) {
-      const i = this.form.colors.indexOf(c);
-      if (i === -1) this.form.colors.push(c);
-      else this.form.colors.splice(i, 1);
+      const idx = this.form.colors.indexOf(c);
+      if (idx === -1) this.form.colors.push(c);
+      else this.form.colors.splice(idx, 1);
     },
     submitForm() {
       const fd = new FormData();
       if (this.form.image) fd.append("image", this.form.image);
       Object.entries(this.form).forEach(([k, v]) => {
-        if (k === "sizes" || k === "fittings" || k === "colors") return;
+        if (["sizes", "fittings", "colors", "image"].includes(k)) return;
         fd.append(k, v);
       });
       this.form.colors.forEach((c) => fd.append("colors[]", c));
@@ -325,12 +397,16 @@ export default {
         fd.append(`fittings[${i}][quantity]`, f.quantity);
       });
       axios
-        .post("https://koshtovnya.api-dev.bmax-edu.website/api/admin/products", fd, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-            "Content-Type": "multipart/form-data",
-          },
-        })
+        .post(
+          "https://koshtovnya.api-dev.bmax-edu.website/api/admin/products",
+          fd,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        )
         .then((r) => {
           const d = r.data.data || r.data.product;
           this.$emit(
@@ -347,165 +423,3 @@ export default {
   },
 };
 </script>
-
-<style scoped>
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 2000;
-}
-.modal-container {
-  background: #fff;
-  padding: 24px;
-  border-radius: 8px;
-  width: 600px;
-  max-height: 90vh;
-  overflow-y: auto;
-  font-family: Montserrat, sans-serif;
-}
-.modal-title {
-  font-size: 24px;
-  font-weight: 700;
-  margin-bottom: 16px;
-  text-align: center;
-}
-
-/* Вирівнюємо лейбли та інпути в дві колонки */
-.form-group {
-  display: grid;
-  grid-template-columns: 150px 1fr;
-  align-items: center;
-  margin-bottom: 16px;
-}
-.form-group label {
-  margin: 0;
-  font-weight: 600;
-}
-.form-group input[type="text"],
-.form-group input[type="number"],
-.form-group select {
-  width: 100%;
-  padding: 8px 12px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 14px;
-}
-
-/* Виносимо великі блоки в другу колонку */
-.form-group .colors-container,
-.form-group .dynamic-field,
-.form-group .btn-add,
-.form-group .file-input-label {
-  grid-column: 2 / 3;
-}
-
-/* Стилі для кольорів, динамічних полів і кнопок лишаються без змін */
-.colors-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-.color-option {
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-}
-.color-circle {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  border: 2px solid #ccc;
-  margin-right: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: transform 0.2s, border-color 0.2s;
-}
-.color-option:hover .color-circle {
-  transform: scale(1.1);
-}
-.color-option.selected .color-circle {
-  border-color: #6b1f1f;
-  transform: scale(1.2);
-}
-.check-icon {
-  width: 16px;
-  height: 16px;
-}
-.dynamic-field {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 8px;
-}
-.dynamic-field input,
-.dynamic-field select {
-  flex: 1;
-  padding: 6px 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 14px;
-}
-.file-input-label {
-  display: inline-block;
-  padding: 8px 16px;
-  background: #f0f0f0;
-  border: 1px dashed #aaa;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-  color: #333;
-}
-.file-input-label:hover {
-  background: #e0e0e0;
-}
-.file-input {
-  display: none;
-}
-.modal-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-  margin-top: 24px;
-}
-.btn {
-  padding: 8px 16px;
-  border: none;
-  border-radius: 4px;
-  font-weight: 600;
-  font-size: 14px;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-.btn-add {
-  background: #6b1f1f;
-  color: #fff;
-}
-.btn-add:hover {
-  background: #c82333;
-}
-.btn-remove {
-  background: #dc3545;
-  color: #fff;
-}
-.btn-remove:hover {
-  background: #c82333;
-}
-.btn-primary {
-  background: #6b1f1f;
-  color: #fff;
-}
-.btn-primary:hover {
-  background: #5a1a1a;
-}
-.btn-secondary {
-  background: #ccc;
-  color: #000;
-}
-.btn-secondary:hover {
-  background: #b3b3b3;
-}
-</style>
