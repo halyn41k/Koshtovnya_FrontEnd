@@ -22,25 +22,14 @@
       </div>
     </section>
 
-    <PaymentSummary
-      :cartItems="localCartItems"
-      :deliveryCost="deliveryCost"
-      :totalAmount="calculatedTotalAmount"
-      :cityRef="formData.city"
-      :deliveryType="formData.deliveryType"
-      @submit-payment="submitOrder"
-      class="w-full"
-    />
   </div>
 </template>
 
 <script>
 import axios from 'axios';
-import PaymentSummary from './PaymentSummary.vue';
 
 export default {
   name: 'OrderReview',
-  components: { PaymentSummary },
   data() {
     return {
       localCartItems: [],

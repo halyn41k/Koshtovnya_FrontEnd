@@ -1,11 +1,62 @@
 <template>
   <section class="py-8 font-montserrat">
-    <!-- Заголовок з лініями -->
+    <!-- Заголовок -->
     <div class="flex items-center my-6">
       <hr class="flex-grow border-t-2 border-gray-300" />
       <h2 class="mx-4 text-2xl font-bold text-gray-900">Відгуки</h2>
       <hr class="flex-grow border-t-2 border-gray-300" />
     </div>
+
+    <!-- Загальна оцінка -->
+    <div class="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+      <div>
+        <div class="flex items-center gap-3">
+          <div class="flex items-center gap-1 text-3xl">
+  <template v-for="n in 5" :key="'star-' + n">
+    <!-- Повна зірка -->
+    <span v-if="n <= Math.floor(rating)" class="text-[#FFA500]">★</span>
+
+    <!-- Половинна зірка -->
+    <svg
+      v-else-if="n - 1 < rating && rating < n"
+      class="w-6 h-6"
+      viewBox="0 0 24 24"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <defs>
+        <linearGradient :id="`grad-half-${n}`" x1="0" y1="0" x2="100%" y2="0">
+          <stop offset="50%" stop-color="#FFA500" />
+          <stop offset="50%" stop-color="#E5E7EB" />
+        </linearGradient>
+      </defs>
+      <path
+        :fill="`url(#grad-half-${n})`"
+        d="M12 .587l3.668 7.431 8.2 1.192-5.934 5.782 
+           1.402 8.177L12 18.896 4.664 23.169 
+           6.066 14.992.132 9.21l8.2-1.192z"
+      />
+    </svg>
+
+    <!-- Порожня зірка -->
+    <span v-else class="text-gray-300">★</span>
+  </template>
+</div>
+
+
+          <span class="text-lg text-gray-700">{{ rating.toFixed(1) }} / 5 ({{ reviewCount }} відгуків)</span>
+        </div>
+        <div class="mt-4 space-y-2">
+          <div v-for="i in [5,4,3,2,1]" :key="i" class="flex items-center gap-3">
+            <span class="w-20 text-sm text-gray-700">{{ i }} зірок</span>
+            <div class="flex-1 h-2 bg-gray-200 rounded">
+              <div class="h-2 rounded bg-[#A01212]" :style="{ width: getRatingWidth(i) + '%' }"></div>
+            </div>
+            <span class="text-sm text-gray-500 w-6 text-right">{{ ratingsBreakdown[i] || 0 }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
 
     <!-- Кнопка “Додати відгук” під заголовком — тільки коли є відгуки -->
     <div v-if="!loading && reviews.length" class="flex justify-end w-full mb-6 px-4 sm:px-0">
@@ -164,6 +215,9 @@ export default {
       reviewsPerPage: 5,
       loading: false,
       userRole: storedUser ? JSON.parse(storedUser).role : null,
+      rating: 0,
+      reviewCount: 0,
+      ratingsBreakdown: {},
     };
   },
   computed: {
@@ -180,20 +234,29 @@ export default {
       this.loading = true;
       try {
         const resp = await api.getProductReviews(this.productId);
-        // Уніфікуємо replies як масив
         this.reviews = (resp.data || []).map(r => ({
           ...r,
-          replies: r.replies
-            ? r.replies
-            : r.reply
-            ? [r.reply]
-            : [],
+          replies: r.replies ? r.replies : r.reply ? [r.reply] : [],
         }));
       } catch (e) {
         console.error("Помилка завантаження відгуків:", e);
       } finally {
         this.loading = false;
       }
+    },
+    async fetchRatingStats() {
+      try {
+        const { data } = await api.getProduct(this.productId);
+        this.rating = data.rating || 0;
+        this.reviewCount = data.review_count || 0;
+        this.ratingsBreakdown = data.ratings_breakdown || {};
+      } catch (e) {
+        console.error("Помилка завантаження рейтингу товару:", e);
+      }
+    },
+    getRatingWidth(star) {
+      const total = Object.values(this.ratingsBreakdown).reduce((sum, val) => sum + val, 0);
+      return total ? ((this.ratingsBreakdown[star] || 0) / total * 100).toFixed(1) : 0;
     },
     async submitReview() {
       if (!this.newReview.comment.trim()) return;
@@ -204,6 +267,7 @@ export default {
           rating: this.newReview.rating,
         });
         await this.fetchReviews();
+        await this.fetchRatingStats();
         this.newReview.rating = 5;
         this.newReview.comment = "";
         this.showReviewForm = false;
@@ -271,6 +335,7 @@ export default {
   },
   created() {
     this.fetchReviews();
+    this.fetchRatingStats();
   },
 };
 </script>

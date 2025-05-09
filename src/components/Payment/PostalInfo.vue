@@ -6,7 +6,7 @@
         <select
           v-model="localDeliveryCategory"
           @change="onDeliveryCategoryChange"
-          class="block w-full p-2 border border-gray-300 rounded-md bg-white text-gray-900 pr-8 appearance-none"
+          class="block w-full p-2 border border-gray-300 rounded-md bg-white text-gray-900 font-normal pr-8 appearance-none"
         >
           <option disabled value="">Оберіть тип доставки</option>
           <option value="courier">Кур'єр</option>
@@ -24,7 +24,7 @@
         <select
           v-model="localData.deliveryType"
           @change="onDeliveryTypeChange"
-          class="block w-full p-2 border border-gray-300 rounded-md bg-white text-gray-900 pr-8 appearance-none"
+          class="block w-full p-2 border border-gray-300 rounded-md bg-white text-gray-900 font-normal pr-8 appearance-none"
         >
           <option disabled value="">Оберіть спосіб доставки</option>
           <option
@@ -49,7 +49,7 @@
           v-model="localData.city"
           @input="onCityInput"
           placeholder="Введіть місто"
-          class="block w-full p-2 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-500"
+          class="block w-full p-2 border border-gray-300 rounded-md text-gray-900 font-normal focus:outline-none focus:ring-2 focus:ring-red-500"
         />
         <span v-if="errors.city" class="text-red-500 text-xs absolute top-full mt-1">{{ errors.city }}</span>
         <ul
@@ -74,7 +74,7 @@
             v-model="localData.streetSearch"
             @input="onStreetSearch"
             placeholder="Введіть назву вулиці"
-            class="block w-full p-2 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-500"
+            class="block w-full p-2 border border-gray-300 rounded-md text-gray-900 font-normal focus:outline-none focus:ring-2 focus:ring-red-500"
           />
           <span v-if="errors.street" class="text-red-500 text-xs absolute top-full mt-1">{{ errors.street }}</span>
           <ul
@@ -98,7 +98,7 @@
             v-model="localData.houseNumber"
             @input="updateData"
             placeholder="Номер будинку"
-            class="block w-full p-2 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-500"
+            class="block w-full p-2 border border-gray-300 rounded-md text-gray-900 font-normal focus:outline-none focus:ring-2 focus:ring-red-500"
           />
           <span v-if="errors.houseNumber" class="text-red-500 text-xs">{{ errors.houseNumber }}</span>
         </div>
@@ -109,7 +109,7 @@
         <select
           v-model="localData.warehouse"
           @change="updateData"
-          class="block w-full p-2 border border-gray-300 rounded-md bg-white text-gray-900 pr-8 appearance-none"
+          class="block w-full p-2 border border-gray-300 rounded-md bg-white text-gray-900 font-normal pr-8 appearance-none"
         >
           <option disabled value="">Оберіть відділення</option>
           <option
@@ -130,6 +130,7 @@
     </div>
   </div>
 </template>
+
 
 <script>
 import axios from 'axios';

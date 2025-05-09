@@ -345,14 +345,7 @@ export default {
   name: 'HeaderComponent',
   data() {
     return {
-      categories: [
-        { name: 'bracelets', link: '/bracelets' },
-        { name: 'herdany',   link: '/herdany'   },
-        { name: 'dukats',    link: '/dukats'    },
-        { name: 'earrings',  link: '/earrings'  },
-        { name: 'sylyanky',  link: '/sylyanky'  },
-        { name: 'belts',     link: '/belts'     },
-      ],
+      categories: [],
       selectedLanguage: 'uk',
       selectedCurrency: 'UAH',
       cartCount: 0,
@@ -413,7 +406,18 @@ export default {
         })
       ).catch(() => {});
     },
-    startSearch() {},  // watcher handles
+    async fetchCategories() {
+  try {
+    const res = await api.getCategories();
+    this.categories = res.data.map(cat => ({
+      name: cat.name,
+      link: `/category/${cat.id}`,
+    }));
+  } catch (e) {
+    console.error('Не вдалося завантажити категорії:', e);
+  }
+},
+    startSearch() {},
     resetResults() { this.results = []; this.isVisible = false; this.loading = false; },
     goToProduct(id) { this.$router.push(`/productpage/${id}`); this.resetResults(); },
     formatPrice(p) {
@@ -426,12 +430,14 @@ export default {
     document.addEventListener('mousedown', this.handleOutsideClick);
     this.fetchCartCount();
     this.fetchSiteSettings();
+    this.fetchCategories();
   },
   beforeUnmount() {
     document.removeEventListener('mousedown', this.handleOutsideClick);
   }
 };
 </script>
+
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');

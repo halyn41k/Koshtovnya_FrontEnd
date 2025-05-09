@@ -74,19 +74,12 @@
       class="mt-6"
     />
 
-    <!-- Адреса доставки -->
-    <DeliveryAddress
-      v-if="steps.every(step => step.completed)"
-      :customer-data="formData"
-      class="mt-6"
-    />
   </div>
 </template>
 
 <script>
 import axios from "axios";
 import { mapActions } from "vuex";
-import PaymentSummary from "./PaymentSummary.vue";
 import DeliveryAddress from "./DeliveryAddress.vue";
 import PersonalInfo from "./PersonalInfo.vue";
 import PostalInfo from "./PostalInfo.vue";
@@ -95,7 +88,6 @@ import PaymentInfo from "./PaymentInfo.vue";
 export default {
   name: "PaymentSteps",
   components: {
-    PaymentSummary,
     DeliveryAddress,
     PersonalInfo,
     PostalInfo,
@@ -194,13 +186,16 @@ export default {
       }
     },
     completeStep() {
-      this.steps[this.currentStep].completed = true;
-      this.steps[this.currentStep].isExpanded = false;
-      if (this.currentStep < this.steps.length - 1) {
-        this.currentStep++;
-        this.steps[this.currentStep].isExpanded = true;
-      }
-    },
+  this.steps[this.currentStep].completed = true;
+  this.steps[this.currentStep].isExpanded = false;
+
+  if (this.currentStep < this.steps.length - 1) {
+    this.currentStep++;
+    this.steps[this.currentStep].isExpanded = true;
+  } else {
+    this.$emit("steps-complete", true);
+  }
+},
     validatePersonalInfo() {
       this.errors = {};
       let valid = true;

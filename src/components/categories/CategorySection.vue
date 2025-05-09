@@ -2,10 +2,7 @@
   <section class="font-montserrat">
     <!-- HEADER: Title + Count + Filter button + Active tags -->
     <div class="px-8 pt-[200px] pb-4">
-      <!-- 1. Category title -->
       <h2 class="title-kyiv text-3xl mb-2">{{ computedTitle }}</h2>
-
-      <!-- 2. Count + Filter button -->
       <div class="flex items-center justify-between mb-2">
         <p class="text-lg font-medium">Знайдено {{ totalCount }} товарів</p>
         <button
@@ -16,8 +13,6 @@
           <span class="text-base font-semibold">Фільтр</span>
         </button>
       </div>
-
-      <!-- 3. Active filter tags -->
       <div v-if="activeTags.length" class="flex flex-wrap gap-2 mb-4">
         <button
           v-for="tag in activeTags"
@@ -40,36 +35,16 @@
     </div>
 
     <div class="flex px-8 pb-[100px]">
-      <!-- MOBILE BACKDROP -->
-      <div
-        v-if="filterVisible && isMobile"
-        class="fixed inset-0 bg-black bg-opacity-50 z-40"
-        @click="toggleFilter"
-      ></div>
+      <!-- FILTER SIDEBAR -->
+      <FilterComponent
+        :initial-filters="filters"
+        :mobile-visible="filterVisible"
+        @apply="applyFilters"
+        @close="toggleFilter"
+      />
 
-      <!-- SIDEBAR FILTER -->
-      <aside
-        v-show="filterVisible"
-        class="transition-all duration-300 ease-in-out bg-white z-50 flex flex-col"
-        :class="isMobile
-          ? 'fixed inset-0 w-full h-full overflow-hidden p-0'
-          : 'relative left-0 w-[350px] pr-4 sticky top-0 h-[calc(100vh-10rem)] overflow-y-auto shadow-lg'"
-      >
-        <FilterComponent
-          :initial-filters="filters"
-          :mobile="isMobile"
-          @apply="applyFilters"
-          @close="toggleFilter"
-        />
-      </aside>
-
-      <!-- MAIN PRODUCT GRID -->
-      <main
-        :class="[
-          'flex-1 transition-[margin] duration-300',
-          filterVisible && !isMobile ? 'ml-[350px]' : ''
-        ]"
-      >
+      <!-- PRODUCT GRID -->
+      <main class="flex-1">
         <div
           class="grid gap-4"
           :class="filterVisible && !isMobile
@@ -98,7 +73,6 @@
                 </p>
               </div>
             </router-link>
-
             <div class="px-4 mb-4 flex justify-between items-center">
               <span class="text-base text-gray-800">{{ product.bead_producer_name }}</span>
               <button @click.stop="toggleWishlist(product)" class="focus:outline-none hover:scale-110 transform transition duration-300">
@@ -110,7 +84,6 @@
                 </svg>
               </button>
             </div>
-
             <div class="px-4 pb-4">
               <button
                 @click="addToCart(product)"
@@ -122,7 +95,6 @@
             </div>
           </article>
         </div>
-
         <!-- PAGINATION -->
         <div class="flex justify-center gap-2 mt-8">
           <button
@@ -141,7 +113,6 @@
     </div>
   </section>
 </template>
-
 
 <script>
 import api from '@/services/api';
@@ -226,8 +197,8 @@ export default {
     clearAll() {
       this.fetchProducts(1, {});
     },
-    toggleWishlist(product) { /* ... */ },
-    addToCart(product) { /* ... */ }
+    toggleWishlist(product) {},
+    addToCart(product) {}
   },
   mounted() {
     this.filterVisible = !this.isMobile;
@@ -241,7 +212,7 @@ export default {
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&amp;display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');
 
 @font-face {
   font-family: 'KyivType Titling Black2';

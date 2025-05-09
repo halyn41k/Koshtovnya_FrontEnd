@@ -1,11 +1,11 @@
 <template>
   <!-- Фон — на всю ширину -->
   <section
-    class="payment py-[100px] bg-fixed bg-cover"
+    class="payment py-[150px] bg-fixed bg-cover"
     :style="{ backgroundImage: `url(${require('@/assets/paymentpattern.png')})` }"
   >
     <!-- Контейнер контенту: max-w і центр -->
-    <div class="w-full max-w-4xl mx-auto px-12">
+    <div class="w-full max-w-6xl mx-auto px-4 lg:px-12">
       <header class="mb-8">
         <h1
           class="flex items-center justify-start mt-[40px] font-kyivBlack2 text-[34px] font-black tracking-[-1.2px] text-left"
@@ -16,35 +16,43 @@
         </h1>
       </header>
 
-      <main class="flex flex-col items-start space-y-8">
-        <PaymentSteps :currentStep="currentStep" class="w-full" />
+      <main class="flex flex-col lg:flex-row lg:items-start lg:gap-12">
+        <div class="flex-1 flex flex-col space-y-8">
+          <PaymentSteps
+  :currentStep="currentStep"
+  @steps-complete="stepsCompleted = $event"
+  ref="paymentSteps"
+  class="w-full"
+/>
 
-        <div class="w-full flex flex-col lg:flex-row gap-8">
           <OrderReview
-            :cartItems="cartItems"
-            :deliveryCost="deliveryCost"
-            class="flex-1"
-          />
-          <PaymentSummary
-            :cartItems="cartItemsFromParent"
-            class="flex-1"
-          />
+  v-if="!stepsCompleted"
+  :cartItems="cartItems"
+  :deliveryCost="deliveryCost"
+  class="w-full"
+/>
+
+          <DeliveryAddress :formData="formData" class="w-full" />
         </div>
 
-        <DeliveryAddress
-          :formData="formData"
-          class="w-full"
-        />
+        <div class="w-full lg:w-[300px] sticky top-[120px]">
+          <PaymentSummary
+            :cart-items="cartItems"
+            :delivery-cost="deliveryCost"
+            :city-ref="formData.cityRef"
+            :delivery-type="formData.deliveryType"
+          />
+        </div>
       </main>
     </div>
   </section>
 </template>
 
-
 <script>
 import PaymentSteps from "./PaymentSteps.vue";
 import OrderReview from "./OrderReview.vue";
 import DeliveryAddress from "./DeliveryAddress.vue";
+import PaymentSummary from "./PaymentSummary.vue";
 
 export default {
   name: "PaymentComponent",
@@ -52,11 +60,12 @@ export default {
     PaymentSteps,
     OrderReview,
     DeliveryAddress,
+    PaymentSummary,
   },
   data() {
     return {
+      stepsCompleted: false,
       cartItems: [],
-      cartItemsFromParent: [],
       currentStep: 1,
       formData: {
         cityRef: "",
@@ -69,6 +78,9 @@ export default {
   watch: {
     cartItems: { handler: "calculateTotalAmount", deep: true },
     deliveryCost: "calculateTotalAmount",
+    currentStep() {
+    this.checkStepsCompletion();
+  }
   },
   methods: {
     calculateTotalAmount() {
@@ -78,6 +90,11 @@ export default {
           0
         ) + this.deliveryCost;
     },
+    checkStepsCompletion() {
+    // Якщо PaymentSteps доступні як компонент або пропс
+    const allCompleted = this.$refs.paymentSteps?.steps?.every(s => s.completed);
+    this.stepsCompleted = allCompleted === true;
+  },
   },
   mounted() {
     document.title = "Оплата";
@@ -94,5 +111,4 @@ export default {
   font-style: normal;
   font-display: swap;
 }
-
 </style>
