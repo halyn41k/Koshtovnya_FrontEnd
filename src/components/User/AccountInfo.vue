@@ -17,30 +17,62 @@
       style="background-image:url('@/assets/accountpattern.png')"
     >
       <!-- Sidebar -->
-      <aside class="w-full lg:w-64 border-b lg:border-b-0 lg:border-r border-gray-300 p-6">
-        <nav>
-          <ul class="flex flex-col space-y-4">
-            <li
-              v-for="(item, i) in menuItems"
-              :key="i"
-              @click="selectTab(i)"
-              :class="[
-                'flex items-center p-2 rounded-lg cursor-pointer transition-colors',
-                activeTab === i ? 'bg-[#F6E7E7]' : 'hover:bg-[#F6E7E7]'
-              ]"
-            >
-              <img
-                :src="item.icon"
-                :alt="item.title"
-                class="w-6 h-6 mr-3"
-              />
-              <span class="text-base font-medium text-gray-900">
-                {{ item.title }}
-              </span>
-            </li>
-          </ul>
-        </nav>
-      </aside>
+      <!-- Mobile-friendly sidebar -->
+      <aside class="w-full lg:w-64 border-b lg:border-b-0 lg:border-r border-gray-300 p-4">
+  <ul class="flex flex-col divide-y divide-gray-300">
+    <li
+  v-for="(item, i) in menuItems"
+  :key="i"
+  class="py-3"
+>
+  <button
+    @click="toggleAccordion(i)"
+    :class="[
+      'flex items-center justify-between w-full p-2 rounded-lg cursor-pointer transition-colors duration-200',
+      activeTab === i ? 'bg-[#F6E7E7] text-[#6B1F1F]' : 'hover:bg-[#F2E8E8] text-gray-800'
+    ]"
+  >
+    <div class="flex items-center">
+      <img :src="item.icon" :alt="item.title" class="w-5 h-5 mr-2" />
+      <span class="font-semibold text-base">
+        {{ item.title }}
+      </span>
+    </div>
+
+    <svg
+      v-if="i !== 4"
+      class="w-4 h-4 transition-transform duration-200 lg:hidden"
+      :class="{ 'rotate-90': openedAccordions.includes(i) }"
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+    >
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M9 5l7 7-7 7" />
+    </svg>
+  </button>
+
+  <!-- Mobile only accordion content -->
+  <div
+    v-if="openedAccordions.includes(i) && i !== 4"
+    class="mt-3 block lg:hidden"
+  >
+    <component
+      :is="getTabComponent(i)"
+      :userId="userId"
+      :first_name="first_name"
+      :last_name="last_name"
+      :second_name="second_name"
+      :email="email"
+    />
+  </div>
+</li>
+
+  </ul>
+</aside>
+
+
+
 
       <!-- Content -->
       <section class="flex-1 p-6 overflow-auto">
@@ -80,6 +112,7 @@ export default {
   data() {
     return {
       activeTab: 0,
+      openedAccordions: [0],
       userId: null,
       first_name: '',
       last_name: '',
@@ -108,6 +141,32 @@ export default {
     },
   },
   methods: {
+    toggleAccordion(i) {
+  if (i === 4) {
+    this.selectTab(i);
+    return;
+  }
+
+  if (this.openedAccordions.includes(i)) {
+    this.openedAccordions = this.openedAccordions.filter(idx => idx !== i);
+  } else {
+    this.openedAccordions.push(i);
+  }
+
+  // Паралельно оновлюємо активну вкладку для десктопу
+  this.activeTab = i;
+},
+
+getTabComponent(i) {
+  switch (i) {
+    case 0: return 'PersonalInfo';
+    case 1: return 'Addresses';
+    case 2: return 'OrderHistory';
+    case 3: return 'Wishlist';
+    default: return null;
+  }
+},
+
     async fetchProfile() {
       const token = localStorage.getItem('token');
       if (!token) {

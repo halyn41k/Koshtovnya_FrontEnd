@@ -16,7 +16,8 @@
         </h1>
       </header>
 
-      <main class="flex flex-col lg:flex-row lg:items-start lg:gap-12">
+      <main class="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-12">
+
         <div class="flex-1 flex flex-col space-y-8">
           <PaymentSteps
   :currentStep="currentStep"
@@ -35,7 +36,8 @@
           <DeliveryAddress :formData="formData" class="w-full" />
         </div>
 
-        <div class="w-full lg:w-[300px] sticky top-[120px]">
+        <div class="hidden lg:block sticky top-28 h-fit self-start">
+
           <PaymentSummary
             :cart-items="cartItems"
             :delivery-cost="deliveryCost"

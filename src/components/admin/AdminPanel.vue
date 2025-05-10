@@ -4,10 +4,10 @@
     <header class="h-12 w-full border-b border-gray-200 bg-white flex items-center px-5">
       <div class="ml-auto flex items-center space-x-8">
         <div @click="showProfile = true" class="cursor-pointer">
-          <img src="@/assets/icons/user.svg" alt="User Icon" class="w-6 h-6"/>
+          <img src="@/assets/icons/user.svg" alt="User Icon" class="w-6 h-6" />
         </div>
         <div class="flex items-center space-x-1">
-          <img :src="currentFlag" :alt="selectedLanguage + ' Flag'" class="w-5 h-4 rounded-sm object-cover"/>
+          <img :src="currentFlag" :alt="selectedLanguage + ' Flag'" class="w-5 h-4 rounded-sm object-cover" />
           <select
             v-model="selectedLanguage"
             @change="changeLanguage"
@@ -21,48 +21,85 @@
     </header>
 
     <!-- Модалка профілю -->
-    <AdminProfileCard
-      v-if="showProfile"
-      @close="showProfile = false"
-    />
+    <AdminProfileCard v-if="showProfile" @close="showProfile = false" />
 
     <!-- Адмін-панель -->
     <main :class="['flex flex-1 relative', showProfile ? 'filter blur-sm' : '']">
       <!-- Сайдбар -->
-      <aside class="w-64 bg-[#F6E7E7] flex flex-col justify-between p-5">
+      <aside
+        :class="[
+          'bg-[#F6E7E7] flex flex-col justify-between transition-all duration-300 ease-in-out',
+          sidebarCollapsed ? 'w-16' : 'w-64'
+        ]"
+      >
         <div>
-          <div class="flex items-center mt-5 ml-7 mb-2">
-            <img :src="siteSettings.site_logo" alt="Коштовня Лого" class="w-12 h-11"/>
-            <span
-              class="text-sm font-black ml-2"
-              style="font-family:'KyivType Titling Black2';"
-            >Коштовня</span>
+          <div class="flex items-center justify-between mt-5 px-4">
+            <div class="flex items-center" v-if="!sidebarCollapsed">
+              <img :src="siteSettings.site_logo" alt="Logo" class="w-12 h-11" />
+              <span
+                class="text-sm font-black ml-2"
+                style="font-family:'KyivType Titling Black2';"
+              >Коштовня</span>
+            </div>
+            <button @click="sidebarCollapsed = !sidebarCollapsed" class="p-1 ml-auto">
+              <img
+                :src="sidebarCollapsed ? require('@/assets/icons/arrow_right.svg') : require('@/assets/icons/arrow_left.svg')"
+                class="w-5 h-5"
+              />
+            </button>
           </div>
-          <div class="text-sm font-bold ml-7 mb-5">{{ panelSubtitle }}</div>
-          <ul class="space-y-2 sticky top-0">
+
+          <div class="mt-2 mb-4 h-5 ml-6 text-sm font-bold transition-opacity duration-200"
+     :class="{ 'opacity-0': sidebarCollapsed, 'opacity-100': !sidebarCollapsed }"
+>
+  {{ panelSubtitle }}
+</div>
+
+
+          <ul class="space-y-2 sticky top-0 px-2">
             <li
               v-for="(menuItem, index) in computedMenuItems"
               :key="index"
               @click="selectTab(index)"
               :class="[
-                'flex items-center h-9 px-2 rounded-[4px] cursor-pointer',
+                'flex items-center h-9 rounded-[4px] cursor-pointer px-2',
                 activeTab === index
                   ? 'bg-[#F2D8D8] border-l-4 border-[#6B1F1F]'
                   : 'hover:bg-[#D1ABAB]'
               ]"
             >
-              <img :src="menuItem.icon" alt="" class="w-5 h-5 mr-2"/>
-              <span>{{ menuItem.title }}</span>
+              <img :src="menuItem.icon" alt="" class="w-5 h-5 mr-2" />
+              <span v-if="!sidebarCollapsed">{{ menuItem.title }}</span>
             </li>
           </ul>
         </div>
-        <div
-          @click="logout"
-          class="flex items-center h-9 px-2 rounded-[4px] cursor-pointer hover:bg-[#D1ABAB]"
-        >
-          <img src="@/assets/exit.png" alt="Exit Icon" class="w-5 h-5 mr-2"/>
-          <span>Вийти</span>
-        </div>
+
+        <!-- Перехід на головну -->
+<!-- Перехід на головну -->
+<div
+  @click="$router.push({ name: 'Home' })"
+  class="px-2 mb-2"
+>
+  <div
+    class="flex items-center h-9 px-3 rounded-[4px] cursor-pointer hover:bg-[#D1ABAB] transition"
+  >
+    <img src="@/assets/icons/home.svg" alt="Home Icon" class="w-5 h-5 mr-2" />
+    <span v-if="!sidebarCollapsed">На головну</span>
+  </div>
+</div>
+
+<!-- Вийти -->
+<div class="px-2">
+  <div
+    @click="logout"
+    class="flex items-center h-9 px-3 rounded-[4px] cursor-pointer hover:bg-[#D1ABAB] transition"
+  >
+    <img src="@/assets/exit.png" alt="Exit Icon" class="w-5 h-5 mr-2" />
+    <span v-if="!sidebarCollapsed">Вийти</span>
+  </div>
+</div>
+
+
       </aside>
 
       <!-- Контент -->
@@ -101,7 +138,8 @@ export default {
       activeTab: -1,
       user: null,
       selectedLanguage: 'uk',
-      siteSettings: { site_logo: '' }
+      siteSettings: { site_logo: '' },
+      sidebarCollapsed: false
     };
   },
   computed: {
@@ -128,33 +166,30 @@ export default {
       if (!this.user) return [];
       const items = {
         superadmin: [
-          ['Користувачі','Clients'],
-          ['Працівники','Employees'],
-          ['Товари','ProductList'],
-          ['Замовлення','Orders'],
-          ['Звіти','Reports'],
-          ['Налаштування','Settings']
+          ['Користувачі','Clients','people'],
+          ['Працівники','Employees','people'],
+          ['Товари','ProductList','goods'],
+          ['Замовлення','Orders','orders'],
+          ['Звіти','Reports','reports'],
+          ['Налаштування','Settings','settings']
         ],
         admin: [
-          ['Користувачі','Clients'],
-          ['Працівники','Employees'],
-          ['Товари','ProductList'],
-          ['Замовлення','Orders'],
-          ['Права доступу','Settings'],
-          ['Налаштування сайту','Settings']
+          ['Користувачі','Clients','people'],
+          ['Працівники','Employees','people'],
+          ['Товари','ProductList','goods'],
+          ['Замовлення','Orders','orders'],
+          ['Права доступу','Settings','settings'],
+          ['Налаштування сайту','Settings','settings']
         ],
         manager: [
-          ['Користувачі','Clients'],
-          ['Товари','ProductList'],
-          ['Замовлення','Orders']
+          ['Користувачі','Clients','people'],
+          ['Товари','ProductList','goods'],
+          ['Замовлення','Orders','orders']
         ]
       };
-      return items[this.user.role].map(([title, comp]) => ({
+      return items[this.user.role].map(([title, comp, icon]) => ({
         title,
-        icon: require(`@/assets/icons/${
-          title==='Товари'?'goods':
-          title==='Замовлення'?'orders':'user'
-        }.svg`),
+        icon: require(`@/assets/icons/${icon}.svg`),
         component: comp
       }));
     }

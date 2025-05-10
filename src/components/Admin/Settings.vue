@@ -1,5 +1,5 @@
 <template>
-  <main class="max-w-4xl mx-auto p-4 space-y-8">
+  <main class="w-full p-4 space-y-6 relative">
     <h1 class="text-2xl font-semibold text-gray-800">Налаштування</h1>
 
     <form @submit.prevent="saveSettings" class="space-y-4 bg-white p-4 rounded shadow">

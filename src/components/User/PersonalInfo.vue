@@ -2,46 +2,47 @@
   <div class="font-sans p-5 rounded-lg">
     <h2 class="text-2xl font-bold text-gray-800 mb-5">Ваша особиста інформація</h2>
 
-    <div class="mb-5 flex items-center">
-      <label for="first_name" class="w-[150px] font-bold mr-3">Ім’я:</label>
-      <input
-        id="first_name"
-        type="text"
-        v-model="localFirstName"
-        class="w-[487px] h-8 bg-[#EBDBDA] border border-black rounded-lg px-3 text-base"
-      />
-    </div>
+    <div class="mb-5 flex flex-col sm:flex-row sm:items-center">
+  <label for="first_name" class="w-full sm:w-[150px] font-bold mb-2 sm:mb-0 sm:mr-3">Ім’я:</label>
+  <input
+    id="first_name"
+    type="text"
+    v-model="localFirstName"
+    class="w-full sm:w-[487px] h-8 bg-[#EBDBDA] border border-black rounded-lg px-3 text-base"
+  />
+</div>
 
-    <div class="mb-5 flex items-center">
-      <label for="last_name" class="w-[150px] font-bold mr-3">Прізвище:</label>
-      <input
-        id="last_name"
-        type="text"
-        v-model="localLastName"
-        class="w-[487px] h-8 bg-[#EBDBDA] border border-black rounded-lg px-3 text-base"
-      />
-    </div>
+<div class="mb-5 flex flex-col sm:flex-row sm:items-center">
+  <label for="last_name" class="w-full sm:w-[150px] font-bold mb-2 sm:mb-0 sm:mr-3">Прізвище:</label>
+  <input
+    id="last_name"
+    type="text"
+    v-model="localLastName"
+    class="w-full sm:w-[487px] h-8 bg-[#EBDBDA] border border-black rounded-lg px-3 text-base"
+  />
+</div>
 
-    <div class="mb-5 flex items-center">
-      <label for="second_name" class="w-[150px] font-bold mr-3">По батькові:</label>
-      <input
-        id="second_name"
-        type="text"
-        v-model="localSecondName"
-        class="w-[487px] h-8 bg-[#EBDBDA] border border-black rounded-lg px-3 text-base"
-      />
-    </div>
+<div class="mb-5 flex flex-col sm:flex-row sm:items-center">
+  <label for="second_name" class="w-full sm:w-[150px] font-bold mb-2 sm:mb-0 sm:mr-3">По батькові:</label>
+  <input
+    id="second_name"
+    type="text"
+    v-model="localSecondName"
+    class="w-full sm:w-[487px] h-8 bg-[#EBDBDA] border border-black rounded-lg px-3 text-base"
+  />
+</div>
 
-    <div class="mb-5 flex items-center">
-      <label for="email" class="w-[150px] font-bold mr-3">Email:</label>
-      <input
-        id="email"
-        type="email"
-        v-model="localEmail"
-        readonly
-        class="w-[487px] h-8 bg-[#EBDBDA] border border-black rounded-lg px-3 text-base cursor-not-allowed"
-      />
-    </div>
+<div class="mb-5 flex flex-col sm:flex-row sm:items-center">
+  <label for="email" class="w-full sm:w-[150px] font-bold mb-2 sm:mb-0 sm:mr-3">Email:</label>
+  <input
+    id="email"
+    type="email"
+    v-model="localEmail"
+    readonly
+    class="w-full sm:w-[487px] h-8 bg-[#EBDBDA] border border-black rounded-lg px-3 text-base cursor-not-allowed"
+  />
+</div>
+
 
     <div class="flex flex-col sm:flex-row gap-4 sm:gap-5 mt-6">
   <button

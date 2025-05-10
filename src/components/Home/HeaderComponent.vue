@@ -241,53 +241,75 @@
   </span>
 </li>
 
-
-
         </ul>
       </nav>
 
-      <!-- Mobile categories & quick-links -->
-      <div v-if="isBurgerOpen" class="md:hidden bg-[#FFF7F6] border-t border-stroke z-40">
-        <ul class="px-4 py-2 space-y-2">
-          <li>
-            <button @click="toggleCategories" class="w-full flex justify-between items-center px-4 py-2 hover:bg-gray-100 rounded-lg transition-all duration-200">
-              Категорії
-              <svg
-                :class="{ 'rotate-180': isCategoriesOpen }"
-                class="w-4 h-4 transform transition-transform"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
-            <ul v-if="isCategoriesOpen" class="mt-2 pl-4 space-y-1">
-              <li v-for="cat in categories" :key="cat.link">
-                <router-link :to="cat.link" class="block px-4 py-2 hover:bg-gray-100 rounded-lg transition-all duration-200">
-                  {{ $t(cat.name) }}
-                </router-link>
-              </li>
-            </ul>
-          </li>
-          <li>
-            <router-link to="/account" :query="{ tab: 'wishlist' }" class="block px-4 py-2 hover:bg-gray-100 rounded-lg transition-all duration-200">
-              {{ $t('wishlist') }}
-            </router-link>
-          </li>
-          <li>
-            <router-link to="/aboutus" class="block px-4 py-2 hover:bg-gray-100 rounded-lg transition-all duration-200">
-              {{ $t('aboutUs') }}
-            </router-link>
-          </li>
-          <li>
-            <router-link to="/aboutdelivery" class="block px-4 py-2 hover:bg-gray-100 rounded-lg transition-all duration-200">
-              {{ $t('aboutDelivery') }}
-            </router-link>
-          </li>
+      <transition name="slide-fade">
+  <div
+    v-if="isBurgerOpen"
+    class="md:hidden bg-[#FFF7F6] border-t border-stroke z-40"
+  >
+    <ul class="px-4 py-2 space-y-2">
+      <li>
+        <button
+          @click="toggleCategories"
+          class="w-full flex justify-between items-center px-4 py-2 hover:bg-gray-100 rounded-lg transition-all duration-200"
+        >
+          Категорії
+          <svg
+            :class="{ 'rotate-180': isCategoriesOpen }"
+            class="w-4 h-4 transform transition-transform"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+        <ul v-if="isCategoriesOpen" class="mt-2 pl-4 space-y-1">
+          <li v-for="cat in categories" :key="cat.link">
+  <a
+    @click.prevent="navigateToCategory(cat.link)"
+    class="block px-4 py-2 hover:bg-gray-100 rounded-lg transition-all duration-200 cursor-pointer"
+  >
+    {{ $t(cat.name) }}
+  </a>
+</li>
+
         </ul>
-      </div>
-    </header>
+      </li>
+      <li>
+        <router-link
+  to="/account"
+  :query="{ tab: 'wishlist' }"
+  class="block px-4 py-2 hover:bg-gray-100 rounded-lg transition-all duration-200"
+  @click="isBurgerOpen = false"
+>
+  {{ $t('wishlist') }}
+</router-link>
+
+<router-link
+  to="/aboutus"
+  class="block px-4 py-2 hover:bg-gray-100 rounded-lg transition-all duration-200"
+  @click="isBurgerOpen = false"
+>
+  {{ $t('aboutUs') }}
+</router-link>
+
+<router-link
+  to="/aboutdelivery"
+  class="block px-4 py-2 hover:bg-gray-100 rounded-lg transition-all duration-200"
+  @click="isBurgerOpen = false"
+>
+  {{ $t('aboutDelivery') }}
+</router-link>
+
+      </li>
+    </ul>
+  </div>
+</transition>
+</header>
+
 
     <!-- Mobile search dropdown + results -->
     <transition name="slide-down">
@@ -407,17 +429,23 @@ export default {
   },
   methods: {
     handleCategoryClick(link) {
-    if (this.$route.path === link) {
-      // якщо вже на цій сторінці — форсовано перезавантажити
-      this.$router.replace('/').then(() => this.$router.push(link));
-    } else {
-      this.$router.push(link);
-    }
+  if (this.$route.path === link) {
+    this.isBurgerOpen = false;
+    this.$router.replace('/').then(() => this.$router.push(link));
+  } else {
+    this.$router.push(link);
+    this.isBurgerOpen = false;
+  }
+},
+navigateToCategory(link) {
+    this.isBurgerOpen = false;
+    this.$router.push(link);
   },
+
     toggleLanguageDropdown() { this.isLanguageDropdownOpen = !this.isLanguageDropdownOpen; },
-    changeLanguage(lang) { this.selectedLanguage = lang; this.$i18n.locale = lang; this.isLanguageDropdownOpen = false; },
+    changeLanguage(lang) { this.selectedLanguage = lang; this.$i18n.locale = lang; this.isLanguageDropdownOpen = false; this.isBurgerOpen = false;},
     toggleCurrencyDropdown() { this.isCurrencyDropdownOpen = !this.isCurrencyDropdownOpen; },
-    changeCurrency(curr) { this.selectedCurrency = curr; this.isCurrencyDropdownOpen = false; },
+    changeCurrency(curr) { this.selectedCurrency = curr; this.isCurrencyDropdownOpen = false; this.isBurgerOpen = false;},
     toggleBurger() { this.isBurgerOpen = !this.isBurgerOpen; if (!this.isBurgerOpen) this.isCategoriesOpen = false; },
     toggleCategories() { this.isCategoriesOpen = !this.isCategoriesOpen; },
     toggleMobileSearch() { this.mobileSearchActive = !this.mobileSearchActive; },
@@ -442,7 +470,7 @@ export default {
 },
     startSearch() {},
     resetResults() { this.results = []; this.isVisible = false; this.loading = false; },
-    goToProduct(id) { this.$router.push(`/productpage/${id}`); this.resetResults(); },
+    goToProduct(id) { this.$router.push(`/productpage/${id}`); this.resetResults(); this.isBurgerOpen = false;},
     formatPrice(p) {
       return new Intl.NumberFormat('uk-UA', { style: 'currency', currency: this.selectedCurrency }).format(p);
     },
@@ -490,19 +518,23 @@ export default {
   100% { content: '...'; }
 }
 
-/* Slide-down transition */
-.slide-down-enter-active,
-.slide-down-leave-active {
-  transition: transform 0.3s ease, opacity 0.3s ease;
+.slide-fade-enter-active,
+.slide-fade-leave-active {
+  transition: opacity 0.3s ease, transform 0.3s ease, max-height 0.3s ease;
+  overflow: hidden;
 }
-.slide-down-enter-from,
-.slide-down-leave-to {
-  transform: translateY(-10px);
+.slide-fade-enter-from,
+.slide-fade-leave-to {
   opacity: 0;
+  transform: translateY(-10px);
+  max-height: 0;
 }
-.slide-down-enter-to,
-.slide-down-leave-from {
-  transform: translateY(0);
+.slide-fade-enter-to,
+.slide-fade-leave-from {
   opacity: 1;
+  transform: translateY(0);
+  max-height: 600px; /* або що завгодно досить велике */
 }
+
+
 </style>

@@ -234,8 +234,15 @@ export default {
       try {
         const data = await api.getFilter()
         availabilityOptions.value = data['Доступність'] || []
-        const sz = data['Розмір'] || { min: '0', max: '100' }
+        const sz = data['Розмір'] || { min: '0', max: '150' }
         sizeOptions.min = +sz.min; sizeOptions.max = +sz.max
+        if (
+  !props.initialFilters.size ||
+  props.initialFilters.size[0] === 0 && props.initialFilters.size[1] === 100
+) {
+  filters.size = [+sz.min, +sz.max]
+}
+
         const wt = data['Вага'] || { min: '0', max: '1000' }
         weightOptions.min = +wt.min; weightOptions.max = +wt.max
         const pr = data['Ціна'] || { min: '0', max: '10000' }
@@ -259,26 +266,35 @@ export default {
     loadFilters()
 
     const applyFilters = () => {
-      const cleaned = {}
+  const cleaned = {}
 
-      if (filters.availability.length) cleaned.availability = [...filters.availability]
-      if (filters.beadTypes.length) cleaned.beadTypes = [...filters.beadTypes]
-      if (filters.producers.length) cleaned.producers = [...filters.producers]
-      if (filters.category.length) cleaned.category = [...filters.category]
-      if (filters.color) cleaned.color = filters.color
-      if (filters.rating.length) cleaned.rating = [...filters.rating]
+  if (filters.availability.length) cleaned.availability = [...filters.availability]
+  if (filters.rating.length) cleaned.rating = [...filters.rating]
 
-      if (filters.size[0] > sizeOptions.min || filters.size[1] < sizeOptions.max)
-        cleaned.size = [...filters.size]
+  if (filters.beadTypes.length) cleaned.type_of_bead = [...filters.beadTypes]
+  if (filters.producers.length) cleaned.bead_producer = [...filters.producers]
+  if (filters.category.length) cleaned.category = [...filters.category]
+  if (filters.color) cleaned.color = filters.color
 
-      if (filters.weight[0] > weightOptions.min || filters.weight[1] < weightOptions.max)
-        cleaned.weight = [...filters.weight]
+  if (filters.size[0] > sizeOptions.min || filters.size[1] < sizeOptions.max)
+    cleaned.size = [...filters.size]
 
-      if (filters.price[0] > priceOptions.min || filters.price[1] < priceOptions.max)
-        cleaned.price = [...filters.price]
+  if (filters.weight[0] > weightOptions.min || filters.weight[1] < weightOptions.max)
+    cleaned.weight = [...filters.weight]
 
-      emit('apply', cleaned)
-    }
+  if (filters.price[0] > priceOptions.min || filters.price[1] < priceOptions.max)
+    cleaned.price = [...filters.price]
+
+  // 🔽 Прокрутка з анімацією
+  window.scrollTo({
+    top: 0,
+    behavior: 'smooth'
+  })
+
+  emit('apply', cleaned)
+}
+
+
 
     return {
       loading,

@@ -249,10 +249,11 @@ export default {
     const { data } = await apiClient.get('/api/new-arrivals');
     return data;
   },
-  getAllProducts: async () => {
-    const { data } = await apiClient.get('/api/products');
+  getAllProducts: async ({ params } = {}) => {
+    const { data } = await apiClient.get('/api/products', { params });
     return data;
   },
+  
   getFilter: async () => {
     const { data } = await apiClient.get('/api/product-filter');
     return data;

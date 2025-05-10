@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col font-montserrat text-[14px]">
+  <div class="flex flex-col font-montserrat text-[14px] bg-white/80 rounded-lg shadow-md p-6 transition-all">
     <!-- Кроки оформлення -->
     <section class="mb-5">
       <div class="font-bold text-[20px] leading-[1.3] text-gray-400">
@@ -11,9 +11,14 @@
           <div v-if="index !== 0" class="w-full h-px bg-gray-300 my-2"></div>
 
           <div
-            class="flex items-center gap-3 cursor-pointer"
-            @click="toggleStep(index)"
-          >
+  class="flex items-center gap-3 cursor-pointer p-3 rounded-md transition hover:bg-gray-100"
+  :class="{
+    'bg-[#FFF0F0] border-l-4 border-[#6B1F1F]': index === currentStep,
+    'bg-[#F8F8F8]': step.completed && index !== currentStep
+  }"
+  @click="toggleStep(index)"
+>
+
             <span
               :class="[
                 step.completed ? 'text-gray-400' : 'text-gray-900',
@@ -36,7 +41,11 @@
             />
           </div>
 
-          <div v-if="index === currentStep && step.isExpanded" class="mt-3">
+          <div
+  v-if="index === currentStep && step.isExpanded"
+  class="mt-3 transition-all duration-300 ease-in-out"
+>
+
             <component
               :is="getStepComponent(step.title)"
               v-model="formData"
@@ -56,7 +65,7 @@
             <button
               v-if="canProceedToNextStep && currentStep < steps.length - 1"
               @click="validateAndProceed"
-              class="mt-4 px-4 py-2 bg-red-700 hover:bg-red-800 text-white text-[14px] font-medium rounded transition"
+              class="mt-4 w-fit px-5 py-2 bg-[#6B1F1F] hover:bg-[#A01212] text-white text-[14px] font-semibold rounded-lg shadow-sm transition-all duration-300 ease-in-out"
             >
               Далі
             </button>
@@ -352,5 +361,20 @@ export default {
 </script>
 
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700&display=swap');
+
+@font-face {
+  font-family: 'KyivType Titling Black2';
+  src: url('@/assets/fonts/KyivType2020-14-12/KyivType-NoVariable/TTF/KyivTypeTitling-Black2.ttf') format('truetype');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+.font-montserrat {
+  font-family: 'Montserrat', sans-serif;
+}
+.font-kyiv {
+  font-family: 'KyivType Titling Black2', sans-serif;
+}
 </style>

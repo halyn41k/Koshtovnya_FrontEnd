@@ -8,12 +8,13 @@
       <div class="flex items-center justify-between mb-2">
         <p class="text-lg font-medium">Знайдено {{ totalCount }} товарів</p>
         <button
-          @click="toggleFilter"
-          class="inline-flex items-center p-2 pl-3 pr-4 rounded-md focus:outline-none focus:ring-2 focus:ring-[#6B1F1F] hover:bg-gray-100 transition"
-        >
-          <img src="@/assets/icons/filter.svg" alt="Filter" class="w-5 h-5 mr-2" />
-          <span class="text-base font-semibold">Фільтр</span>
-        </button>
+  @click="toggleFilter"
+  class="inline-flex items-center p-2 pl-3 pr-4 rounded-md focus:outline-none focus:ring-2 focus:ring-[#6B1F1F] hover:bg-gray-100 transition lg:hidden"
+>
+  <img src="@/assets/icons/filter.svg" alt="Filter" class="w-5 h-5 mr-2" />
+  <span class="text-base font-semibold">Фільтр</span>
+</button>
+
       </div>
       <div v-if="activeTags.length" class="flex flex-wrap gap-2 mb-4">
         <button
@@ -52,7 +53,7 @@
 <!-- Overlay for mobile -->
 <div
   v-if="filterVisible && isMobile"
-  class="fixed inset-0 bg-black bg-opacity-50 z-40"
+  class="fixed inset-0 bg-[#00000080] z-40 transition-opacity"
   @click="toggleFilter"
 ></div>
 <div
@@ -77,9 +78,10 @@
       <!-- PRODUCT GRID -->
       <main class="flex-1">
         <div
-  class="grid gap-4"
-  :class="'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4'"
+  class="grid gap-4 transition-opacity duration-500 ease-in-out"
+  :class="['grid-cols-1 sm:grid-cols-2 lg:grid-cols-4', loadingProducts ? 'opacity-30' : 'opacity-100']"
 >
+
 
         <article
   v-for="product in visibleProducts"
@@ -234,6 +236,7 @@ export default {
       visibleProducts: [],
       totalPages: 0,
       filterVisible: false,
+      loadingProducts: false, 
     };
   },
 
@@ -320,7 +323,11 @@ export default {
     this.totalPages = res.data.meta?.last_page || 1;
     this.updateVisibleProducts();
   } catch (e) {
-    console.error('Не вдалося завантажити товари категорії:', e);
+    console.error('Не вдалося завантажити товари:', e)
+  } finally {
+    setTimeout(() => {
+      this.loadingProducts = false
+    }, 300) // щоб плавно пройшов ефект
   }
 },
 
