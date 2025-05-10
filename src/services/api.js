@@ -236,10 +236,11 @@ export default {
     const { data } = await apiClient.get('/api/site-settings');
     return data;
   },
-  getCategoryProducts: async id => {
-    const { data } = await apiClient.get(`/api/categories/${id}/products`);
-    return data;
+  getCategoryProducts: (categoryId, config = {}) => {
+    return apiClient.get(`/api/categories/${categoryId}/products`, config);
   },
+  
+
   searchProducts: async name => {
     const { data } = await apiClient.get(`/api/products/search/${name}`);
     return data;

@@ -75,6 +75,7 @@
 
 <script>
 import api from '@/services/api';
+import bus from '@/eventBus';
 
 export default {
   name: 'PopularProducts',
@@ -149,6 +150,7 @@ export default {
           product_id: product.id,
           quantity: 1               // тепер quantity є, бекенд не скаржиться
         });
+        bus.emit('cart-updated');
         // тут можна показати тост чи анімацію:
         console.log('Додано в кошик:', res.data);
       } catch (error) {

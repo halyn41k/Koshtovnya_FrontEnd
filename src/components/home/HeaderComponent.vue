@@ -199,7 +199,7 @@
         <!-- User / Cart / Mobile Search / Burger -->
         <div class="flex items-center space-x-4">
           <router-link to="/account" class="hover:text-primary transition">
-            <img src="@/assets/user-svgrepo-com (1).svg" alt="User" class="w-6 h-6"/>
+            <img src="@/assets/icons/user_icon.svg" alt="User" class="w-6 h-6"/>
           </router-link>
           <button @click="toggleMobileSearch" class="md:hidden">
             <img src="@/assets/icons/search1.svg" alt="Mobile Search" class="w-6 h-6"/>
@@ -223,18 +223,26 @@
       <!-- Desktop categories -->
       <nav class="hidden md:block bg-[#F6E7E7] md:-mx-[50px]">
         <ul class="flex justify-center space-x-1 py-1 px-4 md:px-0 font-base">
-          <li v-for="cat in categories" :key="cat.link">
-            <router-link
-              :to="cat.link"
-              class="relative inline-block px-2 py-1 text-[#6B1F1F] transition-colors duration-300 ease-in-out
-                     hover:bg-[#fafafa] hover:text-[#6B1F1F]
-                     before:content-[''] before:absolute before:left-0 before:right-0 before:bottom-0
-                     before:h-[2px] before:bg-[#6B1F1F] before:scale-x-0 hover:before:scale-x-100
-                     before:origin-left before:transition-transform before:duration-300"
-            >
-              {{ $t(cat.name) }}
-            </router-link>
-          </li>
+          <li
+  v-for="cat in categories"
+  :key="cat.link"
+  @click="handleCategoryClick(cat.link)"
+>
+  <span
+    :class="[
+      'relative inline-block px-2 py-1 cursor-pointer transition-colors duration-300',
+      $route.path === cat.link
+        ? 'text-[#6B1F1F] font-semibold before:scale-x-100'
+        : 'text-[#6B1F1F] hover:bg-[#fafafa] hover:text-[#6B1F1F] before:scale-x-0',
+      'before:content-[\'\'] before:absolute before:left-0 before:right-0 before:bottom-0 before:h-[2px] before:bg-[#6B1F1F] before:origin-left before:transition-transform before:duration-300'
+    ]"
+  >
+    {{ $t(cat.name) }}
+  </span>
+</li>
+
+
+
         </ul>
       </nav>
 
@@ -340,6 +348,7 @@
 <script>
 import { debounce } from 'lodash';
 import api from '@/services/api';
+import bus from '@/eventBus';
 
 export default {
   name: 'HeaderComponent',
@@ -370,6 +379,12 @@ export default {
     },
   },
   watch: {
+    '$route'(to, from) {
+    // перевірка, чи змінилась категорія
+    if (to.path.startsWith('/category/')) {
+      this.fetchCategories(); // або зробити принудовий ререндер
+    }
+  },
     searchQuery: debounce(async function(q) {
       const t = q.trim();
       if (t) {
@@ -391,6 +406,14 @@ export default {
     }, 300),
   },
   methods: {
+    handleCategoryClick(link) {
+    if (this.$route.path === link) {
+      // якщо вже на цій сторінці — форсовано перезавантажити
+      this.$router.replace('/').then(() => this.$router.push(link));
+    } else {
+      this.$router.push(link);
+    }
+  },
     toggleLanguageDropdown() { this.isLanguageDropdownOpen = !this.isLanguageDropdownOpen; },
     changeLanguage(lang) { this.selectedLanguage = lang; this.$i18n.locale = lang; this.isLanguageDropdownOpen = false; },
     toggleCurrencyDropdown() { this.isCurrencyDropdownOpen = !this.isCurrencyDropdownOpen; },
@@ -431,9 +454,12 @@ export default {
     this.fetchCartCount();
     this.fetchSiteSettings();
     this.fetchCategories();
+    bus.on('cart-updated', this.fetchCartCount);
+    this.fetchCartCount();
   },
   beforeUnmount() {
     document.removeEventListener('mousedown', this.handleOutsideClick);
+    bus.off('cart-updated', this.fetchCartCount);
   }
 };
 </script>

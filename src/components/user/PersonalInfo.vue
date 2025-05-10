@@ -43,20 +43,33 @@
       />
     </div>
 
-    <div class="flex gap-5 mt-6">
-      <button
-        @click="updateUser"
-        class="w-[200px] h-[40px] bg-[#6B1F1F] text-white text-base font-medium rounded-lg hover:bg-[#A01212] transition-colors"
-      >
-        Оновити інформацію
-      </button>
-      <button
-        @click="changePassword"
-        class="w-[200px] h-[40px] bg-[#6B1F1F] text-white text-base font-medium rounded-lg hover:bg-[#A01212] transition-colors"
-      >
-        Змінити пароль
-      </button>
-    </div>
+    <div class="flex flex-col sm:flex-row gap-4 sm:gap-5 mt-6">
+  <button
+    @click="updateUser"
+    class="w-full sm:w-[200px] h-[40px] bg-[#6B1F1F] text-white text-sm sm:text-base font-medium rounded-lg hover:bg-[#A01212] transition-colors"
+  >
+    Оновити інформацію
+  </button>
+
+  <button
+    @click="changePassword"
+    class="w-full sm:w-[200px] h-[40px] bg-[#6B1F1F] text-white text-sm sm:text-base font-medium rounded-lg hover:bg-[#A01212] transition-colors"
+  >
+    Змінити пароль
+  </button>
+
+  <router-link
+    v-if="isAdminOrManager"
+    to="/admin"
+    class="w-full sm:w-[240px] h-[40px] border border-[#6B1F1F] text-black text-sm sm:text-base font-semibold rounded-lg flex items-center justify-center hover:bg-[#f9eaea] transition-colors"
+  >
+    Перейти в {{ role === 'manager' ? 'менеджер-панель' : 'адмін-панель' }}
+  </router-link>
+</div>
+
+
+
+
   </div>
 </template>
 
@@ -77,8 +90,14 @@ export default {
       localFirstName: this.first_name,
       localLastName: this.last_name,
       localSecondName: this.second_name,
-      localEmail: this.email
+      localEmail: this.email,
+      role: null // зчитується з localStorage
     };
+  },
+  computed: {
+    isAdminOrManager() {
+      return this.role === 'superadmin' || this.role === 'manager';
+    }
   },
   watch: {
     first_name(newVal) { this.localFirstName = newVal },
@@ -106,9 +125,18 @@ export default {
   },
   mounted() {
     document.title = "Ваша особиста інформація";
+
+    // Зчитування ролі з localStorage
+    try {
+      const user = JSON.parse(localStorage.getItem('user'));
+      this.role = user?.role || null;
+    } catch (e) {
+      console.warn("Не вдалося зчитати роль користувача з localStorage", e);
+    }
   }
 };
 </script>
+
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');

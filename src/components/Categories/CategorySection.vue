@@ -3,6 +3,8 @@
     <!-- HEADER: Title + Count + Filter button + Active tags -->
     <div class="px-8 pt-[200px] pb-4">
       <h2 class="title-kyiv text-3xl mb-2">{{ computedTitle }}</h2>
+
+
       <div class="flex items-center justify-between mb-2">
         <p class="text-lg font-medium">Знайдено {{ totalCount }} товарів</p>
         <button
@@ -51,49 +53,106 @@
             ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
             : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4'"
         >
-          <article
-            v-for="product in visibleProducts"
-            :key="product.id"
-            class="bg-[#fff7f6] border border-gray-200 rounded-2xl shadow-md hover:shadow-lg transform hover:-translate-y-2 transition duration-300 overflow-hidden"
-          >
-            <router-link :to="`/productpage/${product.id}`" class="flex-1 flex flex-col">
-              <div class="h-48 overflow-hidden">
-                <img
-                  :src="product.image_url"
-                  :alt="product.name"
-                  class="w-full h-full object-cover hover:scale-105 transition duration-300"
-                />
-              </div>
-              <div class="px-4 py-3 flex-1 flex flex-col justify-between">
-                <h3 class="text-lg font-semibold line-clamp-2 h-12">
-                  {{ product.name }}
-                </h3>
-                <p class="text-xl font-semibold text-red-700 mt-1">
-                  {{ product.price }} грн
-                </p>
-              </div>
-            </router-link>
-            <div class="px-4 mb-4 flex justify-between items-center">
-              <span class="text-base text-gray-800">{{ product.bead_producer_name }}</span>
-              <button @click.stop="toggleWishlist(product)" class="focus:outline-none hover:scale-110 transform transition duration-300">
-                <svg v-if="product.is_in_wishlist" xmlns="http://www.w3.org/2000/svg" fill="#A01212" class="w-6 h-6">
-                  <path d="M12 21.35..."/>
-                </svg>
-                <svg v-else xmlns="http://www.w3.org/2000/svg" stroke="#B3B3B3" stroke-width="2" fill="none" class="w-6 h-6">
-                  <path d="M20.84 4.61..."/>
-                </svg>
-              </button>
-            </div>
-            <div class="px-4 pb-4">
-              <button
-                @click="addToCart(product)"
-                class="w-full h-12 bg-[#6B1F1F] hover:bg-[#A01212] text-white font-semibold rounded-lg flex items-center justify-between px-4 transition duration-300"
-              >
-                <span>Купити</span>
-                <img src="@/assets/miniarrow.png" alt="arrow" class="w-5 h-4" />
-              </button>
-            </div>
-          </article>
+        <article
+  v-for="product in visibleProducts"
+  :key="product.id"
+  class="bg-[#fff7f6] border border-gray-200 rounded-2xl shadow-md hover:shadow-lg transform hover:-translate-y-2 transition duration-300 overflow-hidden flex flex-col"
+>
+  <router-link :to="`/productpage/${product.id}`" class="flex-1 flex flex-col">
+    <div class="h-48 overflow-hidden">
+      <img
+        :src="product.image_url"
+        :alt="product.name"
+        class="w-full h-full object-cover hover:scale-105 transition duration-300"
+      />
+    </div>
+    <div class="px-4 py-3 flex-1 flex flex-col justify-between">
+      <h3 class="text-lg font-semibold line-clamp-2 h-12">{{ product.name }}</h3>
+      <p class="text-xl font-semibold text-red-700 mt-1">{{ product.price }} грн</p>
+    </div>
+  </router-link>
+
+  <!-- Рейтинг -->
+  <div class="px-4 flex items-center mb-2 space-x-2">
+    <div class="flex items-center">
+      <span v-for="n in 5" :key="n">
+        <svg
+          v-if="n <= Math.round(product.rating)"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 20 20"
+          fill="#FFD700"
+          class="w-4 h-4"
+        >
+          <path
+            d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462
+               c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07
+               3.292c.3.921-.755 1.688-1.538 1.118l-2.8-2.034a1 1 0
+               00-1.176 0l-2.8 2.034c-.783.57-1.838-.197-1.538-1.118l1.07-3.292a1
+               1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.462a1
+               1 0 00.95-.69l1.07-3.292z"
+          />
+        </svg>
+        <svg
+          v-else
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 20 20"
+          fill="none"
+          stroke="#FFD700"
+          class="w-4 h-4"
+        >
+          <path
+            d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462
+               c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07
+               3.292c.3.921-.755 1.688-1.538 1.118l-2.8-2.034a1 1 0
+               00-1.176 0l-2.8 2.034c-.783.57-1.838-.197-1.538-1.118l1.07-3.292a1
+               1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.462a1
+               1 0 00.95-.69l1.07-3.292z"
+          />
+        </svg>
+      </span>
+    </div>
+    <span class="text-sm text-gray-600">({{ product.review_count }})</span>
+  </div>
+
+  <!-- Бренд + Лайк -->
+  <div class="px-4 mb-3 flex justify-between items-center">
+    <span class="text-base font-medium text-gray-800">
+      {{ product.bead_producer_name }}
+    </span>
+    <button @click.stop="toggleWishlist(product)">
+      <svg
+        v-if="product.is_in_wishlist"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="#A01212"
+        class="w-6 h-6"
+      >
+        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5..."/>
+      </svg>
+      <svg
+        v-else
+        xmlns="http://www.w3.org/2000/svg"
+        stroke="#B3B3B3"
+        stroke-width="2"
+        fill="none"
+        class="w-6 h-6"
+      >
+        <path d="M20.84 4.61a5.5 5.5 0 00-7.78..."/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Кнопка "Купити" -->
+  <div class="px-4 pb-4">
+    <button
+      @click="addToCart(product)"
+      class="w-full h-11 bg-[#6B1F1F] hover:bg-[#A01212] text-white font-semibold rounded-lg flex items-center justify-between px-4 transition duration-300"
+    >
+      <span>Купити</span>
+      <img src="@/assets/miniarrow.png" alt="arrow" class="w-5 h-4" />
+    </button>
+  </div>
+</article>
         </div>
         <!-- PAGINATION -->
         <div class="flex justify-center gap-2 mt-8">
@@ -117,11 +176,12 @@
 <script>
 import api from '@/services/api';
 import FilterComponent from '../product/FilterComponent.vue';
+import bus from '@/eventBus';
 
 export default {
   name: 'CategorySection',
   components: { FilterComponent },
-  props: { categoryId: Number },
+
   data() {
     return {
       products: [],
@@ -133,11 +193,24 @@ export default {
       filterVisible: false,
     };
   },
+
   computed: {
-    computedTitle() {
-      const names = { 1: 'Браслети', 2: 'Гердани', 3: 'Дукати', 4: 'Силянки', 5: 'Сережки', 6: 'Пояси' };
-      return names[this.categoryId] || 'Категорія';
-    },
+    categoryId() {
+    return Number(this.$route.params.categoryId);
+  },
+  computedTitle() {
+  const names = {
+    1: 'Браслети',
+    2: 'Гердани',
+    3: 'Дукати',
+    4: 'Сережки',
+    5: 'Силянки',
+    6: 'Пояси',
+    15: 'Чокери',
+  };
+  return names[this.categoryId] || 'Категорія';
+},
+
     isMobile() {
       return window.innerWidth < 640;
     },
@@ -152,37 +225,78 @@ export default {
       });
     }
   },
+
   methods: {
     toggleFilter() {
       this.filterVisible = !this.filterVisible;
       document.body.classList.toggle('overflow-hidden', this.filterVisible && this.isMobile);
     },
+
     async fetchProducts(page = 1, filters = {}) {
-      this.currentPage = page;
-      this.filters = filters;
-      try {
-        const res = await api.getCategoryProducts(this.categoryId, { params: filters });
-        this.products = Array.isArray(res.data) ? res.data : res.data?.data || [];
-        this.updatePagination();
-      } catch (e) {
-        console.error(e);
-      }
-    },
+  this.currentPage = page;
+  this.filters = filters;
+
+  const id = this.categoryId; // ← важливо
+
+  if (isNaN(id)) return;
+
+  try {
+    console.log('Category ID →', id);
+
+    const res = await api.getCategoryProducts(id, { params: { ...filters, page } });
+    this.products = Array.isArray(res.data?.data) ? res.data.data : [];
+    this.totalPages = res.data.meta?.last_page || 1;
+    this.updateVisibleProducts();
+  } catch (e) {
+    console.error('Не вдалося завантажити товари категорії:', e);
+  }
+},
+
+
+
+
     updatePagination() {
       this.totalPages = Math.ceil(this.products.length / this.productsPerPage);
       this.updateVisibleProducts();
     },
+
     updateVisibleProducts() {
       const start = (this.currentPage - 1) * this.productsPerPage;
       this.visibleProducts = this.products.slice(start, start + this.productsPerPage);
     },
+
     changePage(n) {
       this.fetchProducts(n, this.filters);
     },
+
     applyFilters(filters) {
       this.fetchProducts(1, filters);
       if (this.isMobile) this.toggleFilter();
     },
+
+    async toggleWishlist(product) {
+      try {
+        if (product.is_in_wishlist) {
+          await api.deleteWishlistItem(product.id);
+        } else {
+          await api.addToWishlist({ product_id: product.id });
+        }
+        product.is_in_wishlist = !product.is_in_wishlist;
+      } catch (error) {
+        console.error('Помилка оновлення списку бажаного:', error);
+      }
+    },
+
+    async addToCart(product) {
+      try {
+        await api.addToCart({ product_id: product.id, quantity: 1 });
+        bus.emit('cart-updated');
+        console.log('Додано в кошик');
+      } catch (error) {
+        console.error('Помилка додавання в кошик:', error.response?.data || error);
+      }
+    },
+
     removeTag(tag) {
       const nf = { ...this.filters };
       const val = nf[tag.key];
@@ -194,22 +308,44 @@ export default {
       }
       this.fetchProducts(1, nf);
     },
+
     clearAll() {
       this.fetchProducts(1, {});
-    },
-    toggleWishlist(product) {},
-    addToCart(product) {}
+    }
   },
-  mounted() {
-    this.filterVisible = !this.isMobile;
-    this.fetchProducts();
-    window.addEventListener('resize', () => {
-      this.filterVisible = false;
-      document.body.classList.remove('overflow-hidden');
-    });
-  }
+  
+
+
+mounted() {
+  this.filterVisible = !this.isMobile;
+  document.title = this.computedTitle;
+  this.fetchProducts();
+  window.addEventListener('resize', () => {
+    this.filterVisible = false;
+    document.body.classList.remove('overflow-hidden');
+  });
+},
+
+
+  watch: {
+  categoryId: {
+    immediate: true,
+    handler(newId) {
+      if (!isNaN(newId)) {
+        this.fetchProducts(1, this.filters);
+      }
+    }
+  },
+  '$route'(to) {
+    document.title = to.meta?.title || 'Категорія';
+    this.fetchProducts(1, this.filters);
+  },
+  
+},
+
 };
 </script>
+
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');

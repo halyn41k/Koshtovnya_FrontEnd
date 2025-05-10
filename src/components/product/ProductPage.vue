@@ -184,6 +184,7 @@
 
 <script>
 import { defineAsyncComponent } from "vue";
+import bus from '@/eventBus';
 import api from "@/services/api";
 // eslint-disable-next-line 
 const ProductReviews = defineAsyncComponent(() => import("./ProductReviews.vue"));
@@ -287,6 +288,8 @@ export default {
         quantity: this.quantity,
         size: this.selectedSize
       });
+      bus.emit('cart-updated');
+
     },
     async notifyWhenAvailable() {
       await api.sendNotification({ product_id: this.productId });

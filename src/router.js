@@ -18,40 +18,60 @@ const routes = [
     component: CategorySection,
     props: route => ({
       categoryId: Number(route.params.categoryId),
-      title: route.meta.title
+      title: route.query.title || 'Категорія'
     }),
     meta: { title: 'Категорія' }
   },
+  
   {
     path: '/bracelets',
-    redirect: { name: 'Category', params: { categoryId: 1 } },
-    meta: { title: 'Браслети' }
+    redirect: to => ({
+      name: 'Category',
+      params: { categoryId: 1 },
+      meta: { title: 'Браслети' }
+    })
   },
   {
     path: '/herdany',
-    redirect: { name: 'Category', params: { categoryId: 2 } },
-    meta: { title: 'Гердани' }
+    redirect: to => ({
+      name: 'Category',
+      params: { categoryId: 2 },
+      meta: { title: 'Гердани' }
+    })
   },
   {
     path: '/dukats',
-    redirect: { name: 'Category', params: { categoryId: 3 } },
-    meta: { title: 'Дукати' }
+    redirect: to => ({
+      name: 'Category',
+      params: { categoryId: 3 },
+      meta: { title: 'Дукати' }
+    })
   },
   {
     path: '/earrings',
-    redirect: { name: 'Category', params: { categoryId: 4 } },
-    meta: { title: 'Силянки' }
+    redirect: to => ({
+      name: 'Category',
+      params: { categoryId: 4 },
+      meta: { title: 'Силянки' }
+    })
   },
   {
     path: '/sylyanky',
-    redirect: { name: 'Category', params: { categoryId: 5 } },
-    meta: { title: 'Сережки' }
+    redirect: to => ({
+      name: 'Category',
+      params: { categoryId: 5 },
+      meta: { title: 'Сережки' }
+    })
   },
   {
     path: '/belts',
-    redirect: { name: 'Category', params: { categoryId: 6 } },
-    meta: { title: 'Пояси' }
+    redirect: to => ({
+      name: 'Category',
+      params: { categoryId: 6 },
+      meta: { title: 'Пояси' }
+    })
   },
+  
   {
     path: '/login',
     name: 'Login',

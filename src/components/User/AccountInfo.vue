@@ -86,7 +86,7 @@ export default {
       second_name: '',
       email: '',
       menuItems: [
-        { title: 'Інформація', icon: require('@/assets/user.png') },
+        { title: 'Інформація', icon: require('@/assets/icons/user_icon.svg') },
         { title: 'Адреси', icon: require('@/assets/location.png') },
         { title: 'Історія замовлень', icon: require('@/assets/history.png') },
         { title: 'Список бажаного', icon: require('@/assets/icons/heart.svg') },
