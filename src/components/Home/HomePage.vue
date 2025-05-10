@@ -71,6 +71,8 @@
       </div>
     </div>
 
+    <TopLatest />
+
     <!-- Categories -->
     <CategoryProduct class="mt-20 px-4 sm:px-6 lg:px-8" />
   </div>
@@ -83,6 +85,7 @@ import PopularProducts from "./PopularProducts.vue";
 import NewArrivals from "./NewArrivals.vue";
 // eslint-disable-next-line 
 import CategoryProduct from "./CategoryProduct.vue";
+import TopLatest from './TopLatest.vue';
 import api from '@/services/api';
 
 export default {
@@ -91,6 +94,7 @@ export default {
     PopularProducts,
     NewArrivals,
     CategoryProduct,
+    TopLatest,
   },
   data() {
     return {
