@@ -38,21 +38,49 @@
 
     <div class="flex px-8 pb-[100px]">
       <!-- FILTER SIDEBAR -->
-      <FilterComponent
-        :initial-filters="filters"
-        :mobile-visible="filterVisible"
-        @apply="applyFilters"
-        @close="toggleFilter"
-      />
+       <!-- Постійно видно на десктопі -->
+<div class="hidden lg:block w-[350px] mr-8">
+  <FilterComponent
+    :initial-filters="filters"
+    :mobile-visible="false"
+    @apply="applyFilters"
+    @close="toggleFilter"
+  />
+</div>
+
+     <!-- Відображається тільки на мобілці -->
+<!-- Overlay for mobile -->
+<div
+  v-if="filterVisible && isMobile"
+  class="fixed inset-0 bg-black bg-opacity-50 z-40"
+  @click="toggleFilter"
+></div>
+<div
+  v-if="filterVisible && isMobile"
+  class="fixed top-0 right-0 w-[350px] h-screen bg-[#fff7f6] z-50 shadow-lg transition-transform duration-300 transform"
+  :class="{ 'translate-x-0': filterVisible, 'translate-x-full': !filterVisible }"
+>
+  <div class="h-full overflow-y-auto px-4 py-6">
+    <FilterComponent
+      :initial-filters="filters"
+      :mobile-visible="filterVisible"
+      @apply="applyFilters"
+      @close="toggleFilter"
+    />
+  </div>
+</div>
+
+
+
+
 
       <!-- PRODUCT GRID -->
       <main class="flex-1">
         <div
-          class="grid gap-4"
-          :class="filterVisible && !isMobile
-            ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
-            : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4'"
-        >
+  class="grid gap-4"
+  :class="'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4'"
+>
+
         <article
   v-for="product in visibleProducts"
   :key="product.id"
@@ -114,33 +142,48 @@
     <span class="text-sm text-gray-600">({{ product.review_count }})</span>
   </div>
 
-  <!-- Бренд + Лайк -->
-  <div class="px-4 mb-3 flex justify-between items-center">
-    <span class="text-base font-medium text-gray-800">
-      {{ product.bead_producer_name }}
-    </span>
-    <button @click.stop="toggleWishlist(product)">
-      <svg
-        v-if="product.is_in_wishlist"
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        fill="#A01212"
-        class="w-6 h-6"
-      >
-        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5..."/>
-      </svg>
-      <svg
-        v-else
-        xmlns="http://www.w3.org/2000/svg"
-        stroke="#B3B3B3"
-        stroke-width="2"
-        fill="none"
-        class="w-6 h-6"
-      >
-        <path d="M20.84 4.61a5.5 5.5 0 00-7.78..."/>
-      </svg>
-    </button>
-  </div>
+  <div class="px-3 mb-6 flex justify-between items-center">
+            <span class="text-base font-montserrat font-medium text-gray-800">
+              {{ product.bead_producer_name }}
+            </span>
+            <button
+              @click.stop="toggleWishlist(product)"
+              class="focus:outline-none transform hover:scale-110 transition-all duration-500 ease-in-out"
+            >
+              <svg
+                v-if="product.is_in_wishlist"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="#A01212"
+                class="w-6 h-6"
+              >
+                <path
+                  d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2
+                     8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81
+                     4.5 2.09C13.09 3.81 14.76 3 16.5
+                     3 19.58 3 22 5.42 22 8.5c0
+                     3.78-3.4 6.86-8.55 11.54L12
+                     21.35z"
+                />
+              </svg>
+              <svg
+                v-else
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                stroke="#B3B3B3"
+                stroke-width="2"
+                fill="none"
+                class="w-6 h-6"
+              >
+                <path
+                  d="M20.84 4.61a5.5 5.5 0 00-7.78
+                     0L12 5.67l-1.06-1.06a5.5 5.5 0
+                     00-7.78 7.78L12 21.23l8.84-8.84a5.5
+                     5.5 0 000-7.78z"
+                />
+              </svg>
+            </button>
+          </div>
 
   <!-- Кнопка "Купити" -->
   <div class="px-4 pb-4">
@@ -218,19 +261,48 @@ export default {
       return this.products.length;
     },
     activeTags() {
-      return Object.entries(this.filters).flatMap(([key, val]) => {
-        if (Array.isArray(val)) return val.map(v => ({ key, value: v, label: `${key}: ${v}` }));
-        if (val !== '' && val != null) return [{ key, value: val, label: `${key}: ${val}` }];
-        return [];
-      });
+  const tags = [];
+
+  for (const [key, val] of Object.entries(this.filters)) {
+    if (Array.isArray(val)) {
+      // Пропускаємо слайдери за замовчуванням (full range)
+      if (
+        (key === 'size' && val[0] === 0 && val[1] === 100) ||
+        (key === 'weight' && val[0] === 0 && val[1] === 1000) ||
+        (key === 'price' && val[0] === 0 && val[1] === 10000)
+      ) continue;
+
+      // Для слайдерів показуємо як діапазон
+      if (['size', 'weight', 'price'].includes(key)) {
+        tags.push({
+          key,
+          value: val,
+          label: `${val[0]} – ${val[1]}`
+        });
+      } else {
+        // Звичайні масиви (checkbox-и)
+        tags.push(...val.map(v => ({
+          key,
+          value: v,
+          label: `${v}`
+        })));
+      }
+    } else if (val !== '' && val != null) {
+      // Одинарне значення
+      tags.push({ key, value: val, label: `${val}` });
     }
+  }
+
+  return tags;
+},
   },
 
   methods: {
     toggleFilter() {
-      this.filterVisible = !this.filterVisible;
-      document.body.classList.toggle('overflow-hidden', this.filterVisible && this.isMobile);
-    },
+  this.filterVisible = !this.filterVisible;
+  document.body.classList.toggle('overflow-hidden', this.filterVisible && this.isMobile);
+},
+
 
     async fetchProducts(page = 1, filters = {}) {
   this.currentPage = page;
@@ -373,5 +445,15 @@ mounted() {
 }
 .section:hover {
   transform: translateY(-2px);
+}
+
+.translate-x-full {
+  transform: translateX(100%);
+}
+.translate-x-0 {
+  transform: translateX(0);
+}
+.transition-transform {
+  transition: transform 0.3s ease-in-out;
 }
 </style>

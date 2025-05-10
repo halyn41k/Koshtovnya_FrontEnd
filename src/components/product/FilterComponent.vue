@@ -1,6 +1,6 @@
 <template>
   <div
-    class="filter-container w-[350px] h-full min-h-[1400px] p-6 bg-[#fff7f6] shadow-xl rounded-lg font-montserrat"
+    class="filter-container w-[350px] h-full min-h-[1750px] p-6 bg-[#fff7f6] shadow-xl rounded-lg font-montserrat"
     @keydown.escape="$emit('close')"
   >
     <section v-if="!loading" class="space-y-8">
@@ -24,6 +24,24 @@
             <span class="text-base text-gray-700">
               {{ item.name }} ({{ item.count }})
             </span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Рейтинг -->
+      <div class="section bg-white p-4 rounded-lg shadow-sm">
+        <h3 class="subsection-title mb-3 text-lg font-semibold text-gray-800">
+          Рейтинг
+        </h3>
+        <div class="space-y-3">
+          <label v-for="star in [5, 4, 3, 2, 1]" :key="star" class="flex items-center space-x-2">
+            <input
+              type="checkbox"
+              :value="star"
+              v-model="filters.rating"
+              class="custom-checkbox"
+            />
+            <span class="text-base text-gray-700">{{ star }} зірки</span>
           </label>
         </div>
       </div>
@@ -200,7 +218,8 @@ export default {
       color: '',
       beadTypes: [],
       producers: [],
-      category: []
+      category: [],
+      rating: []
     })
     const availabilityOptions = ref([])
     const sizeOptions = reactive({ min: 0, max: 100 })
@@ -238,7 +257,28 @@ export default {
     }
 
     loadFilters()
-    const applyFilters = () => emit('apply', { ...filters })
+
+    const applyFilters = () => {
+      const cleaned = {}
+
+      if (filters.availability.length) cleaned.availability = [...filters.availability]
+      if (filters.beadTypes.length) cleaned.beadTypes = [...filters.beadTypes]
+      if (filters.producers.length) cleaned.producers = [...filters.producers]
+      if (filters.category.length) cleaned.category = [...filters.category]
+      if (filters.color) cleaned.color = filters.color
+      if (filters.rating.length) cleaned.rating = [...filters.rating]
+
+      if (filters.size[0] > sizeOptions.min || filters.size[1] < sizeOptions.max)
+        cleaned.size = [...filters.size]
+
+      if (filters.weight[0] > weightOptions.min || filters.weight[1] < weightOptions.max)
+        cleaned.weight = [...filters.weight]
+
+      if (filters.price[0] > priceOptions.min || filters.price[1] < priceOptions.max)
+        cleaned.price = [...filters.price]
+
+      emit('apply', cleaned)
+    }
 
     return {
       loading,
@@ -261,7 +301,6 @@ export default {
 @import "@vueform/slider/themes/default.css";
 
 :root {
-  /* slider overrides */
   --slider-connect-bg: #6B1F1F;
   --slider-tooltip-bg: #6B1F1F;
   --slider-handle-bg: #fff;
@@ -286,7 +325,7 @@ export default {
 .custom-checkbox:checked {
   background-color: #996666;
   border-color: #996666;
-  background-image: url("data:image/svg+xml,%3Csvg%20viewBox='0%200%2016%2016'%20xmlns='http://www.w3.org/2000/svg'%3E%3Cpath%20fill='none'%20stroke='%23fff'%20stroke-width='2'%20d='M4%208l3%203%20l5-5'/ %3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg%20viewBox='0%200%2016%2016'%20xmlns='http://www.w3.org/2000/svg'%3E%3Cpath%20fill='none'%20stroke='%23fff'%20stroke-width='2'%20d='M4%208l3%203%20l5-5'/%3E%3C/svg%3E");
 }
 .custom-checkbox:focus {
   outline: none;
@@ -301,9 +340,8 @@ export default {
 }
 
 .filter-container {
-  /* Ensure the container is taller and wider */
-  max-width: 42rem; /* ~672px */
-  height: 50rem;    /* ~800px */
+  max-width: 42rem;
+  height: 50rem;
 }
 </style>
 
