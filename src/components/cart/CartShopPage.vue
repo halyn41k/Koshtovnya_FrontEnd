@@ -42,6 +42,8 @@ import CartItem from './CartItem.vue';
 import Summary from './Summary.vue';
 // eslint-disable-next-line 
 import Loader from '../home/Loader.vue';
+import bus from '@/eventBus';
+
 
 export default {
   name: 'CartShopPage',
@@ -92,14 +94,17 @@ export default {
       }
     },
     async removeItem(id) {
-      try {
-        await api.removeFromCart(id);
-        this.cartItems = this.cartItems.filter(i => i.id !== id);
-      } catch (err) {
-        console.error('Помилка видалення:', err);
-        alert('Не вдалося видалити товар.');
-      }
-    },
+  try {
+    await api.removeFromCart(id);
+    this.cartItems = this.cartItems.filter(i => i.id !== id);
+
+    // Оповіщаємо шапку оновити лічильник
+    bus.emit('cart-updated');
+  } catch (err) {
+    console.error('Помилка видалення:', err);
+    alert('Не вдалося видалити товар.');
+  }
+},
   },
   mounted() {
     this.fetchCartItems();

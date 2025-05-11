@@ -1,13 +1,15 @@
-import axios from 'axios';
+import axios from 'axios'; 
 import { createToastInterface } from 'vue-toastification';
 import 'vue-toastification/dist/index.css';
 
-// Створюємо глобальний інтерфейс для тостів
 const toast = createToastInterface({
   position: 'top-right',
   timeout: 5000,
   closeOnClick: true,
 });
+
+let hasShownAuthToast = false;
+
 
 const apiClient = axios.create({
   baseURL: 'https://koshtovnya.api-dev.bmax-edu.website',
@@ -15,9 +17,9 @@ const apiClient = axios.create({
     'Content-Type': 'application/json'
   },
   timeout: 10000,
+
 });
 
-// Додаємо токен до запитів
 apiClient.interceptors.request.use(
   config => {
     const token = localStorage.getItem('token');
@@ -29,7 +31,6 @@ apiClient.interceptors.request.use(
   error => Promise.reject(error)
 );
 
-// Обробка помилок
 apiClient.interceptors.response.use(
   response => response,
   error => {
@@ -39,13 +40,23 @@ apiClient.interceptors.response.use(
       console.error('Network or timeout error', error);
       return Promise.reject({ message: 'Network error or timeout' });
     }
+
+    const message = response.data?.message || '';
+
     switch (response.status) {
       case 400:
-        toast.error(response.data.message || 'Неправильні дані запиту');
+        toast.error(message || 'Неправильні дані запиту');
         break;
-      case 401:
-        toast.warning('Будь ласка, увійдіть у систему');
-        break;
+        case 401:
+          if (!hasShownAuthToast) {
+            toast.warning('Будь ласка, увійдіть у систему');
+            hasShownAuthToast = true;
+            // Можна скинути прапор після деякого часу, якщо треба
+            setTimeout(() => {
+              hasShownAuthToast = false;
+            }, 10000); // 10 секунд або інший інтервал
+          }
+          break;        
       case 403:
         toast.error('У вас недостатньо прав для цієї дії');
         break;
@@ -54,20 +65,23 @@ apiClient.interceptors.response.use(
         break;
       case 422: {
         const errors = response.data.errors || {};
-        Object.values(errors)
-          .flat()
-          .forEach(msg => toast.error(msg));
+        Object.values(errors).flat().forEach(msg => toast.error(msg));
         break;
       }
       case 500:
-        toast.error('Сталася помилка на сервері. Спробуйте пізніше');
+        if (message.includes('Out of range value for column')) {
+          toast.error('Цей товар більше не в наявності 😢');
+        } else {
+          toast.error('Сталася помилка на сервері. Спробуйте пізніше');
+        }
         break;
       default:
-        toast.error(response.data.message || `Сталася помилка: ${response.status}`);
+        toast.error(message || `Сталася помилка: ${response.status}`);
     }
     return Promise.reject(response.data);
   }
 );
+
 
 export default {
   // Wishlist
@@ -108,9 +122,16 @@ export default {
   },
   updateCartItem: async (id, payload) => {
     const { data } = await apiClient.patch(`/api/cart/${id}`, payload);
-    toast.success('Кількість товару в кошику оновлено');
+  
+    if ('size' in payload) {
+      toast.success('Розмір товару оновлено');
+    } else {
+      toast.success('Кількість товару в кошику оновлено');
+    }
+  
     return data;
   },
+  
 
   // Auth & Registration
   csrfCookie: async () => {
@@ -163,11 +184,13 @@ export default {
     toast.success('Адресу додано');
     return data;
   },
-  updateUserAddress: async (id, addr) => {
-    const { data } = await apiClient.patch(`/api/user-address/${id}`, addr);
-    toast.success('Адресу оновлено');
+  updateUser: async (id, payload) => {
+    const { data } = await apiClient.patch(`/api/user/${id}`, payload);
+    toast.success('Дані користувача оновлено');
     return data;
   },
+  
+
   deleteUserAddress: async id => {
     const { data } = await apiClient.delete(`/api/user-address/${id}`);
     toast.success('Адресу видалено');

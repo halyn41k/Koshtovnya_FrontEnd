@@ -119,7 +119,16 @@ const routes = [
     path: '/cart',
     name: 'CartShop',
     component: () => import('@/components/cart/CartShopPage.vue'),
+    beforeEnter: (to, from, next) => {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        next({ name: 'Login', query: { redirect: to.fullPath } });
+      } else {
+        next();
+      }
+    },
   },
+
   {
     path: '/allproduct',
     name: 'AllProductsPage',

@@ -184,4 +184,8 @@ export default {
   font-size: 30px;
   color: #000;
 }
+input[type="password"]::-ms-reveal {
+  display: none;
+}
+
 </style>

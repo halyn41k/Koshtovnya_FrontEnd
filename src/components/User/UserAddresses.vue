@@ -6,7 +6,7 @@
     <!-- No Address Block -->
     <div v-if="!addressAvailable && !loading && !showForm" class="text-center mb-6">
       <p class="text-gray-500 text-lg mb-4">
-        Немає адреси доставки. Додайте або створіть нову адресу!
+        Немає адреси доставки. Створіть нову адресу!
       </p>
       <button
         class="inline-flex items-center mx-auto px-4 py-2 bg-[#6B1F1F] hover:bg-[#A01212] text-white rounded-lg transition"
@@ -27,12 +27,15 @@
         <div>
           <label class="block text-gray-700 mb-1">Телефон:</label>
           <input
-            type="tel"
-            v-model="phoneNumber"
-            placeholder="+380XXXXXXXXX"
-            required
-            :class="['w-full px-3 py-2 border rounded-lg focus:ring focus:ring-opacity-50', errors.phoneNumber ? 'border-red-500' : 'border-gray-300']"
-          />
+  v-model="phoneNumber"
+  @input="formatPhoneNumber"
+  placeholder="+38 (___) ___-__-__"
+  class="w-full px-3 py-2 border rounded-lg focus:ring focus:ring-opacity-50"
+  :class="errors.phoneNumber ? 'border-red-500' : 'border-gray-300'"
+/>
+
+
+
           <p v-if="errors.phoneNumber" class="text-red-500 text-sm mt-1">{{ errors.phoneNumber }}</p>
         </div>
 
@@ -75,16 +78,19 @@
                 required
                 :class="['w-full px-3 py-2 border rounded-lg focus:ring focus:ring-opacity-50', errors.city ? 'border-red-500' : 'border-gray-300']"
               />
-              <ul v-if="showCityDropdown && cities.length" class="absolute z-10 w-full mt-1 max-h-48 overflow-y-auto bg-white border border-gray-300 rounded-lg shadow-lg">
-                <li
-                  v-for="city in cities"
-                  :key="city.Ref"
-                  @mousedown.prevent="selectCity(city)"
-                  class="px-3 py-2 hover:bg-gray-100 cursor-pointer"
-                >
-                  {{ city.city }}
-                </li>
-              </ul>
+              <div class="city-dropdown-wrapper">
+  <ul v-if="showCityDropdown && cities.length" class="absolute z-10 w-full mt-1 max-h-48 overflow-y-auto bg-white border border-gray-300 rounded-lg shadow-lg">
+    <li
+      v-for="city in cities"
+      :key="city.Ref"
+      @mousedown.prevent="selectCity(city)"
+      class="px-3 py-2 hover:bg-gray-100 cursor-pointer"
+    >
+      {{ city.city }}
+    </li>
+  </ul>
+</div>
+
             </div>
             <p v-if="errors.city" class="text-red-500 text-sm mt-1">{{ errors.city }}</p>
           </div>
@@ -264,9 +270,12 @@
 import Loader from '../home/Loader.vue';
 import axios from "axios";
 
+
 export default {
   name: "UserAddresses",
-  components: { Loader },
+  components: {
+    Loader,
+  },
   data() {
     return {
       addressAvailable: false,
@@ -280,6 +289,8 @@ export default {
         deliveryName: "",
         streetSearch: ""
       },
+     
+
       deliveryAddress: {
         street: "",
         number: "",
@@ -317,6 +328,29 @@ export default {
     this.debouncedFetchCities = this.debounce(this.fetchCities.bind(this), 300);
   },
   methods: {
+    formatPhoneNumber(e) {
+  let digits = e.target.value.replace(/\D/g, '').slice(0, 12);
+
+  if (!digits.startsWith('38')) {
+    digits = '38' + digits; // автододавання "38", якщо користувач вводить 0...
+  }
+
+  const part1 = digits.slice(0, 2);   // 38
+  const part2 = digits.slice(2, 5);   // 0XX
+  const part3 = digits.slice(5, 8);   // XXX
+  const part4 = digits.slice(8, 10);  // XX
+  const part5 = digits.slice(10, 12); // XX
+
+  this.phoneNumber = `+${part1} (${part2}) ${part3}-${part4}-${part5}`.replace(/\s+$/, '');
+},
+
+    handleClickOutside(event) {
+  const dropdown = this.$el.querySelector('.city-dropdown-wrapper');
+  if (dropdown && !dropdown.contains(event.target)) {
+    this.showCityDropdown = false;
+  }
+},
+
     debounce(func, wait) {
       let timeout;
       return function (...args) {
@@ -378,7 +412,8 @@ export default {
       }
       
       console.log("Fetching cities with:", {
-        city: this.formData.city,
+        city: this.formData.city.toLowerCase(),
+
         delivery_type: deliveryTypeParam,
       });
   
@@ -432,10 +467,16 @@ export default {
           }
         });
         if (response.status === 200 && Array.isArray(response.data?.data)) {
-          this.warehouses = response.data.data.map((item, index) => ({
-            id: index + 1,
-            name: item.warehouse
-          }));
+          const filtered = response.data.data.filter(w =>
+  w.warehouse?.toLowerCase().includes('відділення')
+);
+
+this.warehouses = filtered.map((item, index) => ({
+  id: index + 1,
+  name: item.warehouse
+}));
+
+     
         } else {
           this.warehouses = [];
         }
@@ -647,7 +688,8 @@ console.log("Отправляемые данные:", postData);
     },
     validateForm() {
   const errors = {};
-  const ukrPhoneRegex = /^\+380\d{9}$/;
+  const ukrPhoneRegex = /^\+38\s?\(\d{3}\)\s?\d{3}-\d{2}-\d{2}$/;
+
 
   // Валідація номера телефону
   if (!this.phoneNumber) {
@@ -725,6 +767,12 @@ console.log("Отправляемые данные:", postData);
   },
   mounted() {
     document.title = "Ваша адреса";
-  }
+    document.addEventListener('click', this.handleClickOutside);
+
+  },
+  beforeUnmount() {
+    document.removeEventListener('click', this.handleClickOutside);
+
+  },
 };
 </script>

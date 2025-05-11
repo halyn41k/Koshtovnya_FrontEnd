@@ -161,6 +161,9 @@
 <script>
 import api from '@/services/api';
 import bus from '@/eventBus';
+import { createToastInterface } from 'vue-toastification';
+const toast = createToastInterface();
+
 
 export default {
   name: 'PopularProducts',
@@ -230,18 +233,12 @@ export default {
     // Оновлений метод addToCart
     async addToCart(product) {
       try {
-        // ОБОВ'ЯЗКОВО повертаємо проміс з api
-        const res = await api.addToCart({
-          product_id: product.id,
-          quantity: 1               // тепер quantity є, бекенд не скаржиться
-        });
-        bus.emit('cart-updated');
-        // тут можна показати тост чи анімацію:
-        console.log('Додано в кошик:', res.data);
-      } catch (error) {
-        console.error('Помилка додавання в кошик:', error.response?.data || error);
-      }
-    },
+  await api.addToCart({ product_id: product.id, quantity: 1 });
+} catch (error) {
+  console.error('Помилка додавання в кошик:', error); // можна логувати, але без toast
+}
+
+},
   },
   mounted() {
     window.addEventListener('resize', this.updateProductsPerPage);

@@ -35,11 +35,12 @@
         <div class="flex items-center justify-center space-x-2">
           <div class="flex space-x-1">
             <template v-for="i in 5" :key="i">
-              <span
-                class="text-xl not-italic"
-                :class="i <= Math.floor(product.average_rating) ? 'text-yellow-400' : 'text-gray-300'"
-              >★</span>
-            </template>
+  <span
+    class="text-xl not-italic"
+    :class="i <= Math.round(product.average_rating) ? 'text-yellow-400' : 'text-gray-300'"
+  >★</span>
+</template>
+
           </div>
           <span class="text-sm text-gray-600">({{ product.review_count }})</span>
         </div>
@@ -67,16 +68,18 @@
         </div>
 
         <!-- QUANTITY & ACTIONS -->
-        <div class="flex items-center space-x-4 pt-4">
-          <div class="flex items-center border border-gray-300 rounded-md">
-            <button @click="decreaseQuantity" :disabled="quantity <= 1" class="px-3 disabled:opacity-50">-</button>
-            <span class="px-4">{{ quantity }}</span>
-            <button
-              @click="increaseQuantity"
-              :disabled="!selectedVariant || quantity >= selectedVariant.quantity"
-              class="px-3 disabled:opacity-50"
-            >+</button>
-          </div>
+<div class="flex items-center space-x-4 pt-4">
+  <div class="min-w-[120px] flex items-center border border-gray-300 rounded-md">
+    <button @click="decreaseQuantity" :disabled="quantity <= 1" class="px-3 disabled:opacity-50">-</button>
+    <span class="px-4">{{ quantity }}</span>
+    <button
+      @click="increaseQuantity"
+      :disabled="!selectedVariant || quantity >= selectedVariant.quantity"
+      class="px-3 disabled:opacity-50"
+    >+</button>
+  </div>
+
+
           <button
               v-if="isAvailable"
               @click="addToCart"
@@ -250,20 +253,21 @@ export default {
     }
   },
   methods: {
-    async fetchProduct() {
-      try {
-        const resp = await api.getProduct(this.productId);
-        // resp.data — це { ...fields... }
-        this.product = resp.data;
-        // присвоїмо рейтинг, кількість відгуків
-        this.product.average_rating = resp.data.rating;
-        this.product.review_count   = resp.data.review_count;
-        const first = this.product.variants.find(v => v.is_available);
-        if (first) this.selectedSize = first.size;
-      } catch (e) {
-        console.error("Product load error:", e);
-      }
-    },
+    async fetchProduct(id) {
+  try {
+    const resp = await api.getProduct(id);
+    this.product = resp.data;
+    this.product.average_rating = resp.data.rating;
+    this.product.review_count = resp.data.review_count;
+
+    const first = this.product.variants.find(v => v.is_available);
+    if (first) this.selectedSize = first.size;
+
+    this.productId = id; // оновлюємо локально
+  } catch (e) {
+    console.error("Product load error:", e);
+  }
+},
     async fetchWishlist() {
       try {
         const { data } = await api.getWishlist();
@@ -308,10 +312,10 @@ export default {
     }
   },
   async created() {
-    this.productId = this.$route.params.id;
-    await this.fetchProduct();
-    await this.fetchWishlist();
-  },
+  const id = this.$route.params.id;
+  await this.fetchProduct(id);
+  await this.fetchWishlist();
+},
   mounted() {
     document.title = "Сторінка товару";
   },

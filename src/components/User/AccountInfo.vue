@@ -12,10 +12,13 @@
     </header>
 
     <main
-      class="flex flex-col lg:flex-row mx-auto max-w-[1300px] h-[650px]
-             bg-[#FFF7F6] rounded-lg shadow-md bg-no-repeat bg-right bg-[length:50%] overflow-hidden"
-      style="background-image:url('@/assets/accountpattern.png')"
-    >
+  class="flex flex-col lg:flex-row mx-auto max-w-[1300px] min-h-[500px]
+         bg-[#FFF7F6] rounded-lg shadow-md bg-no-repeat bg-right bg-[length:50%] overflow-hidden"
+  style="background-image:url('@/assets/accountpattern.png')"
+>
+
+
+
       <!-- Sidebar -->
       <!-- Mobile-friendly sidebar -->
       <aside class="w-full lg:w-64 border-b lg:border-b-0 lg:border-r border-gray-300 p-4">
@@ -75,7 +78,7 @@
 
 
       <!-- Content -->
-      <section class="flex-1 p-6 overflow-auto">
+      <section class="flex-1 p-6 overflow-y-auto max-h-full">
         <component
           :is="activeTabContent"
           :userId="userId"

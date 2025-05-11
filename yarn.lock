@@ -18606,6 +18606,11 @@ vue-i18n@^10.0.4:
     "@intlify/shared" "10.0.4"
     "@vue/devtools-api" "^6.5.0"
 
+vue-input-facade@^2.2.0:
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/vue-input-facade/-/vue-input-facade-2.2.0.tgz#a94aa6ee55e3e5ef46a7f8cf35cb92d3db496e05"
+  integrity sha512-t3Rpr9ErzYX2RBWbnLNFOnIy873fP6Xlhbq2cZIoLbg1GirC2TK8PE5u/K8BktsPGOV31ERZpJEUdS9V5tHTaw==
+
 vue-jest@^3.0.7:
   version "3.0.7"
   resolved "https://registry.npmjs.org/vue-jest/-/vue-jest-3.0.7.tgz"
@@ -18779,6 +18784,11 @@ vue-template-es2015-compiler@^1.6.0, vue-template-es2015-compiler@^1.9.0:
   version "1.9.1"
   resolved "https://registry.npmjs.org/vue-template-es2015-compiler/-/vue-template-es2015-compiler-1.9.1.tgz"
   integrity sha512-4gDntzrifFnCEvyoO8PqyJDmguXgVPxKiIxrBKjIowvL9l+N66196+72XVYR8BBf1Uv1Fgt3bGevJ+sEmxfZzw==
+
+vue-the-mask@^0.11.1:
+  version "0.11.1"
+  resolved "https://registry.yarnpkg.com/vue-the-mask/-/vue-the-mask-0.11.1.tgz#91ee01008354ae57bccc79bb61b65f32d971d9d5"
+  integrity sha512-UquSfnSWejD0zAfcD+3jJ1chUAkOAyoxya9Lxh9acCRtrlmGcAIvd0cQYraWqKenbuZJUdum+S174atv2AuEHQ==
 
 vue-toastification@^2.0.0-rc.5:
   version "2.0.0-rc.5"

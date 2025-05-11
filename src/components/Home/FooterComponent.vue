@@ -45,7 +45,7 @@
                        before:content-[''] before:absolute before:left-0 before:right-0 before:bottom-0 before:h-[2px] before:bg-[#090909] before:scale-x-0 hover:before:scale-x-100 before:origin-left before:transition-transform before:duration-300"
               >
                 <img src="@/assets/icons/arrow_right.svg" alt="arrow" class="w-4 h-4" />
-                <span class="font-['Montserrat']">{{ $t('aboutDelivery') }}</span>
+                <span class="font-['Montserrat']">Про Оплату | Доставку</span>
               </router-link>
             </li>
             <li>

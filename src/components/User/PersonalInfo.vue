@@ -131,18 +131,16 @@ export default {
   },
   methods: {
     async updateUser() {
-      try {
-        await api.updateUser(this.userId, {
-          first_name: this.localFirstName,
-          last_name: this.localLastName,
-          second_name: this.localSecondName
-        });
-        alert('Дані успішно оновлено');
-      } catch (error) {
-        console.error(error);
-        alert('Помилка оновлення даних');
-      }
-    },
+  try {
+    await api.updateUser(this.userId, {
+      first_name: this.localFirstName,
+      last_name: this.localLastName,
+      second_name: this.localSecondName
+    });
+  } catch (error) {
+    console.error(error);
+  }
+},
     changePassword() {
       this.$router.push("/changepassword");
     }

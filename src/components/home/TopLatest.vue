@@ -10,11 +10,12 @@
           v-show="show"
           class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6"
         >
-          <div
-            v-for="review in visibleReviews"
-            :key="review.id"
-            class="p-6 rounded-lg border border-gray-200 shadow-md bg-white flex flex-col justify-between"
-          >
+        <div
+  v-for="review in visibleReviews"
+  :key="review.id"
+  class="min-h-[260px] p-6 rounded-lg border border-gray-200 shadow-md bg-white flex flex-col justify-between"
+>
+
             <!-- Зірки -->
             <div class="flex items-center mb-3">
               <svg
