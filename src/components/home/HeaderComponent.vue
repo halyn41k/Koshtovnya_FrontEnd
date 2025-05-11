@@ -28,7 +28,7 @@
                      before:bottom-0 before:h-[2px] before:bg-black before:scale-x-0
                      hover:before:scale-x-100 before:origin-left before:transition-transform"
             >
-              {{ $t('aboutDelivery') }}
+            Про оплату | Доставку
             </router-link>
           </li>
         </ul>
@@ -301,7 +301,7 @@
   class="block px-4 py-2 hover:bg-gray-100 rounded-lg transition-all duration-200"
   @click="isBurgerOpen = false"
 >
-  {{ $t('aboutDelivery') }}
+Про оплату | Доставку
 </router-link>
 
       </li>

@@ -162,10 +162,19 @@ const routes = [
 ];
 
 const router = createRouter({
+  scrollBehavior(to, from, savedPosition) {
+    if (savedPosition) {
+      return savedPosition;
+    } else {
+      return { top: 0 };
+    }
+  },
+  
   history: createWebHistory(),
   routes,
   // робимо так, щоб клас "active" ставився на активний <router-link>
   linkActiveClass: 'active'
+  
 })
 
 router.beforeEach((to, from, next) => {

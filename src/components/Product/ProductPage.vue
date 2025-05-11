@@ -19,7 +19,7 @@
       </div>
 
       <!-- INFO CARD -->
-      <div class="lg:w-1/2 bg-pink-50 p-6 rounded-2xl shadow-lg flex flex-col space-y-4">
+      <div class="lg:w-1/2 bg-[#FFF7F6] p-6 rounded-2xl shadow-lg flex flex-col space-y-4">
         <!-- TITLE & PRICE -->
         <div class="text-center space-y-2">
           <h1 class="text-2xl font-bold text-gray-900">{{ product.name }}</h1>
@@ -53,7 +53,7 @@
           <select
             id="size-select"
             v-model="selectedSize"
-            class="w-full h-10 bg-pink-100 rounded-md px-3 focus:outline-none"
+            class="w-full h-10 bg-[#F6E7E7] rounded-md px-3 focus:outline-none"
           >
             <option
               v-for="v in product.variants"
@@ -314,7 +314,19 @@ export default {
   },
   mounted() {
     document.title = "Сторінка товару";
+  },
+  watch: {
+  '$route.params.id': {
+    immediate: true,
+    handler(newId) {
+      if (newId) {
+        this.fetchProduct(newId); // або як називається твоя функція
+        window.scrollTo({ top: 0, behavior: 'smooth' }); // автоматичний скрол вгору
+      }
+    }
   }
+}
+
 };
 </script>
 

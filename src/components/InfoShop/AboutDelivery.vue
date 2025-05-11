@@ -43,7 +43,7 @@
                     <img src="@/assets/ukrpost.png" alt="Укрпошта" class="w-7 ml-2 inline-block align-middle" />
                   </h4>
                   <p class="text-base leading-relaxed">
-                    Термін доставки: <strong>2-5</strong> робочих днів<br>
+                    Термін доставки: <strong>2-5</strong> робочих дні<br>
                     Доставка доступна до відділень або до поштових скриньок.<br>
                     Вартість доставки визначається згідно тарифів перевізника.<br>
                     Можлива передплата або післяплатіж.

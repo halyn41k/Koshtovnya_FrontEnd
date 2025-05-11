@@ -58,15 +58,55 @@
     </div>
 
 
-    <!-- Кнопка “Додати відгук” під заголовком — тільки коли є відгуки -->
-    <div v-if="!loading && reviews.length" class="flex justify-end w-full mb-6 px-4 sm:px-0">
-      <button
-        @click="toggleReviewForm"
-        class="bg-red-800 text-white py-2 px-4 rounded-lg text-lg hover:bg-red-700 font-montserrat disabled:opacity-50"
+    <!-- КНОПКА + ФОРМА ВГОРІ -->
+<div class="flex justify-between items-center w-full mb-6 px-4 sm:px-0 max-w-3xl mx-auto">
+  <h3 class="text-xl font-bold text-gray-800">Додайте свій відгук</h3>
+  <button
+    @click="toggleReviewForm"
+    class="bg-red-800 text-white py-2 px-4 rounded-lg text-lg hover:bg-red-700 font-montserrat disabled:opacity-50"
+  >
+    {{ showReviewForm ? 'Сховати форму' : 'Додати відгук' }}
+  </button>
+</div>
+
+<!-- Форма для нового відгуку -->
+<div
+  v-if="showReviewForm"
+  class="bg-red-50 p-6 rounded-lg shadow max-w-3xl mx-auto space-y-4 mb-8"
+>
+  <h3 class="text-xl font-semibold text-gray-900">Напишіть відгук</h3>
+  <div class="flex items-center gap-2">
+    <label class="text-gray-700 font-montserrat">Рейтинг:</label>
+    <div class="flex gap-1">
+      <span
+        v-for="n in 5"
+        :key="n"
+        class="text-2xl cursor-pointer transition-colors"
+        :class="n <= (hoverRatingValue || newReview.rating) ? 'text-yellow-400' : 'text-gray-300'"
+        @mouseover="hoverRating(n)"
+        @mouseleave="resetRating"
+        @click="setRating(n)"
       >
-        Додати відгук
-      </button>
+        &#9733;
+      </span>
     </div>
+  </div>
+
+  <textarea
+    v-model="newReview.comment"
+    placeholder="Ваш коментар"
+    required
+    class="w-full h-32 p-2 border border-gray-300 rounded focus:outline-none focus:ring font-montserrat"
+  ></textarea>
+  <button
+    @click="submitReview"
+    :disabled="loading"
+    class="bg-red-800 text-white py-2 px-4 rounded hover:bg-red-700 disabled:opacity-50 font-montserrat"
+  >
+    Відправити
+  </button>
+</div>
+
 
     <!-- Список відгуків -->
     <ul v-if="reviews.length" class="space-y-6">

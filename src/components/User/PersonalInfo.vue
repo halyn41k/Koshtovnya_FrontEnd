@@ -45,12 +45,28 @@
 
 
     <div class="flex flex-col sm:flex-row gap-4 sm:gap-5 mt-6">
+      <div class="relative group">
   <button
     @click="updateUser"
-    class="w-full sm:w-[200px] h-[40px] bg-[#6B1F1F] text-white text-sm sm:text-base font-medium rounded-lg hover:bg-[#A01212] transition-colors"
+    :disabled="isDisabled"
+    class="w-full sm:w-[200px] h-[40px] text-sm sm:text-base font-medium rounded-lg transition-colors
+           text-white bg-[#6B1F1F] hover:bg-[#A01212]
+           disabled:bg-gray-300 disabled:text-gray-600 disabled:cursor-not-allowed"
   >
     Оновити інформацію
   </button>
+
+  <!-- Tooltip -->
+  <div
+    v-if="isDisabled"
+    class="absolute top-full left-0 mt-1 w-max max-w-[250px] text-xs text-white bg-gray-800 px-3 py-2 rounded shadow-lg
+           opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10"
+  >
+    Щоб оновити дані, заповніть всі обов'язкові поля: ім’я, прізвище та по батькові.
+  </div>
+</div>
+
+
 
   <button
     @click="changePassword"
@@ -98,7 +114,14 @@ export default {
   computed: {
     isAdminOrManager() {
       return this.role === 'superadmin' || this.role === 'manager';
-    }
+    },
+    isDisabled() {
+    return (
+      !this.localFirstName?.trim() ||
+      !this.localLastName?.trim() ||
+      !this.localSecondName?.trim()
+    );
+  }
   },
   watch: {
     first_name(newVal) { this.localFirstName = newVal },

@@ -1,21 +1,21 @@
 <template>
   <section class="font-montserrat">
-    <!-- HEADER: Title + Count + Filter button + Active tags -->
+    <!-- HEADER -->
     <div class="px-8 pt-[200px] pb-4">
       <h2 class="title-kyiv text-3xl mb-2">{{ computedTitle }}</h2>
-
 
       <div class="flex items-center justify-between mb-2">
         <p class="text-lg font-medium">Знайдено {{ totalCount }} товарів</p>
         <button
-  @click="toggleFilter"
-  class="inline-flex items-center p-2 pl-3 pr-4 rounded-md focus:outline-none focus:ring-2 focus:ring-[#6B1F1F] hover:bg-gray-100 transition lg:hidden"
->
-  <img src="@/assets/icons/filter.svg" alt="Filter" class="w-5 h-5 mr-2" />
-  <span class="text-base font-semibold">Фільтр</span>
-</button>
-
+          @click="toggleFilter"
+          class="inline-flex items-center p-2 pl-3 pr-4 rounded-md focus:outline-none focus:ring-2 focus:ring-[#6B1F1F] hover:bg-gray-100 transition lg:hidden"
+        >
+          <img src="@/assets/icons/filter.svg" alt="Filter" class="w-5 h-5 mr-2" />
+          <span class="text-base font-semibold">Фільтр</span>
+        </button>
       </div>
+
+      <!-- ACTIVE TAGS -->
       <div v-if="activeTags.length" class="flex flex-wrap gap-2 mb-4">
         <button
           v-for="tag in activeTags"
@@ -38,73 +38,65 @@
     </div>
 
     <div class="flex px-8 pb-[100px]">
-      <!-- FILTER SIDEBAR -->
-       <!-- Постійно видно на десктопі -->
-<div class="hidden lg:block w-[350px] mr-8">
-  <FilterComponent
-    :initial-filters="filters"
-    :mobile-visible="false"
-    @apply="applyFilters"
-    @close="toggleFilter"
-  />
-</div>
+      <!-- FILTER SIDEBAR DESKTOP -->
+      <div class="hidden lg:block w-[350px] mr-8">
+        <FilterComponent
+          :initial-filters="filters"
+          :mobile-visible="false"
+          @apply="applyFilters"
+          @close="toggleFilter"
+        />
+      </div>
 
-     <!-- Відображається тільки на мобілці -->
-<!-- Overlay for mobile -->
-<div
-  v-if="filterVisible && isMobile"
-  class="fixed inset-0 bg-[#00000080] z-40 transition-opacity"
-  @click="toggleFilter"
-></div>
-<div
-  v-if="filterVisible && isMobile"
-  class="fixed top-0 right-0 w-[350px] h-screen bg-[#fff7f6] z-50 shadow-lg transition-transform duration-300 transform"
-  :class="{ 'translate-x-0': filterVisible, 'translate-x-full': !filterVisible }"
->
-  <div class="h-full overflow-y-auto px-4 py-6">
-    <FilterComponent
-      :initial-filters="filters"
-      :mobile-visible="filterVisible"
-      @apply="applyFilters"
-      @close="toggleFilter"
-    />
-  </div>
-</div>
+      <!-- FILTER MOBILE -->
+      <div
+        v-if="filterVisible && isMobile"
+        class="fixed inset-0 bg-[#00000080] z-40 transition-opacity"
+        @click="toggleFilter"
+      ></div>
+      <div
+        v-if="filterVisible && isMobile"
+        class="fixed top-0 right-0 w-[350px] h-screen bg-[#fff7f6] z-50 shadow-lg transition-transform duration-300 transform"
+        :class="{ 'translate-x-0': filterVisible, 'translate-x-full': !filterVisible }"
+      >
+        <div class="h-full overflow-y-auto px-4 py-6">
+          <FilterComponent
+            :initial-filters="filters"
+            :mobile-visible="filterVisible"
+            @apply="applyFilters"
+            @close="toggleFilter"
+          />
+        </div>
+      </div>
 
-
-
-
-
-      <!-- PRODUCT GRID -->
+      <!-- MAIN GRID -->
       <main class="flex-1">
         <div
-  class="grid gap-4 transition-opacity duration-500 ease-in-out"
-  :class="['grid-cols-1 sm:grid-cols-2 lg:grid-cols-4', loadingProducts ? 'opacity-30' : 'opacity-100']"
->
+          class="grid gap-4 transition-opacity duration-500 ease-in-out"
+          :class="['grid-cols-1 sm:grid-cols-2 lg:grid-cols-4', loadingProducts ? 'opacity-30' : 'opacity-100']"
+        >
+          <!-- PRODUCT CARD -->
+          <article
+            v-for="product in visibleProducts"
+            :key="product.id"
+            class="bg-[#fff7f6] border border-gray-200 rounded-2xl shadow-md hover:shadow-lg transform hover:-translate-y-2 transition duration-300 overflow-hidden flex flex-col"
+          >
+            <router-link :to="`/productpage/${product.id}`" class="flex-1 flex flex-col">
+              <div class="h-48 overflow-hidden">
+                <img
+                  :src="product.image_url"
+                  :alt="product.name"
+                  class="w-full h-full object-cover hover:scale-105 transition duration-300"
+                />
+              </div>
+              <div class="px-4 py-3 flex-1 flex flex-col justify-between">
+                <h3 class="text-lg font-semibold line-clamp-2 h-12">{{ product.name }}</h3>
+                <p class="text-xl font-semibold text-red-700 mt-1">{{ product.price }} грн</p>
+              </div>
+            </router-link>
 
-
-        <article
-  v-for="product in visibleProducts"
-  :key="product.id"
-  class="bg-[#fff7f6] border border-gray-200 rounded-2xl shadow-md hover:shadow-lg transform hover:-translate-y-2 transition duration-300 overflow-hidden flex flex-col"
->
-  <router-link :to="`/productpage/${product.id}`" class="flex-1 flex flex-col">
-    <div class="h-48 overflow-hidden">
-      <img
-        :src="product.image_url"
-        :alt="product.name"
-        class="w-full h-full object-cover hover:scale-105 transition duration-300"
-      />
-    </div>
-    <div class="px-4 py-3 flex-1 flex flex-col justify-between">
-      <h3 class="text-lg font-semibold line-clamp-2 h-12">{{ product.name }}</h3>
-      <p class="text-xl font-semibold text-red-700 mt-1">{{ product.price }} грн</p>
-    </div>
-  </router-link>
-
-  <!-- Рейтинг -->
-  <div class="px-4 flex items-center mb-2 space-x-2">
-    <div class="flex items-center">
+            <div class="px-4 flex items-center mb-2 space-x-2">
+              <div class="flex items-center">
       <span v-for="n in 5" :key="n">
         <svg
           v-if="n <= Math.round(product.rating)"
@@ -143,8 +135,8 @@
     </div>
     <span class="text-sm text-gray-600">({{ product.review_count }})</span>
   </div>
-
-  <div class="px-3 mb-6 flex justify-between items-center">
+             
+            <div class="px-3 mb-6 flex justify-between items-center">
             <span class="text-base font-montserrat font-medium text-gray-800">
               {{ product.bead_producer_name }}
             </span>
@@ -187,20 +179,34 @@
             </button>
           </div>
 
-  <!-- Кнопка "Купити" -->
-  <div class="px-4 pb-4">
-    <button
-      @click="addToCart(product)"
-      class="w-full h-11 bg-[#6B1F1F] hover:bg-[#A01212] text-white font-semibold rounded-lg flex items-center justify-between px-4 transition duration-300"
-    >
-      <span>Купити</span>
-      <img src="@/assets/miniarrow.png" alt="arrow" class="w-5 h-4" />
-    </button>
-  </div>
-</article>
+            <div class="px-4 pb-4">
+              <button
+                @click="addToCart(product)"
+                class="w-full h-11 bg-[#6B1F1F] hover:bg-[#A01212] text-white font-semibold rounded-lg flex items-center justify-between px-4 transition duration-300"
+              >
+                <span>Купити</span>
+                <img src="@/assets/miniarrow.png" alt="arrow" class="w-5 h-4" />
+              </button>
+            </div>
+          </article>
+
+          <!-- NOTHING FOUND -->
+          <div
+            v-if="!loadingProducts && visibleProducts.length === 0"
+            class="col-span-full text-center text-gray-600 py-16 animate-fade-in"
+          >
+            <p class="text-lg font-semibold mb-2">Нічого не знайдено за заданими фільтрами 😢</p>
+            <button
+              @click="clearAll"
+              class="mt-4 px-6 py-2 bg-[#6B1F1F] text-white rounded-md hover:bg-[#A01212] transition"
+            >
+              Скинути фільтри
+            </button>
+          </div>
         </div>
+
         <!-- PAGINATION -->
-        <div class="flex justify-center gap-2 mt-8">
+        <div class="flex justify-center gap-2 mt-8" v-if="totalPages > 1">
           <button
             v-for="n in totalPages"
             :key="n"
@@ -215,8 +221,12 @@
         </div>
       </main>
     </div>
+
+    <!-- CATEGORY BLOCK -->
+    <CategoryProduct class="mt-20 px-4 sm:px-6 lg:px-8" />
   </section>
 </template>
+
 
 <script>
 import api from '@/services/api';

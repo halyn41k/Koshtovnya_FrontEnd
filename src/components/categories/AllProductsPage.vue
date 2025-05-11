@@ -69,16 +69,31 @@
       </div>
 
       <!-- PRODUCT GRID -->
-      <main class="flex-1">
-        <div
-          class="grid gap-4"
-          :class="'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4'"
-        >
-        <article
-  v-for="product in products"
-  :key="product.id"
-            class="bg-[#fff7f6] border border-gray-200 rounded-2xl shadow-md hover:shadow-lg transform hover:-translate-y-2 transition duration-300 overflow-hidden flex flex-col"
-          >
+<main class="flex-1">
+  <div
+    class="grid gap-4 transition-opacity duration-500 ease-in-out"
+    :class="['grid-cols-1 sm:grid-cols-2 lg:grid-cols-4', loadingProducts ? 'opacity-30' : 'opacity-100']"
+  >
+    <!-- Коли немає товарів -->
+    <div
+      v-if="!loadingProducts && products.length === 0"
+      class="text-center text-gray-600 py-16 col-span-full animate-fade-in"
+    >
+      <p class="text-lg font-semibold mb-2">Нічого не знайдено за заданими фільтрами 😢</p>
+      <button
+        @click="clearAll"
+        class="mt-4 px-6 py-2 bg-[#6B1F1F] text-white rounded-md hover:bg-[#A01212] transition"
+      >
+        Скинути фільтри
+      </button>
+    </div>
+
+    <!-- Товари -->
+    <article
+      v-for="product in products"
+      :key="product.id"
+      class="bg-[#fff7f6] border border-gray-200 rounded-2xl shadow-md hover:shadow-lg transform hover:-translate-y-2 transition duration-300 overflow-hidden flex flex-col"
+    >
             <router-link :to="`/productpage/${product.id}`" class="flex-1 flex flex-col">
               <div class="h-48 overflow-hidden">
                 <img
@@ -186,21 +201,23 @@
               </button>
             </div>
           </article>
-        </div>
-        <div class="flex justify-center gap-2 mt-8">
-          <button
-            v-for="n in totalPages"
-            :key="n"
-            @click="changePage(n)"
-            :class="[
-              'px-4 py-2 rounded-lg font-semibold transition duration-200',
-              currentPage === n ? 'bg-[#6B1F1F] text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-            ]"
-          >
-            {{ n }}
-          </button>
-        </div>
-      </main>
+  </div>
+
+  <!-- Пагінація -->
+  <div v-if="totalPages > 1" class="flex justify-center gap-2 mt-8">
+    <button
+      v-for="n in totalPages"
+      :key="n"
+      @click="changePage(n)"
+      :class="[
+        'px-4 py-2 rounded-lg font-semibold transition duration-200',
+        currentPage === n ? 'bg-[#6B1F1F] text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+      ]"
+    >
+      {{ n }}
+    </button>
+  </div>
+</main>
     </div>
   </section>
 </template>

@@ -3,13 +3,13 @@
     <!-- Велике X у кутку -->
     <button
       @click="remove"
-      class="absolute top-2 right-2 text-2xl text-gray-500 hover:text-red-600"
+      class="absolute top-2 right-2 text-2xl text-gray-500 hover:text-red-600 hover:bg-red-100 rounded-full transition-all duration-200 w-8 h-8 flex items-center justify-center"
       aria-label="Видалити товар"
     >
       ×
     </button>
 
-    <!-- Фіксована ширина зображення, не на всю ширину -->
+    <!-- Фіксована ширина зображення -->
     <img
       :src="item.image"
       :alt="item.name"
@@ -52,10 +52,13 @@
             <button
               @click="decrease"
               :disabled="item.quantity <= 1"
-              class="px-3 py-1 disabled:opacity-50"
+              class="px-3 py-1 hover:bg-gray-100 transition-colors duration-200 disabled:opacity-50"
             >-</button>
             <span class="px-4 text-gray-800">{{ item.quantity }}</span>
-            <button @click="increase" class="px-3 py-1">+</button>
+            <button
+              @click="increase"
+              class="px-3 py-1 hover:bg-gray-100 transition-colors duration-200"
+            >+</button>
           </div>
         </div>
       </div>
@@ -103,7 +106,6 @@ export default {
   font-family: 'Montserrat', sans-serif;
 }
 
-/* Дві лінії для заголовку */
 .line-clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;
