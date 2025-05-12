@@ -31,7 +31,10 @@ apiClient.interceptors.request.use(
   error => Promise.reject(error)
 );
 
+
+
 apiClient.interceptors.response.use(
+  
   response => response,
   error => {
     const { response } = error;
@@ -42,6 +45,15 @@ apiClient.interceptors.response.use(
     }
 
     const message = response.data?.message || '';
+
+  
+    const normalizedMessage = message.toLowerCase().trim();
+
+    // 🟡 Додай перевірку тут – ДО switch
+    if (normalizedMessage.includes('not enough stock available')) {
+      toast.error('Немає достатньо товару в наявності 😢');
+      return Promise.reject(response.data);
+    }
 
     switch (response.status) {
       case 400:
@@ -69,12 +81,15 @@ apiClient.interceptors.response.use(
         break;
       }
       case 500:
-        if (message.includes('Out of range value for column')) {
-          toast.error('Цей товар більше не в наявності 😢');
-        } else {
-          toast.error('Сталася помилка на сервері. Спробуйте пізніше');
-        }
-        break;
+  if (message.toLowerCase().includes('out of range value for column')) {
+    toast.error('Цей товар більше не в наявності 😢');
+  } else if (message.toLowerCase().includes('not enough stock available')) {
+    toast.error('Немає достатньо товару в наявності 😢');
+  } else {
+    toast.error('Сталася помилка на сервері. Спробуйте пізніше');
+  }
+  break;
+
       default:
         toast.error(message || `Сталася помилка: ${response.status}`);
     }

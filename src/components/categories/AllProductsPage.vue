@@ -192,13 +192,27 @@
           </div>
 
             <div class="px-4 pb-4">
-              <button
-                @click="addToCart(product)"
-                class="w-full h-11 bg-[#6B1F1F] hover:bg-[#A01212] text-white font-semibold rounded-lg flex items-center justify-between px-4 transition duration-300"
-              >
-                <span>Купити</span>
-                <img src="@/assets/miniarrow.png" alt="arrow" class="w-5 h-4" />
-              </button>
+              <!-- Кнопки в залежності від наявності -->
+<!-- Кнопка Купити -->
+<button
+  v-if="product.has_available_variant"
+  @click="addToCart(product)"
+  class="w-full h-11 bg-[#6B1F1F] hover:bg-[#A01212] text-white font-semibold rounded-lg flex items-center justify-between px-4 transition duration-300"
+>
+  <span>Купити</span>
+  <img src="@/assets/miniarrow.png" alt="arrow" class="w-5 h-4" />
+</button>
+
+<!-- Кнопка Повідомити -->
+<button
+  v-else
+  @click="notifyWhenAvailable(product)"
+  class="w-full h-11 bg-gray-300 text-gray-700 font-semibold rounded-lg flex items-center justify-center px-4 transition duration-300"
+>
+  Повідомити про наявність
+</button>
+
+
             </div>
           </article>
   </div>
@@ -268,6 +282,14 @@ export default {
     }
   },
   methods: {
+    async notifyWhenAvailable(product) {
+  try {
+    await api.sendNotification({ product_id: product.id });
+  } catch (e) {
+    console.error('Помилка підписки на сповіщення:', e);
+  }
+},
+
     toggleFilter() {
       this.filterVisible = !this.filterVisible;
       document.body.classList.toggle('overflow-hidden', this.filterVisible && this.isMobile);
@@ -294,7 +316,13 @@ export default {
 
       try {
         const res = await api.getAllProducts({ params });
-this.products = Array.isArray(res.data) ? res.data : [];
+this.products = Array.isArray(res.data)
+  ? res.data.map(p => ({
+      ...p,
+      has_available_variant: (p.variants || []).some(v => v.is_available)
+    }))
+  : [];
+
 this.totalPages = res.meta?.last_page || 1;
 this.totalCount = res.meta?.total || this.products.length;
 
@@ -322,14 +350,23 @@ this.totalCount = res.meta?.total || this.products.length;
         console.error('Помилка оновлення списку бажаного:', error);
       }
     },
-    async addToCart(product) {
-      try {
-        await api.addToCart({ product_id: product.id, quantity: 1 });
-        bus.emit('cart-updated');
-      } catch (error) {
-        console.error('Помилка додавання в кошик:', error.response?.data || error);
-      }
-    },
+     async addToCart(product) {
+  try {
+    const { data } = await api.getProduct(product.id);
+    const available = data.variants?.find(v => v.is_available);
+    if (!available) return; // toast вже в api.js
+
+    await api.addToCart({
+      product_id: product.id,
+      quantity: 1,
+      size: available.size
+    });
+
+    bus.emit('cart-updated');
+  } catch (e) {
+    // тости вже обробляються в api.js
+  }
+},
     removeTag(tag) {
       const nf = { ...this.filters };
       const val = nf[tag.key];

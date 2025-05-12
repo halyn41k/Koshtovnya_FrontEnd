@@ -180,14 +180,27 @@
           </div>
 
             <div class="px-4 pb-4">
-              <button
-                @click="addToCart(product)"
-                class="w-full h-11 bg-[#6B1F1F] hover:bg-[#A01212] text-white font-semibold rounded-lg flex items-center justify-between px-4 transition duration-300"
-              >
-                <span>Купити</span>
-                <img src="@/assets/miniarrow.png" alt="arrow" class="w-5 h-4" />
-              </button>
-            </div>
+ <!-- Кнопка Купити -->
+<button
+  v-if="product.has_available_variant"
+  @click="addToCart(product)"
+  class="w-full h-11 bg-[#6B1F1F] hover:bg-[#A01212] text-white font-semibold rounded-lg flex items-center justify-between px-4 transition duration-300"
+>
+  <span>Купити</span>
+  <img src="@/assets/miniarrow.png" alt="arrow" class="w-5 h-4" />
+</button>
+
+<!-- Кнопка Повідомити -->
+<button
+  v-else
+  @click="notifyWhenAvailable(product)"
+  class="w-full h-11 bg-gray-300 text-gray-700 font-semibold rounded-lg flex items-center justify-center px-4 transition duration-300"
+>
+  Повідомити про наявність
+</button>
+
+</div>
+
           </article>
 
           <!-- NOTHING FOUND -->
@@ -232,6 +245,7 @@
 import api from '@/services/api';
 import FilterComponent from '../product/FilterComponent.vue';
 import bus from '@/eventBus';
+
 
 export default {
   name: 'CategorySection',
@@ -311,6 +325,14 @@ export default {
   },
 
   methods: {
+    async notifyWhenAvailable(product) {
+  try {
+    await api.sendNotification({ product_id: product.id });
+  } catch (e) {
+    console.error('Помилка підписки на сповіщення:', e);
+  }
+},
+
     toggleFilter() {
   this.filterVisible = !this.filterVisible;
   document.body.classList.toggle('overflow-hidden', this.filterVisible && this.isMobile);
@@ -329,9 +351,17 @@ export default {
     console.log('Category ID →', id);
 
     const res = await api.getCategoryProducts(id, { params: { ...filters, page } });
-    this.products = Array.isArray(res.data?.data) ? res.data.data : [];
-    this.totalPages = res.data.meta?.last_page || 1;
-    this.updateVisibleProducts();
+
+this.products = Array.isArray(res.data?.data)
+  ? res.data.data.map(p => ({
+      ...p,
+      has_available_variant: (p.variants || []).some(v => v.is_available)
+    }))
+  : [];
+
+this.totalPages = res.data.meta?.last_page || 1;
+this.updateVisibleProducts();
+
   } catch (e) {
     console.error('Не вдалося завантажити товари:', e)
   } finally {
@@ -377,14 +407,29 @@ export default {
     },
 
     async addToCart(product) {
-      try {
-        await api.addToCart({ product_id: product.id, quantity: 1 });
-        bus.emit('cart-updated');
-        console.log('Додано в кошик');
-      } catch (error) {
-        console.error('Помилка додавання в кошик:', error.response?.data || error);
-      }
-    },
+  try {
+    const { data } = await api.getProduct(product.id);
+    const available = data.variants?.find(v => v.is_available);
+
+    if (!available) return;
+
+    await api.addToCart({
+      product_id: product.id,
+      quantity: 1,
+      size: available.size
+    });
+
+    bus.emit('cart-updated');
+
+    // 🔁 оновлюємо доступність одразу після додавання
+    product.has_available_variant = data.variants?.some(v => v.is_available);
+
+  } catch (e) {
+    // тости вже в api.js
+  }
+},
+
+
 
     removeTag(tag) {
       const nf = { ...this.filters };

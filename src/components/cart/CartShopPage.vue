@@ -43,6 +43,8 @@ import Summary from './Summary.vue';
 // eslint-disable-next-line 
 import Loader from '../home/Loader.vue';
 import bus from '@/eventBus';
+import { useToast } from 'vue-toastification'; // додати
+const toast = useToast(); // ініціалізація тосту
 
 
 export default {
@@ -70,7 +72,6 @@ export default {
         }));
       } catch (err) {
         console.error('Помилка завантаження кошика:', err);
-        alert('Не вдалося завантажити кошик.');
       } finally {
         this.loading = false;
       }
@@ -90,7 +91,6 @@ export default {
         }
       } catch (err) {
         console.error('Помилка оновлення:', err);
-        alert(err.response?.data?.message || 'Не вдалося оновити.');
       }
     },
     async removeItem(id) {

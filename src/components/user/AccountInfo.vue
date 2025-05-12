@@ -1,15 +1,17 @@
 <template>
   <div class="font-sans min-h-screen bg-gray-50">
     <!-- Header -->
-    <header class="text-center mt-[170px] mb-8">
-      <h1 class="flex items-center justify-center">
-        <div class="flex-1 h-px bg-gray-400 mx-4"></div>
-        <span class="text-3xl font-black tracking-tight text-gray-800">
-          Ваш аккаунт
-        </span>
-        <div class="flex-1 h-px bg-gray-400 mx-4"></div>
-      </h1>
-    </header>
+   <header class=" mt-[200px] mb-8">
+
+  <h1
+    class="flex items-center justify-center mt-[80px] font-kyivBlack2 text-[34px] font-black tracking-[-1.2px] text-center"
+  >
+    <div class="flex-1 h-[2px] bg-gray-400 mx-2"></div>
+    Ваш аккаунт
+    <div class="flex-1 h-[2px] bg-gray-400 mx-2"></div>
+  </h1>
+</header>
+
 
     <main
   class="flex flex-col lg:flex-row mx-auto max-w-[1300px] min-h-[500px]
@@ -77,17 +79,18 @@
 
 
 
-      <!-- Content -->
-      <section class="flex-1 p-6 overflow-y-auto max-h-full">
-        <component
-          :is="activeTabContent"
-          :userId="userId"
-          :first_name="first_name"
-          :last_name="last_name"
-          :second_name="second_name"
-          :email="email"
-        />
-      </section>
+<!-- Content: only shown on desktop -->
+<section class="hidden lg:block flex-1 p-6 overflow-y-auto max-h-full">
+  <component
+    :is="activeTabContent"
+    :userId="userId"
+    :first_name="first_name"
+    :last_name="last_name"
+    :second_name="second_name"
+    :email="email"
+  />
+</section>
+
     </main>
 
     <!-- Message -->
@@ -108,6 +111,8 @@ import PersonalInfo from './PersonalInfo.vue';
 import Addresses from './UserAddresses.vue';
 import OrderHistory from './OrderHistory.vue';
 import Wishlist from './UserWishlist.vue';
+import api from '@/services/api';
+
 
 export default {
   name: 'AccountInfo',
@@ -171,26 +176,17 @@ getTabComponent(i) {
 },
 
     async fetchProfile() {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        this.setMessage('Ви не авторизовані. Увійдіть у систему.', 'error');
-        return;
-      }
-      try {
-        const res = await fetch('https://koshtovnya.api-dev.bmax-edu.website/api/profile', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        if (!res.ok) throw res;
-        const { user } = await res.json();
-        this.userId = user.id;
-        this.first_name = user.first_name || '';
-        this.last_name = user.last_name || '';
-        this.second_name = user.second_name || '';
-        this.email = user.email || '';
-      } catch {
-        this.setMessage('Не вдалося завантажити профіль.', 'error');
-      }
-    },
+  try {
+    const { user } = await api.getProfile();
+    this.userId = user.id;
+    this.first_name = user.first_name || '';
+    this.last_name = user.last_name || '';
+    this.second_name = user.second_name || '';
+    this.email = user.email || '';
+  } catch (error) {
+    this.setMessage('Не вдалося завантажити профіль.', 'error');
+  }
+},
     async selectTab(i) {
       if (i === 4) {
         try {
@@ -229,7 +225,16 @@ getTabComponent(i) {
 };
 </script>
 
+
 <style scoped>
+.font-kyivBlack2 {
+  font-family: 'KyivType Titling Black2', sans-serif;
+}
+
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');
-.font-sans { font-family: 'Montserrat', sans-serif; }
+
+.font-sans {
+  font-family: 'Montserrat', sans-serif;
+}
+
 </style>
