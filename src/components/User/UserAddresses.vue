@@ -29,10 +29,14 @@
           <input
   v-model="phoneNumber"
   @input="formatPhoneNumber"
-  placeholder="+38 (___) ___-__-__"
+  placeholder="Введіть номер телефону (тільки цифри)"
+  maxlength="10"
+  inputmode="numeric"
+  pattern="[0-9]*"
   class="w-full px-3 py-2 border rounded-lg focus:ring focus:ring-opacity-50"
   :class="errors.phoneNumber ? 'border-red-500' : 'border-gray-300'"
 />
+
 
 
 
@@ -67,33 +71,38 @@
             />
           </div>
 
-          <div>
-            <label class="block text-gray-700 mb-1">Місто:</label>
-            <div class="relative">
-              <input
-                v-model="formData.city"
-                @input="onCityInput"
-                @focus="showCityDropdown = true"
-                placeholder="Введіть назву міста"
-                required
-                :class="['w-full px-3 py-2 border rounded-lg focus:ring focus:ring-opacity-50', errors.city ? 'border-red-500' : 'border-gray-300']"
-              />
-              <div class="city-dropdown-wrapper">
-  <ul v-if="showCityDropdown && cities.length" class="absolute z-10 w-full mt-1 max-h-48 overflow-y-auto bg-white border border-gray-300 rounded-lg shadow-lg">
-    <li
-      v-for="city in cities"
-      :key="city.Ref"
-      @mousedown.prevent="selectCity(city)"
-      class="px-3 py-2 hover:bg-gray-100 cursor-pointer"
-    >
-      {{ city.city }}
-    </li>
-  </ul>
+<div ref="cityWrapper" class="relative w-full">
+
+<input
+  ref="cityInput"
+  v-model="formData.city"
+  @input="onCityInput"
+  @focus="showCityDropdown = true; updateDropdownPosition()"
+  placeholder="Введіть назву міста"
+  required
+  class="w-full px-3 py-2 border rounded-lg focus:ring focus:ring-opacity-50"
+  :class="errors.city ? 'border-red-500' : 'border-gray-300'"
+/>
+
+<ul
+  v-if="showCityDropdown && cities.length"
+  class="absolute z-50 bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-y-auto"
+  :style="{ top: dropdownTop + 'px', left: dropdownLeft + 'px', width: dropdownWidth + 'px' }"
+>
+
+  <li
+    v-for="city in cities"
+    :key="city.Ref"
+    @mousedown.prevent="selectCity(city)"
+    class="px-3 py-2 hover:bg-gray-100 cursor-pointer"
+  >
+    {{ city.city }}
+  </li>
+</ul>
 </div>
 
-            </div>
-            <p v-if="errors.city" class="text-red-500 text-sm mt-1">{{ errors.city }}</p>
-          </div>
+
+
 
           <div>
             <label class="block text-gray-700 mb-1">Вулиця:</label>
@@ -121,10 +130,12 @@
           <div>
             <label class="block text-gray-700 mb-1">Будинок/Квартира:</label>
             <input
-              v-model="deliveryAddress.number"
-              required
-              :class="['w-full px-3 py-2 border rounded-lg focus:ring focus:ring-opacity-50', errors.number ? 'border-red-500' : 'border-gray-300']"
-            />
+  v-model="deliveryAddress.number"
+  required
+  placeholder="Введіть номер будинку або квартири"
+  :class="['w-full px-3 py-2 border rounded-lg focus:ring focus:ring-opacity-50', errors.number ? 'border-red-500' : 'border-gray-300']"
+/>
+
             <p v-if="errors.number" class="text-red-500 text-sm mt-1">{{ errors.number }}</p>
           </div>
         </template>
@@ -134,14 +145,22 @@
           <div>
             <label class="block text-gray-700 mb-1">Спосіб доставки:</label>
             <select
-              v-model="formData.selectedDeliveryMethod"
-              @change="onDeliveryMethodChange"
-              required
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring focus:ring-opacity-50"
-            >
-              <option disabled value="">Оберіть спосіб доставки</option>
-              <option v-for="opt in pickupOptions" :key="opt.id" :value="opt">{{ opt.name }}</option>
-            </select>
+  v-model="formData.selectedDeliveryMethod"
+  @change="onDeliveryMethodChange"
+  required
+  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring focus:ring-opacity-50"
+>
+  <option :value="null" disabled selected>Оберіть спосіб доставки</option>
+  <option
+    v-for="opt in pickupOptions"
+    :key="opt.id"
+    :value="opt"
+  >
+    {{ opt.name }}
+  </option>
+</select>
+
+
             <p v-if="errors.selectedDeliveryMethod" class="text-red-500 text-sm mt-1">{{ errors.selectedDeliveryMethod }}</p>
           </div>
 
@@ -155,26 +174,38 @@
           <template v-else-if="formData.selectedDeliveryMethod">
             <div>
               <label class="block text-gray-700 mb-1">Місто:</label>
-              <div class="relative">
-                <input
-                  v-model="formData.city"
-                  @input="handleCityInput"
-                  @focus="showCityDropdown = true"
-                  placeholder="Введіть місто"
-                  required
-                  class="w-full px-3 py-2 border rounded-lg focus:ring focus:ring-opacity-50"
-                />
-                <ul v-if="showCityDropdown && cities.length" class="absolute z-10 w-full mt-1 max-h-48 overflow-y-auto bg-white border border-gray-300 rounded-lg shadow-lg">
-                  <li
-                    v-for="city in cities"
-                    :key="city.Ref"
-                    @mousedown.prevent="selectCity(city)"
-                    class="px-3 py-2 hover:bg-gray-100 cursor-pointer"
-                  >
-                    {{ city.city }}
-                  </li>
-                </ul>
-              </div>
+              <input
+  v-model="formData.city"
+  @input="onCityInput"
+  @focus="showCityDropdown = true"
+  placeholder="Введіть назву міста"
+  required
+  :class="['w-full px-3 py-2 border rounded-lg focus:ring focus:ring-opacity-50', errors.city ? 'border-red-500' : 'border-gray-300']"
+/>
+
+<!-- ✅ Бекдроп: закриє дропдаун при кліку поза полем -->
+<div
+  v-if="showCityDropdown"
+  class="fixed inset-0 z-40"
+  @click.self="showCityDropdown = false"
+/>
+
+<div class="city-dropdown-wrapper">
+  <ul
+    v-if="showCityDropdown && cities.length"
+    class="absolute z-50 w-full mt-1 max-h-48 overflow-y-auto bg-white border border-gray-300 rounded-lg shadow-lg"
+  >
+    <li
+      v-for="city in cities"
+      :key="city.Ref"
+      @mousedown.prevent="selectCity(city)"
+      class="px-3 py-2 hover:bg-gray-100 cursor-pointer"
+    >
+      {{ city.city }}
+    </li>
+  </ul>
+</div>
+
               <p v-if="errors.city" class="text-red-500 text-sm mt-1">{{ errors.city }}</p>
             </div>
 
@@ -280,6 +311,10 @@ export default {
     return {
       addressAvailable: false,
       showForm: false,
+      dropdownTop: 0,
+dropdownLeft: 0,
+dropdownWidth: 0,
+
       phoneNumber: "",
       formData: {
         city: "",
@@ -289,7 +324,12 @@ export default {
         deliveryName: "",
         streetSearch: ""
       },
-     
+     dropdownOpen: {
+  deliveryType: false,
+  deliveryMethod: false,
+  branch: false,
+  postomat: false
+},
 
       deliveryAddress: {
         street: "",
@@ -311,12 +351,31 @@ export default {
   },
   computed: {
     pickupOptions() {
-      return [
-        { id: 1, name: "Самовивіз з нашого магазину", is_store: true },
-        { id: 2, name: "Самовивіз з Нової Пошти" },
-        { id: 3, name: "Самовивіз з поштоматів Нової Пошти" }
-      ];
+  return [
+    {
+      id: 1,
+      name: "Самовивіз з наших магазинів", // ← має бути точно як з API
+      delivery_type: "pickup",
+      is_store: true
+    },
+    {
+      id: 2,
+      name: "Самовивіз з Нової Пошти",
+      delivery_type: "pickup"
+    },
+    {
+      id: 3,
+      name: "Самовивіз з поштоматів Нової Пошти",
+      delivery_type: "pickup"
     }
+  ];
+},
+ pickupOptionsWithPlaceholder() {
+    return [
+      { id: null, name: 'Оберіть спосіб доставки', disabled: true },
+      ...this.pickupOptions
+    ];
+  }
   },
   created() {
     this.fetchUserAddress();
@@ -329,28 +388,8 @@ export default {
   },
   methods: {
     formatPhoneNumber(e) {
-  let digits = e.target.value.replace(/\D/g, '').slice(0, 12);
-
-  if (!digits.startsWith('38')) {
-    digits = '38' + digits; // автододавання "38", якщо користувач вводить 0...
-  }
-
-  const part1 = digits.slice(0, 2);   // 38
-  const part2 = digits.slice(2, 5);   // 0XX
-  const part3 = digits.slice(5, 8);   // XXX
-  const part4 = digits.slice(8, 10);  // XX
-  const part5 = digits.slice(10, 12); // XX
-
-  this.phoneNumber = `+${part1} (${part2}) ${part3}-${part4}-${part5}`.replace(/\s+$/, '');
+  this.phoneNumber = e.target.value.replace(/\D/g, '').slice(0, 10);
 },
-
-    handleClickOutside(event) {
-  const dropdown = this.$el.querySelector('.city-dropdown-wrapper');
-  if (dropdown && !dropdown.contains(event.target)) {
-    this.showCityDropdown = false;
-  }
-},
-
     debounce(func, wait) {
       let timeout;
       return function (...args) {
@@ -370,6 +409,18 @@ export default {
         this.warehouses = [];
       }
     },
+    updateDropdownPosition() {
+  this.$nextTick(() => {
+    const input = this.$refs.cityInput;
+    if (input) {
+      const rect = input.getBoundingClientRect();
+      this.dropdownTop = rect.bottom + window.scrollY;
+      this.dropdownLeft = rect.left + window.scrollX;
+      this.dropdownWidth = rect.width;
+    }
+  });
+},
+
     onDeliveryMethodChange() {
       if (
         this.formData.deliveryType === "pickup" &&
@@ -384,6 +435,13 @@ export default {
         this.formData.cityRef = "";
       }
     },
+    handleClickOutsideDropdown(event) {
+  const wrapper = this.$refs.cityFieldWrapper;
+  if (wrapper && !wrapper.contains(event.target)) {
+    this.showCityDropdown = false;
+  }
+},
+
     onCityInput() {
       if (this.formData.city.trim().length < 2) {
         this.cities = [];
@@ -467,16 +525,23 @@ export default {
           }
         });
         if (response.status === 200 && Array.isArray(response.data?.data)) {
-          const filtered = response.data.data.filter(w =>
-  w.warehouse?.toLowerCase().includes('відділення')
-);
+  const isPostomatMode = this.formData.selectedDeliveryMethod?.name?.toLowerCase().includes('поштомат');
 
-this.warehouses = filtered.map((item, index) => ({
-  id: index + 1,
-  name: item.warehouse
-}));
+  const filtered = response.data.data.filter((w) => {
+    const name = (w.warehouse || '').toLowerCase();
+    if (isPostomatMode) {
+      return name.includes('поштомат');
+    } else {
+      return !name.includes('поштомат') && name.includes('відділення');
+    }
+  });
 
-     
+  this.warehouses = filtered.map((item, index) => ({
+    id: index + 1,
+    name: item.warehouse
+  }));
+
+
         } else {
           this.warehouses = [];
         }
@@ -635,7 +700,13 @@ this.warehouses = filtered.map((item, index) => ({
   } else if (this.formData.deliveryType === "pickup") {
     deliveryName = this.formData.selectedDeliveryMethod.name;
   }
-  
+  if (!this.formData.selectedDeliveryMethod) {
+  this.errors.selectedDeliveryMethod = "Оберіть спосіб доставки";
+  return; // важливо вийти, якщо дані некоректні
+}
+
+
+
  const postData = {
   phone_number:     this.phoneNumber,
   city:             this.formData.city,
@@ -688,15 +759,9 @@ console.log("Отправляемые данные:", postData);
     },
     validateForm() {
   const errors = {};
-  const ukrPhoneRegex = /^\+38\s?\(\d{3}\)\s?\d{3}-\d{2}-\d{2}$/;
 
 
-  // Валідація номера телефону
-  if (!this.phoneNumber) {
-    errors.phoneNumber = "Номер телефону є обов'язковим";
-  } else if (!ukrPhoneRegex.test(this.phoneNumber)) {
-    errors.phoneNumber = "Невірний формат номера телефону. Приклад: +380XXXXXXXXX";
-  }
+
 
   if (this.formData.deliveryType === "courier") {
     // Валідація для доставки кур'єром
@@ -713,9 +778,13 @@ console.log("Отправляемые данные:", postData);
 
   if (this.formData.deliveryType === "pickup") {
     // Валідація для самовивозу
-    if (!this.formData.selectedDeliveryMethod) {
-      errors.selectedDeliveryMethod = "Оберіть спосіб доставки";
-    }
+    if (
+  this.formData.deliveryType === "pickup" &&
+  (!this.formData.selectedDeliveryMethod || this.formData.selectedDeliveryMethod.isPlaceholder)
+) {
+  errors.selectedDeliveryMethod = "Оберіть спосіб доставки";
+}
+
     // Перевірка міста незалежно від вибору способу доставки
     if (!this.formData.city) {
       errors.city = "Місто є обов'язковим";
@@ -766,13 +835,14 @@ console.log("Отправляемые данные:", postData);
     }
   },
   mounted() {
-    document.title = "Ваша адреса";
-    document.addEventListener('click', this.handleClickOutside);
+  document.title = "Ваша адреса";
+},
 
-  },
-  beforeUnmount() {
-    document.removeEventListener('click', this.handleClickOutside);
+watch: {
+   showCityDropdown(val) {
+    if (val) this.updateDropdownPosition();
+  }
+}
 
-  },
 };
 </script>
