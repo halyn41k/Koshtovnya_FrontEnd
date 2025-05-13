@@ -20,12 +20,9 @@
       </div>
     </header>
 
-    <!-- Модалка профілю -->
     <AdminProfileCard v-if="showProfile" @close="showProfile = false" />
 
-    <!-- Адмін-панель -->
     <main :class="['flex flex-1 relative', showProfile ? 'filter blur-sm' : '']">
-      <!-- Сайдбар -->
       <aside
         :class="[
           'bg-[#F6E7E7] flex flex-col justify-between transition-all duration-300 ease-in-out',
@@ -50,11 +47,9 @@
           </div>
 
           <div class="mt-2 mb-4 h-5 ml-6 text-sm font-bold transition-opacity duration-200"
-     :class="{ 'opacity-0': sidebarCollapsed, 'opacity-100': !sidebarCollapsed }"
->
-  {{ panelSubtitle }}
-</div>
-
+               :class="{ 'opacity-0': sidebarCollapsed, 'opacity-100': !sidebarCollapsed }">
+            {{ panelSubtitle }}
+          </div>
 
           <ul class="space-y-2 sticky top-0 px-2">
             <li
@@ -74,37 +69,26 @@
           </ul>
         </div>
 
-        <!-- Перехід на головну -->
-<!-- Перехід на головну -->
-<div
-  @click="$router.push({ name: 'Home' })"
-  class="px-2 mb-2"
->
-  <div
-    class="flex items-center h-9 px-3 rounded-[4px] cursor-pointer hover:bg-[#D1ABAB] transition"
-  >
-    <img src="@/assets/icons/home.svg" alt="Home Icon" class="w-5 h-5 mr-2" />
-    <span v-if="!sidebarCollapsed">На головну</span>
-  </div>
-</div>
+        <div @click="$router.push({ name: 'Home' })" class="px-2 mb-2">
+          <div class="flex items-center h-9 px-3 rounded-[4px] cursor-pointer hover:bg-[#D1ABAB] transition">
+            <img src="@/assets/icons/home.svg" alt="Home Icon" class="w-5 h-5 mr-2" />
+            <span v-if="!sidebarCollapsed">На головну</span>
+          </div>
+        </div>
 
-<!-- Вийти -->
-<div class="px-2">
-  <div
-    @click="logout"
-    class="flex items-center h-9 px-3 rounded-[4px] cursor-pointer hover:bg-[#D1ABAB] transition"
-  >
-    <img src="@/assets/exit.png" alt="Exit Icon" class="w-5 h-5 mr-2" />
-    <span v-if="!sidebarCollapsed">Вийти</span>
-  </div>
-</div>
-
-
+        <div class="px-2">
+          <div
+            @click="logout"
+            class="flex items-center h-9 px-3 rounded-[4px] cursor-pointer hover:bg-[#D1ABAB] transition"
+          >
+            <img src="@/assets/exit.png" alt="Exit Icon" class="w-5 h-5 mr-2" />
+            <span v-if="!sidebarCollapsed">Вийти</span>
+          </div>
+        </div>
       </aside>
 
-      <!-- Контент -->
       <section class="flex-1 p-5 overflow-y-auto">
-        <component :is="activeComponent" />
+        <component :is="activeComponent" v-if="activeComponent" />
       </section>
     </main>
   </div>
@@ -119,6 +103,7 @@ import ProductList from './ProductList.vue';
 import Orders from './Orders.vue';
 import Reports from './Reports.vue';
 import Settings from './Settings.vue';
+import DashboardView from './dashboard/Dashboard.vue';
 
 export default {
   name: 'AdminPanel',
@@ -130,7 +115,8 @@ export default {
     ProductList,
     Orders,
     Reports,
-    Settings
+    Settings,
+    DashboardView
   },
   data() {
     return {
@@ -140,13 +126,13 @@ export default {
       selectedLanguage: 'uk',
       siteSettings: { site_logo: '' },
       sidebarCollapsed: false
-    };
+    }
   },
   computed: {
     activeComponent() {
-      return this.activeTab === -1
-        ? 'WelcomeAdmin'
-        : this.computedMenuItems[this.activeTab].component;
+      if (this.activeTab === -1) return 'WelcomeAdmin';
+      const item = this.computedMenuItems[this.activeTab];
+      return item ? item.component : 'WelcomeAdmin';
     },
     currentFlag() {
       return this.selectedLanguage === 'uk'
@@ -166,42 +152,50 @@ export default {
       if (!this.user) return [];
       const items = {
         superadmin: [
-          ['Користувачі','Clients','people'],
-          ['Працівники','Employees','people'],
-          ['Товари','ProductList','goods'],
-          ['Замовлення','Orders','orders'],
-          ['Звіти','Reports','reports'],
-          ['Налаштування','Settings','settings']
+          ['Статистика', 'DashboardView', 'stats'],
+          ['Користувачі', Clients, 'people'],
+          ['Працівники', Employees, 'people'],
+          ['Товари', ProductList, 'goods'],
+          ['Замовлення', Orders, 'orders'],
+          ['Звіти', Reports, 'reports'],
+          ['Налаштування', Settings, 'settings'],
+        
         ],
         admin: [
-          ['Користувачі','Clients','people'],
-          ['Працівники','Employees','people'],
-          ['Товари','ProductList','goods'],
-          ['Замовлення','Orders','orders'],
-          ['Права доступу','Settings','settings'],
-          ['Налаштування сайту','Settings','settings']
+          ['Статистика', 'DashboardView', 'stats'],
+          ['Користувачі', Clients, 'people'],
+          ['Працівники', Employees, 'people'],
+          ['Товари', ProductList, 'goods'],
+          ['Замовлення', Orders, 'orders'],
+          ['Права доступу', Settings, 'settings'],
+          ['Налаштування сайту', Settings, 'settings']
         ],
         manager: [
-          ['Користувачі','Clients','people'],
-          ['Товари','ProductList','goods'],
-          ['Замовлення','Orders','orders']
+          ['Статистика', 'DashboardView', 'stats'],
+          ['Користувачі', Clients, 'people'],
+          ['Товари', ProductList, 'goods'],
+          ['Замовлення', Orders, 'orders']
         ]
       };
       return items[this.user.role].map(([title, comp, icon]) => ({
         title,
-        icon: require(`@/assets/icons/${icon}.svg`),
-        component: comp
+        component: comp,
+        icon: require(`@/assets/icons/${icon}.svg`)
       }));
     }
   },
   methods: {
-    selectTab(idx) { this.activeTab = idx; },
+    selectTab(idx) {
+      this.activeTab = idx;
+    },
     logout() {
       localStorage.removeItem('user');
       localStorage.removeItem('token');
       this.$router.push({ name: 'Login' });
     },
-    changeLanguage() { this.$i18n.locale = this.selectedLanguage; },
+    changeLanguage() {
+      this.$i18n.locale = this.selectedLanguage;
+    },
     async fetchSiteSettings() {
       try {
         const { data } = await this.$axios.get('https://koshtovnya.api-dev.bmax-edu.website/api/site-settings');
@@ -217,14 +211,14 @@ export default {
   },
   mounted() {
     const user = JSON.parse(localStorage.getItem('user'));
-    if (!user || !['superadmin','admin','manager'].includes(user.role)) {
+    if (!user || !['superadmin', 'admin', 'manager'].includes(user.role)) {
       this.$router.push({ name: 'Home' });
     } else {
       this.user = user;
     }
     this.fetchSiteSettings();
   }
-};
+}
 </script>
 
 <style scoped>

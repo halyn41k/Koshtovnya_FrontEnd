@@ -172,7 +172,7 @@ export default {
   methods: {
     async fetchUsers(url = null) {
       const endpoint = url || 'https://koshtovnya.api-dev.bmax-edu.website/api/admin/users'
-      const params = url ? {} : { role: this.searchRole }
+      const params = url ? {} : { role: this.searchRole, search: this.searchQuery }
       const sorted = Object.entries(this.sortState).find(([, v]) => v !== 'none')
       if (sorted) {
         params.sort_by = sorted[0]
@@ -224,29 +224,43 @@ export default {
     openUpdateModal(client) {
       this.modalTitle = 'Оновити користувача'
       this.modalKey = Date.now()
-      this.modalClient = client
+        this.modalClient = { ...client } // обʼєкт повний з id
+
       this.showUserModal = true
     },
     closeUserModal() {
       this.showUserModal = false
     },
     async handleUserSubmit(u) {
-      const isUpd = !!u.id
-      const url = isUpd
-        ? `https://koshtovnya.api-dev.bmax-edu.website/api/admin/user/${u.id}`
-        : 'https://koshtovnya.api-dev.bmax-edu.website/api/admin/user'
-      const method = isUpd ? 'patch' : 'post'
-      try {
-        const r = await axios[method](url, u, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } })
-        this.toastAction = isUpd ? 'оновлено' : 'створено'
-        this.highlightedUserId = r.data.data.id
-        this.fetchUsers()
-        this.showToast = true
-        setTimeout(() => (this.showToast = false), 3000)
-      } catch (e) {
-        console.error(e)
-      }
-    },
+  if (!u) {
+    console.error('handleUserSubmit отримав undefined');
+    return;
+  }
+
+  const isUpd = !!u.id;
+  if (isUpd && typeof u.id !== 'number') {
+    console.warn('u.id не число або некоректне значення:', u.id, u);
+  }
+
+  const url = isUpd
+    ? `https://koshtovnya.api-dev.bmax-edu.website/api/admin/user/${u.id}`
+    : 'https://koshtovnya.api-dev.bmax-edu.website/api/admin/user';
+
+  const method = isUpd ? 'patch' : 'post';
+
+  try {
+    const r = await axios[method](url, u, {
+      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+    });
+    this.toastAction = isUpd ? 'оновлено' : 'створено';
+    this.highlightedUserId = r.data.data.id;
+    this.fetchUsers();
+    this.showToast = true;
+    setTimeout(() => (this.showToast = false), 3000);
+  } catch (e) {
+    console.error('Помилка при збереженні користувача:', e);
+  }
+},
     deleteUser(id) {
       axios
         .delete(`https://koshtovnya.api-dev.bmax-edu.website/api/admin/user/${id}`, {
