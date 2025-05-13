@@ -232,21 +232,37 @@
       {{ n }}
     </button>
   </div>
+   
+
 </main>
     </div>
+       <Suspense>
+  <template #default>
+    <RecentlyViewed />
+  </template>
+  <template #fallback>
+    <div class="text-center text-gray-500">Завантаження останніх товарів…</div>
+  </template>
+</Suspense>
   </section>
+
 </template>
 
 
 <script>
+import { defineAsyncComponent } from 'vue';
+
 import { toRaw } from 'vue';
 import api from '@/services/api';
 import FilterComponent from '../product/FilterComponent.vue';
 import bus from '@/eventBus';
+import FilterProduct from '../admin/FilterProduct.vue';
+const RecentlyViewed = defineAsyncComponent(() => import('@/components/home/RecentlyViewed.vue'));
 
 export default {
   name: 'AllProducts',
-  components: { FilterComponent },
+    components: { FilterComponent, RecentlyViewed },
+
   data() {
     return {
       products: [],

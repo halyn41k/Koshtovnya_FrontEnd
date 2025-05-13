@@ -182,6 +182,16 @@
         @click.stop
       />
     </div>
+
+    <Suspense>
+  <template #default>
+    <RecentlyViewed />
+  </template>
+  <template #fallback>
+    <div class="text-center text-gray-500">Завантаження останніх товарів…</div>
+  </template>
+</Suspense>
+
   </main>
 </template>
 
@@ -193,9 +203,11 @@ import api from "@/services/api";
 const ProductReviews = defineAsyncComponent(() => import("./ProductReviews.vue"));
 // eslint-disable-next-line 
 const ViewOtherProduct = defineAsyncComponent(() => import("./ViewOtherProduct.vue"));
+const RecentlyViewed = defineAsyncComponent(() => import('@/components/home/RecentlyViewed.vue'));
+
 
 export default {
-  components: { ProductReviews, ViewOtherProduct },
+  components: { ProductReviews, ViewOtherProduct, RecentlyViewed },
   data() {
     return {
       isModalOpen: false,
@@ -253,7 +265,7 @@ export default {
     }
   },
   methods: {
-    async fetchProduct(id) {
+   async fetchProduct(id) {
   try {
     const resp = await api.getProduct(id);
     this.product = resp.data;
@@ -263,7 +275,26 @@ export default {
     const first = this.product.variants.find(v => v.is_available);
     if (first) this.selectedSize = first.size;
 
-    this.productId = id; // оновлюємо локально
+    this.productId = id;
+
+    // ✅ Додати в localStorage тільки після завантаження продукту
+    const productToSave = {
+      id: this.product.id,
+      name: this.product.name,
+      image_url: this.product.image_url,
+      price: this.product.price,
+      rating: this.product.average_rating,
+      review_count: this.product.review_count,
+      bead_producer_name: this.product.bead_producer_name
+    };
+
+    const history = JSON.parse(localStorage.getItem('recentlyViewed') || '[]');
+    const exists = history.find(p => p.id === productToSave.id);
+    if (!exists) {
+      history.unshift(productToSave);
+      localStorage.setItem('recentlyViewed', JSON.stringify(history.slice(0, 12)));
+    }
+
   } catch (e) {
     console.error("Product load error:", e);
   }
@@ -316,8 +347,13 @@ export default {
   await this.fetchProduct(id);
   await this.fetchWishlist();
 },
-  mounted() {
-    document.title = "Сторінка товару";
+mounted() {
+  document.title = "Сторінка товару";
+  
+
+
+
+
   },
   watch: {
   '$route.params.id': {

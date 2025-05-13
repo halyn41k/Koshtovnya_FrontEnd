@@ -244,6 +244,14 @@
 
     <!-- CATEGORY BLOCK -->
     <CategoryProduct class="mt-20 px-4 sm:px-6 lg:px-8" />
+           <Suspense>
+  <template #default>
+    <RecentlyViewed />
+  </template>
+  <template #fallback>
+    <div class="text-center text-gray-500">Завантаження останніх товарів…</div>
+  </template>
+</Suspense>
   </section>
 </template>
 
@@ -253,6 +261,10 @@ import api from '@/services/api';
 import FilterComponent from '../product/FilterComponent.vue';
 import bus from '@/eventBus';
 import { toRaw } from 'vue';
+import { defineAsyncComponent } from 'vue';
+
+const RecentlyViewed = defineAsyncComponent(() => import('@/components/home/RecentlyViewed.vue'));
+
 
 export default {
   beforeRouteEnter(to, from, next) {
@@ -272,7 +284,7 @@ export default {
 },
 
   name: 'CategorySection',
-  components: { FilterComponent },
+  components: { FilterComponent, RecentlyViewed },
 
   data() {
     return {

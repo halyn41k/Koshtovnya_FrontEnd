@@ -45,6 +45,8 @@
       <OrderChart :labels="commentChart.labels" :values="commentChart.values" :type="commentChart.type" />
     </div>
 
+    <h2 class="text-lg font-semibold mb-3 mt-6">Популярні товари</h2>
+
 <div v-if="popular.length" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
   <div
     v-for="(item, index) in popular"
@@ -70,6 +72,8 @@
     </div>
   </div>
 </div>
+
+<h2 class="text-lg font-semibold mb-3 mt-6">Останні замовлення</h2>
 
 <ul v-if="latest.length" class="space-y-4">
   <li

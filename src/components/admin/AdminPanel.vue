@@ -4,7 +4,7 @@
     <header class="h-12 w-full border-b border-gray-200 bg-white flex items-center px-5">
       <div class="ml-auto flex items-center space-x-8">
         <div @click="showProfile = true" class="cursor-pointer">
-          <img src="@/assets/icons/user.svg" alt="User Icon" class="w-6 h-6" />
+          <img src="@/assets/icons/user_icon.svg" alt="User Icon" class="w-6 h-6" />
         </div>
         <div class="flex items-center space-x-1">
           <img :src="currentFlag" :alt="selectedLanguage + ' Flag'" class="w-5 h-4 rounded-sm object-cover" />
