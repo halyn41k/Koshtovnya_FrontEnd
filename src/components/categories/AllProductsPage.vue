@@ -40,6 +40,7 @@
       <!-- FILTER SIDEBAR -->
       <div class="hidden lg:block w-[350px] mr-8">
         <FilterComponent
+        :key="filtersKey"
           :initial-filters="filters"
           :mobile-visible="false"
           @apply="applyFilters"
@@ -257,6 +258,7 @@ export default {
     };
   },
   computed: {
+    
     isMobile() {
       return window.innerWidth < 640;
     },
@@ -299,29 +301,60 @@ export default {
       this.filters = filters;
 
       const raw = toRaw(filters);
-      const params = { page };
-      if (raw.color) params.color = raw.color;
-      if (raw.type_of_bead) params.type_of_bead = raw.type_of_bead;
-      if (raw.bead_producer) params.bead_producer = raw.bead_producer;
-      if (raw.size) params.size = raw.size;
-      if (raw.weight_from !== undefined || raw.weight_to !== undefined) {
-        params.weight_from = raw.weight_from || 0;
-        params.weight_to = raw.weight_to || 1000;
-      }
-      if (raw.price_from !== undefined || raw.price_to !== undefined) {
-        params.price_from = raw.price_from || 0;
-        params.price_to = raw.price_to || 10000;
-      }
-      if (raw.rating?.length) params.rating = raw.rating;
+const params = { page };
+
+if (Array.isArray(raw.availability) && raw.availability.length > 0) {
+  const values = [];
+  if (raw.availability.includes('В наявності')) values.push(1);
+  if (raw.availability.includes('Немає в наявності')) values.push(0);
+  if (values.length > 0) params.is_available = values;
+}
+
+
+// 📦 Колір, бісер, виробник
+if (raw.color) params.color = raw.color;
+if (raw.type_of_bead) params.type_of_bead = raw.type_of_bead;
+if (raw.bead_producer) params.bead_producer = raw.bead_producer;
+if (raw.category) params.category = raw.category;
+
+// 📦 Розмір
+if (Array.isArray(raw.size)) {
+  params.size_from = raw.size[0];
+  params.size_to = raw.size[1];
+}
+
+// 📦 Вага
+if (Array.isArray(raw.weight)) {
+  params.weight_from = raw.weight[0];
+  params.weight_to = raw.weight[1];
+}
+
+// 📦 Ціна
+if (Array.isArray(raw.price)) {
+  params.price_from = raw.price[0];
+  params.price_to = raw.price[1];
+}
+
+// 📦 Рейтинг
+if (Array.isArray(raw.rating) && raw.rating.length > 0) {
+  params.rating = raw.rating;
+}
+
 
       try {
         const res = await api.getAllProducts({ params });
 this.products = Array.isArray(res.data)
-  ? res.data.map(p => ({
-      ...p,
-      has_available_variant: (p.variants || []).some(v => v.is_available)
-    }))
+  ? res.data
+      .map(p => ({
+        ...p,
+        has_available_variant: (p.variants || []).some(v => v.is_available)
+      }))
+      .sort((a, b) => {
+        // true → 1, false → 0, тобто: available → вище
+        return (b.has_available_variant ? 1 : 0) - (a.has_available_variant ? 1 : 0);
+      })
   : [];
+
 
 this.totalPages = res.meta?.last_page || 1;
 this.totalCount = res.meta?.total || this.products.length;
@@ -379,19 +412,39 @@ this.totalCount = res.meta?.total || this.products.length;
       this.fetchProducts(1, nf);
     },
     clearAll() {
-      this.fetchProducts(1, {});
-    },
+  sessionStorage.removeItem('filters');
+  this.filtersKey++;
+  this.fetchProducts(1, {});
+},
   },
   async mounted() {
-    this.filterVisible = !this.isMobile;
-    document.title = 'Всі товари';
-    await this.fetchProducts();
-    window.addEventListener('resize', () => {
-      this.filterVisible = false;
-      document.body.classList.remove('overflow-hidden');
-    });
-  },
-};
+  this.filterVisible = !this.isMobile;
+  document.title = 'Всі товари';
+
+  const stored = sessionStorage.getItem('filters');
+  if (stored) {
+    const parsed = JSON.parse(stored);
+    this.filters = parsed;
+    await this.fetchProducts(1, parsed);
+  } else {
+  }
+
+  window.addEventListener('resize', () => {
+    this.filterVisible = false;
+    document.body.classList.remove('overflow-hidden');
+  });
+},
+
+  watch: {
+  filters: {
+    deep: true,
+    handler(newVal) {
+      sessionStorage.setItem('filters', JSON.stringify(newVal));
+    }
+  }
+},
+
+}; 
 </script>
 
 

@@ -130,7 +130,7 @@ const routes = [
   },
 
   {
-    path: '/allproduct',
+    path: '/allproducts',
     name: 'AllProductsPage',
     component: () => import('@/components/categories/AllProductsPage.vue'),
   },

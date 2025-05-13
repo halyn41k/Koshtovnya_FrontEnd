@@ -14,7 +14,7 @@
           {{ $t('exclusiveJewelry') }}
         </div>
         <router-link
-          to="/allproduct"
+          to="/allproducts"
           class="view-products-button mt-4 lg:mt-6"
         >
           {{ $t('viewProducts') }}

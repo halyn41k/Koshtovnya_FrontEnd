@@ -1,8 +1,9 @@
 <template>
   <div
-    class="filter-container w-[350px] h-full min-h-[1750px] p-6 bg-[#fff7f6] shadow-xl rounded-lg font-montserrat"
-    @keydown.escape="$emit('close')"
-  >
+  class="filter-container w-[350px] min-h-[550px] p-6 bg-[#fff7f6] shadow-xl rounded-lg font-montserrat"
+  @keydown.escape="$emit('close')"
+>
+
     <section v-if="!loading" class="space-y-8">
       <!-- Доступність -->
       <div class="section bg-white p-4 rounded-lg shadow-sm">
@@ -101,7 +102,7 @@
           class="w-full p-2 border border-gray-300 bg-white rounded focus:outline-none focus:ring-2 focus:ring-[#6B1F1F]"
         >
           <option value="">(без фільтра)</option>
-          <option v-for="color in colorOptions" :key="color" :value="color">
+          <option v-for="color in sortedColorOptions" :key="color" :value="color">
             {{ color }}
           </option>
         </select>
@@ -156,28 +157,33 @@
       </div>
 
       <!-- Категорія -->
-      <div class="section bg-white p-4 rounded-lg shadow-sm">
-        <h3 class="subsection-title mb-3 text-lg font-semibold text-gray-800">
-          Категорія
-        </h3>
-        <div class="space-y-3">
-          <label
-            v-for="cat in categoryOptions"
-            :key="cat"
-            class="flex items-center space-x-3"
-          >
-            <input
-              type="checkbox"
-              :value="cat"
-              v-model="filters.category"
-              class="custom-checkbox"
-            />
-            <span class="text-base text-gray-700">
-              {{ cat }}
-            </span>
-          </label>
-        </div>
-      </div>
+      <!-- Категорія -->
+<div
+  v-if="!hideCategory"
+  class="section bg-white p-4 rounded-lg shadow-sm"
+>
+  <h3 class="subsection-title mb-3 text-lg font-semibold text-gray-800">
+    Категорія
+  </h3>
+  <div class="space-y-3">
+    <label
+      v-for="cat in categoryOptions"
+      :key="cat"
+      class="flex items-center space-x-3"
+    >
+      <input
+        type="checkbox"
+        :value="cat"
+        v-model="filters.category"
+        class="custom-checkbox"
+      />
+      <span class="text-base text-gray-700">
+        {{ cat }}
+      </span>
+    </label>
+  </div>
+</div>
+
 
       <!-- Кнопка застосувати -->
       <div class="flex justify-center">
@@ -197,7 +203,7 @@
 </template>
 
 <script>
-import { ref, reactive } from 'vue'
+import { ref, reactive, watch, onMounted, computed } from 'vue'
 import Slider from '@vueform/slider'
 import api from '@/services/api'
 
@@ -205,11 +211,14 @@ export default {
   name: 'FilterComponent',
   components: { Slider },
   props: {
-    initialFilters: { type: Object, default: () => ({}) }
-  },
+  initialFilters: { type: Object, default: () => ({}) },
+  hideCategory: { type: Boolean, default: false }
+},
+
   emits: ['apply', 'close'],
   setup(props, { emit }) {
     const loading = ref(true)
+
     const filters = reactive({
       availability: [],
       size: [0, 100],
@@ -221,6 +230,7 @@ export default {
       category: [],
       rating: []
     })
+
     const availabilityOptions = ref([])
     const sizeOptions = reactive({ min: 0, max: 100 })
     const weightOptions = reactive({ min: 0, max: 1000 })
@@ -230,32 +240,51 @@ export default {
     const beadProducerOptions = ref([])
     const categoryOptions = ref([])
 
+    const sortedColorOptions = computed(() =>
+      [...colorOptions.value].sort((a, b) => a.localeCompare(b))
+    )
+
+    const applyInitialFilters = () => {
+      const init = props.initialFilters
+      if (init.availability) filters.availability = [...init.availability]
+      if (init.size?.length === 2) filters.size = [...init.size]
+      if (init.weight?.length === 2) filters.weight = [...init.weight]
+      if (init.price?.length === 2) filters.price = [...init.price]
+      if (init.color) filters.color = init.color
+      if (init.rating) filters.rating = [...init.rating]
+      if (init.beadTypes) filters.beadTypes = [...init.beadTypes]
+      if (init.producers) filters.producers = [...init.producers]
+      if (init.category) filters.category = [...init.category]
+    }
+
     const loadFilters = async () => {
       try {
         const data = await api.getFilter()
         availabilityOptions.value = data['Доступність'] || []
+
         const sz = data['Розмір'] || { min: '0', max: '150' }
-        sizeOptions.min = +sz.min; sizeOptions.max = +sz.max
-        if (
-  !props.initialFilters.size ||
-  props.initialFilters.size[0] === 0 && props.initialFilters.size[1] === 100
-) {
-  filters.size = [+sz.min, +sz.max]
-}
+        sizeOptions.min = +sz.min
+        sizeOptions.max = +sz.max
+
+        if (!props.initialFilters.size ||
+            (props.initialFilters.size[0] === 0 && props.initialFilters.size[1] === 100)) {
+          filters.size = [+sz.min, +sz.max]
+        }
 
         const wt = data['Вага'] || { min: '0', max: '1000' }
-        weightOptions.min = +wt.min; weightOptions.max = +wt.max
+        weightOptions.min = +wt.min
+        weightOptions.max = +wt.max
+
         const pr = data['Ціна'] || { min: '0', max: '10000' }
-        priceOptions.min = +pr.min; priceOptions.max = +pr.max
+        priceOptions.min = +pr.min
+        priceOptions.max = +pr.max
 
         colorOptions.value = data['Колір'] || []
         beadTypeOptions.value = data['Тип бісеру'] || []
         beadProducerOptions.value = data['Виробник бісеру'] || []
         categoryOptions.value = data['Категорія'] || []
 
-        if (props.initialFilters.size?.length === 2) filters.size = [...props.initialFilters.size]
-        if (props.initialFilters.weight?.length === 2) filters.weight = [...props.initialFilters.weight]
-        if (props.initialFilters.price?.length === 2) filters.price = [...props.initialFilters.price]
+        applyInitialFilters()
       } catch (e) {
         console.error('Помилка завантаження фільтрів:', e)
       } finally {
@@ -263,38 +292,36 @@ export default {
       }
     }
 
-    loadFilters()
-
     const applyFilters = () => {
-  const cleaned = {}
+      const cleaned = {}
 
-  if (filters.availability.length) cleaned.availability = [...filters.availability]
-  if (filters.rating.length) cleaned.rating = [...filters.rating]
+      if (filters.availability.length) cleaned.availability = [...filters.availability]
+      if (filters.rating.length) cleaned.rating = [...filters.rating]
+      if (filters.beadTypes.length) cleaned.type_of_bead = [...filters.beadTypes]
+      if (filters.producers.length) cleaned.bead_producer = [...filters.producers]
+      if (filters.category.length) cleaned.category = [...filters.category]
+      if (filters.color) cleaned.color = filters.color
 
-  if (filters.beadTypes.length) cleaned.type_of_bead = [...filters.beadTypes]
-  if (filters.producers.length) cleaned.bead_producer = [...filters.producers]
-  if (filters.category.length) cleaned.category = [...filters.category]
-  if (filters.color) cleaned.color = filters.color
+      if (filters.size[0] > sizeOptions.min || filters.size[1] < sizeOptions.max)
+        cleaned.size = [...filters.size]
 
-  if (filters.size[0] > sizeOptions.min || filters.size[1] < sizeOptions.max)
-    cleaned.size = [...filters.size]
+      if (filters.weight[0] > weightOptions.min || filters.weight[1] < weightOptions.max)
+        cleaned.weight = [...filters.weight]
 
-  if (filters.weight[0] > weightOptions.min || filters.weight[1] < weightOptions.max)
-    cleaned.weight = [...filters.weight]
+      if (filters.price[0] > priceOptions.min || filters.price[1] < priceOptions.max)
+        cleaned.price = [...filters.price]
 
-  if (filters.price[0] > priceOptions.min || filters.price[1] < priceOptions.max)
-    cleaned.price = [...filters.price]
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+      emit('apply', cleaned)
+    }
 
-  // 🔽 Прокрутка з анімацією
-  window.scrollTo({
-    top: 0,
-    behavior: 'smooth'
-  })
+    watch(() => props.initialFilters, () => {
+      applyInitialFilters()
+    }, { deep: true })
 
-  emit('apply', cleaned)
-}
-
-
+    onMounted(() => {
+      loadFilters()
+    })
 
     return {
       loading,
@@ -304,6 +331,7 @@ export default {
       weightOptions,
       priceOptions,
       colorOptions,
+      sortedColorOptions,
       beadTypeOptions,
       beadProducerOptions,
       categoryOptions,
@@ -312,6 +340,8 @@ export default {
   }
 }
 </script>
+
+
 
 <style>
 @import "@vueform/slider/themes/default.css";
@@ -357,8 +387,9 @@ export default {
 
 .filter-container {
   max-width: 42rem;
-  height: 50rem;
+  min-height: 550px; /* фіксована велика висота */
 }
+
 </style>
 
 <style scoped>
