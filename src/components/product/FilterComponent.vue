@@ -387,8 +387,12 @@ export default {
 
 .filter-container {
   max-width: 42rem;
-  min-height: 550px; /* фіксована велика висота */
+  min-height: 100vh; /* ← робимо на всю висоту вікна */
+  height: 100vh;      /* ← обов'язково */
+  overflow-y: auto;   /* ← додатково, якщо буде багато фільтрів */
+  padding-bottom: 3rem; /* щоб останній блок не прилишав */
 }
+
 
 </style>
 
