@@ -50,7 +50,7 @@
 
       <!-- Summary: mobile first, desktop last -->
       <div class="w-full order-first lg:order-last lg:w-auto">
-        <Summary v-if="cartItems.length > 0" :cart-items="cartItems" />
+        <CartSummary  v-if="cartItems.length > 0" :cart-items="cartItems" />
       </div>
     </section>
   </main>
@@ -61,7 +61,7 @@ import api from '@/services/api';
 // eslint-disable-next-line 
 import CartItem from './CartItem.vue';
 // eslint-disable-next-line 
-import Summary from './Summary.vue';
+import CartSummary  from './CartSummary.vue';
 // eslint-disable-next-line 
 import Loader from '../home/Loader.vue';
 import bus from '@/eventBus';
@@ -71,7 +71,7 @@ const toast = useToast(); // ініціалізація тосту
 
 export default {
   name: 'CartShopPage',
-  components: { CartItem, Summary, Loader },
+  components: { CartItem, CartSummary, Loader },
   data() {
     return {
       cartItems: [],

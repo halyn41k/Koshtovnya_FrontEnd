@@ -15,7 +15,7 @@ Chart.register(
   LineElement, PointElement, LineController,
   CategoryScale, LinearScale, Title, Tooltip, Legend, Filler
 )
-
+// eslint-disable-next-line no-undef
 const props = defineProps({
   labels: Array,
   values: Array,
@@ -71,7 +71,10 @@ const createChart = () => {
         x: {
           title: {
             display: true,
-            text: props.type === 'hour' ? 'Години' : props.type === 'day' ? 'Дні' : 'Місяці',
+            text:
+              props.type === 'hour' ? 'Години' :
+              props.type === 'day' ? 'Дні' :
+              'Місяці',
             font: { family: 'Montserrat', size: 14, weight: '600' }
           },
           ticks: {
@@ -83,7 +86,7 @@ const createChart = () => {
         },
         y: {
           beginAtZero: true,
-          suggestedMax: Math.max(...props.values) + 1,
+          suggestedMax: props.values.length ? Math.max(...props.values) + 1 : 10,
           title: {
             display: true,
             text: 'Кількість',
@@ -103,7 +106,12 @@ const createChart = () => {
   })
 }
 
-watch(() => [props.labels, props.values], createChart, { deep: true })
+watch(
+  () => [props.labels, props.values],
+  () => createChart(),
+  { deep: true }
+)
+
 onMounted(createChart)
 </script>
 
@@ -114,5 +122,4 @@ canvas {
 }
 
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap');
-
 </style>

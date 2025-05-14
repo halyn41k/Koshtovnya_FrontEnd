@@ -1,57 +1,28 @@
-// Першим рядком!
-const path = require('path');
-
 module.exports = {
   root: true,
-  // Ігноруємо dist/
-  ignorePatterns: ['dist/'],
-
   env: {
     node: true,
     browser: true,
-    jest: true,
+    es2021: true,
+    jest: true, // ✅ ДОДАЙ ЦЕ
   },
   extends: [
     'plugin:vue/vue3-essential',
     'eslint:recommended',
-    'plugin:import/errors',
-    'plugin:import/warnings',
+    'plugin:jest/recommended', // ✅ ДОДАЙ ЦЕ
   ],
+  parser: 'vue-eslint-parser',
   parserOptions: {
-    parser: 'babel-eslint',
+    parser: '@babel/eslint-parser',
+    ecmaVersion: 2020,
+    sourceType: 'module',
+    requireConfigFile: false,
   },
-  plugins: ['import'],
-  settings: {
-    'import/resolver': {
-      alias: {
-        map: [['@', path.resolve(__dirname, 'src')]],
-        extensions: ['.js', '.vue', '.json'],
-      },
-      node: {
-        extensions: ['.js', '.vue', '.json'],
-        moduleDirectory: ['node_modules'],
-      },
-    },
-  },
+  plugins: ['vue', 'import', 'jest'], // ✅ ДОДАЙ "jest"
   rules: {
+      'jest/no-conditional-expect': 'off',
+
     'no-unused-vars': 'warn',
     'vue/multi-word-component-names': 'off',
-    'import/no-unresolved': ['error', {
-      caseSensitive: true,
-      caseSensitiveStrict: true,
-    }],
-    'import/extensions': ['error', 'always', {
-      js: 'never',
-      vue: 'always',
-      json: 'never',
-    }],
   },
-  overrides: [
-    {
-      files: ['vite.config.js'],
-      rules: {
-        'import/no-unresolved': 'off',
-      },
-    },
-  ]
 };

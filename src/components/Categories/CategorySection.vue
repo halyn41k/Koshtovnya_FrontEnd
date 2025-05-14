@@ -468,8 +468,11 @@ export default {
 
         bus.emit('cart-updated');
         product.has_available_variant = data.variants?.some(v => v.is_available);
-      } catch (e) {}
-    },
+        } catch (e) {
+    console.error('Помилка додавання в кошик:', e);
+  }
+},
+
 
     removeTag(tag) {
       const nf = { ...this.filters };

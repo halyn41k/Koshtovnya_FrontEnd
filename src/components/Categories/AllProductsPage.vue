@@ -439,11 +439,11 @@ this.totalCount = res.meta?.total || this.products.length;
 
   const stored = sessionStorage.getItem('filters');
   if (stored) {
-    const parsed = JSON.parse(stored);
-    this.filters = parsed;
-    await this.fetchProducts(1, parsed);
-  } else {
-  }
+  const parsed = JSON.parse(stored);
+  this.filters = parsed;
+  await this.fetchProducts(1, parsed);
+}
+
 
   window.addEventListener('resize', () => {
     this.filterVisible = false;
