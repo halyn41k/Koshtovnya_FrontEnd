@@ -1,114 +1,124 @@
 <template>
-  <main class="p-6 font-montserrat">
-    <!-- Заголовок і селектори -->
-    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-      <h1 class="text-2xl font-bold">Статистика</h1>
-      <div class="flex gap-2 items-center">
-        <select
-          v-model="selectedPeriod"
-          @change="loadData"
-          class="border border-gray-300 rounded px-3 py-1 focus:ring-[#6B1F1F]"
-        >
-          <option value="day">За сьогодні</option>
-          <option value="week">За тиждень</option>
-          <option value="month">За місяць</option>
-          <option value="year">За рік</option>
-        </select>
-        <VueDatePicker
-          v-model="dateRange"
-          range
-          format="yyyy-MM-dd"
-          :enable-time-picker="false"
-          placeholder="Оберіть період"
-          @update:model-value="loadData"
-          class="border border-gray-300 rounded px-3 py-1 w-[250px]"
-        />
-      </div>
+  <main class="p-6 font-montserrat space-y-10">
+
+<!-- Заголовок і фільтри -->
+<div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+  <h1 class="text-2xl font-extrabold text-gray-900 whitespace-nowrap">Статистика</h1>
+
+  <div class="flex items-center gap-3 flex-wrap">
+    <div class="flex flex-col">
+      <label class="text-sm text-gray-600 mb-1 ml-1">Період</label>
+      <select
+        v-model="selectedPeriod"
+        @change="loadData"
+        class="border border-gray-300 rounded px-3 py-2 focus:ring-[#6B1F1F] focus:outline-none"
+      >
+        <option value="day">За сьогодні</option>
+        <option value="week">За тиждень</option>
+        <option value="month">За місяць</option>
+        <option value="year">За рік</option>
+      </select>
     </div>
-<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-  <div
-    v-for="(card, i) in cards"
-    :key="card.label"
-    class="flex flex-col justify-center items-center bg-white border border-gray-200 rounded-md shadow-sm px-6 py-5 transition duration-300 ease-in-out hover:shadow-md hover:-translate-y-1 animate-fade-in-up"
-    :style="{ animationDelay: `${i * 80}ms` }"
-  >
-    <p class="text-gray-500 text-sm mb-2 text-center">{{ card.label }}</p>
-    <p class="text-3xl font-extrabold text-gray-900 text-center">{{ card.value }}</p>
+
+    <div class="flex flex-col">
+      <label class="text-sm text-gray-600 mb-1 ml-1">Період вручну</label>
+      <VueDatePicker
+        v-model="dateRange"
+        range
+        format="yyyy-MM-dd"
+        :enable-time-picker="false"
+        placeholder="Оберіть період"
+        @update:model-value="loadData"
+        input-class-name="custom-datepicker-input"
+      />
+    </div>
   </div>
 </div>
 
 
+    <!-- Картки статистики -->
+    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+      <div
+        v-for="(card, i) in cards"
+        :key="card.label"
+        class="flex flex-col justify-center items-center bg-white border border-gray-200 rounded-lg shadow-sm px-6 py-5 text-center h-[120px] animate-fade-in-up"
+        :style="{ animationDelay: `${i * 80}ms` }"
+      >
+        <p class="text-sm text-gray-500 mb-1">{{ card.label }}</p>
+        <p class="text-3xl font-black text-gray-800">{{ card.value }}</p>
+      </div>
+    </section>
 
-    <!-- Графіки -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+    <!-- Графік замовлень -->
+    <section class="bg-white p-6 rounded-lg shadow-sm">
+      <h2 class="text-xl font-semibold mb-4">Динаміка замовлень</h2>
       <OrderChart :labels="orderChart.labels" :values="orderChart.values" :type="orderChart.type" />
-      <OrderChart :labels="commentChart.labels" :values="commentChart.values" :type="commentChart.type" />
-    </div>
+    </section>
 
-    <h2 class="text-lg font-semibold mb-3 mt-6">Популярні товари</h2>
-
-<div v-if="popular.length" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-  <div
-    v-for="(item, index) in popular"
-    :key="item.id"
-    class="flex gap-4 border border-gray-300 rounded-md p-3 bg-white shadow transition-transform duration-300 ease-out hover:scale-[1.015] animate-fade-in-up"
-    :style="{ animationDelay: `${index * 100}ms` }"
-  >
-    <img
-      :src="item.image_url"
-      :alt="item.name"
-      class="w-20 h-20 object-cover rounded"
-    />
-    <div class="flex flex-col justify-between">
-      <div>
-        <p class="font-semibold text-base leading-5 mb-1">{{ item.name }}</p>
-        <p class="text-sm text-gray-500 mb-0.5">Виробник: {{ item.bead_producer_name }}</p>
-        <p class="text-sm text-gray-500 mb-0.5">Ціна: {{ item.price }} грн</p>
+    <!-- Популярні товари -->
+    <section>
+      <h2 class="text-xl font-semibold mb-4 mt-6">🔥 Популярні товари</h2>
+      <div v-if="popular.length" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+        <div
+          v-for="(item, index) in popular"
+          :key="item.id"
+          class="flex gap-4 border border-gray-300 rounded-md p-4 bg-white shadow-sm hover:shadow-md transition-transform duration-300 hover:scale-[1.01] animate-fade-in-up"
+          :style="{ animationDelay: `${index * 100}ms` }"
+        >
+          <img
+            :src="item.image_url"
+            :alt="item.name"
+            class="w-20 h-20 object-cover rounded"
+          />
+          <div class="flex flex-col justify-between">
+            <div>
+              <p class="font-semibold text-base leading-5">{{ item.name }}</p>
+              <p class="text-sm text-gray-500">Виробник: {{ item.bead_producer_name }}</p>
+              <p class="text-sm text-gray-500">Ціна: {{ item.price }} грн</p>
+            </div>
+            <div class="text-sm text-gray-600 mt-2 flex gap-3">
+              <span>⭐ {{ item.rating ?? 0 }}</span>
+              <span>💬 {{ item.review_count }} відгуків</span>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="text-sm text-gray-600 mt-2 flex flex-wrap gap-2">
-        <span>⭐ {{ item.rating ?? 0 }}</span>
-        <span>💬 {{ item.review_count }} відгуків</span>
-      </div>
-    </div>
-  </div>
-</div>
+    </section>
 
-<h2 class="text-lg font-semibold mb-3 mt-6">Останні замовлення</h2>
-
-<ul v-if="latest.length" class="space-y-4">
-  <li
-    v-for="(order, i) in latest"
-    :key="order.id"
-    class="border border-gray-300 rounded-md p-3 bg-white shadow transition duration-300 ease-out hover:scale-[1.01] animate-fade-in-up"
-    :style="{ animationDelay: `${i * 100}ms` }"
-  >
-    <p class="font-semibold text-base mb-2">Замовлення #{{ order.id }}</p>
-
-    <div class="flex justify-between items-center mb-1">
-      <span class="text-sm text-gray-700">📞 {{ order.phone_number }}</span>
-      <span class="text-sm text-gray-500">{{ order.order_date }}</span>
-    </div>
-
-    <div class="text-sm text-gray-500 italic mb-1">
-      🛍 {{ order.products.join(', ') }}
-    </div>
-
-    <span
-      class="inline-block text-xs font-semibold px-2 py-0.5 rounded-full"
-      :class="{
-        'bg-yellow-100 text-yellow-800': order.status === 'В очікуванні',
-        'bg-green-100 text-green-800': order.status === 'Успішно',
-        'bg-red-100 text-red-800': order.status === 'Скасовано'
-      }"
-    >
-      {{ order.status }}
-    </span>
-  </li>
-</ul>
-
-
+    <!-- Останні замовлення -->
+    <section>
+      <h2 class="text-xl font-semibold mb-4 mt-8">💸 Останні замовлення</h2>
+      <ul v-if="latest.length" class="space-y-4">
+        <li
+          v-for="(order, i) in latest"
+          :key="order.id"
+          class="border border-gray-300 rounded-md p-4 bg-white shadow-sm transition hover:shadow-md animate-fade-in-up"
+          :style="{ animationDelay: `${i * 100}ms` }"
+        >
+          <p class="font-semibold text-base mb-2">#{{ order.id }}</p>
+          <div class="flex justify-between text-sm text-gray-600 mb-1">
+            <span>📞 {{ order.phone_number }}</span>
+            <span>{{ order.order_date }}</span>
+          </div>
+          <p class="text-sm text-gray-500 italic mb-1">
+            🧾 {{ order.products.join(', ') }}
+          </p>
+          <span
+            class="inline-block text-xs font-semibold px-2 py-0.5 rounded-full"
+            :class="{
+              'bg-yellow-100 text-yellow-800': order.status === 'В очікуванні',
+              'bg-green-100 text-green-800': order.status === 'Успішно',
+              'bg-red-100 text-red-800': order.status === 'Скасовано'
+            }"
+          >
+            {{ order.status }}
+          </span>
+        </li>
+      </ul>
+    </section>
   </main>
 </template>
+
 
 <script setup>
 import { ref, onMounted, watch, computed } from 'vue'
@@ -129,7 +139,6 @@ const summary = ref({
   sold_products_count: 0
 })
 const orderChart = ref({ labels: [], values: [], type: 'day' })
-const commentChart = ref({ labels: [], values: [], type: 'day' })
 const latest = ref([])
 const popular = ref([])
 
@@ -174,7 +183,6 @@ const loadData = async () => {
     }
 
     orderChart.value = chartRes.data
-    commentChart.value = chartRes.data
     popular.value = popRes.data.products || []
     latest.value = latestRes.data.data || []
   } catch (e) {
