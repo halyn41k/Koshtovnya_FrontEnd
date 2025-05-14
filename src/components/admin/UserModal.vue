@@ -61,20 +61,16 @@
         </div>
 
         <div>
-          <label for="role" class="block font-medium text-sm mb-1">Роль:</label>
-          <select
-            id="role"
-            v-model="form.role"
-            required
-            class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#6B1F1F]"
-          >
-            <option disabled value="">Оберіть роль</option>
-            <option value="admin">Admin</option>
-            <option value="manager">Manager</option>
-            <option value="superadmin">Superadmin</option>
-            <option value="user">User</option>
-          </select>
-        </div>
+  <label for="role" class="block font-medium text-sm mb-1">Роль:</label>
+  <Multiselect
+    id="role"
+    v-model="form.role"
+    :options="roleOptions"
+    placeholder="Оберіть роль"
+    class="custom-multiselect"
+  />
+</div>
+
 
         <div>
           <label for="phone_number" class="block font-medium text-sm mb-1">Телефон:</label>
@@ -116,8 +112,13 @@
 </template>
 
 <script>
+import Multiselect from 'vue-multiselect'
 export default {
   name: 'UserModal',
+  components: {
+  Multiselect
+},
+  
   props: {
   title: {
     type: String,
@@ -140,6 +141,7 @@ export default {
   },
   data() {
     return {
+      roleOptions: ["admin", "manager", "superadmin", "user"],
       form: {
         first_name: '',
         second_name: '',
@@ -193,5 +195,26 @@ export default {
 }
 .animate-fade-in {
   animation: fade-in 0.2s ease-out;
+}
+
+.custom-multiselect .multiselect__option--highlight::after {
+  display: none !important;
+}
+
+.multiselect__option--highlight {
+  background: #F3F4F6 !important; /* Ніжно-рожевий */
+  color: #6B1F1F !important; /* Головний колір тексту */
+}
+.multiselect__option--selected {
+  font-weight: 600 !important; /* semibold */
+}
+
+.multiselect__option--selected::after {
+  content: 'Обрано' !important;
+  color: #9CA3AF; /* світло-сірий */
+  font-size: 0.75rem; /* text-sm */
+  font-weight: 500;
+  float: right;
+  margin-right: 1rem;
 }
 </style>

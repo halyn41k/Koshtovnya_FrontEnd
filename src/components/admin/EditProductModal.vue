@@ -16,77 +16,53 @@
         </div>
       </div>
 
-        <!-- Селектори -->
-        <div class="grid grid-cols-2 gap-4">
-          <div class="flex flex-col">
-            <label for="category" class="mb-1 text-sm font-medium text-gray-700">Категорія</label>
-            <select
-              id="category"
-              v-model="form.category"
-              required
-              class="border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring focus:ring-[#6B1F1F]/50"
-            >
-              <option value="">Оберіть категорію</option>
-              <option v-for="item in formData.categories" :key="item" :value="item.toString()">
-  {{ item }}
-</option>
+       <div class="grid grid-cols-2 gap-4">
+  <div class="flex flex-col">
+    <label class="mb-1 text-sm font-medium text-gray-700">Категорія</label>
+    <Multiselect
+      v-model="form.category"
+      :options="formData.categories"
+      placeholder="Оберіть категорію"
+      class="custom-multiselect"
+    />
+  </div>
 
-            </select>
-          </div>
-          <div class="flex flex-col">
-            <label for="bead_producer" class="mb-1 text-sm font-medium text-gray-700">Бісер виробник</label>
-            <select
-              id="bead_producer"
-              v-model="form.bead_producer"
-              required
-              class="border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring focus:ring-[#6B1F1F]/50"
-            >
-              <option value="">Оберіть виробника</option>
-              <option
-                v-for="item in formData.bead_producers"
-                :key="item"
-                :value="item"
-              >{{ item }}</option>
-            </select>
-          </div>
-          <div class="flex flex-col">
-            <label for="country_of_manufacture" class="mb-1 text-sm font-medium text-gray-700">Країна виробництва</label>
-            <select
-              id="country_of_manufacture"
-              v-model="form.country_of_manufacture"
-              required
-              class="border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring focus:ring-[#6B1F1F]/50"
-            >
-              <option value="">Оберіть країну</option>
-              <option
-                v-for="item in formData.countries_of_manufacture"
-                :key="item"
-                :value="item"
-              >{{ item }}</option>
-            </select>
-          </div>
-          <div class="flex flex-col">
-            <label for="type_of_bead" class="mb-1 text-sm font-medium text-gray-700">Тип бісеру</label>
-            <select
-              id="type_of_bead"
-              v-model="form.type_of_bead"
-              required
-              class="border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring focus:ring-[#6B1F1F]/50"
-            >
-              <option value="">Оберіть тип</option>
-              <option
-                v-for="item in formData.type_of_bead"
-                :key="item"
-                :value="item"
-              >{{ item }}</option>
-            </select>
-          </div>
-        </div>
+  <div class="flex flex-col">
+    <label class="mb-1 text-sm font-medium text-gray-700">Бісер виробник</label>
+    <Multiselect
+      v-model="form.bead_producer"
+      :options="formData.bead_producers"
+      placeholder="Оберіть виробника"
+      class="custom-multiselect"
+    />
+  </div>
+
+  <div class="flex flex-col">
+    <label class="mb-1 text-sm font-medium text-gray-700">Країна виробництва</label>
+    <Multiselect
+      v-model="form.country_of_manufacture"
+      :options="formData.countries_of_manufacture"
+      placeholder="Оберіть країну"
+      class="custom-multiselect"
+    />
+  </div>
+
+  <div class="flex flex-col">
+    <label class="mb-1 text-sm font-medium text-gray-700">Тип бісеру</label>
+    <Multiselect
+      v-model="form.type_of_bead"
+      :options="formData.type_of_bead"
+      placeholder="Оберіть тип"
+      class="custom-multiselect"
+    />
+  </div>
+</div>
+
 
          <div class="grid grid-cols-2 gap-4">
         <div class="flex flex-col">
           <label for="weight" class="mb-1 text-sm font-medium text-gray-700">Вага (г)</label>
-          <input id="weight" type="number" v-model="form.weight" required placeholder="грам" class="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50" />
+          <input id="weight" type="number" v-model="form.weight" required placeholder="Введіть вагу" class="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50" />
         </div>
           <div class="flex flex-col">
             <label class="mb-2 text-sm font-medium text-gray-700">Кольори</label>
@@ -132,62 +108,61 @@
         <button type="button" @click="addSize" class="w-max px-4 py-2 bg-[#6B1F1F] text-white rounded-md hover:bg-[#A01212]">Додати розмір</button>
       </div>
 
-        <!-- Фурнітура -->
-        <div class="flex flex-col space-y-3">
-          <label class="text-sm font-medium text-gray-700">Фурнітура</label>
-          <div
-            v-for="(f, i) in form.fittings"
-            :key="i"
-            class="flex items-center gap-2"
-          >
-            <select
-              v-model="f.fitting"
-              required
-              class="flex-1 border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring focus:ring-[#6B1F1F]/50"
-            >
-              <option value="">Оберіть фурнітуру</option>
-              <option
-                v-for="item in formData.fittings"
-                :key="item"
-                :value="item"
-              >{{ item }}</option>
-            </select>
-            <select
-              v-model="f.material"
-              required
-              class="flex-1 border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring focus:ring-[#6B1F1F]/50"
-            >
-              <option value="">Оберіть матеріал</option>
-              <option
-                v-for="item in formData.materials"
-                :key="item"
-                :value="item"
-              >{{ item }}</option>
-            </select>
-            <input
-              v-model.number="f.quantity"
-              type="number"
-              min="1"
-              placeholder="Кількість"
-              required
-              class="w-24 border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50"
-            />
-            <button
-              type="button"
-              @click="removeFitting(i)"
-              class="px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-500"
-            >
-              Видалити
-            </button>
-          </div>
-          <button
-            type="button"
-            @click="addFitting"
-            class="w-max px-4 py-2 bg-[#6B1F1F] text-white rounded-md hover:bg-[#A01212]"
-          >
-            Додати фурнітуру
-          </button>
-        </div>
+       <!-- Фурнітура -->
+<div class="flex flex-col space-y-3">
+  <label class="text-sm font-medium text-gray-700">Фурнітура</label>
+
+  <div
+    v-for="(fitItem, index) in form.fittings"
+    :key="index"
+    class="flex items-center gap-2"
+  >
+    <!-- Multiselect для фурнітури -->
+    <Multiselect
+      v-model="fitItem.fitting"
+      :options="formData.fittings"
+      placeholder="Оберіть фурнітуру"
+      class="flex-1 custom-multiselect"
+    />
+
+    <!-- Multiselect для матеріалу -->
+    <Multiselect
+      v-model="fitItem.material"
+      :options="formData.materials"
+      placeholder="Оберіть матеріал"
+      class="flex-1 custom-multiselect"
+    />
+
+    <!-- Поле кількості -->
+    <input
+      v-model.number="fitItem.quantity"
+      type="number"
+      min="1"
+      placeholder="Кількість"
+      required
+      class="w-24 border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50"
+    />
+
+    <!-- Кнопка видалення -->
+    <button
+      type="button"
+      @click="removeFitting(index)"
+      class="px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-500"
+    >
+      Видалити
+    </button>
+  </div>
+
+  <!-- Кнопка додавання -->
+  <button
+    type="button"
+    @click="addFitting"
+    class="w-max px-4 py-2 bg-[#6B1F1F] text-white rounded-md hover:bg-[#A01212]"
+  >
+    Додати фурнітуру
+  </button>
+</div>
+
 
          <div class="flex flex-col">
         <label class="mb-1 text-sm font-medium text-gray-700">Зображення</label>
@@ -216,12 +191,19 @@
 import { createToastInterface } from 'vue-toastification';
 import 'vue-toastification/dist/index.css';
 import axios from "axios";
+import Multiselect from 'vue-multiselect'
+
 
 export default {
+ 
   name: "AddProductModal",
    props: {
-  product: { type: Object, required: true }
+  product: { type: Object, required: true },
 },
+components: {
+  Multiselect
+},
+
   data() {
     return {
       colorMap: {
@@ -420,3 +402,27 @@ export default {
   },
 };
 </script>
+
+<style>
+.custom-multiselect .multiselect__option--highlight::after {
+  display: none !important;
+}
+
+.multiselect__option--highlight {
+  background: #F3F4F6 !important; /* Ніжно-рожевий */
+  color: #6B1F1F !important; /* Головний колір тексту */
+}
+.multiselect__option--selected {
+  font-weight: 600 !important; /* semibold */
+}
+
+.multiselect__option--selected::after {
+  content: 'Обрано' !important;
+  color: #9CA3AF; /* світло-сірий */
+  font-size: 0.75rem; /* text-sm */
+  font-weight: 500;
+  float: right;
+  margin-right: 1rem;
+}
+
+</style>

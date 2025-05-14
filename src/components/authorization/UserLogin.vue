@@ -177,8 +177,31 @@ export default {
     },
   },
   mounted() {
-    document.title = 'Вхід';
-  },
+  document.title = 'Вхід';
+
+  const query = new URLSearchParams(window.location.search);
+  const token = query.get('token');
+  const userJson = query.get('user');
+
+  if (token && userJson) {
+    try {
+      const user = JSON.parse(decodeURIComponent(userJson));
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(user));
+
+      const role = user?.role;
+      if (role === 'admin' || role === 'superadmin' || role === 'manager') {
+        this.$router.push('/admin');
+      } else {
+        this.$router.push('/account');
+      }
+    } catch (e) {
+      console.error('❌ Помилка парсингу user:', e);
+      alert('Невдала авторизація через Google.');
+      this.$router.replace('/login');
+    }
+  }
+},
 };
 </script>
 

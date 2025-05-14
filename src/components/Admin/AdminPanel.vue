@@ -6,17 +6,23 @@
     <div @click="showProfile = true" class="cursor-pointer">
       <img src="@/assets/icons/user_icon.svg" alt="User Icon" class="w-5 h-5" />
     </div>
-    <div class="flex items-center space-x-1">
-      <img :src="currentFlag" :alt="selectedLanguage + ' Flag'" class="w-5 h-4 rounded-sm object-cover" />
-      <select
-        v-model="selectedLanguage"
-        @change="changeLanguage"
-        class="bg-transparent text-sm outline-none cursor-pointer"
-      >
-        <option value="uk">Українська</option>
-        <option value="en">English</option>
-      </select>
-    </div>
+      <div class="flex items-center space-x-2">
+    <img
+      :src="currentFlag"
+      :alt="selectedLanguage + ' Flag'"
+      class="w-5 h-4 rounded-sm object-cover"
+    />
+    <Multiselect
+  v-model="selectedLanguage"
+  :options="languageOptions"
+  :custom-label="opt => opt.name"
+  :track-by="'code'"
+  placeholder="Оберіть мову"
+  class="w-36 custom-multiselect"
+/>
+
+
+  </div>
   </div>
 </header>
 
@@ -111,6 +117,7 @@ import Orders from './Orders.vue';
 import Reports from './Reports.vue';
 import Settings from './Settings.vue';
 import DashboardView from './dashboard/Dashboard.vue';
+import Multiselect from 'vue-multiselect'
 
 export default {
   name: 'AdminPanel',
@@ -123,14 +130,19 @@ export default {
     Orders,
     Reports,
     Settings,
-    DashboardView
+    DashboardView,
+    Multiselect
   },
   data() {
     return {
       showProfile: false,
       activeTab: -1,
       user: null,
-      selectedLanguage: 'uk',
+         selectedLanguage: { code: 'uk', name: 'Українська', flag: 'https://flagcdn.com/w320/ua.png' },
+    languageOptions: [
+      { code: 'uk', name: 'Українська', flag: 'https://flagcdn.com/w320/ua.png' },
+      { code: 'en', name: 'English', flag: 'https://flagcdn.com/w320/gb.png' }
+    ],
       siteSettings: { site_logo: '' },
       sidebarCollapsed: false
     }
@@ -142,10 +154,9 @@ export default {
       return item ? item.component : 'WelcomeAdmin';
     },
     currentFlag() {
-      return this.selectedLanguage === 'uk'
-        ? 'https://flagcdn.com/w320/ua.png'
-        : 'https://flagcdn.com/w320/gb.png';
-    },
+  return this.selectedLanguage?.flag || 'https://flagcdn.com/w320/ua.png';
+},
+
     panelSubtitle() {
       if (!this.user) return '';
       const map = {
@@ -235,5 +246,26 @@ export default {
   font-weight: 900;
   font-style: normal;
   font-display: swap;
+}
+
+.custom-multiselect .multiselect__option--highlight::after {
+  display: none !important;
+}
+
+.multiselect__option--highlight {
+  background: #F3F4F6 !important; /* Ніжно-рожевий */
+  color: #6B1F1F !important; /* Головний колір тексту */
+}
+.multiselect__option--selected {
+  font-weight: 600 !important; /* semibold */
+}
+
+.multiselect__option--selected::after {
+  content: 'Обрано' !important;
+  color: #9CA3AF; /* світло-сірий */
+  font-size: 0.75rem; /* text-sm */
+  font-weight: 500;
+  float: right;
+  margin-right: 1rem;
 }
 </style>

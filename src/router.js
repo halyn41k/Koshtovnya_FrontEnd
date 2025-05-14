@@ -129,9 +129,9 @@ const routes = [
     },
   },
   {
-  path: '/auth/google/callback',
-  name: 'GoogleCallback',
-  component: () => import('@/components/authorization/GoogleCallback.vue') // або окремий login-handler
+  path: '/google-auth',
+  name: 'GoogleAuth',
+  component: () => import('@/components/authorization/GoogleAuth.vue') // або окремий login-handler
 },
 
 

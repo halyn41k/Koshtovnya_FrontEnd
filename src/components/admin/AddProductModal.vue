@@ -1,105 +1,96 @@
 <template>
 
+    <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
 
-<div class="fixed inset-0 bg-[rgba(0,0,0,0.5)] flex items-center justify-center z-50" @click.self="close">
-  <div class="bg-white rounded-lg w-full max-w-2xl p-6 overflow-y-auto max-h-[90vh] shadow-lg">
-    <h2 class="text-2xl font-semibold text-center mb-6">Додати товар</h2>
-    <form @submit.prevent="submitForm" class="space-y-6">
-      <!-- Назва та Ціна -->
-      <div class="grid grid-cols-2 gap-4">
-        <div class="flex flex-col">
-          <label for="name" class="mb-1 text-sm font-medium text-gray-700">Назва</label>
-          <input id="name" type="text" v-model="form.name" required placeholder="Наприклад: Срібний браслет" class="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50" />
-        </div>
-        <div class="flex flex-col">
-          <label for="price" class="mb-1 text-sm font-medium text-gray-700">Ціна</label>
-          <input id="price" type="number" v-model="form.price" required placeholder="грн" class="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50" />
-        </div>
-      </div>
+    @click.self="close"
+  >
+    <div
+      class="bg-white rounded-lg w-full max-w-2xl p-6 overflow-y-auto max-h-[90vh] shadow-lg"
+    >
+      <h2 class="text-2xl font-semibold text-center mb-6">Додати товар</h2>
 
-        <!-- Селекти -->
+      <form @submit.prevent="submitForm" class="space-y-6">
+        <!-- Назва та Ціна -->
         <div class="grid grid-cols-2 gap-4">
           <div class="flex flex-col">
-            <label for="category" class="mb-1 text-sm font-medium text-gray-700">Категорія</label>
-            <select
-              id="category"
-              v-model="form.category"
+            <label for="name" class="mb-1 text-sm font-medium text-gray-700">Назва</label>
+            <input
+              id="name"
+              type="text"
+              v-model="form.name"
               required
-              class="border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring focus:ring-[#6B1F1F]/50"
-            >
-              <option value="">Оберіть категорію</option>
-              <option
-                v-for="item in formData.categories"
-                :key="item"
-                :value="item"
-              >
-                {{ item }}
-              </option>
-            </select>
+              class="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50"
+            />
           </div>
           <div class="flex flex-col">
-            <label for="bead_producer" class="mb-1 text-sm font-medium text-gray-700">Бісер виробник</label>
-            <select
-              id="bead_producer"
-              v-model="form.bead_producer"
+            <label for="price" class="mb-1 text-sm font-medium text-gray-700">Ціна</label>
+            <input
+              id="price"
+              type="number"
+              v-model="form.price"
               required
-              class="border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring focus:ring-[#6B1F1F]/50"
-            >
-              <option value="">Оберіть виробника</option>
-              <option
-                v-for="item in formData.bead_producers"
-                :key="item"
-                :value="item"
-              >
-                {{ item }}
-              </option>
-            </select>
-          </div>
-          <div class="flex flex-col">
-            <label for="country_of_manufacture" class="mb-1 text-sm font-medium text-gray-700">
-              Країна виробництва
-            </label>
-            <select
-              id="country_of_manufacture"
-              v-model="form.country_of_manufacture"
-              required
-              class="border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring focus:ring-[#6B1F1F]/50"
-            >
-              <option value="">Оберіть країну</option>
-              <option
-                v-for="item in formData.countries_of_manufacture"
-                :key="item"
-                :value="item"
-              >
-                {{ item }}
-              </option>
-            </select>
-          </div>
-          <div class="flex flex-col">
-            <label for="type_of_bead" class="mb-1 text-sm font-medium text-gray-700">Тип бісеру</label>
-            <select
-              id="type_of_bead"
-              v-model="form.type_of_bead"
-              required
-              class="border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring focus:ring-[#6B1F1F]/50"
-            >
-              <option value="">Оберіть тип</option>
-              <option
-                v-for="item in formData.type_of_bead"
-                :key="item"
-                :value="item"
-              >
-                {{ item }}
-              </option>
-            </select>
+              class="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50"
+            />
           </div>
         </div>
 
+       <div class="grid grid-cols-2 gap-4">
+  <div class="flex flex-col">
+    <label class="mb-1 text-sm font-medium text-gray-700">Категорія</label>
+    <Multiselect
+      v-model="form.category"
+      :options="formData.categories"
+      placeholder="Оберіть категорію"
+      class="custom-multiselect"
+    />
+  </div>
+
+  <div class="flex flex-col">
+    <label class="mb-1 text-sm font-medium text-gray-700">Бісер виробник</label>
+    <Multiselect
+      v-model="form.bead_producer"
+      :options="formData.bead_producers"
+      placeholder="Оберіть виробника"
+      class="custom-multiselect"
+    />
+  </div>
+
+  <div class="flex flex-col">
+    <label class="mb-1 text-sm font-medium text-gray-700">Країна виробництва</label>
+    <Multiselect
+      v-model="form.country_of_manufacture"
+      :options="formData.countries_of_manufacture"
+      placeholder="Оберіть країну"
+      class="custom-multiselect"
+    />
+  </div>
+
+  <div class="flex flex-col">
+    <label class="mb-1 text-sm font-medium text-gray-700">Тип бісеру</label>
+    <Multiselect
+      v-model="form.type_of_bead"
+      :options="formData.type_of_bead"
+      placeholder="Оберіть тип"
+      class="custom-multiselect"
+    />
+  </div>
+</div>
+
+
+
+        <!-- Вага та Кольори -->
         <div class="grid grid-cols-2 gap-4">
-        <div class="flex flex-col">
-          <label for="weight" class="mb-1 text-sm font-medium text-gray-700">Вага (г)</label>
-          <input id="weight" type="number" v-model="form.weight" required placeholder="грам" class="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50" />
-        </div>
+          <div class="flex flex-col">
+            <label for="weight" class="mb-1 text-sm font-medium text-gray-700">Вага</label>
+            <input
+              id="weight"
+              type="number"
+              placeholder="Введіть вагу"
+              v-model="form.weight"
+              required
+              class="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50"
+            />
+          </div>
           <div class="flex flex-col">
             <label class="mb-2 text-sm font-medium text-gray-700">Кольори</label>
             <div class="flex flex-wrap gap-2">
@@ -126,60 +117,23 @@
           </div>
         </div>
 
-             <div class="flex flex-col space-y-3">
-        <label class="text-sm font-medium text-gray-700">Розміри</label>
-        <div v-for="(sizeItem, index) in form.sizes" :key="index" class="flex items-center gap-2">
-          <div class="flex flex-col flex-1">
-            <label class="text-sm text-gray-600 mb-1">Розмір (см)</label>
-            <input v-model.number="sizeItem.size" type="number" min="1" placeholder="см" required class="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50" />
-          </div>
-          <div class="flex flex-col w-28">
-            <label class="text-sm text-gray-600 mb-1">К-ть</label>
-            <input v-model.number="sizeItem.quantity" type="number" min="1" placeholder="шт" required class="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50" />
-          </div>
-          <button type="button" @click="removeSize(index)" class="px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-500">Видалити</button>
-        </div>
-        <button type="button" @click="addSize" class="w-max px-4 py-2 bg-[#6B1F1F] text-white rounded-md hover:bg-[#A01212]">Додати розмір</button>
-      </div>
-
-        <!-- Фурнітура -->
+        <!-- Розміри -->
         <div class="flex flex-col space-y-3">
-          <label class="text-sm font-medium text-gray-700">Фурнітура</label>
+          <label class="text-sm font-medium text-gray-700">Розміри</label>
           <div
-            v-for="(fitItem, index) in form.fittings"
+            v-for="(sizeItem, index) in form.sizes"
             :key="index"
             class="flex items-center gap-2"
           >
-            <select
-              v-model="fitItem.fitting"
-              required
-              class="flex-1 border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring focus:ring-[#6B1F1F]/50"
-            >
-              <option value="">Оберіть фурнітуру</option>
-              <option
-                v-for="item in formData.fittings"
-                :key="item"
-                :value="item"
-              >
-                {{ item }}
-              </option>
-            </select>
-            <select
-              v-model="fitItem.material"
-              required
-              class="flex-1 border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring focus:ring-[#6B1F1F]/50"
-            >
-              <option value="">Оберіть матеріал</option>
-              <option
-                v-for="item in formData.materials"
-                :key="item"
-                :value="item"
-              >
-                {{ item }}
-              </option>
-            </select>
             <input
-              v-model.number="fitItem.quantity"
+              v-model="sizeItem.size"
+              type="text"
+              placeholder="Розмір"
+              required
+              class="flex-1 border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50"
+            />
+            <input
+              v-model.number="sizeItem.quantity"
               type="number"
               min="1"
               placeholder="Кількість"
@@ -188,7 +142,7 @@
             />
             <button
               type="button"
-              @click="removeFitting(index)"
+              @click="removeSize(index)"
               class="px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-500"
             >
               Видалити
@@ -196,40 +150,108 @@
           </div>
           <button
             type="button"
-            @click="addFitting"
+            @click="addSize"
             class="w-max px-4 py-2 bg-[#6B1F1F] text-white rounded-md hover:bg-[#A01212]"
           >
-            Додати фурнітуру
+            Додати розмір
           </button>
         </div>
 
-        <div class="flex flex-col">
-        <label class="mb-1 text-sm font-medium text-gray-700">Зображення</label>
-        <label class="inline-flex items-center px-4 py-2 border-2 border-dashed border-gray-300 rounded-md cursor-pointer text-sm text-gray-600 hover:border-[#A01212]">
-          Вибрати файл
-          <input type="file" @change="handleFileChange" accept="image/jpeg,image/png,image/jpg" class="sr-only" />
-        </label>
-        <div v-if="form.image" class="mt-2 relative">
-          <img :src="imagePreview" alt="Превʼю" class="max-h-40 rounded-md border" />
-          <button type="button" @click="removeImage" class="absolute top-0 right-0 bg-red-600 text-white px-2 py-1 rounded-bl-md hover:bg-red-500">×</button>
-        </div>
-      </div>
+        <!-- Фурнітура -->
+<div class="flex flex-col space-y-3">
+  <label class="text-sm font-medium text-gray-700">Фурнітура</label>
+  <div
+    v-for="(fitItem, index) in form.fittings"
+    :key="index"
+    class="flex items-center gap-2"
+  >
+    <Multiselect
+      v-model="fitItem.fitting"
+      :options="formData.fittings"
+      placeholder="Оберіть фурнітуру"
+      class="flex-1 custom-multiselect"
+    />
 
-      <!-- Дії -->
-      <div class="flex justify-end space-x-4 pt-4 border-t border-gray-200">
-        <button type="button" @click="close" class="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400">Скасувати</button>
-        <button type="submit" class="px-4 py-2 bg-[#6B1F1F] text-white rounded-md hover:bg-[#A01212]">Додати</button>
-      </div>
-    </form>
+    <Multiselect
+      v-model="fitItem.material"
+      :options="formData.materials"
+      placeholder="Оберіть матеріал"
+      class="flex-1 custom-multiselect"
+    />
+
+    <input
+      v-model.number="fitItem.quantity"
+      type="number"
+      min="1"
+      placeholder="Кількість"
+      required
+      class="w-24 border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50"
+    />
+
+    <button
+      type="button"
+      @click="removeFitting(index)"
+      class="px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-500"
+    >
+      Видалити
+    </button>
   </div>
+  <button
+    type="button"
+    @click="addFitting"
+    class="w-max px-4 py-2 bg-[#6B1F1F] text-white rounded-md hover:bg-[#A01212]"
+  >
+    Додати фурнітуру
+  </button>
 </div>
-</template>
 
+        <!-- Зображення -->
+        <div class="flex flex-col">
+          <label class="mb-1 text-sm font-medium text-gray-700">Зображення</label>
+          <label
+            class="inline-flex items-center px-4 py-2 border-2 border-dashed border-gray-300 rounded-md cursor-pointer text-sm text-gray-600 hover:border-[#A01212]"
+          >
+            Вибрати файл
+            <input
+              type="file"
+              @change="handleFileChange"
+              accept="image/jpeg,image/png,image/jpg"
+              class="sr-only"
+            />
+          </label>
+        </div>
+
+        <!-- Дії -->
+        <div class="flex justify-end space-x-4 pt-4 border-t border-gray-200">
+          <button
+            type="button"
+            @click="close"
+            class="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400"
+          >
+            Скасувати
+          </button>
+          <button
+            type="submit"
+            class="px-4 py-2 bg-[#6B1F1F] text-white rounded-md hover:bg-[#A01212]"
+          >
+            Додати
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</template>
 
 <script>
 import axios from "axios";
 
+import Multiselect from 'vue-multiselect'
+
+
 export default {
+  components: {
+  Multiselect
+},
   name: "AddProductModal",
   data() {
     return {
@@ -272,36 +294,34 @@ export default {
         fittings: [],
         materials: [],
       },
-      imagePreview: null,
     };
   },
   mounted() {
-    axios.get("https://koshtovnya.api-dev.bmax-edu.website/api/admin/products/form-data", {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-    })
-    .then((res) => {
-      const d = res.data.data;
-      this.formData.categories = d.categories || [];
-      this.formData.bead_producers = d.bead_producers || [];
-      this.formData.countries_of_manufacture = d.countries_of_manufacture || [];
-      this.formData.type_of_bead = d.type_of_bead || [];
-      this.formData.colors = d.colors || [];
-      this.formData.fittings = d.fittings || [];
-      this.formData.materials = d.materials || [];
-    })
-    .catch(console.error);
+    axios
+      .get(
+        "https://koshtovnya.api-dev.bmax-edu.website/api/admin/products/form-data",
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      )
+      .then((res) => {
+        const d = res.data.data;
+        this.formData.categories = d.categories || [];
+        this.formData.bead_producers = d.bead_producers || [];
+        this.formData.countries_of_manufacture =
+          d.countries_of_manufacture || [];
+        this.formData.type_of_bead = d.type_of_bead || [];
+        this.formData.colors = d.colors || [];
+        this.formData.fittings = d.fittings || [];
+        this.formData.materials = d.materials || [];
+      })
+      .catch(console.error);
   },
   methods: {
     handleFileChange(e) {
-      const file = e.target.files[0];
-      this.form.image = file;
-      if (file) this.imagePreview = URL.createObjectURL(file);
-    },
-    removeImage() {
-      this.form.image = null;
-      this.imagePreview = null;
+      this.form.image = e.target.files[0];
     },
     addSize() {
       this.form.sizes.push({ size: "", quantity: 1 });
@@ -321,65 +341,70 @@ export default {
       else this.form.colors.splice(idx, 1);
     },
     submitForm() {
-  // Валідація кольорів
-  if (!this.form.colors.length) {
-    alert("Оберіть хоча б один колір.");
-    return;
-  }
-
-  // Валідація розмірів
-  if (!this.form.sizes.length || this.form.sizes.some(s => !s.size || !s.quantity)) {
-    alert("Додайте принаймні один розмір і вкажіть розмір та кількість.");
-    return;
-  }
-
-  // Валідація фурнітури
-  if (!this.form.fittings.length || this.form.fittings.some(f => !f.fitting || !f.material || !f.quantity)) {
-    alert("Додайте принаймні одну фурнітуру з матеріалом та кількістю.");
-    return;
-  }
-
-  // Валідація зображення
-  if (!this.form.image) {
-    alert("Додайте зображення товару.");
-    return;
-  }
-
-  const fd = new FormData();
-  fd.append("image", this.form.image);
-
-  Object.entries(this.form).forEach(([k, v]) => {
-    if (["sizes", "fittings", "colors", "image"].includes(k)) return;
-    fd.append(k, v);
-  });
-
-  this.form.colors.forEach((c) => fd.append("colors[]", c));
-  this.form.sizes.forEach((s, i) => {
-    fd.append(`sizes[${i}][size]`, s.size);
-    fd.append(`sizes[${i}][quantity]`, s.quantity);
-  });
-  this.form.fittings.forEach((f, i) => {
-    fd.append(`fittings[${i}][fitting]`, f.fitting);
-    fd.append(`fittings[${i}][material]`, f.material);
-    fd.append(`fittings[${i}][quantity]`, f.quantity);
-  });
-
-  axios.post("https://koshtovnya.api-dev.bmax-edu.website/api/admin/products", fd, {
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem("token")}`,
-      "Content-Type": "multipart/form-data",
+      const fd = new FormData();
+      if (this.form.image) fd.append("image", this.form.image);
+      Object.entries(this.form).forEach(([k, v]) => {
+        if (["sizes", "fittings", "colors", "image"].includes(k)) return;
+        fd.append(k, v);
+      });
+      this.form.colors.forEach((c) => fd.append("colors[]", c));
+      this.form.sizes.forEach((s, i) => {
+        fd.append(`sizes[${i}][size]`, s.size);
+        fd.append(`sizes[${i}][quantity]`, s.quantity);
+      });
+      this.form.fittings.forEach((f, i) => {
+        fd.append(`fittings[${i}][fitting]`, f.fitting);
+        fd.append(`fittings[${i}][material]`, f.material);
+        fd.append(`fittings[${i}][quantity]`, f.quantity);
+      });
+      axios
+        .post(
+          "https://koshtovnya.api-dev.bmax-edu.website/api/admin/products",
+          fd,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        )
+        .then((r) => {
+          const d = r.data.data || r.data.product;
+          this.$emit(
+            "product-added",
+            Array.isArray(d) ? Object.assign({}, ...d) : d
+          );
+          this.close();
+        })
+        .catch(console.error);
     },
-  })
-  .then((r) => {
-    const d = r.data.data || r.data.product;
-    this.$emit("product-added", Array.isArray(d) ? Object.assign({}, ...d) : d);
-    this.close();
-  })
-  .catch(console.error);
-},
     close() {
       this.$emit("close");
     },
   },
 };
 </script>
+
+<style>
+.custom-multiselect .multiselect__option--highlight::after {
+  display: none !important;
+}
+
+.multiselect__option--highlight {
+  background: #F3F4F6 !important; /* Ніжно-рожевий */
+  color: #6B1F1F !important; /* Головний колір тексту */
+}
+.multiselect__option--selected {
+  font-weight: 600 !important; /* semibold */
+}
+
+.multiselect__option--selected::after {
+  content: 'Обрано' !important;
+  color: #9CA3AF; /* світло-сірий */
+  font-size: 0.75rem; /* text-sm */
+  font-weight: 500;
+  float: right;
+  margin-right: 1rem;
+}
+
+</style>

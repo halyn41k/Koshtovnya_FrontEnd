@@ -9,6 +9,7 @@ import i18n from './i18n'
 
 // Tailwind CSS
 import './assets/tailwind.css'
+import 'vue-multiselect/dist/vue-multiselect.min.css'
 
 // Axios глобально
 import axios from 'axios'

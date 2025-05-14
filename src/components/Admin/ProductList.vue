@@ -179,44 +179,48 @@ export default {
 
   },
   methods: {
-    fetchProducts(url = null) {
-  const base = 'https://koshtovnya.api-dev.bmax-edu.website/api/admin/products'
-  let endpoint = base
-  const params = new URLSearchParams()
+   fetchProducts() {
+  const query = this.searchQuery.trim();
 
-  // Якщо є фільтри — додаємо їх
-  Object.entries(this.currentFilters).forEach(([k, v]) => {
-    Array.isArray(v)
-      ? v.forEach(val => params.append(k, val))
-      : params.append(k, v)
-  })
-
-  // Якщо є пошук — додаємо параметр search
-  if (this.searchQuery.trim()) {
-    params.append('search', this.searchQuery.trim())
+  if (!query) {
+    this.products = [];
+    this.meta = null;
+    return;
   }
 
-  // Якщо передано URL пагінації (вже з параметрами) — використовуємо його
-  if (url) {
-    endpoint = url
-  } else if ([...params].length > 0) {
-    endpoint += `?${params.toString()}`
-  }
+  const endpoint = `https://koshtovnya.api-dev.bmax-edu.website/api/admin/products/search/${encodeURIComponent(query)}`;
+axios.get(endpoint, {
+  headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+})
 
-  axios.get(endpoint, {
-    headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-  })
-  .then(r => {
-    this.products = r.data.data
-    this.meta = r.data.meta
-  })
-  .catch(e => console.error('Помилка отримання товарів:', e))
+
+    .then(response => {
+      this.products = response.data.data || response.data || [];
+      this.meta = null;
+    })
+    .catch(error => {
+      console.error('❌ Помилка пошуку товарів:', error);
+      this.products = [];
+      this.meta = null;
+    });
 },
     onSearch() {
   clearTimeout(this.searchTimeout)
   this.searchTimeout = setTimeout(() => {
     this.fetchProducts()
   }, 400)
+},
+fetchAllProducts() {
+  axios.get('https://koshtovnya.api-dev.bmax-edu.website/api/products')
+    .then(response => {
+      this.products = response.data.data || response.data || []
+      this.meta = null
+    })
+    .catch(error => {
+      console.error('❌ Помилка завантаження товарів:', error)
+      this.products = []
+      this.meta = null
+    });
 },
 
     openFilter() { this.showFilter = true },
@@ -254,7 +258,7 @@ this.closeEditModal()
     }
   },
   mounted() {
-    this.fetchProducts()
+    this.fetchAllProducts(); 
     document.title = 'Товари'
   }
 }
