@@ -1,28 +1,32 @@
 <template>
   <div class="flex flex-col h-screen font-['Montserrat',sans-serif]">
     <!-- Міні-хедер -->
-    <header class="h-12 w-full border-b border-gray-200 bg-white flex items-center px-5">
-      <div class="ml-auto flex items-center space-x-8">
-        <div @click="showProfile = true" class="cursor-pointer">
-          <img src="@/assets/icons/user_icon.svg" alt="User Icon" class="w-6 h-6" />
-        </div>
-        <div class="flex items-center space-x-1">
-          <img :src="currentFlag" :alt="selectedLanguage + ' Flag'" class="w-5 h-4 rounded-sm object-cover" />
-          <select
-            v-model="selectedLanguage"
-            @change="changeLanguage"
-            class="bg-transparent outline-none cursor-pointer"
-          >
-            <option value="uk">Українська</option>
-            <option value="en">English</option>
-          </select>
-        </div>
-      </div>
-    </header>
+<header class="fixed top-0 left-0 right-0 h-12 bg-white border-b border-gray-200 z-50 flex justify-end items-center px-4 shadow-sm">
+  <div class="flex items-center space-x-6">
+    <div @click="showProfile = true" class="cursor-pointer">
+      <img src="@/assets/icons/user_icon.svg" alt="User Icon" class="w-5 h-5" />
+    </div>
+    <div class="flex items-center space-x-1">
+      <img :src="currentFlag" :alt="selectedLanguage + ' Flag'" class="w-5 h-4 rounded-sm object-cover" />
+      <select
+        v-model="selectedLanguage"
+        @change="changeLanguage"
+        class="bg-transparent text-sm outline-none cursor-pointer"
+      >
+        <option value="uk">Українська</option>
+        <option value="en">English</option>
+      </select>
+    </div>
+  </div>
+</header>
+
+
+
 
     <AdminProfileCard v-if="showProfile" @close="showProfile = false" />
 
-    <main :class="['flex flex-1 relative', showProfile ? 'filter blur-sm' : '']">
+    <main :class="['flex flex-1 relative pt-12', showProfile ? 'filter blur-sm' : '']">
+І
       <aside
         :class="[
           'bg-[#F6E7E7] flex flex-col justify-between transition-all duration-300 ease-in-out',
@@ -88,8 +92,11 @@
       </aside>
 
       <section class="flex-1 p-5 overflow-y-auto">
-        <component :is="activeComponent" v-if="activeComponent" />
-      </section>
+  <div class="w-full max-w-[1600px] mx-auto">
+    <component :is="activeComponent" v-if="activeComponent" />
+  </div>
+</section>
+
     </main>
   </div>
 </template>

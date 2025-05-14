@@ -53,7 +53,7 @@
             v-model="form.email"
               type="email"
   inputmode="email"
-  pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
+
             required
             placeholder="Введіть email"
             class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#6B1F1F]"
@@ -78,16 +78,20 @@
 
         <div>
           <label for="phone_number" class="block font-medium text-sm mb-1">Телефон:</label>
-          <input
-            id="phone_number"
-            v-model="form.phone_number"
-            type="text"
-            required
-            maxlength="17"
-            placeholder="+38(___)___-__-__"
-            @input="applyPhoneMask"
-            class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#6B1F1F]"
-          />
+          <!-- У компоненті UserModal.vue -->
+<input
+  v-model="form.phone_number"
+  type="tel"
+  inputmode="numeric"
+  maxlength="12"
+  required
+  placeholder="380XXXXXXXXX"
+  class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#6B1F1F]"
+  @input="form.phone_number = form.phone_number.replace(/\D/g, '')"
+/>
+
+
+
         </div>
 
         <!-- Actions -->
@@ -115,21 +119,24 @@
 export default {
   name: 'UserModal',
   props: {
-    title: {
-      type: String,
-      default: 'Додати користувача'
-    },
-    user: {
-      type: Object,
-      default: () => ({
-        first_name: '',
-        second_name: '',
-        last_name: '',
-        email: '',
-        phone_number: '',
-        role: ''
-      })
-    }
+  title: {
+    type: String,
+    default: 'Додати користувача'
+  },
+  user: {
+    type: Object,
+    default: () => ({
+      id: null,
+      first_name: '',
+      second_name: '',
+      last_name: '',
+      email: '',
+      phone_number: '',
+      role: ''
+    })
+  }
+
+
   },
   data() {
     return {
@@ -144,49 +151,33 @@ export default {
       }
     }
   },
-  watch: {
-    user: {
-      handler(newUser) {
-        if (newUser) {
-          this.form = {
-  id: newUser.id || null, // ← це важливо!
-  first_name: newUser.first_name || '',
-}
+ watch: {
+  user: {
+    handler(newUser) {
+      if (!newUser || typeof newUser !== 'object') return
+      this.form = {
+        id: newUser.id ?? null,
+        first_name: newUser.first_name || '',
+        second_name: newUser.second_name || '',
+        last_name: newUser.last_name || '',
+        email: newUser.email || '',
+        phone_number: newUser.phone_number || '',
+        role: newUser.role || ''
+      }
+    },
+    deep: true,
+    immediate: true
+  }
+},
 
-        }
-      },
-      immediate: true
-    }
-  },
   methods: {
     handleSubmit() {
-      this.$emit('userSubmit', this.form)
-    },
-    applyPhoneMask() {
-      let digits = this.form.phone_number.replace(/\D/g, '').slice(0, 12)
-      let formatted = '+38('
-
-      if (digits.length >= 3) {
-        formatted += digits.slice(0, 3) + ')'
-        if (digits.length >= 6) {
-          formatted += digits.slice(3, 6) + '-'
-          if (digits.length >= 8) {
-            formatted += digits.slice(6, 8) + '-'
-            formatted += digits.slice(8, 10)
-          } else {
-            formatted += digits.slice(6)
-          }
-        } else {
-          formatted += digits.slice(3)
-        }
-      } else {
-        formatted += digits
-      }
-
-      this.form.phone_number = formatted
-    }
-  }
-}
+  console.log('🟢 submit form:', this.form)
+  this.$emit('userSubmit', { ...this.form })
+},
+   
+},
+};
 </script>
 
 <style scoped>

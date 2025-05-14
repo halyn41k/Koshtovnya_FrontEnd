@@ -7,7 +7,7 @@
         @click="openAddModal"
         class="flex items-center gap-2 bg-[#6B1F1F] hover:bg-[#A01212] text-white px-4 py-2 rounded"
       >
-        <img src="@/assets/icons/plus.svg" alt="Add" class="w-5 h-5"/>
+        <img src="@/assets/icons/plus.svg" alt="Add" class="w-5 h-5" />
         <span class="font-medium">Додати</span>
       </button>
     </div>
@@ -69,10 +69,10 @@
               <td class="px-4 py-2 border-b border-[#E0E0E0] text-sm text-gray-800">{{ user.role }}</td>
               <td class="px-4 py-2 border-b border-[#E0E0E0] flex gap-2">
                 <button @click="openUpdateModal(user)" class="p-1 hover:bg-gray-100 rounded">
-                  <img src="@/assets/icons/edit.svg" class="w-5 h-5" alt="Edit"/>
+                  <img src="@/assets/icons/edit.svg" class="w-5 h-5" alt="Edit" />
                 </button>
                 <button @click="deleteUser(user.id)" class="p-1 hover:bg-gray-100 rounded">
-                  <img src="@/assets/icons/delete.svg" class="w-5 h-5" alt="Delete"/>
+                  <img src="@/assets/icons/delete.svg" class="w-5 h-5" alt="Delete" />
                 </button>
               </td>
             </tr>
@@ -122,12 +122,22 @@
       @close="closeUserModal"
       @userSubmit="handleUserSubmit"
     />
+
+    <!-- Toast -->
+    <div
+      v-if="showToast"
+      class="fixed bottom-6 left-6 bg-green-100 border border-green-300 text-green-800 px-4 py-2 rounded shadow"
+    >
+      Працівника успішно {{ toastAction }}!
+    </div>
   </main>
 </template>
 
 <script>
 import axios from 'axios'
 import UserModal from './UserModal.vue'
+import { createToastInterface } from 'vue-toastification'
+const toast = createToastInterface()
 
 export default {
   name: 'EmployeeList',
@@ -151,6 +161,9 @@ export default {
       modalKey: 0,
       modalUser: null,
       highlightedUserId: null,
+      showToast: false,
+      toastAction: '',
+      searchDebounce: null,
       columns: [
         { key: 'id', label: 'ID', sortable: true },
         { key: 'first_name', label: 'Ім’я', sortable: true },
@@ -170,20 +183,16 @@ export default {
       let endpoint, params
 
       if (url) {
-        // пагінація по готовому URL
         endpoint = url
         params = {}
       } else if (this.searchQuery.trim()) {
-        // пошук через окремий ендпоїнт
         endpoint = `https://koshtovnya.api-dev.bmax-edu.website/api/admin/users/search/${encodeURIComponent(this.searchQuery)}`
         params = { role: this.searchRole }
       } else {
-        // базовий список за роллю
         endpoint = 'https://koshtovnya.api-dev.bmax-edu.website/api/admin/users'
         params = { role: this.searchRole }
       }
 
-      // додаємо сортування, якщо задано
       const sorted = Object.entries(this.sortState).find(([, v]) => v !== 'none')
       if (sorted) {
         params.sort_by = sorted[0]
@@ -197,28 +206,34 @@ export default {
         })
         this.users = res.data.data
         const m = res.data.meta
-        this.meta = {
-          links: m.links,
-          current_page: m.current_page,
-          last_page: m.last_page,
-          prev: m.links.find(l => l.label.includes('Previous'))?.url,
-          next: m.links.find(l => l.label.includes('Next'))?.url
-        }
+        if (res.data.meta) {
+  const m = res.data.meta
+  this.meta = {
+    links: m.links,
+    current_page: m.current_page,
+    last_page: m.last_page,
+    prev: m.links.find((l) => l.label.includes('Previous'))?.url,
+    next: m.links.find((l) => l.label.includes('Next'))?.url
+  }
+} else {
+  this.meta = { links: [], current_page: 1, last_page: 1, prev: null, next: null }
+}
+
       } catch (e) {
         console.error('Error fetching employees:', e)
       }
     },
 
     onSearch() {
-      // при кожному введенні перезапускаємо запит
-      this.fetchUsers()
+      clearTimeout(this.searchDebounce)
+      this.searchDebounce = setTimeout(() => {
+        this.fetchUsers()
+      }, 400)
     },
 
     cycleSort(col) {
       const order = this.sortState[col]
-      // скидаємо всі сорти
       Object.keys(this.sortState).forEach(k => (this.sortState[k] = 'none'))
-      // переключаємо даний стовпець
       this.sortState[col] = order === 'none' ? 'asc' : order === 'asc' ? 'desc' : 'none'
       this.fetchUsers()
     },
@@ -253,34 +268,49 @@ export default {
     },
 
     async handleUserSubmit(u) {
-      const isUpd = !!u.id
-      const url = isUpd
-        ? `https://koshtovnya.api-dev.bmax-edu.website/api/admin/user/${u.id}`
-        : 'https://koshtovnya.api-dev.bmax-edu.website/api/admin/user'
-      const method = isUpd ? 'patch' : 'post'
-      try {
-        const r = await axios[method](url, u, {
-          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-        })
-        this.highlightedUserId = r.data.data.id
-        this.fetchUsers()
-        this.closeUserModal()
-      } catch (e) {
-        console.error('Error saving employee:', e)
-      }
-    },
+  const isUpd = !!u.id;
+  const url = isUpd
+    ? `https://koshtovnya.api-dev.bmax-edu.website/api/admin/user/${u.id}`
+    : 'https://koshtovnya.api-dev.bmax-edu.website/api/admin/user';
+  const method = isUpd ? 'patch' : 'post';
 
-    deleteUser(id) {
-      axios
-        .delete(`https://koshtovnya.api-dev.bmax-edu.website/api/admin/user/${id}`, {
-          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-        })
-        .then(() => {
-          this.highlightedUserId = id
-          this.fetchUsers()
-        })
-        .catch(e => console.error('Error deleting employee:', e))
-    }
+  try {
+    const r = await axios[method](url, u, {
+      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+    });
+
+    this.toastAction = isUpd ? 'оновлено' : 'створено';
+    this.highlightedUserId = r?.data?.data?.id || u.id || null;
+
+    this.fetchUsers();
+    this.closeUserModal();
+
+    toast.success(`Працівника успішно ${this.toastAction}!`, { timeout: 3000 });
+    setTimeout(() => (this.highlightedUserId = null), 3000);
+  } catch (e) {
+    console.error('❌ Error saving employee:', e?.response?.data || e);
+    toast.error('Помилка при збереженні працівника', { timeout: 3000 });
+  }
+},
+
+   deleteUser(id) {
+  axios
+    .delete(`https://koshtovnya.api-dev.bmax-edu.website/api/admin/users/${id}`, {
+      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+    })
+    .then(() => {
+      this.toastAction = 'видалено'
+      this.highlightedUserId = id
+      this.fetchUsers()
+      toast.success('Працівника успішно видалено!', { timeout: 3000 })
+      setTimeout(() => (this.highlightedUserId = null), 3000)
+    })
+    .catch(e => {
+      console.error('❌ Error deleting employee:', e?.response?.data || e)
+      toast.error('Помилка при видаленні працівника', { timeout: 3000 })
+    })
+}
+
   }
 }
 </script>

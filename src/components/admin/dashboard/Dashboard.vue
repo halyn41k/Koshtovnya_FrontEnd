@@ -23,14 +23,16 @@
     <div class="flex flex-col">
       <label class="text-sm text-gray-600 mb-1 ml-1">Період вручну</label>
       <VueDatePicker
-        v-model="dateRange"
-        range
-        format="yyyy-MM-dd"
-        :enable-time-picker="false"
-        placeholder="Оберіть період"
-        @update:model-value="loadData"
-        input-class-name="custom-datepicker-input"
-      />
+  v-model="dateRange"
+  range
+  format="yyyy-MM-dd"
+  :enable-time-picker="false"
+  placeholder="Оберіть період"
+  @update:model-value="loadData"
+  input-class-name="custom-datepicker-input"
+  :locale="uk"
+/>
+
     </div>
   </div>
 </div>
@@ -126,6 +128,8 @@ import axios from 'axios'
 import OrderChart from '@/components/admin/dashboard/OrderChart.vue'
 import VueDatePicker from '@vuepic/vue-datepicker'
 import '@vuepic/vue-datepicker/dist/main.css'
+import { uk } from 'date-fns/locale'
+
 
 const selectedPeriod = ref('month')
 const dateRange = ref(null)

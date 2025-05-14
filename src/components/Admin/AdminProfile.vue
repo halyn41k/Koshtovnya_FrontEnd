@@ -19,17 +19,20 @@
         <div class="flex flex-col">
           <label for="first_name" class="mb-1 font-medium">Ім’я:</label>
           <input
-            id="first_name"
-            type="text"
-            v-model="localFirstName"
-            class="h-10 px-3 border border-gray-300 rounded focus:outline-none focus:ring focus:ring-pink-200"
-          />
+  id="first_name"
+  type="text"
+  v-model="localFirstName"
+  placeholder="Введіть ім’я"
+  class="h-10 px-3 border border-gray-300 rounded focus:outline-none focus:ring focus:ring-pink-200"
+/>
+
         </div>
         <div class="flex flex-col">
           <label for="last_name" class="mb-1 font-medium">Прізвище:</label>
           <input
             id="last_name"
             type="text"
+            placeholder="Введіть прізвище"
             v-model="localLastName"
             class="h-10 px-3 border border-gray-300 rounded focus:outline-none focus:ring focus:ring-pink-200"
           />
@@ -40,6 +43,7 @@
             id="second_name"
             type="text"
             v-model="localSecondName"
+            placeholder="Введіть по батькові"
             class="h-10 px-3 border border-gray-300 rounded focus:outline-none focus:ring focus:ring-pink-200"
           />
         </div>
@@ -59,6 +63,7 @@
             id="email"
             type="email"
             v-model="localEmail"
+            placeholder="Введіть email"
             readonly
             class="h-10 px-3 bg-gray-100 border border-gray-300 rounded"
           />

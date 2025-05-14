@@ -1,55 +1,92 @@
 <template>
-  <main class="max-w-4xl p-4 space-y-6">
-    <!-- Заголовок та кнопки дій -->
-    <div class="flex flex-col md:flex-row items-start md:items-center justify-between space-y-4 md:space-y-0">
-      <h1 class="text-2xl font-semibold text-gray-800">Звіт по Прибутку</h1>
-      <div class="flex space-x-2">
-        <button @click="printReport" class="px-4 py-2 bg-[#6B1F1F] hover:bg-[#A01212] text-white rounded text-sm transition">Друк</button>
-        <button @click="exportToExcel" class="px-4 py-2 bg-[#6B1F1F] hover:bg-[#A01212] text-white rounded text-sm transition">Excel</button>
-        <button @click="exportToPDF" class="px-4 py-2 bg-[#6B1F1F] hover:bg-[#A01212] text-white rounded text-sm transition">PDF</button>
+  <main class="w-full p-4 space-y-6 relative">
+    <!-- Заголовок -->
+    <div class="flex justify-between items-center">
+      <h1 class="text-2xl font-bold">Звіт по Прибутку</h1>
+    </div>
+
+    <!-- Дати + кнопки в ряд -->
+    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+      <!-- Дата -->
+      <div class="flex gap-4 items-center">
+        <VueDatePicker v-model="startDate" placeholder="Дата від" :locale="uk" />
+<VueDatePicker v-model="endDate" placeholder="Дата до" :locale="uk" />
+
+       <button
+  @click="fetchIncomeReport()"
+  class="px-5 py-2 bg-[#6B1F1F] text-white rounded hover:bg-[#A01212] transition"
+>
+  Застосувати
+</button>
+
+<!-- Скинути -->
+<button
+  v-if="startDate || endDate"
+  @click="resetDates"
+  class="px-5 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition"
+>
+  Скинути
+</button>
+
+
+      </div>
+
+      <!-- Кнопки експорту -->
+      <div class="flex gap-3">
+        <button @click="printReport" class="px-4 py-2 bg-[#6B1F1F] text-white rounded hover:bg-[#A01212] transition">Друк</button>
+        <button @click="exportToExcel" class="px-4 py-2 bg-[#6B1F1F] text-white rounded hover:bg-[#A01212] transition">Excel</button>
+        <button @click="exportToPDF" class="px-4 py-2 bg-[#6B1F1F] text-white rounded hover:bg-[#A01212] transition">PDF</button>
       </div>
     </div>
 
-    <!-- Пошук -->
-    <div class="w-full md:w-1/3">
-      <div class="relative">
-        <input
-          v-model="searchQuery"
-          @input="onSearch"
-          type="text"
-          placeholder="Пошук"
-          class="w-full pl-10 pr-4 py-2 bg-red-50 border border-transparent rounded focus:outline-none focus:border-gray-300 text-sm"
-        />
-        <img src="@/assets/icons/search.svg" alt="Search" class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 pointer-events-none" />
-      </div>
-    </div>
-
-    <!-- Таблиця звіту -->
-    <div v-if="filteredProfitData.length" ref="printableArea" class="overflow-x-auto border border-gray-200 rounded-lg">
-      <table class="w-full table-auto text-sm">
-        <thead class="bg-red-50">
+    <!-- Таблиця -->
+    <div v-if="filteredData.length" ref="printableArea" class="overflow-x-auto bg-white shadow-sm rounded-lg border border-gray-200">
+      <table class="min-w-full table-auto text-sm">
+        <thead class="bg-gray-100 text-left">
           <tr>
-            <th @click="cycleSort('id')" class="px-4 py-2 font-medium text-gray-700 cursor-pointer">ID</th>
-            <th @click="cycleSort('order_date')" class="px-4 py-2 font-medium text-gray-700 cursor-pointer">Дата</th>
-            <th @click="cycleSort('orderPrice')" class="px-4 py-2 font-medium text-gray-700 cursor-pointer">Ціна Замовлення</th>
-            <th @click="cycleSort('profit')" class="px-4 py-2 font-medium text-gray-700 cursor-pointer">Прибуток</th>
+            <th class="px-4 py-3 text-gray-700">ID</th>
+            <th class="px-4 py-3 text-gray-700">Дата</th>
+            <th class="px-4 py-3 text-gray-700">Виторг</th>
+            <th class="px-4 py-3 text-gray-700">Транзакції</th>
+            <th class="px-4 py-3 text-gray-700">Витрати</th>
+            <th class="px-4 py-3 text-gray-700">Прибуток</th>
           </tr>
         </thead>
-        <tbody class="divide-y divide-gray-100">
-          <tr v-for="order in filteredProfitData" :key="order.id" class="hover:bg-red-50">
-            <td class="px-4 py-2 text-center">{{ order.id }}</td>
-            <td class="px-4 py-2 text-center">{{ order.date }}</td>
-            <td class="px-4 py-2 text-center">{{ order.orderPrice }}</td>
-            <td class="px-4 py-2 text-center">{{ order.profit }}</td>
+        <tbody>
+          <tr
+            v-for="row in filteredData"
+            :key="row.id"
+            class="hover:bg-gray-50 transition-all"
+          >
+            <td class="px-4 py-2 border-b border-[#E0E0E0] text-sm text-gray-800 text-left">{{ row.id }}</td>
+            <td class="px-4 py-2 border-b border-[#E0E0E0] text-sm text-gray-800 text-left">{{ row.date }}</td>
+            <td class="px-4 py-2 border-b border-[#E0E0E0] text-sm text-gray-800 text-left">{{ row.revenue }} грн</td>
+            <td class="px-4 py-2 border-b border-[#E0E0E0] text-sm text-gray-800 text-left">{{ row.transaction_number || '—' }}</td>
+            <td class="px-4 py-2 border-b border-[#E0E0E0] text-sm text-gray-800 text-left">{{ row.expenses }} грн</td>
+            <td
+              class="px-4 py-2 border-b border-[#E0E0E0] text-sm font-semibold text-left"
+              :class="{ 'text-green-700': row.net_income > 0, 'text-red-600': row.net_income < 0 }"
+            >
+              {{ row.net_income }} грн
+            </td>
           </tr>
         </tbody>
       </table>
+      <!-- Ховаємо область копії -->
+<div ref="printAreaCloned" class="hidden fixed top-0 left-0 z-[-1]"></div>
+
+    </div>
+
+    <!-- Сума -->
+    <div v-if="summary" class="bg-gray-50 p-4 rounded-md border border-gray-200 space-y-1">
+      <p><strong>Всього виручка:</strong> {{ summary.total_income }} грн</p>
+      <p><strong>Всього витрати:</strong> {{ summary.total_expenses }} грн</p>
+      <p><strong>Чистий прибуток:</strong> {{ summary.total_net_income }} грн</p>
     </div>
 
     <!-- Порожній стан -->
-    <div v-else class="py-12 text-center text-gray-500 border border-gray-200 rounded-lg">
-      <p v-if="!searchQuery">Поки що не було додано жодного звіту по прибутку.</p>
-      <p v-else>За запитом «<strong>{{ searchQuery }}</strong>» нічого не знайдено.</p>
+    <div v-else class="py-12 text-center text-gray-500 border border-dashed rounded-md">
+      <p>Поки що не було додано жодного звіту по прибутку.</p>
     </div>
   </main>
 </template>
@@ -59,90 +96,142 @@ import axios from "axios";
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
+import VueDatePicker from '@vuepic/vue-datepicker'
+import '@vuepic/vue-datepicker/dist/main.css'
+import { uk } from 'date-fns/locale';
+
 
 export default {
   name: "ProfitReport",
+  components: {
+  VueDatePicker,
+},
+
   data() {
     return {
-      orders: [],
+      incomeData: [],
+      summary: null,
+      startDate: null,
+      endDate: null,
       searchQuery: "",
-      sortState: { id: 'none', order_date: 'none', orderPrice: 'none', profit: 'none' }
+    uk // ← ось так
     };
   },
   computed: {
-    profitData() {
-      return this.orders.map(o => ({
-        id: o.id,
-        date: o.order_date,
-        orderPrice: o.totalAmount != null ? `${o.totalAmount} грн` : 'N/A',
-        profit: o.profit != null ? `${o.profit} грн` : 'N/A'
-      }));
-    },
-    filteredProfitData() {
-      if (!this.searchQuery) return this.profitData;
+    filteredData() {
+      if (!this.searchQuery) return this.incomeData;
       const q = this.searchQuery.toLowerCase();
-      return this.profitData.filter(r =>
+      return this.incomeData.filter((r) =>
         r.id.toString().includes(q) ||
         r.date.toLowerCase().includes(q) ||
-        r.orderPrice.toLowerCase().includes(q) ||
-        r.profit.toLowerCase().includes(q)
+        r.revenue.toString().includes(q) ||
+        r.transaction_number.toString().includes(q) ||
+        r.expenses.toString().includes(q) ||
+        r.net_income.toString().includes(q)
       );
     }
   },
   mounted() {
-    this.fetchOrders();
-    document.title = "Звіти";
+    this.fetchIncomeReport("month");
   },
   methods: {
-    async fetchOrders() {
+    formatDate(date) {
+  if (!date || isNaN(new Date(date))) return null;
+  const d = new Date(date);
+  return d.toISOString().split("T")[0];
+},
+    async fetchIncomeReport(period = null) {
       try {
-        const res = await axios.get("https://koshtovnya.api-dev.bmax-edu.website/api/admin/orders", {
+        const params = period
+          ? { period }
+          : {
+              start_date: this.formatDate(this.startDate),
+              end_date: this.formatDate(this.endDate),
+            };
+
+            console.log("▶ startDate", this.startDate);
+console.log("▶ endDate", this.endDate);
+console.log("▶ formatted", this.formatDate(this.startDate), this.formatDate(this.endDate));
+
+        const res = await axios.get("https://koshtovnya.api-dev.bmax-edu.website/api/admin/stats/income", {
+          params,
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
-            Accept: "application/json"
-          }
+            Accept: "application/json",
+          },
         });
-        this.orders = res.data.orders;
-      } catch (e) {
-        console.error("Помилка отримання замовлень:", e);
+
+        this.incomeData = res.data.data || [];
+        this.summary = res.data.summary || null;
+      } catch (err) {
+        console.error("❌ Помилка отримання звіту:", err);
       }
     },
     printReport() {
       const el = this.$refs.printableArea;
       if (!el) return;
-      const printWindow = window.open("", "", "width=800,height=600");
-      printWindow.document.write(
-        `<html><head><title>Звіт по Прибутку</title></head><body>${el.outerHTML}</body></html>`
-      );
-      printWindow.document.close();
-      printWindow.focus();
-      printWindow.print();
-      printWindow.close();
+      const win = window.open("", "", "width=800,height=600");
+      win.document.write(`<html><head><title>Звіт по Прибутку</title></head><body>${el.outerHTML}</body></html>`);
+      win.document.close();
+      win.focus();
+      win.print();
+      win.close();
     },
+    resetDates() {
+  this.startDate = null;
+  this.endDate = null;
+  this.fetchIncomeReport("month");
+},
+
     exportToExcel() {
-      const data = this.filteredProfitData.map(r => ({ ID: r.id, Дата: r.date, 'Ціна Замовлення': r.orderPrice, Прибуток: r.profit }));
+      const data = this.filteredData.map(r => ({
+        ID: r.id,
+        Дата: r.date,
+        Виторг: r.revenue,
+        Транзакції: r.transaction_number,
+        Витрати: r.expenses,
+        Прибуток: r.net_income,
+      }));
       const ws = XLSX.utils.json_to_sheet(data);
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, 'Report');
       XLSX.writeFile(wb, 'profit_report.xlsx');
     },
     exportToPDF() {
-      const el = this.$refs.printableArea;
-      if (!el) return;
-      html2canvas(el, { scale: 2 }).then(canvas => {
-        const img = canvas.toDataURL('image/png');
-        const pdf = new jsPDF('p', 'pt', 'a4');
-        const w = pdf.internal.pageSize.getWidth();
-        const h = (canvas.height * w) / canvas.width;
-        pdf.addImage(img, 'PNG', 0, 0, w, h);
-        pdf.save('profit_report.pdf');
-      });
-    },
-    onSearch() {},
-    cycleSort(col) {
-      const s = this.sortState[col];
-      this.sortState[col] = s === 'none' ? 'asc' : s === 'asc' ? 'desc' : 'none';
-    }
+  const original = this.$refs.printableArea;
+  const cloneTarget = this.$refs.printAreaCloned;
+  if (!original || !cloneTarget) return;
+
+  // Клонуємо без оточення (Vue, Tailwind)
+  const cloned = original.cloneNode(true);
+
+  // Примусово базові кольори
+  cloned.style.backgroundColor = "#ffffff";
+  cloned.style.color = "#000000";
+  cloned.style.fontFamily = "sans-serif";
+
+  // Поміщаємо в прихований блок
+  cloneTarget.innerHTML = ""; // очищаємо
+  cloneTarget.appendChild(cloned);
+  cloneTarget.style.display = "block"; // робимо видимим, бо html2canvas не працює з `display: none`
+
+  html2canvas(cloned, { scale: 2 }).then(canvas => {
+    const img = canvas.toDataURL("image/png");
+    const pdf = new jsPDF("p", "pt", "a4");
+    const w = pdf.internal.pageSize.getWidth();
+    const h = (canvas.height * w) / canvas.width;
+    pdf.addImage(img, "PNG", 0, 0, w, h);
+    pdf.save("profit_report.pdf");
+
+    // Після завершення — сховати
+    cloneTarget.style.display = "none";
+  });
+}
+
   }
 };
 </script>
+
+<style scoped>
+/* Опціонально: можна додати стилі для ширини колонок таблиці */
+</style>

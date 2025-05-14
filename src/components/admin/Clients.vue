@@ -1,7 +1,7 @@
 <template>
-  <main class="p-6 max-w-7xl mx-auto font-montserrat">
-    <!-- Заголовок та кнопка Додати -->
-    <div class="flex justify-between items-center mb-6">
+  <main class="w-full p-4 space-y-6 relative">
+    <!-- Заголовок та кнопки -->
+    <div class="flex justify-between items-center">
       <h1 class="text-2xl font-semibold">Користувачі</h1>
       <button
         @click="openAddModal"
@@ -58,10 +58,11 @@
           </thead>
           <tbody class="bg-white">
             <tr
-              v-for="client in clients"
-              :key="client.id"
-              :class="client.id === highlightedUserId ? 'bg-green-50' : ''"
-            >
+  v-for="client in clients"
+  :key="client.id"
+  :class="client.id === highlightedUserId ? 'bg-green-50 transition-all duration-300' : ''"
+>
+
               <td class="px-4 py-2 border-b border-[#E0E0E0] text-sm text-gray-800 text-left">{{ client.id }}</td>
               <td class="px-4 py-2 border-b border-[#E0E0E0] text-sm text-gray-800 text-left">{{ client.first_name }}</td>
               <td class="px-4 py-2 border-b border-[#E0E0E0] text-sm text-gray-800 text-left">{{ client.last_name }}</td>
@@ -137,6 +138,8 @@
 <script>
 import axios from 'axios'
 import UserModal from './UserModal.vue'
+import { createToastInterface } from 'vue-toastification'
+const toast = createToastInterface()
 
 export default {
   name: 'ClientList',
@@ -152,6 +155,8 @@ export default {
       modalTitle: '',
       modalKey: 0,
       modalClient: null,
+      searchDebounce: null,
+
       showToast: false,
       toastAction: '',
       highlightedUserId: null,
@@ -170,36 +175,60 @@ export default {
     document.title = 'Користувачі'
   },
   methods: {
-    async fetchUsers(url = null) {
-      const endpoint = url || 'https://koshtovnya.api-dev.bmax-edu.website/api/admin/users'
-      const params = url ? {} : { role: this.searchRole, search: this.searchQuery }
-      const sorted = Object.entries(this.sortState).find(([, v]) => v !== 'none')
-      if (sorted) {
-        params.sort_by = sorted[0]
-        params.sort_order = sorted[1]
-      }
-      try {
-        const res = await axios.get(endpoint, {
-          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-          params: { ...params, ...(url ? {} : { search: this.searchQuery }) }
-        })
-        this.clients = res.data.data
-        const m = res.data.meta
-        this.meta = {
-          links: m.links,
-          current_page: m.current_page,
-          last_page: m.last_page,
-          prev: m.links.find(l => l.label.includes('Previous'))?.url,
-          next: m.links.find(l => l.label.includes('Next'))?.url
-        }
-      } catch (e) {
-        console.error(e)
-      }
-    },
+   async fetchUsers(url = null) {
+  try {
+    const token = localStorage.getItem('token');
+    const isSearch = this.searchQuery.trim().length > 0;
+    const headers = { Authorization: `Bearer ${token}` };
+
+    // Параметри для обох варіантів
+    const params = {
+      role: this.searchRole
+    };
+
+    // Додаємо сортування, якщо є
+    const sorted = Object.entries(this.sortState).find(([, value]) => value !== 'none');
+    if (sorted) {
+      params.sort_by = sorted[0];
+      params.sort_order = sorted[1];
+    }
+
+    // Вибір URL
+    let res;
+    if (isSearch) {
+      res = await axios.get(`https://koshtovnya.api-dev.bmax-edu.website/api/admin/users/search/${encodeURIComponent(this.searchQuery)}`, {
+        headers,
+        params
+      });
+    } else {
+      res = await axios.get(url || `https://koshtovnya.api-dev.bmax-edu.website/api/admin/users`, {
+        headers,
+        params
+      });
+    }
+
+    // Записуємо дані
+    this.clients = res.data.data;
+    const m = res.data.meta || {};
+    this.meta = {
+      links: m.links || [],
+      current_page: m.current_page || 1,
+      last_page: m.last_page || 1,
+      prev: m.links?.find(l => l.label.includes('Previous'))?.url || null,
+      next: m.links?.find(l => l.label.includes('Next'))?.url || null
+    };
+  } catch (e) {
+    console.error('❌ Помилка при завантаженні користувачів:', e?.response?.data || e);
+  }
+},
+
     onSearch() {
-      if (!this.searchQuery.trim()) return this.fetchUsers()
-      this.fetchUsers()
-    },
+  clearTimeout(this.searchDebounce);
+  this.searchDebounce = setTimeout(() => {
+    this.fetchUsers();
+  }, 400);
+},
+
     cycleSort(col) {
       const order = this.sortState[col]
       this.sortState = Object.fromEntries(Object.keys(this.sortState).map(k => [k, 'none']))
@@ -222,59 +251,69 @@ export default {
       this.showUserModal = true
     },
     openUpdateModal(client) {
-      this.modalTitle = 'Оновити користувача'
-      this.modalKey = Date.now()
-        this.modalClient = { ...client } // обʼєкт повний з id
-
-      this.showUserModal = true
-    },
+  this.modalTitle = 'Оновити користувача'
+  this.modalKey = Date.now()
+  this.modalClient = { ...client }
+  this.showUserModal = true
+},
     closeUserModal() {
       this.showUserModal = false
     },
-    async handleUserSubmit(u) {
-  if (!u) {
-    console.error('handleUserSubmit отримав undefined');
-    return;
+    handleUserSubmit(u) {
+  if (!u || typeof u !== 'object') {
+    console.error('handleUserSubmit отримав невалідний обʼєкт:', u)
+    return
   }
 
-  const isUpd = !!u.id;
-  if (isUpd && typeof u.id !== 'number') {
-    console.warn('u.id не число або некоректне значення:', u.id, u);
-  }
-
-  const url = isUpd
+  const isUpdate = !!u.id
+  const url = isUpdate
     ? `https://koshtovnya.api-dev.bmax-edu.website/api/admin/user/${u.id}`
-    : 'https://koshtovnya.api-dev.bmax-edu.website/api/admin/user';
+    : 'https://koshtovnya.api-dev.bmax-edu.website/api/admin/user'
 
-  const method = isUpd ? 'patch' : 'post';
+  const method = isUpdate ? 'patch' : 'post'
 
-  try {
-    const r = await axios[method](url, u, {
-      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-    });
-    this.toastAction = isUpd ? 'оновлено' : 'створено';
-    this.highlightedUserId = r.data.data.id;
-    this.fetchUsers();
-    this.showToast = true;
-    setTimeout(() => (this.showToast = false), 3000);
-  } catch (e) {
-    console.error('Помилка при збереженні користувача:', e);
-  }
+  axios[method](url, u, {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem('token')}`
+    }
+  })
+    .then((r) => {
+      this.toastAction = isUpdate ? 'оновлено' : 'створено'
+      this.highlightedUserId = r?.data?.data?.id
+setTimeout(() => (this.highlightedUserId = null), 3000)
+
+
+      this.fetchUsers()
+      this.closeUserModal() // ← важливо
+
+      toast.success(`Користувача успішно ${this.toastAction}!`, { timeout: 3000 })
+
+      setTimeout(() => (this.showToast = false), 3000)
+    })
+    .catch((e) => {
+      console.error('❌ Помилка при збереженні користувача:', e?.response?.data || e)
+    })
 },
     deleteUser(id) {
-      axios
-        .delete(`https://koshtovnya.api-dev.bmax-edu.website/api/admin/user/${id}`, {
-          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-        })
-        .then(() => {
-          this.toastAction = 'видалено'
-          this.highlightedUserId = id
-          this.fetchUsers()
-          this.showToast = true
-          setTimeout(() => (this.showToast = false), 3000)
-        })
-        .catch(e => console.error(e))
-    }
+  axios
+    .delete(`https://koshtovnya.api-dev.bmax-edu.website/api/admin/users/${id}`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`
+      }
+    })
+    .then(() => {
+      this.toastAction = 'видалено'
+      this.highlightedUserId = id
+      this.fetchUsers()
+      toast.success('Користувача успішно видалено!', { timeout: 3000 })
+      setTimeout(() => (this.highlightedUserId = null), 3000)
+    })
+    .catch((e) => {
+      console.error('❌ Помилка при видаленні користувача:', e?.response?.data || e)
+      toast.error('Помилка при видаленні користувача', { timeout: 3000 })
+    })
+}
+
   }
 }
 </script>

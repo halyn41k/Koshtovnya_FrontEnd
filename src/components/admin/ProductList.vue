@@ -94,29 +94,39 @@
     </div>
 
     <!-- Пагінація -->
-    <div v-if="meta && meta.links" class="flex justify-center items-center gap-2 mt-5 h-12">
-      <button
-        @click="goToPage(meta.links[0].url)"
-        :disabled="!meta.links[0].url"
-        class="w-9 h-9 rounded-md bg-white shadow hover:bg-gray-100 disabled:bg-gray-300 disabled:cursor-not-allowed"
-      >&laquo;</button>
-      <button
-        v-for="(link, index) in paginationLinks"
-        :key="index"
-        @click="goToPage(link.url)"
-        :class="[
-          'w-9 h-9 rounded-md text-sm shadow transition',
-          link.active ? 'bg-red-900 text-white shadow-lg' : 'bg-white hover:bg-gray-100'
-        ]"
-      >
-        <span v-html="link.label"></span>
-      </button>
-      <button
-        @click="goToPage(meta.links[meta.links.length - 1].url)"
-        :disabled="!meta.links[meta.links.length - 1].url"
-        class="w-9 h-9 rounded-md bg-white shadow hover:bg-gray-100 disabled:bg-gray-300 disabled:cursor-not-allowed"
-      >&raquo;</button>
-    </div>
+    <!-- Пагінація -->
+<div v-if="meta && paginationLinks.length" class="flex justify-center items-center gap-2 mt-5 h-12">
+  <!-- Ліва стрілка -->
+  <button
+    @click="goToPage(meta.links.find(l => l.label.includes('Previous'))?.url)"
+    :disabled="!meta.links.find(l => l.label.includes('Previous'))?.url"
+    class="w-9 h-9 rounded-md bg-white shadow hover:bg-gray-100 disabled:bg-gray-300 disabled:cursor-not-allowed"
+  >
+    ←
+  </button>
+
+  <!-- Номери сторінок -->
+  <button
+    v-for="(link, index) in paginationLinks"
+    :key="index"
+    @click="goToPage(link.url)"
+    :class="[
+      'w-9 h-9 rounded-md text-sm shadow transition',
+      link.active ? 'bg-red-900 text-white shadow-lg' : 'bg-white hover:bg-gray-100'
+    ]"
+    v-html="link.label"
+  ></button>
+
+  <!-- Права стрілка -->
+  <button
+    @click="goToPage(meta.links.find(l => l.label.includes('Next'))?.url)"
+    :disabled="!meta.links.find(l => l.label.includes('Next'))?.url"
+    class="w-9 h-9 rounded-md bg-white shadow hover:bg-gray-100 disabled:bg-gray-300 disabled:cursor-not-allowed"
+  >
+    →
+  </button>
+</div>
+
 
     <!-- Модальні вікна Додати/Редагувати/Видалити -->
     <AddProductModal v-if="showAddModal" @close="closeAddModal" @product-added="onProductAdded" />
@@ -163,24 +173,52 @@ export default {
       return list
     },
     paginationLinks() {
-      return (this.meta.links || []).filter(link => {
-        const lbl = link.label.trim()
-        return lbl !== '« Previous' && lbl !== 'Next »'
-      })
-    }
+  return (this.meta?.links || []).filter(link => !link.label.includes('Previous') && !link.label.includes('Next'))
+}
+
+
   },
   methods: {
-    fetchProducts(url = 'https://koshtovnya.api-dev.bmax-edu.website/api/admin/products') {
-      axios.get(url, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-      })
-      .then(r => {
-        this.products = r.data.data
-        this.meta = r.data.meta
-      })
-      .catch(e => console.error('Помилка отримання товарів:', e))
-    },
-    onSearch() {},
+    fetchProducts(url = null) {
+  const base = 'https://koshtovnya.api-dev.bmax-edu.website/api/admin/products'
+  let endpoint = base
+  const params = new URLSearchParams()
+
+  // Якщо є фільтри — додаємо їх
+  Object.entries(this.currentFilters).forEach(([k, v]) => {
+    Array.isArray(v)
+      ? v.forEach(val => params.append(k, val))
+      : params.append(k, v)
+  })
+
+  // Якщо є пошук — додаємо параметр search
+  if (this.searchQuery.trim()) {
+    params.append('search', this.searchQuery.trim())
+  }
+
+  // Якщо передано URL пагінації (вже з параметрами) — використовуємо його
+  if (url) {
+    endpoint = url
+  } else if ([...params].length > 0) {
+    endpoint += `?${params.toString()}`
+  }
+
+  axios.get(endpoint, {
+    headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+  })
+  .then(r => {
+    this.products = r.data.data
+    this.meta = r.data.meta
+  })
+  .catch(e => console.error('Помилка отримання товарів:', e))
+},
+    onSearch() {
+  clearTimeout(this.searchTimeout)
+  this.searchTimeout = setTimeout(() => {
+    this.fetchProducts()
+  }, 400)
+},
+
     openFilter() { this.showFilter = true },
     closeFilter() { this.showFilter = false },
     applyFilters(filters) {
@@ -203,8 +241,9 @@ export default {
     onProductAdded(p) { this.products.unshift(p); this.closeAddModal() },
     onProductUpdated(u) {
       const i = this.products.findIndex(p => p.id === u.id)
-      if (i !== -1) this.$set(this.products, i, u)
-      this.closeEditModal()
+if (i !== -1) this.products[i] = u
+this.closeEditModal()
+
     },
     onProductDeleted(id) {
       this.products = this.products.filter(p => p.id !== id)
