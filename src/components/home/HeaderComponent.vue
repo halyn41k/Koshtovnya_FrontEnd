@@ -205,7 +205,7 @@
             <img src="@/assets/icons/search1.svg" alt="Mobile Search" class="w-6 h-6"/>
           </button>
           <router-link to="/cart" class="relative hover:text-primary transition">
-            <img src="@/assets/cart-svgrepo-com.svg" alt="Cart" class="w-6 h-6"/>
+            <img src="@/assets/icons/cart.svg" alt="Cart" class="w-6 h-6"/>
             <span
               v-if="cartCount"
               class="absolute -top-1 -right-2 bg-[#A01212] text-white font-semibold text-[10px]

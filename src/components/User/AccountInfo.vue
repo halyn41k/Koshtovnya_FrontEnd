@@ -127,7 +127,7 @@ export default {
       second_name: '',
       email: '',
       menuItems: [
-        { title: 'Інформація', icon: require('@/assets/icons/user_icon.svg') },
+        { title: 'Інформація', icon: require('@/assets/icons/user2.svg') },
         { title: 'Адреси', icon: require('@/assets/location.png') },
         { title: 'Історія замовлень', icon: require('@/assets/history.png') },
         { title: 'Список бажаного', icon: require('@/assets/icons/heart.svg') },

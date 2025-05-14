@@ -128,6 +128,12 @@ const routes = [
       }
     },
   },
+  {
+  path: '/auth/google/callback',
+  name: 'GoogleCallback',
+  component: () => import('@/components/authorization/GoogleCallback.vue') // або окремий login-handler
+},
+
 
   {
     path: '/allproducts',

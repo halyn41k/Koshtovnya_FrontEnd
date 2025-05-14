@@ -111,15 +111,30 @@
           <router-link to="/login" class="font-medium text-[#6B1F1F] hover:text-[#A01212] transition-colors duration-200">Увійти</router-link>
         </p>
 
-        <!-- Кнопка реєстрації -->
-        <div class="flex justify-center">
-          <button
-            type="submit"
-            class="w-full h-12 flex items-center justify-center bg-[#6B1F1F] hover:bg-[#A01212] active:bg-[#A01212] text-white text-base font-semibold rounded-xl transition-colors duration-200 shadow-sm hover:shadow-md"
-          >
-            Зареєструватися
-          </button>
-        </div>
+       <!-- Кнопки: реєстрація + або + Google -->
+<div class="flex flex-col gap-4 mt-6 w-full">
+  <!-- Кнопка реєстрації -->
+  <button
+    type="submit"
+    class="w-full h-12 flex items-center justify-center bg-[#6B1F1F] hover:bg-[#A01212] active:bg-[#A01212] text-white text-base font-semibold rounded-xl transition-colors duration-200 shadow-sm hover:shadow-md"
+  >
+    Зареєструватися
+  </button>
+
+  <!-- або -->
+  <p class="text-sm text-gray-500 text-center">або</p>
+
+  <!-- Кнопка Google -->
+  <button
+    type="button"
+    @click="redirectToGoogle"
+    class="w-full h-12 flex items-center justify-center gap-3 border border-gray-300 rounded-xl bg-white text-gray-700 hover:bg-gray-50 transition-shadow shadow-sm hover:shadow-md"
+  >
+    <img src="@/assets/icons/google.svg" alt="Google" class="w-5 h-5" />
+    <span class="text-sm font-medium">Увійти через Google</span>
+  </button>
+</div>
+
       </form>
     </main>
   </div>
@@ -150,6 +165,10 @@ export default {
     };
   },
   methods: {
+    redirectToGoogle() {
+    window.location.href = "http://koshtovnya.api-dev.bmax-edu.website/auth/google/redirect";
+  },
+
     validateName() {
       this.nameError = !this.first_name.trim()
         ? "Ім'я не може бути порожнім."

@@ -90,16 +90,31 @@
           </router-link>
         </p>
 
-        <!-- Кнопка входу -->
-        <div class="flex justify-center">
-          <button
-            type="submit"
-            class="w-full h-12 flex items-center justify-center bg-[#6B1F1F] hover:bg-[#A01212] active:bg-[#A01212]
-                   text-white text-base font-semibold rounded-xl transition-colors duration-200 shadow-sm hover:shadow-md"
-          >
-            Увійти
-          </button>
-        </div>
+        <!-- Кнопки: Увійти + або + Google -->
+<div class="flex flex-col gap-4 w-full mt-4">
+  <!-- Кнопка входу -->
+  <button
+    type="submit"
+    class="w-full h-12 flex items-center justify-center bg-[#6B1F1F] hover:bg-[#A01212] active:bg-[#A01212]
+           text-white text-base font-semibold rounded-xl transition-colors duration-200 shadow-sm hover:shadow-md"
+  >
+    Увійти
+  </button>
+
+  <!-- або -->
+  <p class="text-sm text-gray-500 text-center">або</p>
+
+  <!-- Кнопка Google -->
+  <button
+    type="button"
+    @click="redirectToGoogle"
+    class="w-full h-12 flex items-center justify-center gap-3 border border-gray-300 rounded-xl bg-white text-gray-700 hover:bg-gray-50 transition-shadow shadow-sm hover:shadow-md"
+  >
+    <img src="@/assets/icons/google.svg" alt="Google" class="w-5 h-5" />
+    <span class="text-sm font-medium">Увійти через Google</span>
+  </button>
+</div>
+
       </form>
     </main>
   </div>
@@ -124,6 +139,9 @@ export default {
     };
   },
   methods: {
+     redirectToGoogle() {
+    window.location.href = "http://koshtovnya.api-dev.bmax-edu.website/auth/google/redirect";
+  },
     validateEmail() {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       this.emailError = emailRegex.test(this.email) ? '' : 'Введіть дійсний email.';
