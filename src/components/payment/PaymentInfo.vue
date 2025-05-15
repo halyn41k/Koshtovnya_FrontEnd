@@ -1,6 +1,11 @@
 <template>
   <div class="payment-info montserrat">
     <div class="flex flex-col gap-2.5">
+      <!-- Додано заголовок -->
+      <label class="text-sm font-semibold text-gray-700 mb-1">
+        Спосіб оплати:
+      </label>
+
       <div
         v-for="(option, idx) in paymentOptions"
         :key="idx"
@@ -25,6 +30,7 @@
           {{ option }}
         </label>
       </div>
+
       <span
         v-if="errors.paymentOption"
         class="text-red-500 text-xs montserrat"
@@ -43,6 +49,7 @@
     </button>
   </div>
 </template>
+
 
 <script>
 export default {

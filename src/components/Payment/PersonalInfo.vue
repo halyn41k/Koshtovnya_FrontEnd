@@ -1,8 +1,12 @@
 <template>
   <div class="personal-info">
-    <div class="flex flex-col gap-2.5 w-[200px]">
-      <div v-for="(field, key) in fields" :key="key">
+    <div class="flex flex-col gap-4 w-[200px]">
+      <div v-for="(field, key) in fields" :key="key" class="flex flex-col gap-1">
+        <label :for="key" class="text-sm text-gray-700 font-medium">
+          {{ getLabel(key) }}
+        </label>
         <input
+          :id="key"
           :type="field.type"
           v-model="localData[key]"
           :placeholder="field.placeholder"
@@ -17,6 +21,7 @@
   </div>
 </template>
 
+
 <script>
 export default {
   name: 'PersonalInfo',
@@ -28,10 +33,10 @@ export default {
     return {
       localData: { ...this.modelValue },
       fields: {
-        firstName:  { type: 'text', placeholder: "Ім'я" },
-        lastName:   { type: 'text', placeholder: 'Прізвище' },
-        secondName: { type: 'text', placeholder: 'По батькові' },
-        phone:      { type: 'tel',  placeholder: 'Номер телефону' },
+        firstName:  { type: 'text', placeholder: "Введіть ім'я" },
+        lastName: { type: 'text', placeholder: 'Введіть прізвище' },
+        secondName: { type: 'text', placeholder: 'Введіть по батькові' },
+        phone:      { type: 'tel',  placeholder: 'Введдіть номер телефону' },
       },
     };
   },
@@ -42,10 +47,20 @@ export default {
     },
   },
   methods: {
-    updateData() {
-      this.$emit('update:modelValue', this.localData);
-    },
+  updateData() {
+    this.$emit('update:modelValue', this.localData);
   },
+  getLabel(key) {
+    const labels = {
+      firstName: "Ім'я",
+      lastName: "Прізвище",
+      secondName: "По батькові",
+      phone: "Номер телефону",
+    };
+    return labels[key] || key;
+  },
+},
+
 };
 </script>
 

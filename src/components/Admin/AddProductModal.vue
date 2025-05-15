@@ -397,43 +397,78 @@ export default {
       else this.form.colors.splice(idx, 1);
     },
     submitForm() {
-      const fd = new FormData();
-      if (this.form.image) fd.append("image", this.form.image);
-      Object.entries(this.form).forEach(([k, v]) => {
-        if (["sizes", "fittings", "colors", "image"].includes(k)) return;
-        fd.append(k, v);
-      });
-      this.form.colors.forEach((c) => fd.append("colors[]", c));
-      this.form.sizes.forEach((s, i) => {
-        fd.append(`sizes[${i}][size]`, s.size);
-        fd.append(`sizes[${i}][quantity]`, s.quantity);
-      });
-      this.form.fittings.forEach((f, i) => {
-        fd.append(`fittings[${i}][fitting]`, f.fitting);
-        fd.append(`fittings[${i}][material]`, f.material);
-        fd.append(`fittings[${i}][quantity]`, f.quantity);
-      });
-      axios
-        .post(
-          "https://koshtovnya.api-dev.bmax-edu.website/api/admin/products",
-          fd,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-              "Content-Type": "multipart/form-data",
-            },
-          }
-        )
-        .then((r) => {
-          const d = r.data.data || r.data.product;
-          this.$emit(
-            "product-added",
-            Array.isArray(d) ? Object.assign({}, ...d) : d
-          );
-          this.close();
-        })
-        .catch(console.error);
-    },
+  // Клієнтська валідація
+  if (!this.form.colors.length) {
+    alert('Будь ласка, оберіть хоча б один колір.');
+    return;
+  }
+
+  if (!this.form.sizes.length) {
+    alert('Додайте хоча б один розмір.');
+    return;
+  }
+
+  const sizeInvalid = this.form.sizes.some(s => !s.size || s.quantity === null || s.quantity === '');
+  if (sizeInvalid) {
+    alert('Заповніть всі поля для розмірів.');
+    return;
+  }
+
+  if (!this.form.fittings.length) {
+    alert('Додайте хоча б одну фурнітуру.');
+    return;
+  }
+
+  const fittingInvalid = this.form.fittings.some(f => !f.fitting || !f.material || !f.quantity);
+  if (fittingInvalid) {
+    alert('Заповніть всі поля для фурнітури.');
+    return;
+  }
+
+  if (!this.form.image) {
+    alert('Будь ласка, завантажте зображення товару.');
+    return;
+  }
+
+  // Якщо все ок — надсилаємо
+  const fd = new FormData();
+  fd.append("image", this.form.image);
+
+  Object.entries(this.form).forEach(([k, v]) => {
+    if (["sizes", "fittings", "colors", "image"].includes(k)) return;
+    fd.append(k, v);
+  });
+
+  this.form.colors.forEach((c) => fd.append("colors[]", c));
+
+  this.form.sizes.forEach((s, i) => {
+    fd.append(`sizes[${i}][size]`, s.size);
+    fd.append(`sizes[${i}][quantity]`, s.quantity);
+  });
+
+  this.form.fittings.forEach((f, i) => {
+    fd.append(`fittings[${i}][fitting]`, f.fitting);
+    fd.append(`fittings[${i}][material]`, f.material);
+    fd.append(`fittings[${i}][quantity]`, f.quantity);
+  });
+
+  axios
+    .post("https://koshtovnya.api-dev.bmax-edu.website/api/admin/products", fd, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+        "Content-Type": "multipart/form-data",
+      },
+    })
+    .then((r) => {
+      const d = r.data.data || r.data.product;
+      this.$emit("product-added", Array.isArray(d) ? Object.assign({}, ...d) : d);
+      this.close();
+    })
+    .catch((err) => {
+      console.error('❌ Помилка створення товару:', err);
+      alert('Сталася помилка при додаванні товару.');
+    });
+},
     close() {
       this.$emit("close");
     },

@@ -5,17 +5,17 @@
     <form @submit.prevent="saveSettings" class="space-y-4 bg-white p-4 rounded shadow">
       <div>
         <label class="text-sm font-medium text-gray-700">Адреса</label>
-        <input v-model="settings.address" type="text" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-pink-200 text-sm" />
+        <input v-model="settings.address" placeholder="Введіть адресу" type="text" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-pink-200 text-sm" />
       </div>
 
       <div>
         <label class="text-sm font-medium text-gray-700">Телефон</label>
-        <input v-model="settings.phone" type="tel" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-pink-200 text-sm" />
+        <input v-model="settings.phone" placeholder="Введіть номер телефону" type="tel" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-pink-200 text-sm" />
       </div>
 
       <div>
         <label class="text-sm font-medium text-gray-700">Email</label>
-        <input v-model="settings.email" type="email" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-pink-200 text-sm" />
+        <input v-model="settings.email" placeholder="Введіть email" type="email" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-pink-200 text-sm" />
       </div>
 
       <div>
@@ -73,7 +73,11 @@
     </section>
 
     <transition name="fade">
-      <div v-if="showAddModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+<div
+  v-if="showAddModal"
+  class="fixed inset-0 z-50 flex items-center justify-center"
+  style="background-color: rgba(0, 0, 0, 0.5);"
+>
         <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-md space-y-4 relative">
           <button @click="showAddModal = false" class="absolute top-2 right-3 text-xl">&times;</button>
           <h3 class="text-lg font-semibold text-gray-800">Додати нову категорію</h3>
@@ -98,7 +102,12 @@ export default {
   name: "SettingsView",
   data() {
     return {
-      settings: { address: "", phone: "", email: "", logo: null },
+      settings: {
+  address: "",
+  phone: "",
+  email: "",
+  logo: null
+},
       logoPreview: null,
       newCategory: { name: "", image: null },
       showAddModal: false,
@@ -125,21 +134,29 @@ export default {
         this.logoPreview = URL.createObjectURL(file);
       }
     },
-    async fetchSettings() {
-      try {
-        const res = await axios.get(this.apiUrl, this.authHeader());
-        const map = res.data.data.reduce((a, s) => ({ ...a, [s.setting_key]: s.setting_value }), {});
-        this.settings = {
-          address: map.footer_address_info || "",
-          phone: map.footer_phone_number || "",
-          email: map.footer_email_info || "",
-          logo: null
-        };
-        if (map.site_logo) this.logoPreview = map.site_logo;
-      } catch (e) {
-        console.error(e);
-      }
-    },
+   async fetchSettings() {
+  try {
+    const res = await axios.get(this.apiUrl, this.authHeader());
+    const map = res.data.data.reduce((acc, setting) => {
+      acc[setting.setting_key] = setting.setting_value;
+      return acc;
+    }, {});
+
+    // Замість переписування всього об'єкта — оновлюємо ключі
+    this.settings.address = map.footer_address_info || "";
+    this.settings.phone = map.footer_phone_number || "";
+    this.settings.email = map.footer_email_info || "";
+    this.settings.logo = null;
+
+    // Превʼю логотипа
+    if (map.site_logo) {
+      this.logoPreview = map.site_logo;
+    }
+
+  } catch (error) {
+    console.error("❌ Помилка при отриманні налаштувань:", error);
+  }
+},
     async saveSettings() {
       try {
         const fd = new FormData();
@@ -220,9 +237,13 @@ export default {
     this.fetchSettings();
     this.fetchCategories();
   },
-  mounted() {
-    document.title = "Налаштування";
-  },
+
+  async mounted() {
+  document.title = "Налаштування";
+  await this.fetchSettings();
+  await this.fetchCategories();
+}
+
 };
 </script>
 

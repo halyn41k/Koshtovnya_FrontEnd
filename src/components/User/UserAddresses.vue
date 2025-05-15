@@ -799,50 +799,47 @@ console.log("deliveryAddressValue:", deliveryAddressValue);
     }
     ,
     validateForm() {
-      const errors = {};
+  const errors = {};
 
+  // ✅ Перевірка номера телефону
+  if (!this.phoneNumber || this.phoneNumber.length !== 10) {
+    errors.phoneNumber = "Введіть коректний номер телефону (10 цифр)";
+  }
 
-      if (this.formData.deliveryType?.value === "courier") {
-        // Валідація для доставки кур'єром
-       
-        if (!this.deliveryAddress.street) {
-          errors.street = "Оберіть вулицю";
-        }
-        if (!this.deliveryAddress.number) {
-          errors.number = "Введіть номер будинку/квартири";
-        }
+  if (this.formData.deliveryType?.value === "courier") {
+    if (!this.deliveryAddress.street) {
+      errors.street = "Оберіть вулицю";
+    }
+    if (!this.deliveryAddress.number) {
+      errors.number = "Введіть номер будинку/квартири";
+    }
+  }
+
+  if (this.formData.deliveryType?.value === "pickup") {
+    if (!this.formData.city) {
+      errors.city = "Місто є обов'язковим";
+    }
+    if (this.formData.deliveryType?.name?.includes('поштомат') && !this.deliveryAddress.postomat) {
+      errors.postomat = "Оберіть поштомат";
+    }
+    if (!this.formData.deliveryType?.name?.includes('поштомат') && !this.deliveryAddress.branch) {
+      errors.branch = "Оберіть відділення";
+    }
+
+    // Якщо обраний спосіб доставки не з магазину – перевіряємо відділення або поштомат
+    if (this.formData.selectedDeliveryMethod) {
+      if (this.formData.deliveryType?.name?.includes('поштомат') && !this.deliveryAddress.postomat) {
+        errors.postomat = "Введіть номер поштомата";
       }
-      if (this.formData.deliveryType?.value === "pickup") {
-        if (!this.formData.city) {
-          errors.city = "Місто є обов'язковим";
-        }
-        if (this.formData.deliveryType?.name?.includes('поштомат') && !this.deliveryAddress.postomat) {
-          errors.postomat = "Оберіть поштомат";
-        }
-        if (!this.formData.deliveryType?.name?.includes('поштомат') && !this.deliveryAddress.branch) {
-          errors.branch = "Оберіть відділення";
-        }
-
-
-
-        // Перевірка міста незалежно від вибору способу доставки
-        if (!this.formData.city) {
-          errors.city = "Місто є обов'язковим";
-        }
-        // Якщо обраний спосіб доставки не з магазину – перевіряємо відділення або поштомат
-        if (this.formData.selectedDeliveryMethod) {
-          if (this.formData.deliveryType?.name?.includes('поштомат') && !this.deliveryAddress.postomat) {
-            errors.postomat = "Введіть номер поштомата";
-          }
-          if (!this.formData.deliveryType?.name?.includes('поштомат') && !this.deliveryAddress.branch) {
-            errors.branch = "Введіть номер відділення";
-          }
-        }
+      if (!this.formData.deliveryType?.name?.includes('поштомат') && !this.deliveryAddress.branch) {
+        errors.branch = "Введіть номер відділення";
       }
+    }
+  }
 
-      this.errors = errors;
-      return Object.keys(errors).length === 0;
-    },
+  this.errors = errors;
+  return Object.keys(errors).length === 0;
+},
     async deleteAddress() {
       const token = localStorage.getItem("token");
       if (!token) {
