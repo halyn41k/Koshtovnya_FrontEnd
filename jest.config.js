@@ -2,12 +2,16 @@ module.exports = {
   moduleFileExtensions: ['js', 'json', 'vue'],
   transform: {
     '^.+\\.js$': 'babel-jest',
-    '^.+\\.vue$': '@vue/vue3-jest', // Упевніться, що використовується `vue3-jest`
+    '^.+\\.vue$': '@vue/vue3-jest',
     '^.+\\.(jpg|jpeg|png|gif|svg|ttf|woff|woff2)$': 'jest-transform-stub',
   },
   testEnvironment: 'jsdom',
-  transformIgnorePatterns: ['/node_modules/(?!(@vue|vue-styleguidist)/)'],
+  testEnvironmentOptions: {
+    customExportConditions: ['node', 'node-addons'],
+  },
+  transformIgnorePatterns: ['/node_modules/(?!(@vue)/)'],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
   },
+  setupFiles: ['<rootDir>/jest.setup.js'],
 };
