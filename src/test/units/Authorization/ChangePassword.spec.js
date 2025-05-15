@@ -4,7 +4,7 @@ describe.skip('Тести для MyComponent', () => {
   })
 })
 
-//Тестування оновлено
+//Протестовано головні аспекти
 /*
 import { shallowMount } from '@vue/test-utils';
 import ChangePassword from '@/components/authorization/ChangePassword.vue';
