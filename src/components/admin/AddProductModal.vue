@@ -115,85 +115,116 @@
           </div>
         </div>
 
-        <!-- Розміри -->
-        <div class="flex flex-col space-y-3">
-          <label class="text-sm font-medium text-gray-700">Розміри</label>
-          <div
-            v-for="(sizeItem, index) in form.sizes"
-            :key="index"
-            class="flex items-center gap-2"
-          >
-            <input
-              v-model="sizeItem.size"
-              type="text"
-              placeholder="Розмір"
-              required
-              class="flex-1 border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50"
-            />
-            <input
-              v-model.number="sizeItem.quantity"
-              type="number"
-              min="1"
-              placeholder="Кількість"
-              required
-              class="w-24 border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50"
-            />
-            <button
-              type="button"
-              @click="removeSize(index)"
-              class="px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-500"
-            >
-              Видалити
-            </button>
-          </div>
-          <button
-            type="button"
-            @click="addSize"
-            class="w-max px-4 py-2 bg-[#6B1F1F] text-white rounded-md hover:bg-[#A01212]"
-          >
-            Додати розмір
-          </button>
-        </div>
+       <div class="flex flex-col space-y-3">
+  <label class="text-sm font-medium text-gray-700">Розміри</label>
+
+  <div v-for="(sizeItem, index) in form.sizes" :key="index" class="grid grid-cols-12 gap-2 items-end">
+    <!-- Поле розміру -->
+    <div class="col-span-6">
+      <label class="text-sm font-medium text-gray-700">Розмір (см)</label>
+      <input
+  v-model.number="sizeItem.size"
+  type="number"
+  step="0.01"
+  min="0"
+  placeholder="23.00"
+  required
+  class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50"
+/>
+
+    </div>
+
+    <!-- Поле кількості -->
+    <div class="col-span-3">
+      <label class="text-sm font-medium text-gray-700">К-ть</label>
+      <input
+        v-model.number="sizeItem.quantity"
+        type="number"
+        min="0"
+        placeholder="0"
+        required
+        class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50"
+      />
+    </div>
+
+    <!-- Кнопка видалення -->
+    <div class="col-span-3">
+      <button
+        type="button"
+        @click="removeSize(index)"
+        class="w-full px-3 py-2 bg-red-600 text-white rounded-md hover:bg-red-500"
+      >
+        Видалити
+      </button>
+    </div>
+  </div>
+
+  <button
+    type="button"
+    @click="addSize"
+    class="w-max px-4 py-2 bg-[#6B1F1F] text-white rounded-md hover:bg-[#A01212]"
+  >
+    Додати розмір
+  </button>
+</div>
 
         <!-- Фурнітура -->
+<!-- Фурнітура -->
 <div class="flex flex-col space-y-3">
   <label class="text-sm font-medium text-gray-700">Фурнітура</label>
+
   <div
     v-for="(fitItem, index) in form.fittings"
     :key="index"
-    class="flex items-center gap-2"
+    class="grid grid-cols-12 gap-2 items-end"
   >
-    <Multiselect
-      v-model="fitItem.fitting"
-      :options="formData.fittings"
-      placeholder="Оберіть фурнітуру"
-      class="flex-1 custom-multiselect"
-    />
+    <!-- Фурнітура -->
+    <div class="col-span-4">
+      <label class="text-sm font-medium text-gray-700">Фурнітура</label>
+      <Multiselect
+        v-model="fitItem.fitting"
+        :options="formData.fittings"
+        placeholder="Оберіть фурнітуру"
+        class="custom-multiselect"
+      />
+    </div>
 
-    <Multiselect
-      v-model="fitItem.material"
-      :options="formData.materials"
-      placeholder="Оберіть матеріал"
-      class="flex-1 custom-multiselect"
-    />
+    <!-- Матеріал -->
+    <div class="col-span-4">
+      <label class="text-sm font-medium text-gray-700">Матеріал</label>
+      <Multiselect
+        v-model="fitItem.material"
+        :options="formData.materials"
+        placeholder="Оберіть матеріал"
+        class="custom-multiselect"
+      />
+    </div>
 
-    <input
-      v-model.number="fitItem.quantity"
-      type="number"
-      min="1"
-      placeholder="Кількість"
-      required
-      class="w-24 border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50"
-    />
+    <!-- Кількість -->
+    <div class="col-span-2">
+      <label class="text-sm font-medium text-gray-700">К-ть</label>
+      <input
+        v-model.number="fitItem.quantity"
+        type="number"
+        min="1"
+        placeholder="К-ть"
+        required
+        class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50"
+      />
+    </div>
 
-    <button
-      type="button"
-      @click="removeFitting(index)"
-      class="px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-500"
-    >
-      Видалити
-    </button>
+    <!-- Кнопка Видалити -->
+    <div class="col-span-2">
+      <button
+        type="button"
+        @click="removeFitting(index)"
+        class="w-full px-3 py-2 bg-red-600 text-white rounded-md hover:bg-red-500"
+      >
+        Видалити
+      </button>
+    </div>
   </div>
+
   <button
     type="button"
     @click="addFitting"
@@ -203,21 +234,42 @@
   </button>
 </div>
 
-        <!-- Зображення -->
-        <div class="flex flex-col">
-          <label class="mb-1 text-sm font-medium text-gray-700">Зображення</label>
-          <label
-            class="inline-flex items-center px-4 py-2 border-2 border-dashed border-gray-300 rounded-md cursor-pointer text-sm text-gray-600 hover:border-[#A01212]"
-          >
-            Вибрати файл
-            <input
-              type="file"
-              @change="handleFileChange"
-              accept="image/jpeg,image/png,image/jpg"
-              class="sr-only"
-            />
-          </label>
-        </div>
+<!-- Зображення -->
+<div class="flex flex-col">
+  <label class="mb-1 text-sm font-medium text-gray-700">Зображення</label>
+
+  <!-- Кнопка вибору файлу -->
+  <label
+    class="inline-flex items-center px-4 py-2 border-2 border-dashed border-gray-300 rounded-md cursor-pointer text-sm text-gray-600 hover:border-[#A01212]"
+  >
+    Вибрати файл
+    <input
+      type="file"
+      @change="handleFileChange"
+      accept="image/jpeg,image/png,image/jpg"
+      class="sr-only"
+    />
+  </label>
+
+  <!-- Превʼю + видалення -->
+  <div v-if="form.image" class="mt-4 flex items-center space-x-4">
+    <img
+  :src="imagePreview"
+
+      alt="Превʼю"
+      class="w-24 h-24 object-cover rounded-md border"
+    />
+    <button
+      type="button"
+        @click="() => { form.image = null; imagePreview = null }"
+
+      class="px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-500"
+    >
+      Видалити
+    </button>
+  </div>
+</div>
+
 
         <!-- Дії -->
         <div class="flex justify-end space-x-4 pt-4 border-t border-gray-200">
@@ -253,6 +305,8 @@ export default {
   name: "AddProductModal",
   data() {
     return {
+      imagePreview: null,
+
       colorMap: {
         Чорний: "#000000",
         Червоний: "#FF0000",
@@ -319,8 +373,12 @@ export default {
   },
   methods: {
     handleFileChange(e) {
-      this.form.image = e.target.files[0];
-    },
+  const file = e.target.files[0];
+  if (file) {
+    this.form.image = file;
+    this.imagePreview = URL.createObjectURL(file);
+  }
+},
     addSize() {
       this.form.sizes.push({ size: "", quantity: 1 });
     },

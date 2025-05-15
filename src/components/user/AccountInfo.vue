@@ -7,7 +7,7 @@
     class="flex items-center justify-center mt-[80px] font-kyivBlack2 text-[34px] font-black tracking-[-1.2px] text-center"
   >
     <div class="flex-1 h-[2px] bg-gray-400 mx-2"></div>
-    Ваш аккаунт
+    Особистий кабінет
     <div class="flex-1 h-[2px] bg-gray-400 mx-2"></div>
   </h1>
 </header>

@@ -95,7 +95,7 @@
 
     <!-- Пагінація -->
     <!-- Пагінація -->
-<div v-if="meta && paginationLinks.length" class="flex justify-center items-center gap-2 mt-5 h-12">
+<div v-if="meta && paginationLinks().length" class="flex justify-center items-center gap-2 mt-5 h-12">
   <!-- Ліва стрілка -->
   <button
     @click="goToPage(meta.links.find(l => l.label.includes('Previous'))?.url)"
@@ -107,7 +107,8 @@
 
   <!-- Номери сторінок -->
   <button
-    v-for="(link, index) in paginationLinks"
+   v-for="(link, index) in paginationLinks()"
+
     :key="index"
     @click="goToPage(link.url)"
     :class="[
@@ -165,77 +166,106 @@ export default {
   },
   computed: {
     filteredProducts() {
-      let list = [...this.products]
-      if (this.searchQuery) {
-        const q = this.searchQuery.toLowerCase()
-        list = list.filter(p => p.name.toLowerCase().includes(q))
-      }
-      return list
-    },
-    paginationLinks() {
-  return (this.meta?.links || []).filter(link => !link.label.includes('Previous') && !link.label.includes('Next'))
+  if (this.meta) {
+    return this.products
+  }
+
+  const q = this.searchQuery.toLowerCase().trim()
+  if (!q) return this.products
+
+  return this.products.filter(p => p.name.toLowerCase().includes(q))
 }
 
 
   },
   methods: {
-   fetchProducts() {
-  const query = this.searchQuery.trim();
+    goToPage(url) {
+  if (!url) return
 
-  if (!query) {
-    this.products = [];
-    this.meta = null;
-    return;
+  // Якщо є активний пошук — нічого не робимо
+  if (this.searchQuery.trim()) return
+
+  this.fetchProducts(url)
+},
+
+   fetchProducts(url = null) {
+  const endpoint = url || 'https://koshtovnya.api-dev.bmax-edu.website/api/admin/products'
+  const params = new URLSearchParams()
+
+  // додай фільтри
+  Object.entries(this.currentFilters).forEach(([key, val]) => {
+    Array.isArray(val)
+      ? val.forEach(v => params.append(key, v))
+      : params.append(key, val)
+  })
+
+  // додай пошук
+  if (this.searchQuery.trim()) {
+    params.append('search', this.searchQuery.trim())
   }
 
-  const endpoint = `https://koshtovnya.api-dev.bmax-edu.website/api/admin/products/search/${encodeURIComponent(query)}`;
-axios.get(endpoint, {
-  headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-})
+  const fullUrl = `${endpoint}?${params.toString()}`
 
-
+  axios.get(fullUrl, {
+    headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+  })
     .then(response => {
-      this.products = response.data.data || response.data || [];
-      this.meta = null;
-    })
-    .catch(error => {
-      console.error('❌ Помилка пошуку товарів:', error);
-      this.products = [];
-      this.meta = null;
-    });
-},
-    onSearch() {
-  clearTimeout(this.searchTimeout)
-  this.searchTimeout = setTimeout(() => {
-    this.fetchProducts()
-  }, 400)
-},
-fetchAllProducts() {
-  axios.get('https://koshtovnya.api-dev.bmax-edu.website/api/products')
-    .then(response => {
-      this.products = response.data.data || response.data || []
-      this.meta = null
+      this.products = response.data.data || []
+      this.meta = response.data.meta || null
     })
     .catch(error => {
       console.error('❌ Помилка завантаження товарів:', error)
       this.products = []
       this.meta = null
-    });
+    })
+},
+    onSearch() {
+  clearTimeout(this.searchTimeout)
+  this.searchTimeout = setTimeout(() => {
+    if (this.searchQuery.trim()) {
+      this.fetchSearchedProducts(this.searchQuery)
+    } else {
+      this.fetchProducts()
+    }
+  }, 400)
+},
+fetchAllProducts() {
+  this.fetchProducts(); // Просто виклик без .then()
+},
+
+fetchSearchedProducts(query) {
+  const search = query.trim()
+  if (!search) {
+    this.fetchProducts() // повертає всі товари + пагінацію
+    return
+  }
+
+  axios.get(`https://koshtovnya.api-dev.bmax-edu.website/api/admin/products/search/${encodeURIComponent(search)}`, {
+    headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+  })
+    .then(response => {
+      this.products = response.data.data || []
+      this.meta = null // видаляє пагінацію для пошуку
+    })
+    .catch(error => {
+      console.error('❌ Помилка пошуку товарів:', error)
+      this.products = []
+      this.meta = null
+    })
 },
 
     openFilter() { this.showFilter = true },
     closeFilter() { this.showFilter = false },
     applyFilters(filters) {
-      this.currentFilters = filters
-      const params = new URLSearchParams()
-      Object.entries(filters).forEach(([k, v]) => {
-        Array.isArray(v)
-          ? v.forEach(val => params.append(k, val))
-          : params.append(k, v)
-      })
-      this.fetchProducts(`https://koshtovnya.api-dev.bmax-edu.website/api/admin/products?${params}`)
-      this.closeFilter()
-    },
+  this.currentFilters = filters
+  this.fetchProducts()
+  this.closeFilter()
+},
+paginationLinks() {
+  if (!this.meta || !this.meta.links) return []
+  return this.meta.links.filter(link => !link.label.includes('Previous') && !link.label.includes('Next'))
+},
+
     openAddModal() { this.showAddModal = true },
     closeAddModal() { this.showAddModal = false },
     openUpdateModal(p) { this.selectedProduct = p; this.showEditModal = true },
@@ -253,9 +283,7 @@ this.closeEditModal()
       this.products = this.products.filter(p => p.id !== id)
       this.closeDeleteModal()
     },
-    goToPage(url) {
-      if (url) this.fetchProducts(url)
-    }
+    
   },
   mounted() {
     this.fetchAllProducts(); 
