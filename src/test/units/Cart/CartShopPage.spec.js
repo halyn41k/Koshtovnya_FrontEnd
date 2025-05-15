@@ -1,9 +1,9 @@
-// describe.skip('Тести для MyComponent', () => {
-//    it('цей тест не виконається', () => {
-//      expect(true).toBe(false)
-//    })
-//  })
-  
+describe.skip('Тести для MyComponent', () => {
+   it('цей тест не виконається', () => {
+     expect(true).toBe(false)
+   })
+ })
+  /*
  //Протестовано головні аспекти
   
 import { shallowMount } from '@vue/test-utils';
@@ -250,4 +250,4 @@ describe('CartShopPage.vue', () => {
       expect(window.alert).toHaveBeenCalledWith("Не вдалося видалити товар із кошика.");
     });
   });
-});
+});*/

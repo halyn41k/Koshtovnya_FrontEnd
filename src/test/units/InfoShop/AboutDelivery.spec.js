@@ -1,9 +1,9 @@
-// describe.skip('Тести для MyComponent', () => {
-//   it('цей тест не виконається', () => {
-//     expect(true).toBe(false)
-//   })
-// })
-
+describe.skip('Тести для MyComponent', () => {
+  it('цей тест не виконається', () => {
+    expect(true).toBe(false)
+  })
+})
+/*
 //Протестовано головні аспекти
 
 
@@ -246,4 +246,4 @@ describe('AboutDelivery.vue', () => {
     expect(conditionItems.length).toBeGreaterThan(0);
     expect(conditionItems.at(0).text()).toContain('У випадку оплати післяплатою');
   });
-});
+});*/

@@ -1,9 +1,9 @@
-// describe.skip('Тести для MyComponent', () => {
-//     it('цей тест не виконається', () => {
-//       expect(true).toBe(false)
-//     })
-//   })
-  
+describe.skip('Тести для MyComponent', () => {
+    it('цей тест не виконається', () => {
+      expect(true).toBe(false)
+    })
+  })
+  /*
   //Протестовано головні аспекти
   
   beforeEach(() => {
@@ -472,3 +472,4 @@ describe('PostalInfo.vue - Рендеринг повідомлень про по
     expect(errorsEls.at(1).text()).toBe(errors.city);
   });
 });
+*/

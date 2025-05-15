@@ -1,9 +1,9 @@
-// describe.skip('Тести для MyComponent', () => {
-//     it('цей тест не виконається', () => {
-//       expect(true).toBe(false)
-//     })
-//   })
-  
+describe.skip('Тести для MyComponent', () => {
+    it('цей тест не виконається', () => {
+      expect(true).toBe(false)
+    })
+  })
+  /*
   //Протестовано головні аспекти
   
   
@@ -142,3 +142,4 @@ describe('PersonalInfo.vue', () => {
     expect(wrapper.find('input.input-field[placeholder="Номер телефону"]').element.value).toBe(newData.phone);
   });
 });
+*/

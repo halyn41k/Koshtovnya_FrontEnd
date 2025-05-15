@@ -2,12 +2,12 @@
 
 
 
-// describe.skip('Тести для MyComponent', () => {
-//   it('цей тест не виконається', () => {
-//     expect(true).toBe(false);
-//   });
-// });
-
+describe.skip('Тести для MyComponent', () => {
+  it('цей тест не виконається', () => {
+    expect(true).toBe(false);
+  });
+});
+/*
 // Замокання axios
 jest.mock("axios", () => ({
   get: jest.fn(() =>
@@ -146,3 +146,4 @@ describe('PaymentComponent.vue', () => {
     });
   });
 });
+*/

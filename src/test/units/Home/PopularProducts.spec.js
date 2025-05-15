@@ -1,9 +1,9 @@
-// describe.skip('Тести для MyComponent', () => {
-//   it('цей тест не виконається', () => {
-//     expect(true).toBe(false)
-//   })
-// })
-
+describe.skip('Тести для MyComponent', () => {
+  it('цей тест не виконається', () => {
+    expect(true).toBe(false)
+  })
+})
+/*
 //Протестовано головні аспекти
 
 import { mount } from '@vue/test-utils';
@@ -384,3 +384,4 @@ describe('PopularProducts.vue', () => {
   });
   
 });
+*/

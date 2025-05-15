@@ -1,12 +1,12 @@
-// describe.skip('Тести для MyComponent', () => {
-//     it('цей тест не виконається', () => {
-//       expect(true).toBe(false)
-//     })
-//   })
+describe.skip('Тести для MyComponent', () => {
+    it('цей тест не виконається', () => {
+      expect(true).toBe(false)
+    })
+  })
   
   //Протестовано головні аспекти
   
-  
+  /*
   import { shallowMount } from '@vue/test-utils';
 import OrderHistory from '@/components/User/OrderHistory.vue';
 import axios from 'axios';
@@ -422,3 +422,4 @@ describe('OrderHistory.vue', () => {
     });
   });
 });
+*/

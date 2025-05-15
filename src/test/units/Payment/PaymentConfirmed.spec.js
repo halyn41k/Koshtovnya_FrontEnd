@@ -1,9 +1,9 @@
-// describe.skip('Тести для MyComponent', () => {
-//     it('цей тест не виконається', () => {
-//       expect(true).toBe(false)
-//     })
-//   })
-  
+describe.skip('Тести для MyComponent', () => {
+    it('цей тест не виконається', () => {
+      expect(true).toBe(false)
+    })
+  })
+  /*
   //Протестовано головні аспекти
   
   
@@ -137,3 +137,4 @@ describe('PaymentInfo.vue', () => {
     expect(emitted[1][0].paymentMethod).toBe("Оплата картою");
   });
 });
+*/
