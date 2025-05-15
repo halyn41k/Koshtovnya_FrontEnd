@@ -249,10 +249,7 @@
 import Loader from '../home/Loader.vue';
 import axios from "axios";
 import Multiselect from 'vue-multiselect'
-import vSelect from "vue-select";
-import "vue-select/dist/vue-select.css";
 import { Combobox, ComboboxInput, ComboboxOptions, ComboboxOption } from '@headlessui/vue'
-
 
 
 export default {
