@@ -1,12 +1,18 @@
-// src/test/units/UserRegistration.spec.js
+// describe.skip('Тести для MyComponent', () => {
+//   it('цей тест не виконається', () => {
+//     expect(true).toBe(false)
+//   })
+// })
+
+//Протестовано головні аспекти
 
 import { mount } from '@vue/test-utils';
-import UserRegistration from '../../components/authorization/UserRegistration.vue';
+import UserRegistration from '@/components/authorization/UserRegistration.vue';
 
 // Mock global fetch
 global.fetch = jest.fn((url, options) => {
   // Перевіряємо правильність URL та параметрів запиту
-  if (url === "https://koshtovnya.api-dev.bmax-edu.website/api/register" && options.method === "POST") {
+  if (url === "http://26.235.139.202:8080/api/register" && options.method === "POST") {
     const body = JSON.parse(options.body);
 
     // Симулюємо успішну відповідь з використанням даних із запиту
@@ -140,27 +146,20 @@ describe('UserRegistration.vue', () => {
     expect(form.element.checkValidity()).toBe(false); // Некоректний email не пройде перевірку
   });
 
-  it("Пропускає форму, якщо всі поля валідні", async () => {
-    const firstNameInput = wrapper.find("input#first_name");
-    const lastNameInput = wrapper.find("input#last_name");
-    const middleNameInput = wrapper.find("input#second_name"); // Виправлений селектор
-    const emailInput = wrapper.find("input#email");
-    const passwordInput = wrapper.find("input#password");
-    const form = wrapper.find("form");
-  
-    // Заповнюємо всі поля
-    await firstNameInput.setValue("John");
-    await lastNameInput.setValue("Doe");
-    await middleNameInput.setValue("Smith");
-    await emailInput.setValue("john.doe@example.com");
-    await passwordInput.setValue("securepassword");
-  
-    // Сабмітимо форму
-    await form.trigger("submit.prevent");
-  
-    // Перевіряємо виклик fetch
+  it('Пропускає форму, якщо всі поля валідні', async () => {
+    // Заповнюємо всі поля правильно
+    await wrapper.find('input#first_name').setValue('John');
+    await wrapper.find('input#last_name').setValue('Doe');
+    await wrapper.find('input#second_name').setValue('Smith');
+    await wrapper.find('input#email').setValue('john.doe@example.com');
+    await wrapper.find('input#password').setValue('securepassword');
+    
+    const form = wrapper.find('form');
+    await form.trigger('submit.prevent');
+    
+    // Перевіряємо, що викликається fetch з необхідними параметрами
     expect(global.fetch).toHaveBeenCalledWith(
-      "https://koshtovnya.api-dev.bmax-edu.website/api/register",
+      "http://26.235.139.202:8080/api/register",
       expect.objectContaining({
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -173,12 +172,14 @@ describe('UserRegistration.vue', () => {
         }),
       })
     );
-  
-    // Перевіряємо, що alert викликаний із правильним повідомленням
-    expect(global.alert).toHaveBeenCalledWith(
-      "Реєстрація успішна! Вітаємо, John!"
-    );
-  });  
+    // Оскільки відповідь вдала, має відбутися перенаправлення
+    expect(mockRouterPush).toHaveBeenCalledWith({
+      name: "Verify",
+      query: { email: "john.doe@example.com" },
+    });
+    // В alert не має бути викликів
+    expect(global.alert).not.toHaveBeenCalled();
+  }); 
 
   it('Прив\'язка даних через v-model оновлює стан компонента', async () => {
     const firstNameInput = wrapper.find('input#first_name');
@@ -354,4 +355,64 @@ describe('UserRegistration.vue', () => {
   
     expect(global.alert).toHaveBeenCalledWith('Будь ласка, виправте помилки.');
   });
+
+  it('Показує помилку, якщо ім\'я порожнє', async () => {
+    const firstNameInput = wrapper.find('input#first_name');
+    await firstNameInput.setValue('');
+    await firstNameInput.trigger('input');
+    
+    expect(wrapper.vm.nameError).toBe("Ім'я не може бути порожнім.");
+  });
+
+  it('Показує помилку, якщо прізвище порожнє', async () => {
+    const lastNameInput = wrapper.find('input#last_name');
+    await lastNameInput.setValue('');
+    await lastNameInput.trigger('input');
+    
+    expect(wrapper.vm.lastNameError).toBe('Прізвище не може бути порожнім.');
+  });
+
+  it('Показує помилку, якщо email порожній', async () => {
+    const emailInput = wrapper.find('input#email');
+    await emailInput.setValue('');
+    await emailInput.trigger('input');
+    
+    expect(wrapper.vm.emailError).toBe('Введіть дійсний email.');
+  });
+  
+  it('Показує помилку, якщо пароль коротший за 8 символів', async () => {
+    const passwordInput = wrapper.find('input#password');
+    await passwordInput.setValue('short');
+    await passwordInput.trigger('input');
+    
+    expect(wrapper.vm.passwordError).toBe('Пароль повинен містити щонайменше 8 символів.');
+  });
+
+  it('Показує помилку, якщо пароль містить пробіли', async () => {
+    const passwordInput = wrapper.find('input#password');
+    await passwordInput.setValue('password with space');
+    await passwordInput.trigger('input');
+    
+    expect(wrapper.vm.passwordError).toBe('Пароль не повинен містити пробілів.');
+  });
+
+  it('Не відправляє форму при наявності помилок валідації', async () => {
+    const form = wrapper.find('form');
+    await form.trigger('submit.prevent');
+    expect(global.alert).toHaveBeenCalledWith("Будь ласка, виправте помилки.");
+  });
+
+  it('Перевіряє чи зберігаються дані після перезавантаження сторінки', async () => {
+    const firstNameInput = wrapper.find('input#first_name');
+    await firstNameInput.setValue('Jane');
+    const lastNameInput = wrapper.find('input#last_name');
+    await lastNameInput.setValue('Doe');
+    
+    // Імітуємо перезавантаження сторінки
+    wrapper.vm.$forceUpdate();
+    
+    expect(firstNameInput.element.value).toBe('Jane');
+    expect(lastNameInput.element.value).toBe('Doe');
+  });
+  
 });

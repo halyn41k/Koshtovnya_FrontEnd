@@ -1,5 +1,18 @@
+// describe.skip('Тести для MyComponent', () => {
+//   it('цей тест не виконається', () => {
+//     expect(true).toBe(false)
+//   })
+// })
+
+//Протестовано головні аспекти
+beforeEach(() => {
+  jest.spyOn(console, 'warn').mockImplementation(() => {});
+  jest.spyOn(console, 'error').mockImplementation(() => {});
+  jest.spyOn(console, 'log').mockImplementation(() => {});
+});
+
 import { mount } from '@vue/test-utils';
-import HeaderComponent from '../../components/home/HeaderComponent.vue';
+import HeaderComponent from '@/components/home/HeaderComponent.vue';
 
 // Замокати axios, щоб уникнути помилок з ESM
 jest.mock('axios', () => ({
@@ -408,5 +421,55 @@ describe('HeaderComponent.vue', () => {
         expect(link.classes()).not.toContain('active'); // Всі інші не повинні мати клас active
       }
     });
+  });
+
+  it('відображає логотип із правильним src і текстом', () => {
+    const logo = wrapper.find('.logo img');
+    expect(logo.exists()).toBe(true);
+    expect(logo.attributes('src')).toBeDefined();
+    expect(wrapper.find('.logo h1').text()).toBe('Коштовня');
+  });
+  
+  it('не відображає SearchResults при пустому searchQuery', async () => {
+    await wrapper.setData({ searchQuery: '' });
+    expect(wrapper.findComponent({ name: 'SearchResults' }).exists()).toBe(false);
+  });
+  
+  it('відображає активний маршрут навігації', () => {
+    const activeLink = wrapper.find('a.active');
+    expect(activeLink.exists()).toBe(true);
+    expect(activeLink.text()).toBe('Про нас');
+  });
+  
+  it('при кліку на корзину переходить на сторінку кошика', async () => {
+    const cartLink = wrapper.find('.cart-icon');
+    expect(cartLink.attributes('href')).toBe('/cart');
+  });
+  
+  it('при кліку на значок користувача переходить у профіль', async () => {
+    const userIcon = wrapper.find('.user-icon');
+    expect(userIcon.attributes('href')).toBe('/account');
+  });
+  
+  it('при виборі нової мови оновлюється локаль і прапорець', async () => {
+    await wrapper.find('.language select').setValue('en');
+    expect(wrapper.vm.$i18n.locale).toBe('en');
+    expect(wrapper.find('.language .flag').attributes('src')).toContain('gb.png');
+  });
+  
+  it('при виборі нової валюти оновлюється selectedCurrency', async () => {
+    await wrapper.find('.currency select').setValue('USD');
+    expect(wrapper.vm.selectedCurrency).toBe('USD');
+  });
+  
+  it('відображає правильну кількість категорій у меню навігації', () => {
+    const menuItems = wrapper.findAll('.nav-menu ul li');
+    expect(menuItems.length).toBe(6);
+  });
+  
+  it('при натисканні на значок пошуку викликає startSearch', async () => {
+    wrapper.vm.startSearch = jest.fn();
+    await wrapper.find('.search-icon').trigger('click');
+    expect(wrapper.vm.startSearch).toHaveBeenCalled();
   });
 });

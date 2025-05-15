@@ -18319,6 +18319,11 @@ vue-router@^4.3.2:
   dependencies:
     "@vue/devtools-api" "^6.6.4"
 
+vue-select@^3.20.4:
+  version "3.20.4"
+  resolved "https://registry.yarnpkg.com/vue-select/-/vue-select-3.20.4.tgz#cf1fee2e0dfad3b692b23895acf959b9971770de"
+  integrity sha512-pXIsDUnBR1075qHNEM7mKgX7YnHI3MfCO+7VmXSA1Hywplpqi52jOa0j6EHWQU6MnaW/mBZPuaQtgp3yvks2Kw==
+
 vue-splitpane@^1.0.4:
   version "1.0.6"
   resolved "https://registry.yarnpkg.com/vue-splitpane/-/vue-splitpane-1.0.6.tgz#c4667bfdd8e10ced5d23d09fe8a129585c2c04c0"

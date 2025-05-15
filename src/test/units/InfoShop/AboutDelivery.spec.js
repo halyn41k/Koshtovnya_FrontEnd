@@ -1,5 +1,14 @@
+// describe.skip('Тести для MyComponent', () => {
+//   it('цей тест не виконається', () => {
+//     expect(true).toBe(false)
+//   })
+// })
+
+//Протестовано головні аспекти
+
+
 import { shallowMount } from '@vue/test-utils';
-import AboutDelivery from '../../components/infoshop/AboutDelivery.vue';
+import AboutDelivery from '@/components/infoshop/AboutDelivery.vue';
 
 // Мок для IntersectionObserver
 global.IntersectionObserver = class {
@@ -203,5 +212,38 @@ describe('AboutDelivery.vue', () => {
   
     // Перевіряємо, чи disconnect було викликано
     expect(disconnectMock).toHaveBeenCalled();
+  });
+  
+  it('повинен містити фонове зображення', () => {
+    const backgroundImage = wrapper.find('.background-image');
+    expect(backgroundImage.exists()).toBe(true);
+  });
+  
+  it('повинен містити зображення для доставки', () => {
+    const deliveryImage = wrapper.find('.delivery-icon');
+    expect(deliveryImage.exists()).toBe(true);
+    expect(deliveryImage.attributes('alt')).toBe('Доставка');
+  });
+  
+  it('повинен містити правильні деталі для оплати при отриманні', () => {
+    const paymentMethod = wrapper.find('.payment-item .payment-method');
+    expect(paymentMethod.text()).toContain('Оплата при отриманні');
+    const paymentDetails = wrapper.find('.payment-item .payment-details');
+    expect(paymentDetails.text()).toContain('Оплачується безпосередньо під час отримання товару');
+  });
+  
+  it('повинен мати правильний стиль для заголовків секцій', () => {
+    const deliverySectionTitle = wrapper.find('.delivery-section .section-title').element;
+    const computedStyles = window.getComputedStyle(deliverySectionTitle);
+    expect(computedStyles.fontSize).toBe('34px'); // Заміни на актуальні значення стилю, якщо треба
+  });
+  
+  it('повинен коректно відображати додаткові умови', () => {
+    const additionalConditions = wrapper.find('.additional-conditions');
+    expect(additionalConditions.exists()).toBe(true);
+    
+    const conditionItems = wrapper.findAll('.condition-item');
+    expect(conditionItems.length).toBeGreaterThan(0);
+    expect(conditionItems.at(0).text()).toContain('У випадку оплати післяплатою');
   });
 });

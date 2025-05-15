@@ -1,5 +1,14 @@
+// describe.skip('Тести для MyComponent', () => {
+//   it('цей тест не виконається', () => {
+//     expect(true).toBe(false)
+//   })
+// })
+
+//Протестовано головні аспекти
+
+
 import { mount } from '@vue/test-utils';
-import FilterComponent from '../../components/product/FilterComponent.vue';
+import FilterComponent from '@/components/Product/FilterComponent.vue';
 import axios from 'axios';
 
 // Мокаємо axios
@@ -345,5 +354,33 @@ describe('FilterComponent.vue', () => {
     expect(buttonStyles.margin).toBe('0px auto');
     expect(buttonStyles.textAlign).toBe('center');
   });
-    
+
+  it('повинен рендерити чекбокси для доступності', () => {
+    const checkboxes = wrapper.findAll('.availability-options input[type="checkbox"]');
+    expect(checkboxes.length).toBe(2);
+  });
+
+  it('повинен оновлювати "selectedAvailability" при зміні чекбоксів', async () => {
+    const checkboxes = wrapper.findAll('.availability-options input[type="checkbox"]');
+    await checkboxes.at(0).setValue(true);
+    expect(wrapper.vm.selectedAvailability).toContain('В наявності');
+  });
+
+  it('повинен правильно оновлювати "selectedColor" при зміні випадаючого списку', async () => {
+    const select = wrapper.find('.dropdown-menu select');
+    await select.setValue('Зелений');
+    expect(wrapper.vm.selectedColor).toBe('Зелений');
+  });
+
+  it('повинен коректно застосовувати фільтри', async () => {
+    wrapper.vm.selectedColor = 'Червоний';
+    await wrapper.vm.applyFilters();
+    expect(wrapper.vm.fetchProducts).toHaveBeenCalledWith(1, expect.objectContaining({ color: 'Червоний' }));
+  });
+
+  it('повинен відображати збережені у localStorage фільтри', async () => {
+    localStorage.setItem('filterCache', JSON.stringify(mockFilterData));
+    await wrapper.vm.loadFilters();
+    expect(wrapper.vm.colorOptions).toEqual(mockFilterData['Колір']);
+  });
 });

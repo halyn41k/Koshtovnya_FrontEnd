@@ -18,7 +18,7 @@
               id="name"
               type="text"
               v-model="form.name"
-              required
+              required placeholder="Наприклад: Срібний браслет"
               class="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50"
             />
           </div>
@@ -28,7 +28,7 @@
               id="price"
               type="number"
               v-model="form.price"
-              required
+              required placeholder="грн"
               class="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50"
             />
           </div>
@@ -85,7 +85,7 @@
             <input
               id="weight"
               type="number"
-              placeholder="Введіть вагу"
+              placeholder="Введіть вагу (г)"
               v-model="form.weight"
               required
               class="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50"

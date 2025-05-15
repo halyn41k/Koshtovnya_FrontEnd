@@ -1,5 +1,13 @@
+// describe.skip('Тести для MyComponent', () => {
+//   it('цей тест не виконається', () => {
+//     expect(true).toBe(false)
+//   })
+// })
+
+//Протестовано головні аспекти
+
 import { mount } from '@vue/test-utils';
-import PopularProducts from '../../components/home/PopularProducts.vue';
+import PopularProducts from '@/components/home/PopularProducts.vue';
 
 jest.mock('axios', () => ({
   get: jest.fn(),
@@ -318,7 +326,7 @@ describe('PopularProducts.vue', () => {
     await wrapper.vm.fetchProducts();
   
     // Перевіряємо, що fetch був викликаний з правильним URL
-    expect(global.fetch).toHaveBeenCalledWith('https://koshtovnya.api-dev.bmax-edu.website/api/popular-products?page=1');
+    expect(global.fetch).toHaveBeenCalledWith('http://26.235.139.202:8080/api/popular-products?page=1');
   
     // Перевіряємо, чи дані API збережено у змінну products
     expect(wrapper.vm.products).toEqual([
@@ -329,5 +337,50 @@ describe('PopularProducts.vue', () => {
     // Перевіряємо кількість видимих продуктів після обробки
     expect(wrapper.vm.visibleProducts.length).toBe(wrapper.vm.productsPerPage);
   });  
+  
+  it('Правильно відображає ціну продукту', async () => {
+    await wrapper.vm.$nextTick();
+    const productCards = wrapper.findAll('.product-card');
+    const firstProduct = productCards.at(0);
+    const price = firstProduct.find('.product-price').text();
+    expect(price).toBe('100 грн');
+  });
+  
+  it('Правильно відображає зображення продукту', async () => {
+    await wrapper.vm.$nextTick();
+    const productCards = wrapper.findAll('.product-card');
+    const firstProduct = productCards.at(0);
+    const img = firstProduct.find('img').attributes('src');
+    expect(img).toBe('test-url-1');
+  });
+
+  it('Картка продукту присутня на сторінці', async () => {
+    await wrapper.vm.$nextTick();
+    const productCard = wrapper.find('.product-card');
+    expect(productCard.exists()).toBe(true);
+  });
+
+  it('Правильно відображає кнопку "Купити" для кожного продукту', async () => {
+    await wrapper.vm.$nextTick();
+    const productCards = wrapper.findAll('.product-card');
+    productCards.forEach((productCard) => {
+      const buyButton = productCard.find('.buy-button');
+      expect(buyButton.exists()).toBe(true);
+    });
+  });
+
+  it('Правильно відображає заповнене серце для продуктів, що у списку бажаного', async () => {
+    await wrapper.vm.$nextTick();
+    const productCards = wrapper.findAll('.product-card');
+    const secondProduct = productCards.at(1);
+    const filledHeart = secondProduct.find('.filled-heart');
+    expect(filledHeart.exists()).toBe(true);
+  });
+
+  it('Правильна кількість пагінаційних крапок', async () => {
+    await wrapper.vm.$nextTick();
+    const dots = wrapper.findAll('.dot');
+    expect(dots.length).toBe(wrapper.vm.totalPages);
+  });
   
 });

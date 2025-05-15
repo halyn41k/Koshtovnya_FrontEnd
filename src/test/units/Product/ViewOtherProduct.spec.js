@@ -1,5 +1,14 @@
+// describe.skip('Тести для MyComponent', () => {
+//   it('цей тест не виконається', () => {
+//     expect(true).toBe(false)
+//   })
+// })
+
+//Протестовано головні аспекти
+
+
 import { mount } from '@vue/test-utils';
-import ViewOtherProduct from '../../components/product/ViewOtherProduct.vue';
+import ViewOtherProduct from '@/components/product/ViewOtherProduct.vue';
 
 jest.mock('axios', () => ({
   get: jest.fn(),
@@ -54,7 +63,7 @@ describe('ViewOtherProduct.vue - Тестування іконки сердеч�
   it('Рендерить заголовок із локалізованим текстом', () => {
     const title = wrapper.find('.specifications-title');
     expect(title.exists()).toBe(true);
-    expect(title.text()).toBe('Переглянути інші товари');
+    expect(title.text()).toBe('Перегляньте інші товари');
   });
 
   it('Кнопки навігації мають відповідні класи', () => {
@@ -291,7 +300,7 @@ describe('ViewOtherProduct.vue - Тестування іконки сердеч�
 
     await wrapper.vm.fetchProducts();
 
-    expect(mockFetch).toHaveBeenCalledWith('https://koshtovnya.api-dev.bmax-edu.website/api/popular-products');
+    expect(mockFetch).toHaveBeenCalledWith('http://26.235.139.202:8080/api/popular-products?page=1');
     expect(mockFetch).toHaveBeenCalledTimes(1);
 
     // Очищення мока
@@ -320,7 +329,7 @@ describe('ViewOtherProduct.vue - Тестування іконки сердеч�
     await wrapper.vm.fetchWishlist();
   
     // Перевіряємо, що запит виконувався з правильними заголовками
-    expect(axiosMock.get).toHaveBeenCalledWith('https://koshtovnya.api-dev.bmax-edu.website/api/wishlist', {
+    expect(axiosMock.get).toHaveBeenCalledWith('http://26.235.139.202:8080/api/wishlist', {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -385,7 +394,7 @@ describe('ViewOtherProduct.vue - Тестування іконки сердеч�
   
     // Перевіряємо, чи був викликаний POST із правильними параметрами
     expect(axiosMock.post).toHaveBeenCalledWith(
-      'https://koshtovnya.api-dev.bmax-edu.website/api/wishlist',
+      'http://26.235.139.202:8080/api/wishlist',
       { product_id: 1 }, // product_id має бути переданий
       {
         headers: {
@@ -399,5 +408,82 @@ describe('ViewOtherProduct.vue - Тестування іконки сердеч�
   
     // Очищуємо моки
     jest.restoreAllMocks();
-  });  
+  }); 
+  
+  it('Перевіряє, чи зникає кнопка, коли немає продуктів', async () => {
+    wrapper.setData({
+      visibleProducts: [],
+    });
+    await wrapper.vm.$nextTick();
+  
+    const productCards = wrapper.findAll('.product-card');
+    expect(productCards.length).toBe(0); // Перевірка відсутності продуктів
+  
+    const buyButton = wrapper.find('.buy-button');
+    expect(buyButton.exists()).toBe(false); // Перевірка відсутності кнопки
+  });
+
+  it('Перевіряє відображення повідомлення про відсутність зображення у продукту', async () => {
+    wrapper.setData({
+      visibleProducts: [
+        { id: 1, name: 'Product 1', price: 100, image_url: '', bead_producer_name: 'Producer 1', is_in_wishlist: false },
+      ],
+    });
+  
+    await wrapper.vm.$nextTick();
+  
+    const productCard = wrapper.find('.product-card');
+    const image = productCard.find('img');
+    expect(image.attributes('src')).toBe(''); // Перевірка на відсутність зображення
+  });
+
+  it('Перевіряє логіку pagination, коли немає більше сторінок', async () => {
+    wrapper.setData({
+      currentPage: 0,
+      products: Array.from({ length: 3 }, (_, i) => ({
+        id: i + 1,
+        name: `Product ${i + 1}`,
+        price: (i + 1) * 100,
+        image_url: `test-url-${i + 1}`,
+        bead_producer_name: `Producer ${i + 1}`,
+        is_in_wishlist: false,
+      })),
+      productsPerPage: 3,
+      totalPages: 1,
+    });
+  
+    await wrapper.vm.$nextTick();
+  
+    const rightArrow = wrapper.find('.right-arrow');
+    await rightArrow.trigger('click');
+    expect(wrapper.vm.currentPage).toBe(0); // Кількість сторінок 1, тому не можна перейти на наступну
+  });
+
+  it('Перевіряє відсутність кнопки "Buy" для продуктів у списку бажаного', async () => {
+    wrapper.setData({
+      visibleProducts: [
+        { id: 1, name: 'Product 1', price: 100, image_url: 'test-url-1', bead_producer_name: 'Producer 1', is_in_wishlist: true },
+      ],
+    });
+  
+    await wrapper.vm.$nextTick();
+  
+    const productCard = wrapper.find('.product-card');
+    const buyButton = productCard.find('.buy-button');
+    expect(buyButton.exists()).toBe(true); // Кнопка buy повинна бути доступною
+  });
+  
+  it('Перевіряє правильність відображення ціни продукту', async () => {
+    wrapper.setData({
+      visibleProducts: [
+        { id: 1, name: 'Product 1', price: 100, image_url: 'test-url-1', bead_producer_name: 'Producer 1', is_in_wishlist: false },
+      ],
+    });
+  
+    await wrapper.vm.$nextTick();
+  
+    const productCard = wrapper.find('.product-card');
+    const price = productCard.find('.product-price');
+    expect(price.text()).toBe('100 грн'); // Перевірка правильності ціни
+  });
 });

@@ -62,7 +62,7 @@
          <div class="grid grid-cols-2 gap-4">
         <div class="flex flex-col">
           <label for="weight" class="mb-1 text-sm font-medium text-gray-700">Вага (г)</label>
-          <input id="weight" type="number" v-model="form.weight" required placeholder="Введіть вагу" class="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50" />
+          <input id="weight" type="number" v-model="form.weight" placeholder="Введіть вагу (г)" class="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50" />
         </div>
           <div class="flex flex-col">
             <label class="mb-2 text-sm font-medium text-gray-700">Кольори</label>

@@ -1,5 +1,12 @@
+// describe.skip('Тести для MyComponent', () => {
+//   it('цей тест не виконається', () => {
+//     expect(true).toBe(false)
+//   })
+// })
+
+
 import { shallowMount } from '@vue/test-utils';
-import ChangePassword from '../../components/authorization/ChangePassword.vue';
+import ChangePassword from '@/components/authorization/ChangePassword.vue';
 
 describe('ChangePassword.vue', () => {
   let wrapper;
@@ -172,7 +179,7 @@ describe('ChangePassword.vue', () => {
     await form.trigger('submit.prevent');
 
     // Очікуємо виклику fetch
-    expect(fetch).toHaveBeenCalledWith('https://koshtovnya.api-dev.bmax-edu.website/api/change-password', expect.any(Object));
+    expect(fetch).toHaveBeenCalledWith('http://26.235.139.202:8080/api/change-password', expect.any(Object));
 
     // Очікуємо, що alert викликається з повідомленням про успіх
     expect(global.alert).toHaveBeenCalledWith('Пароль успішно змінено!');
@@ -250,7 +257,7 @@ describe('ChangePassword.vue', () => {
     await form.trigger('submit.prevent');
   
     expect(fetch).toHaveBeenCalledWith(
-      'https://koshtovnya.api-dev.bmax-edu.website/api/change-password',
+      'http://26.235.139.202:8080/api/change-password',
       expect.objectContaining({
         method: 'PATCH',
         body: JSON.stringify({
@@ -260,5 +267,60 @@ describe('ChangePassword.vue', () => {
         }),
       })
     );
+  });
+
+  it('fetch викликається з правильними параметрами', async () => {
+    await wrapper.find('#currentPassword').setValue('current_password');
+    await wrapper.find('#newPassword').setValue('new_password');
+    await wrapper.find('#confirmPassword').setValue('new_password');
+  
+    const form = wrapper.find('.password-change-form');
+    await form.trigger('submit.prevent');
+  
+    expect(fetch).toHaveBeenCalledWith(expect.stringMatching(/\/api\/change-password$/), expect.objectContaining({
+      method: 'PATCH',
+      headers: expect.objectContaining({
+        'Content-Type': 'application/json',
+        Authorization: expect.stringMatching(/^Bearer\s/),
+      }),
+      body: JSON.stringify({
+        current_password: 'current_password',
+        new_password: 'new_password',
+        new_password_confirmation: 'new_password',
+      }),
+    }));
+  });
+  
+  it('показує повідомлення за замовчуванням, якщо сервер повертає помилку без деталей', async () => {
+    global.fetch = jest.fn(() =>
+      Promise.resolve({
+        ok: false,
+        status: 400,
+        json: () => Promise.resolve({}),
+      })
+    );
+  
+    const form = wrapper.find('.password-change-form');
+    await form.trigger('submit.prevent');
+  
+    expect(global.alert).toHaveBeenCalledWith('Помилка: Щось пішло не так.');
+  });
+  
+  it('обробляє помилку, якщо сервер повертає не JSON-відповідь', async () => {
+    jest.spyOn(console, 'error').mockImplementation(() => {}); // Заглушка для console.error
+  
+    global.fetch = jest.fn(() =>
+      Promise.resolve({
+        ok: false,
+        text: () => Promise.resolve('Internal Server Error'),
+      })
+    );
+  
+    const form = wrapper.find('.password-change-form');
+    await form.trigger('submit.prevent');
+  
+    expect(global.alert).toHaveBeenCalledWith('Помилка під час з\'єднання з сервером. Спробуйте ще раз.');
+  
+    console.error.mockRestore(); // Відновлення оригінального console.error після тесту
   });
 });
