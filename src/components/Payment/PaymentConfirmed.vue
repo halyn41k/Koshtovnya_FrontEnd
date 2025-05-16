@@ -34,6 +34,8 @@
 
 <script>
 import confetti from 'canvas-confetti';
+import bus from '@/eventBus';
+
 
 export default {
   name: 'PaymentConfirmed',
@@ -52,6 +54,8 @@ export default {
       spread: 180,
       origin: { y: 0.6 },
     });
+    bus.emit('cart-updated'); // оновлення кошика
+
   },
 };
 </script>

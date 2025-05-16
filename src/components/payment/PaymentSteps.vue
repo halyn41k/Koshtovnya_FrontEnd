@@ -347,37 +347,78 @@ export default {
       this.formData.phone = addressData.phone_number || "";
       this.formData.city = addressData.city || "";
       this.formData.cityRef = addressData.Ref || "";
-      this.formData.warehouse = addressData.delivery_address || "";
+
+      if (addressData.delivery_type === "courier") {
+        this.formData.streetSearch = addressData.delivery_address || "";
+        this.formData.street = addressData.delivery_address || "";
+        this.formData.houseNumber = addressData.house_number || "";
+      }
 
       this.selectedDeliveryCategory =
         addressData.delivery_type === "courier" ? "courier" : "pickup";
 
-      // 💥 Оновлюємо delivery options
       this.updateDeliveryOptions(this.selectedDeliveryCategory);
 
-      // 💡 Чекаємо DOM і реактивність через 2 nextTick-и
-      this.$nextTick(() => {
-  const match = this.filteredDeliveryOptions.find(
-    opt => opt.name === addressData.delivery_name
-  );
-  if (match) {
-    this.formData.deliveryType = match;
-  } else {
-    console.warn('Не знайдено deliveryType для', addressData.delivery_name);
-  }
+      this.$nextTick(async () => {
+        const match = this.deliveryOptions.find(
+          opt => opt.name === addressData.delivery_name
+        );
+        if (match) {
+          this.formData.deliveryType = match;
+        } else {
+          console.warn("Не знайдено deliveryType для", addressData.delivery_name);
+        }
 
-  // Імʼя + прізвище
-  const [last, first, second] = addressData.user ? addressData.user.split(' ') : ["", "", ""];
-  this.formData.lastName = last;
-  this.formData.firstName = first;
-  this.formData.secondName = second;
-});
-
+        // Чекаємо завантаження відділень
+        this.warehouses = await this.fetchWarehouses(
+  addressData.city,
+  addressData.Ref,
+  addressData.delivery_name
+);
 
 
+        const warehouseMatch = this.warehouses.find(
+  w => w.name === addressData.delivery_address
+);
+if (warehouseMatch) {
+  this.formData.warehouse = warehouseMatch;
+}
+
+        // ПІБ
+        const [last, first, second] = addressData.user
+          ? addressData.user.split(" ")
+          : ["", "", ""];
+        this.formData.lastName = last;
+        this.formData.firstName = first;
+        this.formData.secondName = second;
+      });
     }
   } catch (error) {
     console.error("Помилка отримання адреси користувача", error);
+  }
+},
+async fetchWarehouses(city, cityRef, deliveryName) {
+  const token = localStorage.getItem("token");
+  if (!token || !city || !cityRef) return [];
+
+  try {
+    const response = await axios.get(
+      "https://koshtovnya.api-dev.bmax-edu.website/api/nova-poshta/ware-houses",
+      {
+        headers: { Authorization: `Bearer ${token}` },
+        params: {
+          city,
+          Ref: cityRef,
+          delivery_type: deliveryName || '',
+        }
+      }
+    );
+    return Array.isArray(response.data.data)
+      ? response.data.data.map((item, i) => ({ id: i + 1, name: item.warehouse }))
+      : [];
+  } catch (e) {
+    console.error("Помилка отримання відділень", e);
+    return [];
   }
 },
 
