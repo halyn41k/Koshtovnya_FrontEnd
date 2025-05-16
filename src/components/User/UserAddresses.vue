@@ -343,17 +343,22 @@ export default {
   this.cities = [];
   this.warehouses = [];
 
-  if (value === 'pickup') {
-    this.formData.selectedDeliveryMethod = this.formData.deliveryType;
+ if (value === 'pickup') {
+  this.formData.selectedDeliveryMethod = this.formData.deliveryType;
 
-    if (name.includes('самовивіз з наших магазинів')) {
-      this.formData.city = "Коломия";
-      return;
-    }
+  if (name.includes('самовивіз з наших магазинів')) {
+    this.formData.city = "Коломия";
+    return;
+  }
 
-    // Самовивіз з НП, УкрПошти, поштоматів — викликаємо fetchCities одразу
+  // Якщо місто вже обране — перевантажити відділення/поштомати
+  if (this.formData.city && this.formData.cityRef) {
+    this.fetchWarehouses();
+  } else {
     this.fetchCities();
   }
+}
+
 
   if (value === 'courier') {
     // Для кур'єра fetchCities викликається при введенні, fetchStreets викликаємо одразу
@@ -450,54 +455,53 @@ export default {
     },
 
     async fetchWarehouses() {
-      if (!this.formData.cityRef) {
-        console.error("CityRef is required.");
-        return;
-      }
-      const token = localStorage.getItem("token");
-      try {
-        const response = await axios.get("https://koshtovnya.api-dev.bmax-edu.website/api/nova-poshta/ware-houses", {
-          headers: { Authorization: `Bearer ${token}` },
-          params: {
-            city: this.formData.city,
-            Ref: this.formData.cityRef,
-            delivery_type: this.formData.deliveryType?.value
-
-          }
-        });
-        if (response.status === 200 && Array.isArray(response.data?.data)) {
-          
-const deliveryName = this.formData.deliveryType?.name?.toLowerCase() || '';
-const isPostomatMode = deliveryName.includes('поштомат');
-const isBranchMode = deliveryName.includes('відділення') || deliveryName.includes('нова пошта') || deliveryName.includes('укрпошта');
-
-const filtered = response.data.data.filter((w) => {
-  const name = (w.warehouse || '').toLowerCase();
-  if (isPostomatMode) {
-    return name.includes('поштомат');
-  } else if (isBranchMode) {
-    return name.includes('відділення');
+  if (!this.formData.cityRef) {
+    console.error("CityRef is required.");
+    return;
   }
-  return true;
-});
-
-
-
-
-          this.warehouses = filtered.map((item, index) => ({
-            id: index + 1,
-            name: item.warehouse
-          }));
-
-
-        } else {
-          this.warehouses = [];
-        }
-      } catch (error) {
-        console.error("Error fetching warehouses:", error.response?.data || error.message);
-        this.warehouses = [];
+  const token = localStorage.getItem("token");
+  try {
+    const response = await axios.get("https://koshtovnya.api-dev.bmax-edu.website/api/nova-poshta/ware-houses", {
+      headers: { Authorization: `Bearer ${token}` },
+      params: {
+        city: this.formData.city,
+        Ref: this.formData.cityRef,
+        delivery_type: this.formData.deliveryType?.value
       }
-    },
+    });
+
+    if (response.status === 200 && Array.isArray(response.data?.data)) {
+      const deliveryName = this.formData.deliveryType?.name?.toLowerCase() || '';
+      const isPostomatMode = deliveryName.includes('поштомат');
+
+      // 🛠️ Нове: фільтруємо чітко
+      const filtered = response.data.data.filter((w) => {
+        const name = (w.warehouse || '').toLowerCase();
+
+        if (isPostomatMode) {
+          return name.includes('поштомат');
+        } else {
+          // ❗ Відсікаємо всі поштомати, залишаємо тільки відділення
+          return !name.includes('поштомат') && (
+            name.includes('відділення') ||
+            name.includes('нова пошта') ||
+            name.includes('укрпошта')
+          );
+        }
+      });
+
+      this.warehouses = filtered.map((item, index) => ({
+        id: index + 1,
+        name: item.warehouse
+      }));
+    } else {
+      this.warehouses = [];
+    }
+  } catch (error) {
+    console.error("Error fetching warehouses:", error.response?.data || error.message);
+    this.warehouses = [];
+  }
+},
 
   onCitySearch(query) {
   this.formData.city = query;
@@ -890,13 +894,15 @@ console.log("deliveryAddressValue:", deliveryAddressValue);
 },
 
   watch: {
-    selectedCity(newCity) {
-      if (newCity?.Ref) {
-        this.formData.city = newCity.city;
-        this.formData.cityRef = newCity.Ref;
-        this.fetchWarehouses();
-      }
+  selectedCity(newCity) {
+    if (newCity?.Ref) {
+      this.formData.city = newCity.city;
+      this.formData.cityRef = newCity.Ref;
+      this.warehouses = []; // 🧼 очищення
+      this.fetchWarehouses();
     }
+  }
+
   }
 
 };
@@ -929,4 +935,9 @@ console.log("deliveryAddressValue:", deliveryAddressValue);
   float: right;
   margin-right: 1rem;
 }
+
+.multiselect__option--highlight::after {
+  display: none !important;
+}
+
 </style>

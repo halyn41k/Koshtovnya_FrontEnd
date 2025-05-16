@@ -1,8 +1,10 @@
 <template>
   <div class="postal-info font-montserrat text-[14px]">
     <div class="flex flex-col gap-4 w-[250px]">
-      <!-- Category dropdown -->
+
+      <!-- Тип доставки -->
       <div class="relative">
+        <label class="block mb-1 text-sm font-medium text-gray-700">Тип доставки:</label>
         <select
           v-model="localDeliveryCategory"
           @change="onDeliveryCategoryChange"
@@ -19,19 +21,16 @@
         </div>
       </div>
 
-      <!-- Delivery type dropdown -->
+      <!-- Спосіб доставки -->
       <div class="relative">
+        <label class="block mb-1 text-sm font-medium text-gray-700">Спосіб доставки:</label>
         <select
           v-model="localData.deliveryType"
           @change="onDeliveryTypeChange"
           class="block w-full p-2 border border-gray-300 rounded-md bg-white text-gray-900 font-normal pr-8 appearance-none"
         >
           <option disabled value="">Оберіть спосіб доставки</option>
-          <option
-            v-for="option in deliveryOptions"
-            :key="option.id"
-            :value="option.name"
-          >
+          <option v-for="option in deliveryOptions" :key="option.id" :value="option.name">
             {{ option.name }}
           </option>
         </select>
@@ -40,11 +39,12 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
           </svg>
         </div>
+        <span v-if="errors.deliveryType" class="text-red-500 text-xs">{{ errors.deliveryType }}</span>
       </div>
-      <span v-if="errors.deliveryType" class="text-red-500 text-xs">{{ errors.deliveryType }}</span>
 
-      <!-- City autocomplete dropdown -->
+      <!-- Місто -->
       <div class="relative">
+        <label class="block mb-1 text-sm font-medium text-gray-700">Місто:</label>
         <input
           v-model="localData.city"
           @input="onCityInput"
@@ -52,24 +52,17 @@
           class="block w-full p-2 border border-gray-300 rounded-md text-gray-900 font-normal focus:outline-none focus:ring-2 focus:ring-red-500"
         />
         <span v-if="errors.city" class="text-red-500 text-xs absolute top-full mt-1">{{ errors.city }}</span>
-        <ul
-          v-if="citiesLocal.length"
-          class="absolute z-50 bg-white border border-gray-200 rounded-md shadow-lg w-full mt-1 max-h-48 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100"
-        >
-          <li
-            v-for="city in citiesLocal"
-            :key="city.Ref"
-            @click="selectCity(city)"
-            class="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-          >
+        <ul v-if="citiesLocal.length" class="absolute z-50 bg-white border border-gray-200 rounded-md shadow-lg w-full mt-1 max-h-48 overflow-y-auto">
+          <li v-for="city in citiesLocal" :key="city.Ref" @click="selectCity(city)" class="px-4 py-2 hover:bg-gray-100 cursor-pointer">
             {{ city.city }}
           </li>
         </ul>
       </div>
 
-      <!-- Courier street search -->
+      <!-- Вулиця -->
       <div v-if="isCourier" class="mt-4">
         <div class="relative">
+          <label class="block mb-1 text-sm font-medium text-gray-700">Вулиця:</label>
           <input
             v-model="localData.streetSearch"
             @input="onStreetSearch"
@@ -77,23 +70,17 @@
             class="block w-full p-2 border border-gray-300 rounded-md text-gray-900 font-normal focus:outline-none focus:ring-2 focus:ring-red-500"
           />
           <span v-if="errors.street" class="text-red-500 text-xs absolute top-full mt-1">{{ errors.street }}</span>
-          <ul
-            v-if="streetsLocal.length"
-            class="absolute z-50 bg-white border border-gray-200 rounded-md shadow-lg w-full mt-1 max-h-48 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100"
-          >
-            <li
-              v-for="(street, idx) in streetsLocal"
-              :key="idx"
-              @click="selectStreet(street)"
-              class="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-            >
+          <ul v-if="streetsLocal.length" class="absolute z-50 bg-white border border-gray-200 rounded-md shadow-lg w-full mt-1 max-h-48 overflow-y-auto">
+            <li v-for="(street, idx) in streetsLocal" :key="idx" @click="selectStreet(street)" class="px-4 py-2 hover:bg-gray-100 cursor-pointer">
               {{ street.street || street.Name }}
             </li>
           </ul>
           <p v-else-if="localData.streetSearch" class="text-gray-500 mt-1">Немає вулиць для цього запиту.</p>
         </div>
 
+        <!-- Номер будинку -->
         <div v-if="localData.street" class="mt-4">
+          <label class="block mb-1 text-sm font-medium text-gray-700">Номер будинку:</label>
           <input
             v-model="localData.houseNumber"
             @input="updateData"
@@ -104,19 +91,16 @@
         </div>
       </div>
 
-      <!-- Pickup warehouse dropdown -->
+      <!-- Відділення -->
       <div v-if="isPickup" class="mt-4 relative">
+        <label class="block mb-1 text-sm font-medium text-gray-700">Відділення:</label>
         <select
           v-model="localData.warehouse"
           @change="updateData"
           class="block w-full p-2 border border-gray-300 rounded-md bg-white text-gray-900 font-normal pr-8 appearance-none"
         >
           <option disabled value="">Оберіть відділення</option>
-          <option
-            v-for="warehouse in warehousesLocal"
-            :key="warehouse.id"
-            :value="warehouse.name"
-          >
+          <option v-for="warehouse in warehousesLocal" :key="warehouse.id" :value="warehouse.name">
             {{ warehouse.name }}
           </option>
         </select>
@@ -127,6 +111,7 @@
         </div>
         <span v-if="errors.warehouse" class="text-red-500 text-xs absolute top-full mt-1">{{ errors.warehouse }}</span>
       </div>
+
     </div>
   </div>
 </template>
