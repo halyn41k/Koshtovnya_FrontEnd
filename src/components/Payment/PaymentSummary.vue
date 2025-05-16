@@ -1,4 +1,4 @@
-<template>
+<template> 
   <section class="relative z-[5]">
     <div
       class="
@@ -75,28 +75,23 @@ import { mapGetters, mapActions } from "vuex";
 export default {
   name: "PaymentSummary",
   props: {
-    cityRef: {
-      type: String,
-      required: false,
-      default: ""
-    },
-    deliveryType: {
-      type: String,
-      required: false,
-      default: ""
-    }
+    cityRef: { type: String, default: "" },
+    deliveryType: { type: [String, Object], default: "" }
   },
   computed: {
     ...mapGetters("order", ["cartItems", "deliveryCost", "customerData"]),
     safeCartItems() {
       return Array.isArray(this.cartItems) ? this.cartItems : [];
     },
-    // Використовуємо дані з пропсів, а якщо вони відсутні — дані з customerData
-    effectiveCityRef() {
-      return this.cityRef || (this.customerData && this.customerData.cityRef) || "";
-    },
     effectiveDeliveryType() {
-      return this.deliveryType || (this.customerData && this.customerData.deliveryType) || "";
+      if (typeof this.deliveryType === 'string') return this.deliveryType;
+      if (this.deliveryType && typeof this.deliveryType === 'object') {
+        return this.deliveryType.delivery_type || this.deliveryType.name || '';
+      }
+      return '';
+    },
+    effectiveCityRef() {
+      return this.cityRef || this.customerData?.cityRef || '';
     },
     cartTotalAmount() {
       return this.safeCartItems.reduce(
@@ -123,40 +118,24 @@ export default {
   methods: {
     ...mapActions("order", ["updateCartItems", "updateDeliveryCost"]),
     async fetchCartItems() {
-      console.log("[fetchCartItems] Початок завантаження кошика");
       const token = localStorage.getItem("token");
-      if (!token) {
-        console.error("[fetchCartItems] Необхідна авторизація");
-        return;
-      }
+      if (!token) return;
       try {
         const response = await axios.get("https://koshtovnya.api-dev.bmax-edu.website/api/cart", {
           headers: { Authorization: `Bearer ${token}` }
         });
-        const data = response.data.products || [];
-        console.log("[fetchCartItems] Отримані дані кошика:", data);
-        this.updateCartItems(data);
+        this.updateCartItems(response.data.products || []);
       } catch (error) {
-        console.error("[fetchCartItems] Помилка завантаження кошика", error);
+        console.error("[fetchCartItems] Помилка:", error);
       }
     },
     async calculateDeliveryCost() {
-      console.log("[calculateDeliveryCost] Виклик функції розрахунку доставки");
       const token = localStorage.getItem("token");
-      if (!token) {
-        console.error("[calculateDeliveryCost] Необхідна авторизація");
-        return 0;
-      }
-      console.log("[calculateDeliveryCost] effectiveCityRef:", this.effectiveCityRef);
-      console.log("[calculateDeliveryCost] effectiveDeliveryType:", this.effectiveDeliveryType);
-      if (!this.effectiveCityRef || !this.effectiveDeliveryType) {
-        console.error("[calculateDeliveryCost] cityRef або deliveryType відсутні");
-        return 0;
-      }
-      const productIds = this.safeCartItems.map(item => item.id);
+      if (!token || !this.effectiveCityRef || !this.effectiveDeliveryType) return 0;
       const serviceType = this.effectiveDeliveryType.toLowerCase().includes("кур'єр")
         ? "WarehouseDoors"
         : "WarehouseWarehouse";
+      const productIds = this.safeCartItems.map(item => item.id);
       try {
         const response = await axios.get("https://koshtovnya.api-dev.bmax-edu.website/api/nova-poshta/delivery/cost", {
           headers: { Authorization: `Bearer ${token}` },
@@ -166,43 +145,18 @@ export default {
             product_ids: productIds
           }
         });
-        if (response.data && response.data.data && response.data.data.cost !== undefined) {
-          const cost = response.data.data.cost;
-          this.updateDeliveryCost(cost);
-          return cost;
-        } else {
-          console.error("[calculateDeliveryCost] Невірна відповідь API розрахунку доставки", response.data);
-          return 0;
-        }
+        const cost = response.data?.data?.cost || 0;
+        this.updateDeliveryCost(cost);
+        return cost;
       } catch (error) {
-        console.error("[calculateDeliveryCost] Помилка розрахунку вартості доставки", error);
+        console.error("[calculateDeliveryCost] Помилка:", error);
         return 0;
       }
     },
     async submitOrder() {
-      console.log("[submitOrder] === Початок submitOrder ===");
       const token = localStorage.getItem("token");
-      if (!token) {
-        console.error("[submitOrder] Токен відсутній - перенаправлення на логін");
-        alert("Будь ласка, увійдіть у свій обліковий запис.");
-        this.$router.push("/login");
-        return;
-      }
-      if (!this.safeCartItems.length) {
-        console.error("[submitOrder] Кошик порожній");
-        alert("Кошик порожній. Додайте товари перед оформленням замовлення.");
-        return;
-      }
-      // Логування перед розрахунком доставки
-      console.log("[submitOrder] Перед розрахунком доставки:", {
-        effectiveCityRef: this.effectiveCityRef,
-        effectiveDeliveryType: this.effectiveDeliveryType,
-        safeCartItems: this.safeCartItems
-      });
-      
+      if (!token || !this.safeCartItems.length) return;
       const currentDeliveryCost = await this.calculateDeliveryCost();
-      console.log("[submitOrder] Поточна вартість доставки після розрахунку:", currentDeliveryCost);
-      
       const customer = this.customerData;
       const orderData = {
         last_name: customer.lastName,
@@ -210,89 +164,72 @@ export default {
         second_name: customer.secondName || "",
         phone_number: customer.phone,
         city: customer.city,
-        delivery_name: customer.deliveryType,
-        delivery_address: customer.deliveryType.toLowerCase().includes("самовивіз")
-          ? customer.warehouse
-          : `${customer.street} ${customer.houseNumber}`,
+        delivery_name: typeof customer.deliveryType === 'string'
+          ? customer.deliveryType
+          : customer.deliveryType?.name || '',
+        delivery_address: this.resolveDeliveryAddress(),
+
+
         payment_method: customer.paymentMethod,
         type_of_card: customer.paymentMethod === "Післяоплата" ? "" : customer.typeOfCard,
         delivery_cost: currentDeliveryCost,
         cart_cost: this.cartTotalAmount
       };
-      
-      console.log("[submitOrder] Сформований payload замовлення:", orderData);
       try {
-        // Створення замовлення
         const orderResponse = await axios.post("https://koshtovnya.api-dev.bmax-edu.website/api/orders", orderData, {
           headers: { Authorization: `Bearer ${token}` }
         });
         const orderId = orderResponse.data?.data?.order?.id;
-        if (!orderId) {
-          console.error("[submitOrder] Помилка: order_id не отримано з API.");
-          alert("Сталася помилка при оформленні замовлення. Спробуйте ще раз.");
-          return;
-        }
-        console.log("[submitOrder] Замовлення успішно створено, order_id:", orderId);
-        
+        if (!orderId) return;
         if (customer.paymentMethod === "Післяоплата") {
           this.$router.push("/payment-confirmed");
         } else if (customer.paymentMethod === "Оплата картою") {
-          // Оплата картою:
           const amount = this.cartTotalAmount + currentDeliveryCost;
-          console.log("[submitOrder] Спосіб оплати - Оплата картою, сума для оплати:", amount);
-          try {
-            const paymentResponse = await axios.post(
-              "https://koshtovnya.api-dev.bmax-edu.website/api/payment",
-              {
-                amount,
-                order_id: orderId,
-                description: "Оплата замовлення" // або "Оплата товару" – за потребою
-              },
-              {
-                headers: { Authorization: `Bearer ${token}` }
-              }
-            );
-            // Очікуємо, що бекенд повертає HTML форму LiqPay у полі form
-            const liqpayFormHtml = paymentResponse.data.form;
-            if (!liqpayFormHtml) {
-              console.error("[submitOrder] Не отримано HTML форму LiqPay");
-              alert("Сталася помилка при оплаті картою. Спробуйте ще раз.");
-              return;
-            }
-            // Створюємо тимчасовий контейнер, вставляємо HTML форму та автоматично її відправляємо
-            const container = document.createElement("div");
-            container.innerHTML = liqpayFormHtml;
-            document.body.appendChild(container);
-            const form = container.querySelector("form");
-            if (form) {
-              console.log("[submitOrder] Відправка форми LiqPay...");
-              form.submit();
-            } else {
-              console.error("[submitOrder] Не вдалося знайти форму LiqPay в отриманому HTML");
-            }
-          } catch (paymentError) {
-            console.error("[submitOrder] Помилка оплати картою:", paymentError);
-            alert("Сталася помилка при оплаті картою. Спробуйте ще раз.");
-          }
+          const paymentResponse = await axios.post("https://koshtovnya.api-dev.bmax-edu.website/api/payment", {
+            amount,
+            order_id: orderId,
+            description: "Оплата замовлення"
+          }, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          const liqpayFormHtml = paymentResponse.data.form;
+          if (!liqpayFormHtml) return;
+          const container = document.createElement("div");
+          container.innerHTML = liqpayFormHtml;
+          document.body.appendChild(container);
+          const form = container.querySelector("form");
+          if (form) form.submit();
         }
       } catch (error) {
-        console.error("[submitOrder] Помилка оформлення замовлення:", error.response?.data || error.message);
-        alert("Не вдалося оформити замовлення. Спробуйте пізніше.");
+        console.error("[submitOrder] Помилка оформлення замовлення:", error);
       }
-      console.log("[submitOrder] === Кінець submitOrder ===");
-    }
+    },
+    resolveDeliveryAddress() {
+  const type = this.customerData?.deliveryType;
+  const name = typeof type === 'string' ? type : type?.name || '';
+  const delivery_type = typeof type === 'object' ? type.delivery_type : null;
+
+  if (name === 'Самовивіз з наших магазинів') {
+    return 'вул. Степана Бандери 22, Коломия';
+  }
+
+  if (name.toLowerCase().includes('поштомат')) {
+    return this.customerData?.warehouse || 'Поштомат не обрано';
+  }
+
+  if (delivery_type === 'pickup') {
+    return this.customerData?.warehouse || 'Відділення не обрано';
+  }
+
+  return `${this.customerData?.street || ''} ${this.customerData?.houseNumber || ''}`.trim();
+},
+
   },
   async mounted() {
-    console.log("[mounted] Компонент PaymentSummary монтується...");
     await this.fetchCartItems();
     if (this.effectiveCityRef && this.effectiveDeliveryType && this.safeCartItems.length) {
       await this.calculateDeliveryCost();
-      console.log("[mounted] Розрахована вартість доставки:", this.deliveryCost);
-    } else {
-      console.warn("[mounted] Недостатньо даних для розрахунку доставки. effectiveCityRef:", this.effectiveCityRef, "effectiveDeliveryType:", this.effectiveDeliveryType, "safeCartItems.length:", this.safeCartItems.length);
     }
-    console.log("[mounted] Завершення монтування PaymentSummary");
   }
 };
 </script>
-

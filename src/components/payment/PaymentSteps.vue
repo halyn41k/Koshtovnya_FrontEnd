@@ -63,7 +63,7 @@
             />
 
             <button
-              v-if="canProceedToNextStep && currentStep < steps.length - 1"
+  v-if="(canProceedToNextStep || isStorePickupSelected) && currentStep < steps.length - 1"
               @click="validateAndProceed"
               class="mt-4 w-fit px-5 py-2 bg-[#6B1F1F] hover:bg-[#A01212] text-white text-[14px] font-semibold rounded-lg shadow-sm transition-all duration-300 ease-in-out"
             >
@@ -93,6 +93,8 @@ import DeliveryAddress from "./DeliveryAddress.vue";
 import PersonalInfo from "./PersonalInfo.vue";
 import PostalInfo from "./PostalInfo.vue";
 import PaymentInfo from "./PaymentInfo.vue";
+import PaymentSummary from './PaymentSummary.vue';
+
 
 export default {
   name: "PaymentSteps",
@@ -101,6 +103,7 @@ export default {
     PersonalInfo,
     PostalInfo,
     PaymentInfo,
+    PaymentSummary,
   },
   data() {
     return {
@@ -129,13 +132,17 @@ export default {
       cities: [],
       streets: [],
       warehouses: [],
-      selectedDeliveryCategory: "",
-      filteredDeliveryOptions: [],
+      deliveryOptions: [], // комбінований список тип + спосіб
+      hasTriedSubmit: false,
       cartItems: [],
       deliveryCost: 0,
     };
   },
   computed: {
+    isStorePickupSelected() {
+  return this.formData.deliveryType?.name === 'Самовивіз з наших магазинів';
+},
+
     canProceedToNextStep() {
       if (this.currentStep === 0) {
         return this.validatePersonalInfo();
@@ -172,23 +179,29 @@ export default {
         this.steps[this.currentStep].isExpanded = true;
       }
     },
-    updateDeliveryOptions(selectedCategory) {
-      this.selectedDeliveryCategory = selectedCategory;
-      const deliveryData = {
-        courier: [
-          { id: 5, name: "Кур'єр Нової Пошти" },
-          { id: 6, name: "Кур'єр УКРПОШТИ" },
-        ],
-        pickup: [
-          { id: 1, name: "Самовивіз з наших магазинів" },
-          { id: 2, name: "Самовивіз з поштоматів Нової Пошти" },
-          { id: 3, name: "Самовивіз з Нової Пошти" },
-          { id: 4, name: "Самовивіз з УКРПОШТИ" },
-        ],
-      };
-      this.filteredDeliveryOptions = deliveryData[selectedCategory] || [];
-    },
+    updateDeliveryOptions() {
+  const deliveryData = {
+    courier: [
+      { id: 5, name: "Кур'єр Нової Пошти", value: 'courier', label: 'Курʼєр' },
+      { id: 6, name: "Кур'єр УКРПОШТИ", value: 'courier', label: 'Курʼєр' }
+    ],
+    pickup: [
+      { id: 1, name: "Самовивіз з наших магазинів", value: 'pickup', label: 'Самовивіз' },
+      { id: 2, name: "Самовивіз з поштоматів Нової Пошти", value: 'pickup', label: 'Самовивіз' },
+      { id: 3, name: "Самовивіз з Нової Пошти", value: 'pickup', label: 'Самовивіз' },
+      { id: 4, name: "Самовивіз з УКРПОШТИ", value: 'pickup', label: 'Самовивіз' }
+    ]
+  };
+
+  this.deliveryOptions = [...deliveryData.courier, ...deliveryData.pickup];
+},
     validateAndProceed() {
+      if (!this.canProceedToNextStep) {
+  // Примусово розгортає step, де є помилка
+  this.steps[this.currentStep].isExpanded = true;
+  return;
+}
+
       if (this.canProceedToNextStep) {
         this.updateCustomerData(this.formData);
         this.completeStep();
@@ -233,10 +246,11 @@ export default {
         this.errors.city = "Місто обов'язкове";
         valid = false;
       }
-      if (!this.formData.deliveryType) {
-        this.errors.deliveryType = "Тип доставки обов'язковий";
-        valid = false;
-      }
+      if (!this.formData.deliveryType || this.formData.deliveryType.name === '') {
+  this.errors.deliveryType = "Спосіб доставки обов'язковий";
+  valid = false;
+}
+
       if (this.selectedDeliveryCategory === "courier") {
         if (!this.formData.street) {
           this.errors.street = "Виберіть вулицю";
@@ -319,37 +333,58 @@ export default {
       }
     },
     async fetchUserAddress() {
-      const token = localStorage.getItem("token");
-      if (!token) return;
-      try {
-        const response = await axios.get(
-          "https://koshtovnya.api-dev.bmax-edu.website/api/user-address",
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        const addressData = response.data.data;
-        if (addressData) {
-          this.formData.phone = addressData.phone_number || "";
-          this.formData.city = addressData.city || "";
-          this.formData.cityRef = addressData.Ref || "";
-          this.formData.warehouse = addressData.delivery_address || "";
-          this.selectedDeliveryCategory =
-            addressData.delivery_type === "courier" ? "courier" : "pickup";
-          this.$nextTick(() => {
-            this.updateDeliveryOptions(this.selectedDeliveryCategory);
-            this.formData.deliveryType = addressData.delivery_name || "";
-            [
-              this.formData.lastName,
-              this.formData.firstName,
-              this.formData.secondName,
-            ] = addressData.user ? addressData.user.split(' ') : ["", "", ""];
-          });
-        }
-      } catch (error) {
-        console.error("Помилка отримання адреси користувача", error);
-      }
-    },
+  const token = localStorage.getItem("token");
+  if (!token) return;
+
+  try {
+    const response = await axios.get(
+      "https://koshtovnya.api-dev.bmax-edu.website/api/user-address",
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+
+    const addressData = response.data.data;
+    if (addressData) {
+      this.formData.phone = addressData.phone_number || "";
+      this.formData.city = addressData.city || "";
+      this.formData.cityRef = addressData.Ref || "";
+      this.formData.warehouse = addressData.delivery_address || "";
+
+      this.selectedDeliveryCategory =
+        addressData.delivery_type === "courier" ? "courier" : "pickup";
+
+      // 💥 Оновлюємо delivery options
+      this.updateDeliveryOptions(this.selectedDeliveryCategory);
+
+      // 💡 Чекаємо DOM і реактивність через 2 nextTick-и
+      this.$nextTick(() => {
+  const match = this.filteredDeliveryOptions.find(
+    opt => opt.name === addressData.delivery_name
+  );
+  if (match) {
+    this.formData.deliveryType = match;
+  } else {
+    console.warn('Не знайдено deliveryType для', addressData.delivery_name);
+  }
+
+  // Імʼя + прізвище
+  const [last, first, second] = addressData.user ? addressData.user.split(' ') : ["", "", ""];
+  this.formData.lastName = last;
+  this.formData.firstName = first;
+  this.formData.secondName = second;
+});
+
+
+
+    }
+  } catch (error) {
+    console.error("Помилка отримання адреси користувача", error);
+  }
+},
+
   },
   created() {
+    this.updateDeliveryOptions();
+
     this.fetchDeliveryTypes();
     this.fetchUserAddress();
     this.fetchCartItems().then(() => {

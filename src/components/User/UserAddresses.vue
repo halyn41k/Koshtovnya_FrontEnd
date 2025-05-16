@@ -182,7 +182,7 @@
 
     <div>
       <label class="block text-gray-700 mb-1">Відділення:</label>
-      <Multiselect v-model="deliveryAddress.branch" :options="warehouses.map(w => w.name)"
+      <Multiselect :key="formData.deliveryType?.name" v-model="deliveryAddress.branch" :options="warehouses.map(w => w.name)"
         placeholder="Оберіть відділення" :searchable="true" :allow-empty="false"
         class="w-full mt-2"
         :class="{ 'border border-red-500 rounded-md': errors.branch }" />
@@ -191,7 +191,7 @@
   </template>
 </template>
 
-        <!-- Form Actions -->
+
         <div class="flex flex-wrap gap-4 mt-4">
           <button type="submit" class="px-5 py-2 bg-[#6B1F1F] hover:bg-[#A01212] text-white rounded-lg transition">
             Зберегти
@@ -335,33 +335,45 @@ export default {
   const name = this.formData.deliveryType?.name?.toLowerCase();
   const value = this.formData.deliveryType?.value;
 
-  this.formData.selectedDeliveryMethod = null;
-  this.formData.city = "";
-  this.formData.cityRef = "";
-  this.deliveryAddress = { street: "", number: "", branch: "", postomat: "", warehouse: "" };
+  // Скидаємо всі змінні
+  this.formData.selectedDeliveryMethod = this.formData.deliveryType;
+  this.formData.cityRef = '';
+  this.formData.streetSearch = '';
+  this.selectedCity = null;
+  this.selectedStreet = null;
+
+  // 🧹 Очищення адрес
+  this.deliveryAddress = {
+    street: '',
+    number: '',
+    branch: '',
+    postomat: '',
+    warehouse: ''
+  };
+
+  // 🧹 Очищення списків
   this.streets = [];
   this.cities = [];
   this.warehouses = [];
 
- if (value === 'pickup') {
-  this.formData.selectedDeliveryMethod = this.formData.deliveryType;
-
-  if (name.includes('самовивіз з наших магазинів')) {
+  // Якщо тип доставки — з магазину
+  if (value === 'pickup' && name.includes('самовивіз з наших магазинів')) {
     this.formData.city = "Коломия";
     return;
   }
 
-  // Якщо місто вже обране — перевантажити відділення/поштомати
+  // Якщо вже обране місто — одразу підтягуємо відділення/поштомати
   if (this.formData.city && this.formData.cityRef) {
     this.fetchWarehouses();
-  } else {
+  }
+
+  // Якщо ще нема міста — пропонуємо його знайти
+  if (!this.formData.city && value === 'pickup') {
     this.fetchCities();
   }
-}
 
-
+  // Якщо курʼєр — підтягуємо вулиці
   if (value === 'courier') {
-    // Для кур'єра fetchCities викликається при введенні, fetchStreets викликаємо одразу
     this.fetchStreets();
   }
 },
@@ -893,18 +905,22 @@ console.log("deliveryAddressValue:", deliveryAddressValue);
   }
 },
 
-  watch: {
+ watch: {
+  'formData.deliveryType': {
+    handler() {
+      this.updateDeliveryOptions();
+    },
+    immediate: false
+  },
   selectedCity(newCity) {
     if (newCity?.Ref) {
       this.formData.city = newCity.city;
       this.formData.cityRef = newCity.Ref;
-      this.warehouses = []; // 🧼 очищення
+      this.warehouses = []; // обовʼязково очищаємо перед фетчем
       this.fetchWarehouses();
     }
   }
-
-  }
-
+}
 };
 </script>
 

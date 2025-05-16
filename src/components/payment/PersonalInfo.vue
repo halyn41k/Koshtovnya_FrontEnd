@@ -23,6 +23,8 @@
 
 
 <script>
+import Multiselect from 'vue-multiselect'
+
 export default {
   name: 'PersonalInfo',
   props: {

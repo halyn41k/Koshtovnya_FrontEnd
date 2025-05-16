@@ -36,15 +36,8 @@
           <DeliveryAddress :formData="formData" class="w-full" />
         </div>
 
-        <div class="hidden lg:block sticky top-28 h-fit self-start">
 
-          <PaymentSummary
-            :cart-items="cartItems"
-            :delivery-cost="deliveryCost"
-            :city-ref="formData.cityRef"
-            :delivery-type="formData.deliveryType"
-          />
-        </div>
+
       </main>
     </div>
   </section>
@@ -54,7 +47,6 @@
 import PaymentSteps from "./PaymentSteps.vue";
 import OrderReview from "./OrderReview.vue";
 import DeliveryAddress from "./DeliveryAddress.vue";
-import PaymentSummary from "./PaymentSummary.vue";
 
 export default {
   name: "PaymentComponent",
@@ -62,7 +54,6 @@ export default {
     PaymentSteps,
     OrderReview,
     DeliveryAddress,
-    PaymentSummary,
   },
   data() {
     return {
@@ -113,4 +104,6 @@ export default {
   font-style: normal;
   font-display: swap;
 }
+
+
 </style>

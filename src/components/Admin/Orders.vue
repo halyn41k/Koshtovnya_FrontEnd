@@ -56,17 +56,18 @@
               <td class="px-4 py-2 text-sm text-gray-800">{{ order.id }}</td>
               <td class="px-4 py-2 text-sm text-gray-800">{{ order.order_date }}</td>
               <td class="px-4 py-2 text-sm text-gray-800">
-                <select
-                  v-model="order.status"
-                  @change="updateStatus(order.id, order.status)"
-                  class="border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring focus:ring-pink-200"
-                >
-                  <option value="" disabled>В очікуванні</option>
-                  <option value="Відправлено">Відправлено</option>
-                  <option value="Доставлено">Доставлено</option>
-                  <option value="Скасовано">Скасовано</option>
-                </select>
-              </td>
+  <Multiselect
+    v-model="order.status"
+    :options="statusOptions"
+    placeholder="Оберіть статус"
+    :allow-empty="false"
+    :close-on-select="true"
+    :show-labels="false"
+    @input="updateStatus(order.id, order.status)"
+    class="text-sm"
+  />
+</td>
+
               <td class="px-4 py-2 text-sm text-gray-800">{{ order.phone_number }}</td>
               <td class="px-4 py-2 text-sm text-gray-800">{{ order.products.join(', ') }}</td>
               
@@ -129,11 +130,16 @@
 
 <script>
 import axios from "axios";
+import Multiselect from 'vue-multiselect'
 
 export default {
   name: "OrderList",
+  components: {
+    Multiselect
+  },
   data() {
     return {
+      statusOptions: ["В очікуванні", "Відправлено", "Доставлено", "Скасовано"],
       orders: [],
       searchQuery: "",
       sortState: {
@@ -252,3 +258,37 @@ export default {
   }
 };
 </script>
+
+<style>
+.custom-multiselect .multiselect__option--highlight::after {
+  display: none !important;
+}
+
+.multiselect__option--highlight {
+  background: #F3F4F6 !important;
+  /* Ніжно-рожевий */
+  color: #6B1F1F !important;
+  /* Головний колір тексту */
+}
+
+.multiselect__option--selected {
+  font-weight: 600 !important;
+  /* semibold */
+}
+
+.multiselect__option--selected::after {
+  content: 'Обрано' !important;
+  color: #9CA3AF;
+  /* світло-сірий */
+  font-size: 0.75rem;
+  /* text-sm */
+  font-weight: 500;
+  float: right;
+  margin-right: 1rem;
+}
+
+.multiselect__option--highlight::after {
+  display: none !important;
+}
+
+</style>
