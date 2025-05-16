@@ -19,67 +19,85 @@
       </div>
 
       <!-- Місто -->
-      <div v-if="!isStorePickup" class="relative">
+      <div v-if="!isStorePickup">
         <label class="block mb-1 text-sm font-medium text-gray-700">Місто:</label>
-        <input
-          v-model="localData.city"
-          @input="onCityInput"
-          placeholder="Введіть місто"
-          class="block w-full p-2 border border-gray-300 rounded-md text-gray-900 font-normal focus:outline-none focus:ring-2 focus:ring-red-500"
-        />
-        <span v-if="errors.city" class="text-red-500 text-xs absolute top-full mt-1">{{ errors.city }}</span>
-        <ul v-if="citiesLocal.length" class="absolute z-50 bg-white border border-gray-200 rounded-md shadow-lg w-full mt-1 max-h-48 overflow-y-auto">
-          <li v-for="city in citiesLocal" :key="city.Ref" @click="selectCity(city)" class="px-4 py-2 hover:bg-gray-100 cursor-pointer">
-            {{ city.city }}
-          </li>
-        </ul>
+        <Combobox v-model="selectedCity" as="div" class="relative">
+          <div class="relative">
+            <ComboboxInput
+  class="block w-full p-2 border border-gray-300 rounded-md text-gray-900 font-normal focus:outline-none focus:ring-2 focus:ring-red-500"
+  :class="{ 'border-red-500': errors.city }"
+  @input="handleCitySearch"
+  :displayValue="city => city?.city || city"
+  placeholder="Введіть місто"
+/>
+
+
+            <ComboboxOptions v-if="citiesLocal.length"
+              class="absolute z-50 w-full mt-1 max-h-48 overflow-auto rounded bg-white border shadow-lg">
+              <ComboboxOption v-for="city in citiesLocal" :key="city.Ref" :value="city"
+                class="px-4 py-2 hover:bg-gray-100 cursor-pointer">
+                {{ city.city }}
+              </ComboboxOption>
+            </ComboboxOptions>
+          </div>
+        </Combobox>
+        <p v-if="errors.city" class="text-red-500 text-xs mt-1">{{ errors.city }}</p>
       </div>
 
       <!-- Вулиця -->
-      <div v-if="isCourier" class="mt-4">
+      <div v-if="isCourier">
         <label class="block mb-1 text-sm font-medium text-gray-700">Вулиця:</label>
-        <input
-          v-model="localData.streetSearch"
-          @input="onStreetSearch"
-          placeholder="Введіть назву вулиці"
-          class="block w-full p-2 border border-gray-300 rounded-md text-gray-900 font-normal focus:outline-none focus:ring-2 focus:ring-red-500"
-        />
-        <span v-if="errors.street" class="text-red-500 text-xs absolute top-full mt-1">{{ errors.street }}</span>
-        <ul v-if="streetsLocal.length" class="absolute z-50 bg-white border border-gray-200 rounded-md shadow-lg w-full mt-1 max-h-48 overflow-y-auto">
-          <li v-for="(street, idx) in streetsLocal" :key="idx" @click="selectStreet(street)" class="px-4 py-2 hover:bg-gray-100 cursor-pointer">
-            {{ street.street || street.Name }}
-          </li>
-        </ul>
-        <div v-if="localData.street" class="mt-4">
+        <Combobox v-model="selectedStreet" as="div" class="relative">
+          <div class="relative">
+            <ComboboxInput
+  class="block w-full p-2 border border-gray-300 rounded-md text-gray-900 font-normal focus:outline-none focus:ring-2 focus:ring-red-500"
+              :class="{ 'border-red-500': errors.street }"
+              @input="handleStreetSearch"
+
+              :displayValue="street => street?.Name || street"
+              placeholder="Введіть вулицю"
+            />
+            <ComboboxOptions v-if="streetsLocal.length"
+              class="absolute z-50 w-full mt-1 max-h-48 ovehandleStreetSearchrflow-auto rounded bg-white border shadow-lg">
+              <ComboboxOption v-for="(street, idx) in streetsLocal" :key="idx" :value="street"
+                class="px-4 py-2 hover:bg-gray-100 cursor-pointer">
+                {{ street.Name || street.street }}
+              </ComboboxOption>
+            </ComboboxOptions>
+          </div>
+        </Combobox>
+        <p v-if="errors.street" class="text-red-500 text-xs mt-1">{{ errors.street }}</p>
+
+        <div class="mt-4">
           <label class="block mb-1 text-sm font-medium text-gray-700">Номер будинку:</label>
           <input
             v-model="localData.houseNumber"
+class="block w-full p-2 border border-gray-300 rounded-md text-gray-900 font-normal focus:outline-none focus:ring-2 focus:ring-red-500"
+            :class="{ 'border-red-500': errors.houseNumber }"
             @input="updateData"
             placeholder="Номер будинку"
-            class="block w-full p-2 border border-gray-300 rounded-md text-gray-900 font-normal focus:outline-none focus:ring-2 focus:ring-red-500"
           />
-          <span v-if="errors.houseNumber" class="text-red-500 text-xs">{{ errors.houseNumber }}</span>
+          <p v-if="errors.houseNumber" class="text-red-500 text-xs mt-1">{{ errors.houseNumber }}</p>
         </div>
       </div>
 
       <!-- Відділення / Поштомат -->
-      <div v-if="showWarehouse" class="mt-4 relative">
+      <div v-if="showWarehouse">
         <label class="block mb-1 text-sm font-medium text-gray-700">{{ isPostomat ? 'Поштомат' : 'Відділення' }}:</label>
         <Multiselect
           v-model="localData.warehouse"
           :options="warehousesLocal"
           :label="'name'"
           :track-by="'id'"
-          :placeholder="`Оберіть ${isPostomat ? 'поштомат' : 'відділення'}`"
-
+          placeholder="Оберіть відділення"
           :searchable="true"
           :allow-empty="false"
           @input="updateData"
         />
-        <span v-if="errors.warehouse" class="text-red-500 text-xs absolute top-full mt-1">{{ errors.warehouse }}</span>
+        <span v-if="errors.warehouse" class="text-red-500 text-xs mt-1">{{ errors.warehouse }}</span>
       </div>
 
-      <!-- Адреса магазину -->
+      <!-- Магазин -->
       <div v-if="isStorePickup" class="text-sm text-gray-800">
         <p><strong>Місто:</strong> Коломия</p>
         <p><strong>Адреса:</strong> вул. Степана Бандери 22</p>
@@ -88,19 +106,26 @@
   </div>
 </template>
 
+
 <script>
 import axios from 'axios';
 import Multiselect from 'vue-multiselect';
+import { Combobox, ComboboxInput, ComboboxOptions, ComboboxOption } from '@headlessui/vue'
 
 export default {
   name: 'PostalInfo',
-  components: { Multiselect },
+  components: { Multiselect, Combobox,
+    ComboboxInput,
+    ComboboxOptions,
+    ComboboxOption, },
   props: {
     modelValue: { type: Object, required: true },
     errors: { type: Object, default: () => ({}) }
   },
   data() {
     return {
+      selectedCity: null,
+
       localData: { ...this.modelValue },
       deliveryOptions: [],
       citiesLocal: [],
@@ -127,12 +152,32 @@ export default {
     }
   },
   watch: {
-    modelValue: { handler(val) { this.localData = { ...val }; }, deep: true }
+    modelValue: { handler(val) { this.localData = { ...val }; }, deep: true },
+     selectedCity(val) {
+    if (val?.city) {
+      this.selectCity(val);
+    }
+  },
+  selectedStreet(val) {
+  if (val?.Name || val?.street) {
+    this.selectStreet(val);
+  }
+},
+
   },
   created() {
     this.fetchDeliveryTypes();
   },
   methods: {
+    handleCitySearch(event) {
+  const value = event.target.value;
+  this.selectedCity = value; // Це важливо
+  this.localData.city = value;
+  this.updateData();
+  if (value.length >= 3) {
+    this.fetchCities();
+  }
+},
     updateData() {
       this.$emit('update:modelValue', this.localData);
     },
@@ -206,6 +251,16 @@ export default {
         this.streetsLocal = Array.isArray(data.data) ? data.data : [];
       } catch (e) { console.error('Помилка отримання вулиць', e); }
     },
+    handleStreetSearch(event) {
+  const value = event.target.value;
+  this.selectedStreet = value;
+  this.localData.streetSearch = value;
+  this.updateData();
+  if (value.length >= 3) {
+    this.fetchStreets();
+  }
+},
+
     selectCity(city) {
       this.localData.city = city.city;
       this.localData.cityRef = city.Ref;
@@ -254,4 +309,25 @@ export default {
   float: right;
   margin-right: 1rem;
 }
+
+.multiselect__option {
+  font-weight: 400 !important; /* Regular */
+}
+
+.multiselect__option--selected {
+  font-weight: 400 !important; /* Забрати жирний для вибраного */
+}
+
+.multiselect__option--highlight {
+  font-weight: 400 !important;
+}
+
+.multiselect__single {
+  font-weight: 400 !important;
+}
+
+.multiselect__option::after {
+  display: none !important; /* Забрати слово "Обрано", якщо треба */
+}
+
 </style>
