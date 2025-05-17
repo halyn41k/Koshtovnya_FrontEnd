@@ -8,11 +8,11 @@
       <div class="grid grid-cols-2 gap-4">
         <div class="flex flex-col">
           <label for="name" class="mb-1 text-sm font-medium text-gray-700">Назва</label>
-          <input id="name" type="text" v-model="form.name" required placeholder="Наприклад: Срібний браслет" class="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50" />
+          <input id="name" type="text" v-model="form.name" required placeholder="Наприклад: Срібний браслет" class="border border-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50" />
         </div>
         <div class="flex flex-col">
           <label for="price" class="mb-1 text-sm font-medium text-gray-700">Ціна</label>
-          <input id="price" type="number" v-model="form.price" required placeholder="грн" class="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50" />
+          <input id="price" type="number" v-model="form.price" required placeholder="грн" class="border border-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50" />
         </div>
       </div>
 
@@ -62,7 +62,7 @@
          <div class="grid grid-cols-2 gap-4">
         <div class="flex flex-col">
           <label for="weight" class="mb-1 text-sm font-medium text-gray-700">Вага (г)</label>
-          <input id="weight" type="number" v-model="form.weight" placeholder="Введіть вагу (г)" class="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50" />
+          <input id="weight" type="number" v-model="form.weight" placeholder="Введіть вагу (г)" class="border border-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50" />
         </div>
           <div class="flex flex-col">
             <label class="mb-2 text-sm font-medium text-gray-700">Кольори</label>
@@ -97,11 +97,11 @@
         <div v-for="(sizeItem, index) in form.sizes" :key="index" class="flex items-center gap-2">
           <div class="flex flex-col flex-1">
             <label class="text-sm text-gray-600 mb-1">Розмір (см)</label>
-            <input v-model.number="sizeItem.size" type="number" min="1" placeholder="см" required class="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50" />
+            <input v-model.number="sizeItem.size" type="number" min="1" placeholder="см" required class="border border-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50" />
           </div>
           <div class="flex flex-col w-28">
             <label class="text-sm text-gray-600 mb-1">К-ть</label>
-            <input v-model.number="sizeItem.quantity" type="number" min="1" placeholder="шт" required class="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50" />
+            <input v-model.number="sizeItem.quantity" type="number" min="1" placeholder="шт" required class="border border-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50" />
           </div>
           <button type="button" @click="removeSize(index)" class="px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-500">Видалити</button>
         </div>
@@ -140,7 +140,7 @@
       min="1"
       placeholder="Кількість"
       required
-      class="w-24 border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50"
+      class="w-24 border border-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50"
     />
 
     <!-- Кнопка видалення -->

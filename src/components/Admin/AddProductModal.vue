@@ -19,7 +19,7 @@
               type="text"
               v-model="form.name"
               required placeholder="Наприклад: Срібний браслет"
-              class="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50"
+              class="border border-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50"
             />
           </div>
           <div class="flex flex-col">
@@ -29,8 +29,7 @@
               type="number"
               v-model="form.price"
               required placeholder="грн"
-              class="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50"
-            />
+           class="border border-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50" />
           </div>
         </div>
 
@@ -86,7 +85,7 @@
               placeholder="Введіть вагу (г)"
               v-model="form.weight"
               required
-              class="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50"
+              class="border border-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50"
             />
           </div>
           <div class="flex flex-col">
@@ -129,7 +128,7 @@
   min="0"
   placeholder="23.00"
   required
-  class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50"
+  class="w-full border border-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50"
 />
 
     </div>
@@ -143,7 +142,7 @@
         min="0"
         placeholder="0"
         required
-        class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50"
+        class="w-full border border-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50"
       />
     </div>
 
@@ -209,7 +208,7 @@
         min="1"
         placeholder="К-ть"
         required
-        class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50"
+        class="w-full border border-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50"
       />
     </div>
 
@@ -497,5 +496,6 @@ export default {
   float: right;
   margin-right: 1rem;
 }
+
 
 </style>

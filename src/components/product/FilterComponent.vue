@@ -212,8 +212,10 @@ export default {
   components: { Slider },
   props: {
   initialFilters: { type: Object, default: () => ({}) },
-  hideCategory: { type: Boolean, default: false }
+  hideCategory: { type: Boolean, default: false },
+  categoryId: { type: [Number, String], default: null } // ← додай це
 },
+
 
   emits: ['apply', 'close'],
   setup(props, { emit }) {
@@ -259,7 +261,10 @@ export default {
 
     const loadFilters = async () => {
       try {
-        const data = await api.getFilter()
+const params = {}
+if (props.categoryId) params.category_id = props.categoryId
+
+const data = await api.getFilter({ params })
         availabilityOptions.value = data['Доступність'] || []
 
         const sz = data['Розмір'] || { min: '0', max: '150' }
@@ -300,6 +305,8 @@ export default {
       if (filters.beadTypes.length) cleaned.type_of_bead = [...filters.beadTypes]
       if (filters.producers.length) cleaned.bead_producer = [...filters.producers]
       if (filters.category.length) cleaned.category = [...filters.category]
+      if (props.categoryId) cleaned.category_id = props.categoryId
+
       if (filters.color) cleaned.color = filters.color
 
       if (filters.size[0] > sizeOptions.min || filters.size[1] < sizeOptions.max)
@@ -319,6 +326,13 @@ export default {
       applyInitialFilters()
     }, { deep: true })
 
+    watch(() => props.categoryId, (newId, oldId) => {
+  if (newId !== oldId) {
+    loadFilters()
+  }
+})
+
+
     onMounted(() => {
       loadFilters()
     })
@@ -337,7 +351,7 @@ export default {
       categoryOptions,
       applyFilters
     }
-  }
+  },
 }
 </script>
 

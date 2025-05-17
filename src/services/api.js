@@ -292,10 +292,11 @@ export default {
     return data;
   },
   
-  getFilter: async () => {
-    const { data } = await apiClient.get('/api/product-filter');
-    return data;
-  },
+  getFilter: async (config = {}) => {
+  const { data } = await apiClient.get('/api/product-filter', config)
+  return data
+},
+
 
   // Reviews
   getProductReviews: async id => {

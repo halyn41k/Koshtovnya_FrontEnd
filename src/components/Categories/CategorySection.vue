@@ -40,14 +40,16 @@
     <div class="flex px-8 pb-[100px]">
       <!-- FILTER SIDEBAR DESKTOP -->
       <div class="hidden lg:block w-[350px] mr-8">
-        <FilterComponent
+     <FilterComponent
   :key="filtersKey"
   :initial-filters="filters"
   :mobile-visible="false"
   :hide-category="true"
+  :category-id="categoryId"        
   @apply="applyFilters"
   @close="toggleFilter"
 />
+
 
 
       </div>
@@ -64,14 +66,16 @@
         :class="{ 'translate-x-0': filterVisible, 'translate-x-full': !filterVisible }"
       >
         <div class="h-full overflow-y-auto px-4 py-6">
-          <FilterComponent
+         <FilterComponent
   :key="filtersKey"
   :initial-filters="filters"
   :mobile-visible="filterVisible"
   :hide-category="true"
+  :category-id="categoryId"    
   @apply="applyFilters"
   @close="toggleFilter"
 />
+
 
         </div>
       </div>

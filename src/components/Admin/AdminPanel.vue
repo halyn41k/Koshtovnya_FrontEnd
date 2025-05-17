@@ -32,7 +32,7 @@
     <AdminProfileCard v-if="showProfile" @close="showProfile = false" />
 
     <main :class="['flex flex-1 relative pt-12', showProfile ? 'filter blur-sm' : '']">
-І
+
       <aside
         :class="[
           'bg-[#F6E7E7] flex flex-col justify-between transition-all duration-300 ease-in-out',
@@ -268,4 +268,6 @@ export default {
   float: right;
   margin-right: 1rem;
 }
+
+
 </style>

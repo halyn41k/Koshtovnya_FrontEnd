@@ -1,5 +1,5 @@
 <template>
-  <main class="p-6 max-w-7xl mx-auto font-montserrat">
+  <main class="w-full p-4 space-y-6 relative">
     <!-- Заголовок -->
     <div class="flex justify-between items-center mb-6">
       <h1 class="text-2xl font-semibold">Замовлення</h1>

@@ -1,5 +1,5 @@
 <template>
-  <main class="p-6 font-montserrat space-y-10">
+  <main class="w-full p-4 space-y-6 relative">
 
 <!-- Заголовок і фільтри -->
 <div class="flex flex-wrap items-center justify-between gap-4 mb-6">

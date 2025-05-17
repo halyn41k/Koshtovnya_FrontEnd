@@ -1,4 +1,4 @@
-<template>
+<template> 
   <main class="w-full p-4 space-y-6 relative">
     <!-- Заголовок та кнопки -->
     <div class="flex justify-between items-center">
@@ -37,7 +37,6 @@
       </div>
     </div>
 
-    <!-- FilterComponent як модальне вікно -->
     <FilterProduct
       v-if="showFilter"
       class="fixed top-0 left-0 bottom-0 z-[9999]"
@@ -46,10 +45,9 @@
       @closeFilter="closeFilter"
     />
 
-    <!-- Список товарів -->
-    <div v-if="filteredProducts.length" class="space-y-5 mt-5">
+    <div v-if="products.length" class="space-y-5 mt-5">
       <div
-        v-for="product in filteredProducts"
+        v-for="product in products"
         :key="product.id"
         :class="[
           'border border-[#E0E0E0] rounded-lg p-3 bg-white',
@@ -58,14 +56,34 @@
       >
         <div class="flex justify-between items-center mb-2">
           <h2 class="text-lg font-bold">{{ product.name }}</h2>
-          <div class="flex gap-2">
-            <button @click="openUpdateModal(product)" class="p-1">
-              <img src="@/assets/icons/edit.svg" alt="Edit" class="w-6 h-6" />
-            </button>
-            <button @click="deleteProduct(product.id)" class="p-1">
-              <img src="@/assets/icons/delete.svg" alt="Delete" class="w-6 h-6" />
-            </button>
-          </div>
+          <div class="flex gap-3">
+  <button
+    v-if="!product.is_deleted"
+    @click="openUpdateModal(product)"
+    class="w-10 h-10 flex items-center justify-center rounded-md hover:bg-gray-100 transition"
+    aria-label="Редагувати"
+  >
+    <img src="@/assets/icons/edit.svg" alt="Edit" class="w-7 h-7 sm:w-8 sm:h-8" />
+
+  </button>
+  <button
+    v-if="!product.is_deleted"
+    @click="deleteProduct(product.id)"
+    class="w-10 h-10 flex items-center justify-center rounded-md hover:bg-gray-100 transition"
+    aria-label="Видалити"
+  >
+    <img src="@/assets/icons/delete.svg" alt="Delete" class="w-7 h-7 sm:w-8 sm:h-8" />
+  </button>
+  <button
+    v-if="product.is_deleted"
+    @click="restoreProduct(product.id)"
+    class="w-10 h-10 flex items-center justify-center rounded-md hover:bg-gray-100 transition"
+    aria-label="Відновити"
+  >
+    <img src="@/assets/icons/restore.svg" alt="Restore" class="w-7 h-7 sm:w-8 sm:h-8" />
+  </button>
+</div>
+
         </div>
         <div class="flex items-center gap-5">
           <div class="p-2">
@@ -79,7 +97,6 @@
       </div>
     </div>
 
-    <!-- Empty states -->
     <div
       v-else-if="!searchQuery"
       class="flex items-center justify-center border border-[#E0E0E0] bg-gray-50 rounded-lg mt-10 h-48 font-semibold text-sm"
@@ -93,43 +110,42 @@
       За запитом «<strong>{{ searchQuery }}</strong>» нічого не знайдено.
     </div>
 
-    <!-- Пагінація -->
-    <!-- Пагінація -->
 <div v-if="meta && paginationLinks().length" class="flex justify-center items-center gap-2 mt-5 h-12">
-  <!-- Ліва стрілка -->
+  <!-- Стрілка вліво -->
   <button
-    @click="goToPage(meta.links.find(l => l.label.includes('Previous'))?.url)"
-    :disabled="!meta.links.find(l => l.label.includes('Previous'))?.url"
-    class="w-9 h-9 rounded-md bg-white shadow hover:bg-gray-100 disabled:bg-gray-300 disabled:cursor-not-allowed"
+    @click="changePage(meta.current_page - 1)"
+    :disabled="meta.current_page === 1"
+    class="w-9 h-9 rounded-md text-sm shadow bg-white hover:bg-gray-100 disabled:bg-gray-200 disabled:cursor-not-allowed transition"
   >
-    ←
+    &lt;
   </button>
 
   <!-- Номери сторінок -->
   <button
-   v-for="(link, index) in paginationLinks()"
-
+    v-for="(link, index) in paginationLinks()"
     :key="index"
-    @click="goToPage(link.url)"
+    @click="changePage(link.page)"
     :class="[
       'w-9 h-9 rounded-md text-sm shadow transition',
-      link.active ? 'bg-red-900 text-white shadow-lg' : 'bg-white hover:bg-gray-100'
+      link.active
+        ? 'bg-[#6B1F1F] text-white shadow-lg'
+        : 'bg-white text-gray-700 hover:bg-gray-100'
     ]"
-    v-html="link.label"
-  ></button>
-
-  <!-- Права стрілка -->
-  <button
-    @click="goToPage(meta.links.find(l => l.label.includes('Next'))?.url)"
-    :disabled="!meta.links.find(l => l.label.includes('Next'))?.url"
-    class="w-9 h-9 rounded-md bg-white shadow hover:bg-gray-100 disabled:bg-gray-300 disabled:cursor-not-allowed"
   >
-    →
+    {{ link.label }}
+  </button>
+
+  <!-- Стрілка вправо -->
+  <button
+    @click="changePage(meta.current_page + 1)"
+    :disabled="meta.current_page === meta.last_page"
+    class="w-9 h-9 rounded-md text-sm shadow bg-white hover:bg-gray-100 disabled:bg-gray-200 disabled:cursor-not-allowed transition"
+  >
+    &gt;
   </button>
 </div>
 
 
-    <!-- Модальні вікна Додати/Редагувати/Видалити -->
     <AddProductModal v-if="showAddModal" @close="closeAddModal" @product-added="onProductAdded" />
     <EditProductModal v-if="showEditModal" :product="selectedProduct" @close="closeEditModal" @product-updated="onProductUpdated" />
     <DeleteProductModal v-if="showDeleteModal" :product="selectedProduct" @close="closeDeleteModal" @product-deleted="onProductDeleted" />
@@ -164,45 +180,27 @@ export default {
       currentFilters: {}
     }
   },
-  computed: {
-    filteredProducts() {
-  if (this.meta) {
-    return this.products
-  }
-
-  const q = this.searchQuery.toLowerCase().trim()
-  if (!q) return this.products
-
-  return this.products.filter(p => p.name.toLowerCase().includes(q))
-}
-
-
-  },
+ 
   methods: {
     goToPage(url) {
-  if (!url) return
-
-  // Якщо є активний пошук — нічого не робимо
-  if (this.searchQuery.trim()) return
-
-  this.fetchProducts(url)
-},
-
-   fetchProducts(url = null) {
+      if (!url || this.searchQuery.trim()) return;
+      this.fetchProducts(url);
+    },
+    fetchProducts(url = null, page = 1) {
   const endpoint = url || 'https://koshtovnya.api-dev.bmax-edu.website/api/admin/products'
   const params = new URLSearchParams()
 
-  // додай фільтри
   Object.entries(this.currentFilters).forEach(([key, val]) => {
     Array.isArray(val)
       ? val.forEach(v => params.append(key, v))
       : params.append(key, val)
   })
 
-  // додай пошук
   if (this.searchQuery.trim()) {
     params.append('search', this.searchQuery.trim())
   }
+
+  params.append('page', page)
 
   const fullUrl = `${endpoint}?${params.toString()}`
 
@@ -211,7 +209,7 @@ export default {
   })
     .then(response => {
       this.products = response.data.data || []
-      this.meta = response.data.meta || null
+      this.meta = this.searchQuery.trim() ? null : (response.data.meta || null)
     })
     .catch(error => {
       console.error('❌ Помилка завантаження товарів:', error)
@@ -219,53 +217,63 @@ export default {
       this.meta = null
     })
 },
+changePage(page) {
+  if (page < 1 || page > this.meta.last_page) return
+  this.fetchProducts(null, page)
+},
+
     onSearch() {
-  clearTimeout(this.searchTimeout)
-  this.searchTimeout = setTimeout(() => {
-    if (this.searchQuery.trim()) {
-      this.fetchSearchedProducts(this.searchQuery)
-    } else {
-      this.fetchProducts()
-    }
-  }, 400)
+      clearTimeout(this.searchTimeout);
+      this.searchTimeout = setTimeout(() => {
+        if (this.searchQuery.trim()) {
+          this.fetchSearchedProducts(this.searchQuery)
+        } else {
+          this.fetchProducts()
+        }
+      }, 400);
+    },
+    fetchSearchedProducts(query) {
+      const search = query.trim();
+      if (!search) return this.fetchProducts();
+      axios.get(`https://koshtovnya.api-dev.bmax-edu.website/api/admin/products/search/${encodeURIComponent(search)}`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+      })
+      .then(response => {
+this.products = (response.data.data || []).sort((a, b) => b.id - a.id);
+        this.meta = null;
+      })
+      .catch(error => {
+        console.error('❌ Помилка пошуку товарів:', error);
+        this.products = [];
+        this.meta = null;
+      });
+    },
+    paginationLinks() {
+  if (!this.meta || this.meta.last_page <= 1) return []
+  return Array.from({ length: this.meta.last_page }, (_, i) => ({
+    label: (i + 1).toString(),
+    page: i + 1,
+    active: this.meta.current_page === i + 1
+  }))
 },
-fetchAllProducts() {
-  this.fetchProducts(); // Просто виклик без .then()
-},
-
-fetchSearchedProducts(query) {
-  const search = query.trim()
-  if (!search) {
-    this.fetchProducts() // повертає всі товари + пагінацію
-    return
-  }
-
-  axios.get(`https://koshtovnya.api-dev.bmax-edu.website/api/admin/products/search/${encodeURIComponent(search)}`, {
-    headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-  })
-    .then(response => {
-      this.products = response.data.data || []
-      this.meta = null // видаляє пагінацію для пошуку
-    })
-    .catch(error => {
-      console.error('❌ Помилка пошуку товарів:', error)
-      this.products = []
-      this.meta = null
-    })
-},
-
+    restoreProduct(id) {
+      axios.post(`https://koshtovnya.api-dev.bmax-edu.website/api/admin/products/${id}/restore`, {}, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+      })
+      .then(() => {
+        this.fetchProducts();
+      })
+      .catch(err => {
+        console.error('❌ Помилка відновлення товару:', err);
+      });
+    },
     openFilter() { this.showFilter = true },
     closeFilter() { this.showFilter = false },
     applyFilters(filters) {
-  this.currentFilters = filters
-  this.fetchProducts()
-  this.closeFilter()
-},
-paginationLinks() {
-  if (!this.meta || !this.meta.links) return []
-  return this.meta.links.filter(link => !link.label.includes('Previous') && !link.label.includes('Next'))
-},
-
+      this.currentFilters = filters;
+      this.fetchProducts();
+      this.closeFilter();
+    },
     openAddModal() { this.showAddModal = true },
     closeAddModal() { this.showAddModal = false },
     openUpdateModal(p) { this.selectedProduct = p; this.showEditModal = true },
@@ -274,20 +282,18 @@ paginationLinks() {
     closeDeleteModal() { this.showDeleteModal = false; this.selectedProduct = null },
     onProductAdded(p) { this.products.unshift(p); this.closeAddModal() },
     onProductUpdated(u) {
-      const i = this.products.findIndex(p => p.id === u.id)
-if (i !== -1) this.products[i] = u
-this.closeEditModal()
-
+      const i = this.products.findIndex(p => p.id === u.id);
+      if (i !== -1) this.products[i] = u;
+      this.closeEditModal();
     },
     onProductDeleted(id) {
-      this.products = this.products.filter(p => p.id !== id)
-      this.closeDeleteModal()
+      this.products = this.products.filter(p => p.id !== id);
+      this.closeDeleteModal();
     },
-    
   },
   mounted() {
-    this.fetchAllProducts(); 
-    document.title = 'Товари'
+    this.fetchProducts();
+    document.title = 'Товари';
   }
 }
 </script>

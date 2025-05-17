@@ -18,31 +18,36 @@
         <span v-if="errors.deliveryType" class="text-red-500 text-xs">{{ errors.deliveryType }}</span>
       </div>
 
-      <!-- Місто -->
-      <div v-if="!isStorePickup">
-        <label class="block mb-1 text-sm font-medium text-gray-700">Місто:</label>
-        <Combobox v-model="selectedCity" as="div" class="relative">
-          <div class="relative">
-            <ComboboxInput
-  class="block w-full p-2 border border-gray-300 rounded-md text-gray-900 font-normal focus:outline-none focus:ring-2 focus:ring-red-500"
-  :class="{ 'border-red-500': errors.city }"
-  @input="handleCitySearch"
-  :displayValue="city => city?.city || city"
-  placeholder="Введіть місто"
-/>
+     <!-- Місто -->
+<div v-if="localData.deliveryType && !isStorePickup">
+  <label class="block mb-1 text-sm font-medium text-gray-700">Місто:</label>
+  <Combobox v-model="selectedCity" as="div" class="relative">
+    <div class="relative">
+      <ComboboxInput
+        class="block w-full p-2 border border-gray-300 rounded-md text-gray-900 font-normal focus:outline-none focus:ring-2 focus:ring-red-500"
+        :class="{ 'border-red-500': errors.city }"
+        @input="handleCitySearch"
+        :displayValue="city => city?.city || city"
+        placeholder="Введіть місто"
+      />
+      <ComboboxOptions
+        v-if="citiesLocal.length"
+        class="absolute z-50 w-full mt-1 max-h-48 overflow-auto rounded bg-white border shadow-lg"
+      >
+        <ComboboxOption
+          v-for="city in citiesLocal"
+          :key="city.Ref"
+          :value="city"
+          class="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+        >
+          {{ city.city }}
+        </ComboboxOption>
+      </ComboboxOptions>
+    </div>
+  </Combobox>
+  <p v-if="errors.city" class="text-red-500 text-xs mt-1">{{ errors.city }}</p>
+</div>
 
-
-            <ComboboxOptions v-if="citiesLocal.length"
-              class="absolute z-50 w-full mt-1 max-h-48 overflow-auto rounded bg-white border shadow-lg">
-              <ComboboxOption v-for="city in citiesLocal" :key="city.Ref" :value="city"
-                class="px-4 py-2 hover:bg-gray-100 cursor-pointer">
-                {{ city.city }}
-              </ComboboxOption>
-            </ComboboxOptions>
-          </div>
-        </Combobox>
-        <p v-if="errors.city" class="text-red-500 text-xs mt-1">{{ errors.city }}</p>
-      </div>
 
       <!-- Вулиця -->
       <div v-if="isCourier">
@@ -217,6 +222,36 @@ export default {
         this.localData.warehouse = null;
       }
       this.updateData();
+
+      if (this.tempUserAddress) {
+  const { city, cityRef, street, houseNumber, streetSearch, warehouseName, deliveryTypeName, deliveryCategory } = this.tempUserAddress;
+
+  this.formData.city = city;
+  this.formData.cityRef = cityRef;
+
+  if (deliveryCategory === 'courier') {
+    this.formData.street = street;
+    this.formData.streetSearch = streetSearch;
+    this.formData.houseNumber = houseNumber;
+  }
+
+  if (deliveryCategory === 'pickup') {
+    this.fetchWarehouses(city, cityRef, deliveryTypeName).then(warehouses => {
+      this.warehouses = warehouses;
+      const warehouseMatch = warehouses.find(w => w.name === warehouseName);
+      if (warehouseMatch) {
+        this.formData.warehouse = warehouseMatch;
+      }
+    });
+  }
+
+  // обрати deliveryType
+  const match = this.deliveryOptions.find(opt => opt.name === deliveryTypeName);
+  if (match) {
+    this.formData.deliveryType = match;
+  }
+}
+
     },
     onCityInput() {
       this.updateData();
