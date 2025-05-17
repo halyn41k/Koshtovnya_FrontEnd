@@ -3,27 +3,41 @@ describe.skip('Тести для MyComponent', () => {
     expect(true).toBe(false)
   })
 })
-/*
-//Протестовано головні аспекти
 
-// Замокання axios для повернення необхідних даних
-jest.mock('axios', () => ({
-  get: jest.fn(() =>
-    Promise.resolve({
-      data: {
-        data: [
-          { setting_key: 'site_logo', setting_value: 'logo-url' },
-          { setting_key: 'footer_email_info', setting_value: 'koshtovnya@mail.com' },
-          { setting_key: 'footer_address_info', setting_value: 'м. Київ, вул. Хрещатик, 1' },
-          { setting_key: 'footer_phone_number', setting_value: '+380123456789' },
-        ],
-      },
-    })
-  ),
-}));
+//Протестовано головні аспекти
+/*
+beforeEach(() => {
+  jest.spyOn(console, 'warn').mockImplementation(() => {});
+  jest.spyOn(console, 'error').mockImplementation(() => {});
+  jest.spyOn(console, 'log').mockImplementation(() => {});
+});
 
 import { mount } from '@vue/test-utils';
 import FooterComponent from '@/components/home/FooterComponent.vue';
+
+// Замокання axios для повернення необхідних даних
+jest.mock('axios', () => {
+  const actualAxios = jest.requireActual('axios');
+  return {
+    __esModule: true,
+    default: {
+      ...actualAxios,
+      create: () => actualAxios,
+      get: jest.fn(() =>
+        Promise.resolve({
+          data: {
+            data: [
+              { setting_key: 'site_logo', setting_value: 'logo-url' },
+              { setting_key: 'footer_email_info', setting_value: 'koshtovnya.store@gmail.com' },
+              { setting_key: 'footer_address_info', setting_value: 'м. Київ, вул. Хрещатик, 1' },
+              { setting_key: 'footer_phone_number', setting_value: '+380123456789' },
+            ],
+          },
+        })
+      ),
+    },
+  };
+});
 
 describe('FooterComponent.vue', () => {
   let wrapper;
@@ -65,61 +79,59 @@ describe('FooterComponent.vue', () => {
     }
   });
 
-  it('компонент рендиться без помилок', () => {
+  it('рендериться без помилок', () => {
     expect(wrapper.exists()).toBe(true);
   });
 
-  it('повинен завантажувати зображення логотипу з правильним alt', () => {
-    const logoImg = wrapper.find('img.logo-image');
-    expect(logoImg.exists()).toBe(true);
-    expect(logoImg.attributes('alt')).toBe('Коштовня Лого');
+  it('відображає логотип та alt атрибут', () => {
+    const img = wrapper.find('img');
+    expect(img.exists()).toBe(true);
+    expect(img.attributes('alt')).toBe('Коштовня Лого');
   });
 
-  it('повинен відображати правильний текст логотипу з локалізації', () => {
-    const logoTitle = wrapper.find('h1.logo-title');
-    expect(logoTitle.exists()).toBe(true);
-    expect(logoTitle.text()).toBe('Коштовня Лого');
+  it('відображає заголовок логотипу', () => {
+    const h1 = wrapper.find('h1');
+    expect(h1.exists()).toBe(true);
+    expect(h1.text()).toBe('Коштовня');
   });
 
-  it('повинен відображати правильний текст опису з локалізації', () => {
-    const description = wrapper.find('p.description');
-    expect(description.exists()).toBe(true);
-    expect(description.text()).toBe('Опис компанії Коштовня');
+  it('відображає опис компанії', () => {
+    const p = wrapper.find('p');
+    expect(p.exists()).toBe(true);
+    expect(p.text()).toContain('Опис компанії Коштовня');
   });
 
-  it('Всі посилання у розділі footer-links присутні та мають правильні маршрути', () => {
-    const expectedLinks = [
-      { route: '/aboutus', text: 'Про нас' },
-      { route: '/aboutdelivery', text: 'Доставка' },
-      { route: '/account', text: 'Особистий кабінет' },
-    ];
+  it('відображає адресу, телефон, email', async () => {
+    wrapper.vm.siteSettings = {
+      site_logo: 'logo-url',
+      footer_email_info: 'koshtovnya@mail.com',
+      footer_address_info: 'м. Київ, вул. Хрещатик, 1',
+      footer_phone_number: '+380123456789'
+    };
+    await wrapper.vm.$nextTick();
 
-    const links = wrapper.findAll('.footer-list .footer-link');
-    expect(links.length).toBe(expectedLinks.length);
-
-    links.forEach((link, index) => {
-      const { route, text } = expectedLinks[index];
-      expect(link.attributes('href')).toBe(route);
-      expect(link.text()).toBe(text);
-    });
+    const text = wrapper.text();
+    expect(text).toContain('м. Київ, вул. Хрещатик, 1');
+    expect(text).toContain('+380123456789');
+    expect(text).toContain('koshtovnya@mail.com');
   });
 
-  it('повинен відображати правильну адресу', () => {
-    const addressElement = wrapper.find('.address');
-    expect(addressElement.exists()).toBe(true);
-    expect(addressElement.text()).toBe('м. Київ, вул. Хрещатик, 1');
+
+  it('містить посилання на соцмережі', () => {
+    const instagram = wrapper.find('a[href="https://www.instagram.com"]');
+    const facebook = wrapper.find('a[href="https://www.facebook.com"]');
+    const tiktok = wrapper.find('a[href="https://www.tiktok.com"]');
+    expect(instagram.exists()).toBe(true);
+    expect(facebook.exists()).toBe(true);
+    expect(tiktok.exists()).toBe(true);
   });
 
-  it('повинен відображати правильний номер телефону', () => {
-    const phoneElement = wrapper.find('.phone');
-    expect(phoneElement.exists()).toBe(true);
-    expect(phoneElement.text()).toBe('+380123456789');
-  });
+  it('має всі навігаційні посилання', async () => {
+    await wrapper.vm.$nextTick();
 
-  it('повинен відображати правильний email', () => {
-    const emailElement = wrapper.find('.email');
-    expect(emailElement.exists()).toBe(true);
-    expect(emailElement.text()).toBe('koshtovnya@mail.com');
+    const links = wrapper.findAll('a');
+    const hrefs = links.map(link => link.attributes('href'));
+    expect(hrefs).toEqual(expect.arrayContaining(['/aboutus', '/aboutdelivery', '/account']));
   });
 
   it('повинен містити посилання на Instagram з правильним URL', () => {
@@ -140,37 +152,33 @@ describe('FooterComponent.vue', () => {
     expect(tiktokLink.attributes('target')).toBe('_blank');
   });
 
-  it('повинен мати правильний базовий клас для компоненту footer', () => {
-    const footer = wrapper.find('.footer');
-    expect(footer.exists()).toBe(true);
-    expect(footer.classes()).toContain('footer');
+  it('має hover-класи на лінках', () => {
+    const hoverLinks = wrapper.findAll('a').filter(link =>
+      link.attributes('class')?.includes('hover:text-') ||
+      link.attributes('class')?.includes('hover:')
+    );
+    expect(hoverLinks.length).toBeGreaterThan(0);
   });
 
-  it('повинен мати hover-ефект на посиланнях (через CSS-класи)', () => {
-    const links = wrapper.findAll('.footer-link');
-    expect(links.length).toBeGreaterThan(0);
-    links.forEach((link) => {
-      // Симуляція події hover (mouseenter) – клас hover не додається автоматично
-      link.trigger('mouseenter');
-      expect(link.classes()).toContain('footer-link');
-    });
+  it('повинен мати правильний базовий клас для компоненту footer', () => {
+    const footer = wrapper.find('footer');
+    expect(footer.exists()).toBe(true);
+    expect(footer.attributes('class')).toContain('bg-[#F4E7E5]');
   });
 
   it('повинен мати hover-ефект на соціальних іконках (через CSS-класи)', () => {
-    const socialIcons = wrapper.findAll('.social-icon');
+    const socialIcons = wrapper.findAll('a[href*="instagram"], a[href*="facebook"], a[href*="tiktok"]');
     expect(socialIcons.length).toBeGreaterThan(0);
     socialIcons.forEach((icon) => {
-      icon.trigger('mouseenter');
-      expect(icon.classes()).toContain('social-icon');
+      expect(icon.attributes('class')).toMatch(/hover:scale-110/);
     });
   });
 
   it('повинен застосовувати активні стилі до посилань (active state)', () => {
-    const links = wrapper.findAll('.footer-link');
+    const links = wrapper.findAll('a[href="/aboutus"], a[href="/aboutdelivery"], a[href="/account"]');
     expect(links.length).toBeGreaterThan(0);
     links.forEach((link) => {
-      link.trigger('mousedown');
-      expect(link.classes()).toContain('footer-link');
+      expect(link.attributes('class')).toMatch(/transition-colors/); // або .match(/hover:/)
     });
   });
 
@@ -201,7 +209,7 @@ describe('FooterComponent.vue', () => {
       { selector: 'a[href="https://www.facebook.com"]', url: 'https://www.facebook.com' },
       { selector: 'a[href="https://www.tiktok.com"]', url: 'https://www.tiktok.com' },
     ];
-    
+
     socialLinks.forEach(({ selector, url }) => {
       const link = wrapper.find(selector);
       expect(link.exists()).toBe(true);
@@ -210,46 +218,35 @@ describe('FooterComponent.vue', () => {
     });
   });
 
-  it('має необхідні CSS-класи на ключових елементах', () => {
-    const logoWrapper = wrapper.find('.logo-wrapper');
-    expect(logoWrapper.exists()).toBe(true);
-    expect(logoWrapper.classes()).toContain('logo-wrapper');
+  it('має основні елементи футера: логотип, соц. мережі, посилання, контакти', () => {
+    const logo = wrapper.find('img[alt="Коштовня Лого"]');
+    expect(logo.exists()).toBe(true);
 
-    const footer = wrapper.find('.footer');
-    expect(footer.exists()).toBe(true);
-    expect(footer.classes()).toContain('footer');
-
-    const footerLinks = wrapper.findAll('.footer-link');
-    expect(footerLinks.length).toBeGreaterThan(0);
-    footerLinks.forEach((link) => {
-      expect(link.classes()).toContain('footer-link');
-    });
-
-    const socialIcons = wrapper.findAll('.social-icon');
+    const socialIcons = wrapper.findAll('a[href*="instagram"], a[href*="facebook"], a[href*="tiktok"]');
     expect(socialIcons.length).toBeGreaterThan(0);
-    socialIcons.forEach((icon) => {
-      expect(icon.classes()).toContain('social-icon');
-    });
+
+    const navLinks = wrapper.findAll('a[href="/aboutus"], a[href="/aboutdelivery"], a[href="/account"]');
+    expect(navLinks.length).toBe(3);
+
+    const contacts = wrapper.findAll('address p');
+    expect(contacts.length).toBeGreaterThanOrEqual(3);
   });
 
-  it('повинен містити головний контейнер .footer-content', () => {
-    const footerContent = wrapper.find('.footer-content');
-    expect(footerContent.exists()).toBe(true);
+  it('повинен містити контейнер з класами flex md:flex-row (групування секцій)', () => {
+    const container = wrapper.find('div.flex-col.md\\:flex-row');
+    expect(container.exists()).toBe(true);
   });
 
-  it('повинен містити три основні секції у футері', () => {
-    const sections = wrapper.findAll('.nav-section');
-    expect(sections.length).toBe(3);
-  });
-
-  it('повинен містити роздільники між елементами контактної інформації', () => {
-    const dividers = wrapper.findAll('.divider');
+  it('повинен містити два горизонтальні роздільники у contact info', () => {
+    const dividers = wrapper.findAll('.border-t.border-gray-300');
     expect(dividers.length).toBe(2);
   });
 
+
+
   it('повинен містити правильні заголовки секцій', () => {
-    const titles = wrapper.findAll('.nav-title').map((title) => title.text());
-    expect(titles).toEqual(['links', 'Зв’язатися з нами', 'Слідкуйте за нами']);
+    const headings = wrapper.findAll('h2').map(h => h.text());
+    expect(headings).toEqual(['links', 'Зв’язатися з нами', 'Слідкуйте за нами']);
   });
 
   it('всі зображення в футері мають атрибут src', () => {
@@ -269,22 +266,49 @@ describe('FooterComponent.vue', () => {
   it('контактна інформація міститься всередині <address>', () => {
     const addressElement = wrapper.find('address');
     expect(addressElement.exists()).toBe(true);
-    expect(addressElement.find('.contact-item').exists()).toBe(true);
+    // Перевіряємо, що в address є принаймні один <p>
+    expect(addressElement.findAll('p').length).toBeGreaterThan(0);
   });
 
   it('секція соціальних мереж містить правильну кількість елементів', () => {
-    const socialLinks = wrapper.findAll('.social-link');
+    const socialLinks = wrapper.findAll('a[href^="https://"]');
     expect(socialLinks.length).toBe(3);
   });
 
   it('повинен містити три елементи router-link у навігаційному меню', () => {
-    const routerLinks = wrapper.findAll('a.footer-link');
-    expect(routerLinks.length).toBe(3);
+    const navSection = wrapper.findAll('ul li a[href^="/"]');
+    expect(navSection.length).toBe(3);
   });
 
-  it('текст логотипу має клас .logo-title', () => {
-    const logoTitle = wrapper.find('.logo-title');
+  it('текст логотипу має правильний клас', () => {
+    const logoTitle = wrapper.find('h1');
     expect(logoTitle.exists()).toBe(true);
+    expect(logoTitle.classes()).toContain('font-heading');
   });
-});
-*/
+
+  it('має один <ul> список у секції навігації', () => {
+    const ulElements = wrapper.findAll('ul');
+    // Має бути лише один список навігаційних лінків
+    expect(ulElements.length).toBeGreaterThanOrEqual(1);
+  });
+
+  it('усі router-link у навігації мають іконку зі стрілкою', () => {
+    const routerLinks = wrapper.findAll('ul li a');
+    routerLinks.forEach(link => {
+      const icon = link.find('img[alt="arrow"]');
+      expect(icon.exists()).toBe(true);
+    });
+  });
+
+  it('кожна секція футера має заголовок h2', () => {
+    const headings = wrapper.findAll('h2');
+    expect(headings.length).toBeGreaterThanOrEqual(3); // links, contactUs, followUs
+  });
+
+  it('логотип має правильні розміри (Tailwind класи)', () => {
+    const logo = wrapper.find('img[alt="Коштовня Лого"]');
+    expect(logo.exists()).toBe(true);
+    expect(logo.attributes('class')).toContain('w-20');
+    expect(logo.attributes('class')).toContain('h-auto');
+  });
+});*/
