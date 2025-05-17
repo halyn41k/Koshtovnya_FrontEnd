@@ -124,17 +124,29 @@
             </button>
           </div>
 
-          <!-- Кнопка "Купити" -->
           <div class="px-4 pb-4">
-            <button
-              @click="addToCart(product)"
-              class="w-full bg-[#6B1F1F] hover:bg-[#A01212] text-white font-montserrat font-semibold py-2 rounded-lg
-                     flex items-center justify-between px-4 transition-all duration-500 ease-in-out"
-            >
-              <span>{{ $t('buyButton') }}</span>
-              <img src="@/assets/miniarrow.png" alt="Arrow icon" class="w-5 h-4" />
-            </button>
-          </div>
+  <!-- Якщо є доступні варіанти → КУПИТИ -->
+  <button
+    v-if="product.has_available_variant"
+    @click="addToCart(product)"
+    class="w-full h-11 bg-[#6B1F1F] hover:bg-[#A01212] text-white font-semibold rounded-lg flex items-center justify-between px-4 transition duration-300"
+  >
+    <span>Купити</span>
+    <img src="@/assets/miniarrow.png" alt="arrow" class="w-5 h-4" />
+  </button>
+
+  <!-- Інакше → ПОВІДОМИТИ -->
+<!-- Інакше → ПОВІДОМИТИ -->
+<button
+  v-else
+  @click="notifyWhenAvailable(product)"
+  class="w-full h-11 bg-gray-300 text-gray-700 font-montserrat font-semibold rounded-lg flex items-center justify-center px-4 transition duration-300"
+>
+  Повідомити про наявність
+</button>
+
+</div>
+
         </article>
       </div>
 
@@ -186,17 +198,22 @@ export default {
     },
 
     async fetchProducts() {
-      try {
-        const response = await api.getPopularProducts();
-        const items = Array.isArray(response.data)
-          ? response.data
-          : response.data?.data || [];
-        this.products = items;
-        this.updateProductsPerPage();
-      } catch (error) {
-        console.error('Помилка при завантаженні популярних товарів:', error);
-      }
-    },
+  try {
+    const response = await api.getPopularProducts();
+    const items = Array.isArray(response.data)
+      ? response.data
+      : response.data?.data || [];
+
+    this.products = items.map(p => ({
+      ...p,
+      has_available_variant: (p.variants || []).some(v => v.is_available)
+    }));
+
+    this.updateProductsPerPage();
+  } catch (error) {
+    console.error('Помилка при завантаженні популярних товарів:', error);
+  }
+},
 
     updateVisibleProducts() {
       const start = this.currentPage * this.productsPerPage;
@@ -239,6 +256,16 @@ export default {
 }
 
 },
+async notifyWhenAvailable(product) {
+  try {
+    await api.sendNotification({ product_id: product.id });
+    toast.success('Ви будете повідомлені, коли товар зʼявиться в наявності');
+  } catch (e) {
+    console.error('Помилка підписки на повідомлення:', e);
+    toast.error('Не вдалося підписатись на повідомлення 😢');
+  }
+},
+
   },
   mounted() {
     window.addEventListener('resize', this.updateProductsPerPage);
