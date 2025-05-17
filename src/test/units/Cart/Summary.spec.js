@@ -1,22 +1,26 @@
-
 describe.skip('Тести для MyComponent', () => {
   it('цей тест не виконається', () => {
     expect(true).toBe(false)
   })
 })
-/*
+
 //Протестовано головні аспекти
-
+/*
 import { shallowMount } from '@vue/test-utils';
-import Summary from '@/components/cart/Summary.vue';
+import Summary from '@/components/cart/CartSummary.vue';
 
-describe('Summary - Рендеринг базової структури', () => {
+describe('CartSummary.vue - базовий рендеринг', () => {
   let wrapper;
-  const cartItems = []; // Можна передати порожній масив для базового рендерингу
+  const cartItems = [];
 
   beforeEach(() => {
     wrapper = shallowMount(Summary, {
-      props: { cartItems }
+      props: { cartItems },
+      global: {
+        mocks: {
+          $router: { push: jest.fn() }
+        }
+      }
     });
   });
 
@@ -24,87 +28,79 @@ describe('Summary - Рендеринг базової структури', () =>
     wrapper.unmount();
   });
 
-  it('повинен рендерити контейнер з класом "order-summary"', () => {
+  it('має клас "order-summary"', () => {
     expect(wrapper.classes()).toContain('order-summary');
   });
 
-  it('повинен рендерити заголовок з класом "summary-title" з текстом "Сума до оплати"', () => {
-    const header = wrapper.find('.summary-title');
+  it('рендерить заголовок з текстом "Сума до оплати"', () => {
+    const header = wrapper.find('h2');
     expect(header.exists()).toBe(true);
     expect(header.text()).toBe('Сума до оплати');
   });
-});
 
-describe('Summary - Відображення деталей замовлення', () => {
-  let wrapper;
-  const sampleCartItems = [
-    { price: 100, quantity: 2 },
-    { price: 50, quantity: 1 }
-  ];
-  const expectedTotal = sampleCartItems.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0
-  );
-
-  beforeEach(() => {
-    wrapper = shallowMount(Summary, {
-      props: { cartItems: sampleCartItems }
-    });
-  });
-
-  afterEach(() => {
-    wrapper.unmount();
-  });
-
-  it('повинен містити блок з класом "summary-details", який містить два рядки з відповідними позначками', () => {
-    const details = wrapper.find('.summary-details');
-    expect(details.exists()).toBe(true);
-
-    const rows = details.findAll('.summary-row');
-    expect(rows.length).toBe(2);
-    expect(rows.at(0).text()).toContain('Проміжний підсумок');
-    expect(rows.at(1).text()).toContain('Загальна сума');
-  });
-
-  it('повинен відображати правильну суму з валютою ₴ для обох рядків', () => {
-    const rows = wrapper.findAll('.summary-row');
-    const firstRowPrice = rows.at(0).find('.price').text();
-    const secondRowPrice = rows.at(1).find('.price').text();
-
-    expect(firstRowPrice).toBe(`${expectedTotal}₴`);
-    expect(secondRowPrice).toBe(`${expectedTotal}₴`);
+  it('відображає "0₴" якщо cartItems порожній', () => {
+    const amount = wrapper.find('span.text-xl');
+    expect(amount.exists()).toBe(true);
+    expect(amount.text()).toBe('0₴');
   });
 });
 
-describe('Summary - Обчислення суми замовлення (computed totalSum)', () => {
-  it('повинен правильно обчислювати totalSum для масиву з декількома об\'єктами', () => {
+describe('CartSummary.vue - обчислення totalSum', () => {
+  it('коректно обчислює суму', () => {
     const cartItems = [
       { price: 100, quantity: 2 },
-      { price: 50, quantity: 1 },
-      { price: 200, quantity: 3 }
+      { price: 50, quantity: 1 }
     ];
-    const expectedTotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
-    const wrapper = shallowMount(Summary, { props: { cartItems } });
+    const expectedTotal = 250;
+
+    const wrapper = shallowMount(Summary, {
+      props: { cartItems },
+      global: {
+        mocks: {
+          $router: { push: jest.fn() }
+        }
+      }
+    });
+
     expect(wrapper.vm.totalSum).toBe(expectedTotal);
+    const sumText = wrapper.find('span.text-xl').text();
+    expect(sumText).toBe(`${expectedTotal}₴`);
     wrapper.unmount();
   });
+});
 
-  it('повинен повертати 0, якщо cartItems порожній', () => {
-    const cartItems = [];
-    const expectedTotal = 0;
-    const wrapper = shallowMount(Summary, { props: { cartItems } });
-    expect(wrapper.vm.totalSum).toBe(expectedTotal);
+describe('CartSummary.vue - кнопка переходу до оплати', () => {
+  it('викликає this.$router.push("/payment") при натисканні', async () => {
+    const mockRouter = { push: jest.fn() };
+    const wrapper = shallowMount(Summary, {
+      props: { cartItems: [{ price: 100, quantity: 1 }] },
+      global: {
+        mocks: {
+          $router: mockRouter
+        }
+      }
+    });
+
+    const button = wrapper.find('button');
+    await button.trigger('click');
+
+    expect(mockRouter.push).toHaveBeenCalledWith('/payment');
     wrapper.unmount();
   });
 });
 
 describe('Summary - Рендеринг кнопки для оплати', () => {
   let wrapper;
-  const cartItems = []; // Порожній масив для базового рендерингу
+  const cartItems = [];
 
   beforeEach(() => {
     wrapper = shallowMount(Summary, {
-      props: { cartItems }
+      props: { cartItems },
+      global: {
+        mocks: {
+          $router: { push: jest.fn() }
+        }
+      }
     });
   });
 
@@ -112,29 +108,28 @@ describe('Summary - Рендеринг кнопки для оплати', () => 
     wrapper.unmount();
   });
 
-  it('повинен відображати кнопку з класом "payment-button"', () => {
-    const paymentButton = wrapper.find('.payment-button');
-    expect(paymentButton.exists()).toBe(true);
+  it('повинен відображати кнопку для переходу до оплати', () => {
+    const button = wrapper.find('button');
+    expect(button.exists()).toBe(true);
   });
 
   it('повинен містити всередині кнопки текст "Перейти до оплати"', () => {
-    const paymentButton = wrapper.find('.payment-button');
-    expect(paymentButton.text()).toContain('Перейти до оплати');
+    const button = wrapper.find('button');
+    expect(button.text()).toContain('Перейти до оплати');
   });
 
-  it('повинен містити зображення (іконку) з вказаними атрибутами src, alt та класом "login-icon"', () => {
-    const paymentButton = wrapper.find('.payment-button');
-    const img = paymentButton.find('img');
-    expect(img.exists()).toBe(true);
-    expect(img.attributes('src')).toBe('https://cdn.builder.io/api/v1/image/assets/TEMP/436b738744905f60c6a542e2cd314f5694db20045d36b8991f8dab9a31b316a0?placeholderIfAbsent=true&apiKey=c3e46d0a629546c7a48302a5db3297d5');
-    expect(img.attributes('alt')).toBe('');
-    expect(img.classes()).toContain('login-icon');
+  it('повинен містити SVG-іконку (стрілку) всередині кнопки', () => {
+    const svg = wrapper.find('button svg');
+    expect(svg.exists()).toBe(true);
+    const path = svg.find('path');
+    expect(path.exists()).toBe(true);
+    expect(path.attributes('d')).toBe('M9 5l7 7-7 7');
   });
 });
 
 describe('Summary - Функціональність переходу до оплати', () => {
   let wrapper;
-  const cartItems = []; // Порожній масив для базового рендерингу
+  const cartItems = [];
   const routerPushMock = jest.fn();
 
   beforeEach(() => {
@@ -142,9 +137,7 @@ describe('Summary - Функціональність переходу до оп�
       props: { cartItems },
       global: {
         mocks: {
-          $router: {
-            push: routerPushMock
-          }
+          $router: { push: routerPushMock }
         }
       }
     });
@@ -156,15 +149,12 @@ describe('Summary - Функціональність переходу до оп�
   });
 
   it('повинен викликати метод goToPayment при кліку на кнопку', async () => {
-    // Призначаємо мок-функцію для методу goToPayment
-    wrapper.vm.goToPayment = jest.fn();
-    const paymentButton = wrapper.find('.payment-button');
-    await paymentButton.trigger('click');
-    expect(wrapper.vm.goToPayment).toHaveBeenCalled();
+    const spy = jest.spyOn(wrapper.vm, 'goToPayment');
+    await wrapper.find('button').trigger('click');
+    expect(spy).toHaveBeenCalled();
   });
 
   it('метод goToPayment повинен викликати $router.push з шляхом "/payment"', () => {
-    // Викликаємо метод без кліку на кнопку
     wrapper.vm.goToPayment();
     expect(routerPushMock).toHaveBeenCalledWith('/payment');
   });
@@ -206,24 +196,29 @@ describe('Summary - Перевірка основних класів у DOM', ()
     wrapper.unmount();
   });
 
-  it('повинен містити основні класи на кореневому елементі та основних дочірніх елементах', () => {
+  it('повинен містити основні класи на кореневому елементі', () => {
     expect(wrapper.classes()).toContain('order-summary');
-    expect(wrapper.find('.summary-title').exists()).toBe(true);
-    expect(wrapper.find('.summary-details').exists()).toBe(true);
-    expect(wrapper.find('.payment-button').exists()).toBe(true);
+
+    const heading = wrapper.find('h2');
+    expect(heading.exists()).toBe(true);
+    expect(heading.text()).toBe('Сума до оплати');
+
+    const amount = wrapper.find('span.text-xl');
+    expect(amount.exists()).toBe(true);
+
+    const button = wrapper.find('button');
+    expect(button.exists()).toBe(true);
   });
 
-  it('елементи всередині компоненту мають відповідні класи: summary-title, summary-details, summary-row та price', () => {
-    const title = wrapper.find('.summary-title');
-    const details = wrapper.find('.summary-details');
-    const rows = details.findAll('.summary-row');
-    const priceElements = details.findAll('.price');
+  it('перевіряє структуру DOM: span із сумою та кнопку з іконкою', () => {
+    const amount = wrapper.find('span.text-xl');
+    expect(amount.text()).toMatch(/₴/);
 
-    expect(title.exists()).toBe(true);
-    expect(details.exists()).toBe(true);
-    // Маємо два рядки: "Проміжний підсумок" та "Загальна сума"
-    expect(rows.length).toBe(2);
-    // Перевірка, що є елементи з класом "price"
-    expect(priceElements.length).toBeGreaterThan(0);
+    const button = wrapper.find('button');
+    expect(button.text()).toContain('Перейти до оплати');
+
+    const svg = button.find('svg');
+    expect(svg.exists()).toBe(true);
+    expect(svg.find('path').exists()).toBe(true);
   });
 });*/
