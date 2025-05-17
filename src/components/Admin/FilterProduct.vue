@@ -1,11 +1,9 @@
 <template>
-<div
+  <div
   class="filter-container w-[350px] min-h-[550px] p-6 bg-[#fff7f6] shadow-xl rounded-lg font-montserrat"
+  @keydown.escape="$emit('close')"
 >
-  <button
-        class="absolute top-3 right-3 text-gray-500 hover:text-black"
-        @click="$emit('closeFilter')"
-      >✕</button>
+
     <section v-if="!loading" class="space-y-8">
       <!-- Доступність -->
       <div class="section bg-white p-4 rounded-lg shadow-sm">
@@ -214,10 +212,13 @@ export default {
   components: { Slider },
   props: {
   initialFilters: { type: Object, default: () => ({}) },
-  hideCategory: { type: Boolean, default: false }
+  hideCategory: { type: Boolean, default: false },
+  categoryId: { type: [Number, String], default: null } // ← додай це
 },
 
-  emits: ['apply', 'close'],
+
+  emits: ['applyFilters', 'close'],
+
   setup(props, { emit }) {
     const loading = ref(true)
 
@@ -261,7 +262,10 @@ export default {
 
     const loadFilters = async () => {
       try {
-        const data = await api.getFilter()
+const params = {}
+if (props.categoryId) params.category_id = props.categoryId
+
+const data = await api.getAdminFilter({ params })
         availabilityOptions.value = data['Доступність'] || []
 
         const sz = data['Розмір'] || { min: '0', max: '150' }
@@ -302,6 +306,8 @@ export default {
       if (filters.beadTypes.length) cleaned.type_of_bead = [...filters.beadTypes]
       if (filters.producers.length) cleaned.bead_producer = [...filters.producers]
       if (filters.category.length) cleaned.category = [...filters.category]
+      if (props.categoryId) cleaned.category_id = props.categoryId
+
       if (filters.color) cleaned.color = filters.color
 
       if (filters.size[0] > sizeOptions.min || filters.size[1] < sizeOptions.max)
@@ -314,12 +320,19 @@ export default {
         cleaned.price = [...filters.price]
 
       window.scrollTo({ top: 0, behavior: 'smooth' })
-      emit('apply', cleaned)
+      emit('applyFilters', cleaned) 
     }
 
     watch(() => props.initialFilters, () => {
       applyInitialFilters()
     }, { deep: true })
+
+    watch(() => props.categoryId, (newId, oldId) => {
+  if (newId !== oldId) {
+    loadFilters()
+  }
+})
+
 
     onMounted(() => {
       loadFilters()
@@ -339,7 +352,7 @@ export default {
       categoryOptions,
       applyFilters
     }
-  }
+  },
 }
 </script>
 

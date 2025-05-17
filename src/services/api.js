@@ -297,6 +297,12 @@ export default {
   return data
 },
 
+getAdminFilter: async (config = {}) => {
+  const { data } = await apiClient.get('/api/admin/product-filter', config)
+  return data
+},
+
+
 
   // Reviews
   getProductReviews: async id => {
