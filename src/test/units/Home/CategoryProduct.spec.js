@@ -3,9 +3,9 @@ describe.skip('Тести для MyComponent', () => {
     expect(true).toBe(false)
   })
 })
-/*
-//Протестовано головні аспекти
 
+//Протестовано головні аспекти
+/*
 beforeEach(() => {
   jest.spyOn(console, 'warn').mockImplementation(() => {});
   jest.spyOn(console, 'error').mockImplementation(() => {});
@@ -15,23 +15,31 @@ beforeEach(() => {
 import { shallowMount } from '@vue/test-utils';
 import CategoryProduct from '@/components/Home/CategoryProduct.vue';
 
-// Допоміжна функція для очікування мікрозадач (альтернатива flush-promises)
+jest.mock('@/services/api', () => ({
+  getCategories: jest.fn(() =>
+    Promise.resolve({
+      data: [
+        { id: 1, name: 'Category 1', image_url: 'test-url-1' },
+        { id: 2, name: 'Category 2', image_url: 'test-url-2' },
+      ],
+    })
+  ),
+}));
+
 const wait = () => new Promise(resolve => setTimeout(resolve, 0));
 
 describe('CategoryProduct.vue', () => {
   let wrapper;
 
-  // Фабрика для створення компонента з базовими налаштуваннями
   const factory = (options = {}) =>
     shallowMount(CategoryProduct, {
       global: {
         mocks: {
-          $t: (msg) => msg,
+          $t: msg => msg,
         },
         stubs: {
-          // Заглушка для router-link із передачею пропсу "to" в атрибут href
           'router-link': {
-            template: '<a class="category-link" :href="to"><slot /></a>',
+            template: '<a class="category-link group" :href="to"><slot /></a>',
             props: ['to'],
           },
         },
@@ -41,144 +49,119 @@ describe('CategoryProduct.vue', () => {
     });
 
   beforeEach(() => {
-    // Очищення localStorage та моків перед кожним тестом
     localStorage.clear();
     jest.clearAllMocks();
-
-    // Мок для fetch із даними API
-    global.fetch = jest.fn(() =>
-      Promise.resolve({
-        ok: true,
-        json: () =>
-          Promise.resolve({
-            data: [
-              { id: 1, name: 'Category 1', image_url: 'test-url-1' },
-              { id: 2, name: 'Category 2', image_url: 'test-url-2' },
-            ],
-          }),
-      })
-    );
-
-    // Створення компонента
     wrapper = factory();
   });
 
   afterEach(() => {
-    if (wrapper) {
-      wrapper.unmount();
-    }
-    delete global.fetch;
+    if (wrapper) wrapper.unmount();
   });
 
   it('Коректне застосування стилів для заголовка секції', () => {
-    const sectionTitle = wrapper.find('.section-title');
+    const sectionTitle = wrapper.find('h2');
     expect(sectionTitle.exists()).toBe(true);
-    expect(sectionTitle.classes()).toContain('section-title');
+    expect(sectionTitle.classes()).toContain('text-[32px]');
+    expect(sectionTitle.classes()).toContain('font-black');
+    expect(sectionTitle.classes()).toContain('text-center');
   });
 
   it('Коректне відображення шрифтів KyivType Titling', () => {
-    const sectionTitle = wrapper.find('.section-title');
+    const sectionTitle = wrapper.find('h2');
     expect(sectionTitle.exists()).toBe(true);
-    expect(sectionTitle.classes()).toContain('section-title');
+    expect(sectionTitle.classes()).toContain('font-kyivtype');
   });
 
   it('Відображення заголовка секції (Shop By Category)', () => {
-    const sectionTitle = wrapper.find('.section-title');
+    const sectionTitle = wrapper.find('h2');
     expect(sectionTitle.exists()).toBe(true);
-    expect(sectionTitle.text()).toBe('shopByCategory');
+    expect(sectionTitle.text()).toBe('shopByCategory'); // бо $t замокано як (msg) => msg
   });
 
   it('Коректне відображення елементів категорій у вигляді сітки', async () => {
     await wrapper.vm.$nextTick();
     await wait();
-    const categoryGrid = wrapper.find('.category-grid');
+
+    const categoryGrid = wrapper.find('div.grid');
     expect(categoryGrid.exists()).toBe(true);
 
-    const categoryItems = categoryGrid.findAll('.category-item');
+    const categoryItems = categoryGrid.findAll('.group'); // router-link має клас group
     expect(categoryItems.length).toBe(wrapper.vm.categories.length);
 
     categoryItems.forEach((item) => {
-      expect(item.classes()).toContain('category-item');
+      expect(item.classes()).toContain('group');
     });
   });
 
   it('отримує дані категорій із замоканого API та відображає їх правильно', async () => {
-    await wrapper.vm.$nextTick();
     await wait();
-
-    // Перевірка, що fetch викликано лише один раз під час монтування
-    expect(global.fetch).toHaveBeenCalledTimes(1);
-    expect(global.fetch).toHaveBeenCalledWith('http://26.235.139.202:8080/api/categories');
+    await wrapper.vm.$nextTick();
 
     expect(wrapper.vm.categories).toEqual([
       { id: 1, name: 'Category 1', image_url: 'test-url-1', url: '/bracelets' },
       { id: 2, name: 'Category 2', image_url: 'test-url-2', url: '/herdany' },
     ]);
 
-    const categoryItems = wrapper.findAll('.category-item');
+    const categoryItems = wrapper.findAll('.group');
     expect(categoryItems.length).toBe(2);
     expect(categoryItems[0].find('img').attributes('src')).toBe('test-url-1');
-    expect(categoryItems[0].find('.category-title').text()).toBe('Category 1');
+    expect(categoryItems[0].find('h3').text()).toBe('Category 1');
     expect(categoryItems[1].find('img').attributes('src')).toBe('test-url-2');
-    expect(categoryItems[1].find('.category-title').text()).toBe('Category 2');
+    expect(categoryItems[1].find('h3').text()).toBe('Category 2');
   });
 
   it('Перевірка, що URL кожної категорії коректно додається під час мапінгу даних', async () => {
-    await wrapper.vm.$nextTick();
     await wait();
+    await wrapper.vm.$nextTick();
+
     const expectedCategories = [
       { id: 1, name: 'Category 1', image_url: 'test-url-1', url: '/bracelets' },
       { id: 2, name: 'Category 2', image_url: 'test-url-2', url: '/herdany' },
     ];
-    expect(wrapper.vm.categories).toEqual(expectedCategories);
 
-    wrapper.vm.categories.forEach((category, index) => {
-      expect(category.url).toBe(expectedCategories[index].url);
+    expect(wrapper.vm.categories).toEqual(expectedCategories);
+    wrapper.vm.categories.forEach((category, i) => {
+      expect(category.url).toBe(expectedCategories[i].url);
     });
   });
 
   it('Перевірка коректності підвантаження зображень категорій (lazy loading)', async () => {
-    await wrapper.vm.$nextTick();
     await wait();
-    const categoryImages = wrapper.findAll('.category-image');
-    expect(categoryImages.length).toBe(wrapper.vm.categories.length);
+    await wrapper.vm.$nextTick();
 
-    categoryImages.forEach((img) => {
+    const images = wrapper.findAll('img');
+    expect(images.length).toBe(wrapper.vm.categories.length);
+
+    images.forEach(img => {
       expect(img.attributes('loading')).toBe('lazy');
     });
   });
 
   it('API повертає масив категорій із неповними даними (без image_url або name)', async () => {
-    global.fetch.mockImplementationOnce(() =>
-      Promise.resolve({
-        ok: true,
-        headers: { get: jest.fn().mockReturnValue('application/json') },
-        json: () =>
-          Promise.resolve({
-            data: [
-              { id: 1, name: 'Category 1', image_url: 'test-url-1' },
-              { id: 2, name: 'Category 2', image_url: 'test-url-2' },
-            ],
-          }),
-      })
-    );
-    // Перезмонтуємо компонент для використання нової імплементації fetch
+    const { getCategories } = require('@/services/api');
+    getCategories.mockResolvedValueOnce({
+      data: [
+        { id: 1, name: 'Category 1' }, // без image_url
+        { id: 2, image_url: 'test-url-2' }, // без name
+      ],
+    });
+
     wrapper.unmount();
     wrapper = factory();
-    await wrapper.vm.$nextTick();
     await wait();
+    await wrapper.vm.$nextTick();
 
     expect(wrapper.vm.categories).toEqual([
-      { id: 1, name: 'Category 1', image_url: 'test-url-1', url: '/bracelets' },
-      { id: 2, name: 'Category 2', image_url: 'test-url-2', url: '/herdany' },
+      { id: 1, name: 'Category 1', image_url: undefined, url: '/bracelets' },
+      { id: 2, name: undefined, image_url: 'test-url-2', url: '/herdany' },
     ]);
 
-    const categoryItems = wrapper.findAll('.category-item');
-    expect(categoryItems.length).toBe(2);
-    expect(categoryItems[0].find('img').attributes('src')).toBe('test-url-1');
-    expect(categoryItems[0].find('.category-title').text()).toBe('Category 1');
-    expect(categoryItems[1].find('img').attributes('src')).toBe('test-url-2');
-    expect(categoryItems[1].find('.category-title').text()).toBe('Category 2');
+    const categoryLinks = wrapper.findAll('.group');
+    expect(categoryLinks.length).toBe(2);
+    expect(categoryLinks[0].find('img').attributes('src')).toBeUndefined();
+    expect(categoryLinks[0].find('h3').text()).toBe('Category 1');
+    expect(categoryLinks[1].find('img').attributes('src')).toBe('test-url-2');
+    expect(categoryLinks[1].find('h3').text()).toBe('');
   });
 
   it('Відображення зображення, назви, та стрілки у кожному елементі категорії', async () => {
@@ -201,71 +184,6 @@ describe('CategoryProduct.vue', () => {
     });
   });
 
-  it('Відображення квадратів у перших, третіх і п’ятих категоріях', async () => {
-    await wrapper.vm.$nextTick();
-    await wait();
-    const categoryItems = wrapper.findAll('.category-item');
-    expect(categoryItems.length).toBe(wrapper.vm.categories.length);
-
-    [0, 2, 4].forEach((index) => {
-      if (categoryItems[index]) {
-        const lightSquare = categoryItems[index].find('.light-square');
-        const darkSquare = categoryItems[index].find('.dark-square');
-        expect(lightSquare.exists()).toBe(true);
-        expect(darkSquare.exists()).toBe(true);
-      }
-    });
-
-    [1, 3, 5].forEach((index) => {
-      if (categoryItems[index]) {
-        const lightSquare = categoryItems[index].find('.light-square');
-        const darkSquare = categoryItems[index].find('.dark-square');
-        expect(lightSquare.exists()).toBe(false);
-        expect(darkSquare.exists()).toBe(false);
-      }
-    });
-  });
-
-  // Зміна лише для тесту кешування: замість того, щоб давати fetch змінювати дані,
-  // ми переопреділяємо метод fetchCategories як noop та вручну задаємо дані з localStorage.
-  it('отримує категорії із кешу, якщо вони є', async () => {
-    const cachedCategories = [
-      { id: 1, name: 'Кешована категорія', image_url: 'cached-url', url: '/cached-url' },
-    ];
-    localStorage.setItem('categories', JSON.stringify(cachedCategories));
-
-    // Перестворюємо компонент із заміною fetchCategories на noop, щоб уникнути виклику fetch
-    wrapper.unmount();
-    wrapper = shallowMount(CategoryProduct, {
-      methods: {
-        fetchCategories: () => {} // Не виконуємо запит до API
-      },
-      global: {
-        mocks: {
-          $t: (msg) => msg,
-        },
-        stubs: {
-          'router-link': {
-            template: '<a class="category-link" :href="to"><slot /></a>',
-            props: ['to'],
-          },
-        },
-      },
-    });
-
-    await wrapper.vm.$nextTick();
-    await wait();
-    // Ручне задання даних з localStorage (оскільки компонент сам не читає їх)
-    wrapper.vm.categories = JSON.parse(localStorage.getItem('categories'));
-    await wrapper.vm.$nextTick();
-    await wait();
-
-    expect(wrapper.vm.categories).toEqual(cachedCategories);
-    const categoryItems = wrapper.findAll('.category-item');
-    expect(categoryItems.length).toBe(1);
-    expect(categoryItems[0].find('.category-title').text()).toBe('Кешована категорія');
-  });
-
   it('Зображення категорій мають правильні alt-атрибути', async () => {
     await wrapper.vm.$nextTick();
     await wait();
@@ -276,27 +194,29 @@ describe('CategoryProduct.vue', () => {
   });
 
   it('Оновлює список категорій після зміни даних', async () => {
-    wrapper.setData({
-      categories: [
-        { id: 100, name: 'Нова категорія', image_url: 'new-url', url: '/new-category' },
-      ],
-    });
+    wrapper.vm.categories = [
+      { id: 100, name: 'Нова категорія', image_url: 'new-url', url: '/new-category' },
+    ];
     await wrapper.vm.$nextTick();
     await wait();
 
-    const categoryItems = wrapper.findAll('.category-item');
+    const categoryItems = wrapper.findAll('.group'); // ← замість .category-item
     expect(categoryItems.length).toBe(1);
-    expect(categoryItems[0].find('.category-title').text()).toBe('Нова категорія');
+    const h3 = categoryItems[0].find('h3');
+    expect(h3.exists()).toBe(true);
+    expect(h3.text()).toBe('Нова категорія');
   });
+
 
   it('Коректно відображає список категорій', async () => {
     await wrapper.vm.$nextTick();
     await wait();
-    const categoryTitles = wrapper.findAll('.category-title');
-    expect(categoryTitles.length).toBe(wrapper.vm.categories.length);
 
-    categoryTitles.forEach((title, index) => {
-      expect(title.text()).toBe(wrapper.vm.categories[index].name);
+    const h3s = wrapper.findAll('h3');
+    expect(h3s.length).toBe(wrapper.vm.categories.length);
+
+    h3s.forEach((h3, index) => {
+      expect(h3.text()).toBe(wrapper.vm.categories[index].name);
     });
   });
 
@@ -310,14 +230,80 @@ describe('CategoryProduct.vue', () => {
   });
 
   it('Оновлює відображення після зміни списку категорій', async () => {
-    wrapper.setData({
-      categories: [
-        { id: 201, name: 'Оновлена категорія', image_url: 'new-image.jpg', url: '/updated' },
-      ],
-    });
+    wrapper.vm.categories = [
+      { id: 201, name: 'Оновлена категорія', image_url: 'new-image.jpg', url: '/updated' },
+    ];
     await wrapper.vm.$nextTick();
     await wait();
-    expect(wrapper.find('.category-title').text()).toBe('Оновлена категорія');
+
+    const h3 = wrapper.find('h3');
+    expect(h3.exists()).toBe(true);
+    expect(h3.text()).toBe('Оновлена категорія');
   });
+  //
+  it('Використовує fallbackCategories при помилці API', async () => {
+    const { getCategories } = require('@/services/api');
+    getCategories.mockRejectedValueOnce(new Error('API Error'));
+
+    wrapper.unmount();
+    wrapper = shallowMount(CategoryProduct, {
+      global: {
+        mocks: { $t: msg => msg },
+        stubs: {
+          'router-link': {
+            template: '<a class="category-link group" :href="to"><slot /></a>',
+            props: ['to'],
+          },
+        },
+      },
+    });
+
+    await wrapper.vm.$nextTick();
+    await wait();
+
+    expect(wrapper.vm.categories.length).toBe(wrapper.vm.fallbackCategories.length);
+  });
+
+  it('Кожна категорія має коректне значення :to у router-link', async () => {
+    await wrapper.vm.$nextTick();
+    await wait();
+
+    const links = wrapper.findAllComponents({ name: 'router-link' });
+    links.forEach((link, index) => {
+      expect(link.attributes('href')).toBe(wrapper.vm.categories[index].url);
+    });
+  });
+
+  it('Зображення без image_url не ламають lazy loading', async () => {
+    wrapper.vm.categories = [
+      { id: 1, name: 'Без картинки', image_url: undefined, url: '/no-image' },
+    ];
+    await wrapper.vm.$nextTick();
+    await wait();
+
+    const img = wrapper.find('img');
+    expect(img.exists()).toBe(true);
+    expect(img.attributes('loading')).toBe('lazy');
+  });
+
+  it('Формує URL для категорій поза межами fixedUrls', async () => {
+    const { getCategories } = require('@/services/api');
+    getCategories.mockResolvedValueOnce({
+      data: new Array(10).fill(0).map((_, i) => ({
+        id: i + 1,
+        name: `Cat ${i + 1}`,
+        image_url: `url-${i + 1}`,
+      })),
+    });
+
+    wrapper.unmount();
+    wrapper = factory();
+
+    await wrapper.vm.$nextTick();
+    await wait();
+
+    expect(wrapper.vm.categories[9].url).toBe('/category/10');
+  });
+
 });
 */
