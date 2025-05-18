@@ -5,7 +5,8 @@
     :style="{ backgroundImage: `url(${require('@/assets/paymentpattern.png')})` }"
   >
     <!-- Контейнер контенту: max-w і центр -->
-    <div class="w-full max-w-6xl mx-auto px-4 lg:px-12">
+    <div class="w-full max-w-7xl mx-auto px-4 lg:px-12">
+
       <header class="mb-8">
         <h1 class="flex items-center justify-center mt-[40px]
                    font-kyivBlack2 text-[34px] font-black tracking-[-1.2px]
@@ -16,25 +17,39 @@
         </h1>
       </header>
 
-      <main class="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-12">
+<main class="flex flex-col lg:flex-row lg:items-start gap-10 relative min-h-[900px]">
+<div class="flex-1 flex flex-col space-y-6">
+  <PaymentSteps
+    v-model="formData"
+    :currentStep="currentStep"
+    @steps-complete="stepsCompleted = $event"
+    ref="paymentSteps"
+  />
 
-        <div class="flex-1 flex flex-col space-y-8">
-          <PaymentSteps
-  :currentStep="currentStep"
-  @steps-complete="stepsCompleted = $event"
-  ref="paymentSteps"
-  class="w-full"
-/>
+  <OrderReview
+    :cartItems="cartItems"
+    :deliveryCost="deliveryCost"
+  />
 
-          <OrderReview
-  v-if="!stepsCompleted"
-  :cartItems="cartItems"
-  :deliveryCost="deliveryCost"
-  class="w-full"
-/>
+  <DeliveryAddress
+    v-if="stepsCompleted"
+    :customerData="formData"
+  />
+</div>
 
-          <DeliveryAddress :formData="formData" class="w-full" />
-        </div>
+<!-- ВСЕРЕДИНІ <main> -->
+<div class="w-full lg:w-[360px] shrink-0 lg:ml-[60px] mt-6 lg:mt-0">
+  <div class="sticky top-[100px] z-10">
+    <PaymentSummary
+      :cart-items="cartItems"
+      :city-ref="formData.cityRef"
+      :delivery-type="formData.deliveryType"
+      :customer-data="formData"
+    />
+  </div>
+</div>
+
+
 
 
 
@@ -47,6 +62,7 @@
 import PaymentSteps from "./PaymentSteps.vue";
 import OrderReview from "./OrderReview.vue";
 import DeliveryAddress from "./DeliveryAddress.vue";
+import PaymentSummary from "./PaymentSummary.vue";
 
 export default {
   name: "PaymentComponent",
@@ -54,20 +70,49 @@ export default {
     PaymentSteps,
     OrderReview,
     DeliveryAddress,
+    PaymentSummary,
   },
   data() {
-    return {
-      stepsCompleted: false,
-      cartItems: [],
-      currentStep: 1,
-      formData: {
-        cityRef: "",
-        deliveryType: "",
-      },
-      deliveryCost: 0,
-      totalAmount: 0,
-    };
-  },
+  return {
+    steps: [
+      { title: "Особиста інформація", completed: false, validated: false, isExpanded: true },
+      { title: "Поштове відділення", completed: false, validated: false, isExpanded: false },
+      { title: "Оплата", completed: false, validated: false, isExpanded: false },
+    ],
+    currentStep: 0,
+    tempUserAddress: null,
+    selectedDeliveryCategory: '',
+    errors: {},
+    cities: [],
+    streets: [],
+    warehouses: [],
+    deliveryOptions: [],
+    hasTriedSubmit: false,
+    cartItems: [],
+    deliveryCost: 0,
+
+    stepsCompleted: false,
+
+    formData: {
+      paymentMethod: "",
+      typeOfCard: "",
+      firstName: "",
+      lastName: "",
+      secondName: "",
+      phone: "",
+      city: "",
+      cityRef: "",
+      street: "",
+      streetSearch: "",
+      houseNumber: "",
+      warehouse: "",
+      deliveryType: "",
+    },
+
+    totalAmount: 0,
+  };
+},
+
   watch: {
     cartItems: { handler: "calculateTotalAmount", deep: true },
     deliveryCost: "calculateTotalAmount",

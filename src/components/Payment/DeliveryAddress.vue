@@ -1,6 +1,13 @@
 <template>
-  <div class="delivery-address-card bg-gradient-to-br from-gray-50 to-white rounded-2xl shadow-xl p-6 max-w-lg mx-auto hover:shadow-2xl transition-shadow">
-    <h2 class="text-center text-2xl font-semibold text-gray-800 mb-6">Підсумкова інформація</h2>
+<div
+  class="delivery-address-card
+         bg-gradient-to-br from-gray-50 to-white
+         rounded-2xl shadow-xl p-6
+         max-w-lg
+         hover:shadow-2xl transition-shadow
+         lg:ml-0 ml-4"
+    >
+<h2 class="text-center text-2xl font-semibold text-gray-800 mb-6">Підсумкова інформація</h2>
     <div class="space-y-4">
       <!-- User Info -->
       <div class="flex items-center space-x-4">
@@ -31,13 +38,27 @@
             <span class="text-gray-700">{{ customerData.street || 'Не вказано' }} {{ customerData.houseNumber || '' }}</span>
           </div>
           <div class="flex items-center space-x-2">
-            <span class="text-gray-600">📦</span>
-            <span class="text-gray-700">{{ customerData.deliveryType || 'Не вказано' }}</span>
-          </div>
+  <span class="text-gray-600">📦</span>
+  <span class="text-gray-700">
+    {{
+      typeof customerData.deliveryType === 'object'
+        ? customerData.deliveryType.name || customerData.deliveryType.label
+        : customerData.deliveryType || 'Не вказано'
+    }}
+  </span>
+</div>
+
           <div class="flex items-center space-x-2">
-            <span class="text-gray-600">🏤</span>
-            <span class="text-gray-700">{{ customerData.warehouse || 'Не вказано' }}</span>
-          </div>
+  <span class="text-gray-600">🏤</span>
+  <span class="text-gray-700">
+    {{
+      typeof customerData.warehouse === 'object'
+        ? customerData.warehouse.name
+        : customerData.warehouse || 'Не вказано'
+    }}
+  </span>
+</div>
+
         </div>
       </div>
     </div>

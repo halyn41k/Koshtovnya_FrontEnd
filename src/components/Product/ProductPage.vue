@@ -307,14 +307,16 @@ export default {
         console.error("Wishlist load error:", e);
       }
     },
-    async toggleWishlist() {
-      const id = this.product.id;
-      if (this.wishlist.includes(id)) {
-        await api.deleteWishlistItem(id);
-        this.wishlist = this.wishlist.filter(x => x !== id);
-      } else {
-        await api.addToWishlist({ product_id: id });
-        this.wishlist.push(id);
+    async toggleWishlist(product) {
+      try {
+        if (product.is_in_wishlist) {
+          await api.deleteWishlistItem(product.id);
+        } else {
+          await api.addToWishlist({ product_id: product.id });
+        }
+        product.is_in_wishlist = !product.is_in_wishlist;
+      } catch (error) {
+        console.error('Помилка оновлення списку бажаного:', error);
       }
     },
     async addToCart() {
@@ -327,8 +329,12 @@ export default {
 
     },
     async notifyWhenAvailable() {
-      await api.sendNotification({ product_id: this.productId });
-    },
+  try {
+    await api.sendNotification({ product_id: this.productId });
+  } catch (error) {
+    // нічого не робимо тут — api.js вже показує toast
+  }
+},
     openModal() { this.isModalOpen = true; },
     closeModal() { this.isModalOpen = false; },
     increaseQuantity() {

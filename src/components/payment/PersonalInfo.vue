@@ -1,6 +1,6 @@
 <template>
   <div class="personal-info">
-    <div class="flex flex-col gap-4 w-[200px]">
+    <div class="flex flex-col gap-4 w-[400px]">
       <div v-for="(field, key) in fields" :key="key" class="flex flex-col gap-1">
         <label :for="key" class="text-sm text-gray-700 font-medium">
           {{ getLabel(key) }}

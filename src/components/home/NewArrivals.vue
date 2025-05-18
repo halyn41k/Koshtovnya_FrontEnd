@@ -186,7 +186,6 @@ export default {
   try {
     await api.sendNotification({ product_id: product.id });
     // можеш додати toast:
-    // toast.success('Ви будете повідомлені, коли товар зʼявиться в наявності.');
   } catch (e) {
     console.error('Помилка при спробі підписки на сповіщення:', e);
   }

@@ -242,7 +242,12 @@
 
       <template v-if="formData.deliveryType?.value === 'courier'">
         <p class="text-gray-700 whitespace-nowrap"><strong>Місто:</strong> {{ formData.city }}</p>
-        <p class="text-gray-700"><strong>Адреса:</strong> {{ deliveryAddress.street }} {{ deliveryAddress.number }}</p>
+<p class="text-gray-700">
+  <strong>Адреса:</strong>
+  {{ deliveryAddress.street && deliveryAddress.number
+      ? deliveryAddress.street + ' ' + deliveryAddress.number
+      : savedDeliveryAddress || '(не вказано)' }}
+</p>
       </template>
 
       <!-- Якщо самовивіз з наших магазинів -->
@@ -252,13 +257,23 @@
   </p>
 </template>
 
-<!-- Pickup варіанти з виводом тільки для відділення або поштомату -->
 <template v-else-if="formData.deliveryType?.value === 'pickup'">
-  <p class="text-gray-700">
-    <strong>Місто:</strong> {{ formData.city }}<br />
-    <strong v-if="deliveryAddress.branch">Відділення:</strong> {{ deliveryAddress.branch }}
-    <strong v-if="deliveryAddress.postomat">Поштомат:</strong> {{ deliveryAddress.postomat }}
-  </p>
+<p class="text-gray-700">
+  <strong>Місто:</strong> {{ formData.city }}
+</p>
+
+<p class="text-gray-700" v-if="deliveryAddress.branch">
+  <strong>Адреса:</strong> {{ deliveryAddress.branch }}
+</p>
+<p class="text-gray-700" v-else-if="deliveryAddress.postomat">
+  <strong>Адреса:</strong> {{ deliveryAddress.postomat }}
+</p>
+<p class="text-gray-700">
+  <strong>Адреса:</strong> {{ savedDeliveryAddress || '(не вказано)' }}
+</p>
+
+
+
 </template>
 
 
@@ -306,6 +321,7 @@ export default {
       dropdownTop: 0,
       dropdownLeft: 0,
       dropdownWidth: 0,
+      savedDeliveryAddress: '',
 
       phoneNumber: "",
       formData: {
@@ -635,7 +651,9 @@ export default {
     this.$router.push("/login");
     return;
   }
+
   this.loading = true;
+
   try {
     const response = await axios.get("https://koshtovnya.api-dev.bmax-edu.website/api/user-address", {
       headers: { Authorization: `Bearer ${token}` }
@@ -643,17 +661,27 @@ export default {
 
     if (response.data && response.data.data) {
       const address = response.data.data;
+      this.savedDeliveryAddress = address.delivery_address || '';
+
 
       this.phoneNumber = address.phone_number || "";
       this.formData.city = address.city || "";
+      this.formData.cityRef = address.city_ref || "";
       this.selectedCity = {
         city: address.city,
         Ref: address.city_ref
       };
 
-      const foundType = this.deliveryOptions.find(opt => opt.value === address.delivery_type && opt.name === address.delivery_name);
+      const foundType = this.deliveryOptions.find(opt =>
+        opt.value === address.delivery_type && opt.name === address.delivery_name
+      );
       this.formData.deliveryType = foundType || null;
-      this.formData.selectedDeliveryMethod = foundType || null;
+this.formData.selectedDeliveryMethod = foundType || null;
+
+this.$nextTick(() => {
+  this.updateDeliveryOptions();
+});
+
       this.formData.deliveryName = address.delivery_name || "";
       this.addressId = address.id;
 
@@ -665,18 +693,39 @@ export default {
         warehouse: ""
       };
 
-      if (address.delivery_type === "courier") {
-        const parts = address.delivery_address.split(" ");
-        this.deliveryAddress.street = parts[0];
-        this.deliveryAddress.number = parts.slice(1).join(" ");
-      } else if (address.delivery_type === "pickup") {
-        const addr = address.delivery_address.toLowerCase();
+     if (address.delivery_type === "courier") {
+  const full = address.delivery_address || '';
+  let streetPart = '', numberPart = '';
 
-        if (addr.includes("поштомат")) {
+  // Якщо починається на "вул." — стандартна розбивка
+  if (full.includes(' ')) {
+    const split = full.trim().split(' ');
+    streetPart = split.slice(0, -1).join(' ');
+    numberPart = split.slice(-1)[0];
+  } else {
+    // Якщо не можемо розбити — записуємо все в вулицю
+    streetPart = full;
+  }
+
+  this.deliveryAddress.street = streetPart;
+  this.deliveryAddress.number = numberPart;
+  this.formData.streetSearch = streetPart;
+  this.selectedStreet = { street: streetPart };
+
+  await this.fetchStreets();
+}
+
+       else if (address.delivery_type === "pickup") {
+        const lowerAddr = (address.delivery_address || '').toLowerCase();
+
+        if (lowerAddr.includes("поштомат")) {
           this.deliveryAddress.postomat = address.delivery_address;
-        } else if (addr.includes("вул. степана бандери")) {
-          // Це самовивіз з магазину
+        } else if (lowerAddr.includes("вул. степана бандери")) {
+          // Самовивіз з магазину — нічого не змінюємо
+        } else if (lowerAddr.includes("відділення")) {
+          this.deliveryAddress.branch = address.delivery_address;
         } else {
+          // Якщо не вдалося ідентифікувати — все одно зберігаємо у branch
           this.deliveryAddress.branch = address.delivery_address;
         }
       }
@@ -685,6 +734,7 @@ export default {
     } else {
       this.addressAvailable = false;
     }
+
   } catch (error) {
     console.error("Помилка отримання адреси:", error);
     this.addressAvailable = false;
@@ -692,6 +742,11 @@ export default {
     this.loading = false;
   }
 },
+
+
+  
+
+
 
     async fetchUserPhoneNumber() {
       const token = localStorage.getItem("token");
@@ -888,9 +943,40 @@ export default {
         alert(error.response?.data?.message || "Не вдалося видалити адресу");
       }
     },
-    editAddress() {
-      this.showForm = true;
-    },
+   editAddress() {
+  this.showForm = true;
+
+  // Відновлюємо selectedCity
+  if (this.formData.city && this.formData.cityRef) {
+    this.selectedCity = {
+      city: this.formData.city,
+      Ref: this.formData.cityRef
+    };
+  }
+
+  // Якщо courier — відновлюємо selectedStreet і поле пошуку
+  if (this.formData.deliveryType?.value === 'courier') {
+    const street = this.deliveryAddress.street;
+    if (street) {
+      this.selectedStreet = { street };
+      this.formData.streetSearch = street;
+    }
+  }
+
+  // 🔁 Форсуємо оновлення опцій + підтягуємо потрібні дані
+  this.$nextTick(() => {
+    this.updateDeliveryOptions();
+
+    if (this.formData.deliveryType?.value === 'courier') {
+      this.fetchStreets();
+    }
+
+    if (this.formData.deliveryType?.value === 'pickup') {
+      this.fetchWarehouses();
+    }
+  });
+},
+
     openForm() {
       if (!this.phoneNumber) {
         this.fetchUserPhoneNumber();
@@ -905,6 +991,13 @@ export default {
     document.title = "Ваша адреса";
   },
   computed: {
+    formattedDeliveryAddress() {
+    // Якщо тип pickup і нічого не зайшло — fallback
+    return this.deliveryAddress.branch ||
+           this.deliveryAddress.postomat ||
+           this.formData?.delivery_address ||
+           '';
+  },
   isStorePickup() {
     return this.formData.deliveryType?.name === 'Самовивіз з наших магазинів';
   },
@@ -916,6 +1009,9 @@ export default {
   },
   isUkrposhtaPickup() {
     return this.formData.deliveryType?.name?.toLowerCase().includes('укрпошта');
+  },
+  fallbackDeliveryAddress() {
+    return this.deliveryAddress.branch || this.deliveryAddress.postomat || '';
   }
 },
 

@@ -47,7 +47,15 @@ apiClient.interceptors.response.use(
     const message = response.data?.message || '';
 
   
-    const normalizedMessage = message.toLowerCase().trim();
+   const normalizedMessage = message.toLowerCase().trim();
+
+
+if (normalizedMessage.includes('you are already subscribed for notifications')) {
+  toast.error('Ви вже підписані на сповіщення для цього товару 😢');
+  return Promise.reject(response.data);
+}
+
+
 
     // 🟡 Додай перевірку тут – ДО switch
     if (normalizedMessage.includes('not enough stock available')) {
@@ -252,10 +260,11 @@ export default {
     return data;
   },
   sendNotification: async payload => {
-    const { data } = await apiClient.post('/api/notification', payload);
-    toast.success('Сповіщення відправлено');
-    return data;
-  },
+  const { data } = await apiClient.post('/api/notification', payload);
+  toast.success('Ви будете повідомлені, коли товар зʼявиться в наявності');
+  return data;
+},
+
 
   // Products & Categories
   getProduct: async id => {

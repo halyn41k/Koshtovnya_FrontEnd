@@ -1,16 +1,16 @@
-<template> 
+<template>
   <section class="relative z-[5]">
     <div
-      class="
-        w-full mt-5
-        lg:absolute lg:top-[300px] lg:right-[100px] lg:w-[300px] lg:mt-0
-        p-4 lg:p-5
-        bg-[#FFF7F6] border border-[#E6E6E6] rounded-lg
-        max-h-[400px] overflow-y-auto
-        transition-all duration-300
+  class="
+    w-full
+    p-4 lg:p-5
+    bg-[#FFF7F6] border border-[#E6E6E6] rounded-lg
+    transition-all duration-300
       "
       style="font-family: 'Montserrat', sans-serif;"
     >
+     
+
       <!-- Заголовок -->
       <h2 class="text-black font-bold text-[20px] leading-[1.3] mb-4">
         Сума до оплати

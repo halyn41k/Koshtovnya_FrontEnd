@@ -250,19 +250,23 @@ export default {
     // Оновлений метод addToCart
     async addToCart(product) {
       try {
-  await api.addToCart({ product_id: product.id, quantity: 1 });
-} catch (error) {
-  console.error('Помилка додавання в кошик:', error); // можна логувати, але без toast
-}
-
-},
+        // ОБОВ'ЯЗКОВО повертаємо проміс з api
+        const res = await api.addToCart({
+          product_id: product.id,
+          quantity: 1               // тепер quantity є, бекенд не скаржиться
+        });
+        bus.emit('cart-updated');
+        // тут можна показати тост чи анімацію:
+        console.log('Додано в кошик:', res.data);
+      } catch (error) {
+        console.error('Помилка додавання в кошик:', error.response?.data || error);
+      }
+    },
 async notifyWhenAvailable(product) {
   try {
     await api.sendNotification({ product_id: product.id });
-    toast.success('Ви будете повідомлені, коли товар зʼявиться в наявності');
   } catch (e) {
     console.error('Помилка підписки на повідомлення:', e);
-    toast.error('Не вдалося підписатись на повідомлення 😢');
   }
 },
 
