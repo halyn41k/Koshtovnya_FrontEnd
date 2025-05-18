@@ -60,6 +60,7 @@
               @update-streets="setStreets"
               @update-warehouses="setWarehouses"
               @validate="validateAndProceed"
+              :temp-user-address="tempUserAddress"
             />
 
             <button
@@ -116,7 +117,7 @@ export default {
 
       currentStep: 0,
       tempUserAddress: null,
-
+      selectedDeliveryCategory: '',
       formData: {
         paymentMethod: "",
         firstName: "",
@@ -146,6 +147,12 @@ export default {
     isStorePickupSelected() {
   return this.formData.deliveryType?.name === 'Самовивіз з наших магазинів';
 },
+ filteredDeliveryOptions() {
+    if (!this.selectedDeliveryCategory) return this.deliveryOptions;
+    return this.deliveryOptions.filter(
+      opt => opt.value === this.selectedDeliveryCategory
+    );
+  },
 
 
     canProceedToNextStep() {
@@ -221,6 +228,9 @@ export default {
     this.steps[this.currentStep].completed = false;
     return;
   }
+
+  // ✅ ОНОВИТИ ДАНІ КОРИСТУВАЧА В СТЕЙТІ
+  this.updateCustomerData(this.formData);
 
   this.steps[this.currentStep].validated = true;
   this.steps[this.currentStep].completed = true;
@@ -349,25 +359,39 @@ validateCurrentStep() {
       this.formData.city = addressData.city || "";
       this.formData.cityRef = addressData.Ref || "";
 
-      if (addressData.delivery_type === "courier") {
-        this.formData.streetSearch = addressData.delivery_address || "";
-        this.formData.street = addressData.delivery_address || "";
-        this.formData.houseNumber = addressData.house_number || "";
-      }
+    if (addressData.delivery_type === "courier") {
+  const fullAddress = addressData.delivery_address || "";
+
+  // Спробуємо знайти останнє число з текстом як номер будинку
+  const addressMatch = fullAddress.match(/^(.*?)(?:[, ]+)?((\d+[^\s]*)|(\d+\/\d+)|(\d+\s?[а-яА-ЯіІїЇєЄa-zA-Z-]+))$/);
+
+  if (addressMatch) {
+    const [, streetOnly, numberOnly] = addressMatch;
+    this.formData.streetSearch = streetOnly.trim();
+    this.formData.street = streetOnly.trim();
+    this.formData.houseNumber = numberOnly.trim();
+  } else {
+    // якщо не змогли розбити — як fallback
+    this.formData.streetSearch = fullAddress;
+    this.formData.street = fullAddress;
+    this.formData.houseNumber = addressData.house_number || '';
+  }
+}
+
+
 
       this.tempUserAddress = {
-  phone: addressData.phone_number || '',
-  city: addressData.city || '',
-  cityRef: addressData.Ref || '',
-  street: addressData.delivery_address || '',
-  streetSearch: addressData.delivery_address || '',
-  houseNumber: addressData.house_number || '',
-  warehouseName: addressData.delivery_address,
-  deliveryTypeName: addressData.delivery_name,
-  deliveryCategory: addressData.delivery_type,
-  userName: addressData.user || ''
-};
-
+        phone: addressData.phone_number || '',
+        city: addressData.city || '',
+        cityRef: addressData.Ref || '',
+        street: addressData.delivery_address || '',
+        streetSearch: addressData.delivery_address || '',
+        houseNumber: addressData.house_number || '',
+        warehouseName: addressData.delivery_address,
+        deliveryTypeName: addressData.delivery_name,
+        deliveryCategory: addressData.delivery_type,
+        userName: addressData.user || ''
+      };
 
       this.selectedDeliveryCategory =
         addressData.delivery_type === "courier" ? "courier" : "pickup";
@@ -384,20 +408,19 @@ validateCurrentStep() {
           console.warn("Не знайдено deliveryType для", addressData.delivery_name);
         }
 
-        // Чекаємо завантаження відділень
+        // Завантажити відділення
         this.warehouses = await this.fetchWarehouses(
-  addressData.city,
-  addressData.Ref,
-  addressData.delivery_name
-);
-
+          addressData.city,
+          addressData.Ref,
+          addressData.delivery_name
+        );
 
         const warehouseMatch = this.warehouses.find(
-  w => w.name === addressData.delivery_address
-);
-if (warehouseMatch) {
-  this.formData.warehouse = warehouseMatch;
-}
+          w => w.name === addressData.delivery_address
+        );
+        if (warehouseMatch) {
+          this.formData.warehouse = warehouseMatch;
+        }
 
         // ПІБ
         const [last, first, second] = addressData.user
@@ -454,6 +477,8 @@ async fetchWarehouses(city, cityRef, deliveryName) {
 },
 
   validatePostalInfo(silent = false) {
+  console.log('formData.houseNumber', this.formData.houseNumber); // 👉 додай це
+
     if (!silent) this.errors = {};
     let valid = true;
 
@@ -492,15 +517,17 @@ async fetchWarehouses(city, cityRef, deliveryName) {
 
   },
   created() {
-    this.updateDeliveryOptions();
+  this.updateDeliveryOptions();
 
-    this.fetchDeliveryTypes();
-    this.fetchUserAddress();
-    this.fetchCartItems().then(() => {
-      this.updateCartItems(this.cartItems);
+  this.fetchUserAddress().then(() => {
+    this.fetchDeliveryTypes().then(() => {
+     
+      
     });
-    this.fetchProfile();
-  },
+  });
+},
+
+
   watch: {
   formData: {
     handler() {

@@ -7,7 +7,7 @@
         <label class="block mb-1 text-sm font-medium text-gray-700">Спосіб доставки:</label>
         <Multiselect
           v-model="localData.deliveryType"
-          :options="deliveryOptions"
+          :options="deliveryOptions || []"
           :custom-label="opt => `${opt.label} — ${opt.name}`"
           :track-by="'id'"
           placeholder="Оберіть спосіб доставки"
@@ -75,8 +75,9 @@
 
         <div class="mt-4">
           <label class="block mb-1 text-sm font-medium text-gray-700">Номер будинку:</label>
-          <input
-            v-model="localData.houseNumber"
+          <input   v-model="houseNumberProxy"
+ 
+
 class="block w-full p-2 border border-gray-300 rounded-md text-gray-900 font-normal focus:outline-none focus:ring-2 focus:ring-red-500"
             :class="{ 'border-red-500': errors.houseNumber }"
             @input="updateData"
@@ -91,7 +92,7 @@ class="block w-full p-2 border border-gray-300 rounded-md text-gray-900 font-nor
         <label class="block mb-1 text-sm font-medium text-gray-700">{{ isPostomat ? 'Поштомат' : 'Відділення' }}:</label>
         <Multiselect
           v-model="localData.warehouse"
-          :options="warehousesLocal"
+          :options="warehousesLocal || []"
           :label="'name'"
           :track-by="'id'"
           placeholder="Оберіть відділення"
@@ -124,9 +125,11 @@ export default {
     ComboboxOptions,
     ComboboxOption, },
   props: {
-    modelValue: { type: Object, required: true },
-    errors: { type: Object, default: () => ({}) }
-  },
+  modelValue: { type: Object, required: true },
+  errors: { type: Object, default: () => ({}) }, // ← ДОДАЙ КОМУ
+  tempUserAddress: { type: Object, default: null },
+},
+
   data() {
     return {
       selectedCity: null,
@@ -140,6 +143,15 @@ export default {
     };
   },
   computed: {
+    houseNumberProxy: {
+  get() {
+    return this.localData.houseNumber || '';
+  },
+  set(value) {
+    this.localData.houseNumber = value;
+    this.updateData();
+  }
+},
     isCourier() {
       return this.localData.deliveryType?.delivery_type === 'courier';
     },
@@ -157,21 +169,55 @@ export default {
     }
   },
   watch: {
-    modelValue: { handler(val) { this.localData = { ...val }; }, deep: true },
-     selectedCity(val) {
-    if (val?.city) {
-      this.selectCity(val);
+   modelValue: {
+    handler(val) {
+      console.log('watch.modelValue updated', val);
+      this.localData = { ...val }; // видаляємо houseNumber з localData повністю
+
+      this.selectedCity = val.city && val.cityRef ? { city: val.city, Ref: val.cityRef } : null;
+      this.selectedStreet = val.street ? { Name: val.street } : null;
+
+      // 🛑 ❌ видалити це:
+      // if (val.houseNumber) {
+      //   this.localData.houseNumber = val.houseNumber;
+      // }
+    },
+    deep: true,
+    immediate: true
+  },
+  houseNumberWatcher: {
+  handler(val) {
+    if (val && val !== this.localData.houseNumber) {
+      this.localData.houseNumber = val;
     }
   },
+  immediate: true
+},
+
   selectedStreet(val) {
   if (val?.Name || val?.street) {
     this.selectStreet(val);
   }
 },
 
+tempUserAddress: {
+  handler(address) {
+    if (!address || !Array.isArray(this.deliveryOptions)) return;
+    this.handleTempAddress(address);
   },
-  created() {
-    this.fetchDeliveryTypes();
+  immediate: true,
+  deep: true
+}
+
+
+  },
+ async created() {
+  await this.fetchDeliveryTypes();
+
+  if (this.tempUserAddress && Array.isArray(this.deliveryOptions)) {
+    this.handleTempAddress(this.tempUserAddress);
+  }
+
   },
   methods: {
     handleCitySearch(event) {
@@ -183,9 +229,79 @@ export default {
     this.fetchCities();
   }
 },
-    updateData() {
-      this.$emit('update:modelValue', this.localData);
-    },
+handleTempAddress(address) {
+  if (!address || !Array.isArray(this.deliveryOptions)) return;
+
+  const {
+    city,
+    cityRef,
+    street,
+    streetSearch,
+    houseNumber,
+    warehouseName,
+    deliveryTypeName,
+    deliveryCategory
+  } = address;
+
+  this.selectedDeliveryCategory = deliveryCategory;
+
+  const matched = this.deliveryOptions.find(opt => opt.name === deliveryTypeName);
+  if (matched) {
+    this.localData.deliveryType = matched;
+  }
+
+  this.localData.city = city || '';
+  this.localData.cityRef = cityRef || '';
+  this.selectedCity = city && cityRef ? { city, Ref: cityRef } : null;
+
+  if (deliveryCategory === 'courier') {
+  const addressMatch = street?.match(/(.+?)\s+(\d+\w*)$/);
+
+  if (addressMatch) {
+    const [, streetOnly, numberOnly] = addressMatch;
+    this.localData.street = streetOnly.trim();
+    this.localData.streetSearch = streetOnly.trim();
+    // ❌ не this.localData.houseNumber
+    this.$emit('update:modelValue', {
+      ...this.modelValue,
+      street: streetOnly.trim(),
+      streetSearch: streetOnly.trim(),
+      houseNumber: numberOnly.trim()
+    });
+  } else {
+    this.$emit('update:modelValue', {
+      ...this.modelValue,
+      street: street || '',
+      streetSearch: street || '',
+      houseNumber: houseNumber || ''
+    });
+  }
+}
+
+
+  if (deliveryCategory === 'pickup' && city && cityRef && deliveryTypeName) {
+    this.fetchWarehouses(city, cityRef, deliveryTypeName).then(warehouses => {
+      this.warehousesLocal = Array.isArray(warehouses) ? warehouses : [];
+      const match = this.warehousesLocal.find(w => w.name === warehouseName);
+      if (match) {
+        this.localData.warehouse = match;
+      }
+      this.$emit('update:modelValue', { ...this.localData });
+    });
+  } else {
+    this.$emit('update:modelValue', { ...this.localData });
+  }
+},
+
+
+
+   updateData() {
+  this.$emit('update:modelValue', {
+    ...this.modelValue,
+    ...this.localData
+  });
+},
+
     async fetchDeliveryTypes() {
       const token = localStorage.getItem('token');
       try {
@@ -209,50 +325,26 @@ export default {
         this.deliveryOptions = [];
       }
     },
-    onDeliveryTypeChange() {
-      if (this.isStorePickup) {
-        this.localData.city = 'Коломия';
-        this.localData.street = 'вул. Степана Бандери 22';
-        this.localData.houseNumber = '';
-        this.localData.warehouse = null;
-      } else {
-        this.localData.city = '';
-        this.localData.street = '';
-        this.localData.houseNumber = '';
-        this.localData.warehouse = null;
-      }
-      this.updateData();
-
-      if (this.tempUserAddress) {
-  const { city, cityRef, street, houseNumber, streetSearch, warehouseName, deliveryTypeName, deliveryCategory } = this.tempUserAddress;
-
-  this.formData.city = city;
-  this.formData.cityRef = cityRef;
-
-  if (deliveryCategory === 'courier') {
-    this.formData.street = street;
-    this.formData.streetSearch = streetSearch;
-    this.formData.houseNumber = houseNumber;
+   onDeliveryTypeChange() {
+  if (this.isStorePickup) {
+    this.localData.city = 'Коломия';
+    this.localData.street = 'вул. Степана Бандери 22';
+    this.localData.houseNumber = '';
+    this.localData.warehouse = null;
+    this.updateData();
+    return;
   }
 
-  if (deliveryCategory === 'pickup') {
-    this.fetchWarehouses(city, cityRef, deliveryTypeName).then(warehouses => {
-      this.warehouses = warehouses;
-      const warehouseMatch = warehouses.find(w => w.name === warehouseName);
-      if (warehouseMatch) {
-        this.formData.warehouse = warehouseMatch;
-      }
-    });
-  }
+  this.localData.city = '';
+  this.localData.street = '';
+  this.localData.houseNumber = '';
+  this.localData.warehouse = null;
+  this.updateData();
+},
+  
 
-  // обрати deliveryType
-  const match = this.deliveryOptions.find(opt => opt.name === deliveryTypeName);
-  if (match) {
-    this.formData.deliveryType = match;
-  }
-}
 
-    },
+
     onCityInput() {
       this.updateData();
       if (this.localData.city.length >= 3) this.fetchCities();
@@ -326,7 +418,10 @@ export default {
           : [];
       } catch (e) { console.error('Помилка отримання відділень', e); }
     }
-  }
+  },
+
+  
+
 };
 </script>
 

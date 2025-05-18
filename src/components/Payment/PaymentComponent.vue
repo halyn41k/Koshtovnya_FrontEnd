@@ -7,12 +7,12 @@
     <!-- Контейнер контенту: max-w і центр -->
     <div class="w-full max-w-6xl mx-auto px-4 lg:px-12">
       <header class="mb-8">
-        <h1
-          class="flex items-center justify-start mt-[40px] font-kyivBlack2 text-[34px] font-black tracking-[-1.2px] text-left"
-        >
+        <h1 class="flex items-center justify-center mt-[40px]
+                   font-kyivBlack2 text-[34px] font-black tracking-[-1.2px]
+                   text-center">
           <div class="flex-1 h-[2px] bg-gray-400 mx-2"></div>
-          Оплата
-          <div class="flex-1 h-[2px] bg-gray-400 mx-2"></div>
+      Оплата    
+<div class="flex-1 h-[2px] bg-gray-400 mx-2"></div>
         </h1>
       </header>
 
@@ -97,6 +97,10 @@ export default {
 </script>
 
 <style scoped>
+/* Google-шрифт Montserrat */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');
+
+/* Ваш кастомний шрифт */
 @font-face {
   font-family: 'KyivType Titling Black2';
   src: url('@/assets/fonts/KyivType2020-14-12/KyivType-NoVariable/TTF/KyivTypeTitling-Black2.ttf') format('truetype');
@@ -105,5 +109,12 @@ export default {
   font-display: swap;
 }
 
+/* Класи для шрифтів */
+.font-montserrat {
+  font-family: 'Montserrat', sans-serif;
+}
+.font-kyivBlack2 {
+  font-family: 'KyivType Titling Black2', sans-serif;
+}
 
 </style>

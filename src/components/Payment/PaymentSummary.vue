@@ -204,7 +204,7 @@ export default {
         console.error("[submitOrder] Помилка оформлення замовлення:", error);
       }
     },
-    resolveDeliveryAddress() {
+   resolveDeliveryAddress() {
   const type = this.customerData?.deliveryType;
   const name = typeof type === 'string' ? type : type?.name || '';
   const delivery_type = typeof type === 'object' ? type.delivery_type : null;
@@ -214,11 +214,13 @@ export default {
   }
 
   if (name.toLowerCase().includes('поштомат')) {
-    return this.customerData?.warehouse || 'Поштомат не обрано';
+    const wh = this.customerData?.warehouse;
+    return typeof wh === 'object' ? wh.name : wh || 'Поштомат не обрано';
   }
 
   if (delivery_type === 'pickup') {
-    return this.customerData?.warehouse || 'Відділення не обрано';
+    const wh = this.customerData?.warehouse;
+    return typeof wh === 'object' ? wh.name : wh || 'Відділення не обрано';
   }
 
   return `${this.customerData?.street || ''} ${this.customerData?.houseNumber || ''}`.trim();
