@@ -1,10 +1,10 @@
-describe.skip('Тести для MyComponent', () => {
-  it('цей тест не виконається', () => {
-    expect(true).toBe(false)
-  })
-})
+// describe.skip('Тести для MyComponent', () => {
+//   it('цей тест не виконається', () => {
+//     expect(true).toBe(false)
+//   })
+// })
 
-/*
+
 //Протестовано головні аспекти
 beforeEach(() => {
   jest.spyOn(console, 'warn').mockImplementation(() => {});
@@ -404,4 +404,4 @@ describe('HeaderComponent.vue', () => {
     const items = wrapper.findAll('.nav-menu ul li');
     expect(items.length).toBe(0);
   });
-});*/
+});

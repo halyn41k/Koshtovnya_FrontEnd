@@ -1,11 +1,11 @@
-describe.skip('Тести для MyComponent', () => {
-  it('цей тест не виконається', () => {
-    expect(true).toBe(false)
-  })
-})
+// describe.skip('Тести для MyComponent', () => {
+//   it('цей тест не виконається', () => {
+//     expect(true).toBe(false)
+//   })
+// })
 
 //Протестовано головні аспекти
-/*
+
 import { mount } from '@vue/test-utils';
 import UserRegistration from '@/components/authorization/UserRegistration.vue';
 
@@ -335,4 +335,3 @@ it('Заголовок має текст "Реєстрація" і правил�
   });
   
 });
-*/

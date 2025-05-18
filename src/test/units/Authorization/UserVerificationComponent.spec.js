@@ -1,11 +1,11 @@
-describe.skip('Тести для MyComponent', () => {
-  it('цей тест не виконається', () => {
-    expect(true).toBe(false)
-  })
-})
+// describe.skip('Тести для MyComponent', () => {
+//   it('цей тест не виконається', () => {
+//     expect(true).toBe(false)
+//   })
+// })
 
 //Протестовано головні аспекти
-/*
+
 import { shallowMount } from '@vue/test-utils'
 import UserVerificationComponent from '@/components/authorization/UserVerificationComponent.vue'
 
@@ -295,4 +295,3 @@ describe('Функціональність resendCode', () => {
     expect(window.alert).toHaveBeenCalledWith("Код надіслано ще раз.")
   })
 })
-*/

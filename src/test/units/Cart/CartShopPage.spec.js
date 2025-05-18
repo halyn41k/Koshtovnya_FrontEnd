@@ -1,11 +1,11 @@
-describe.skip('Тести для MyComponent', () => {
-   it('цей тест не виконається', () => {
-     expect(true).toBe(false)
-   })
- })
+// describe.skip('Тести для MyComponent', () => {
+//    it('цей тест не виконається', () => {
+//      expect(true).toBe(false)
+//    })
+//  })
 
 //Протестовано головні аспекти
-/*
+
 import { mount, flushPromises } from '@vue/test-utils';
 import CartShopPage from '@/components/Cart/CartShopPage.vue';
 import CartItem from '@/components/Cart/CartItem.vue';
@@ -162,4 +162,3 @@ describe('CartShopPage.vue', () => {
     expect(api.updateCartItem).not.toHaveBeenCalled();
   });
 });
-*/

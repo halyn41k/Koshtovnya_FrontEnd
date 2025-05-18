@@ -1,16 +1,10 @@
-describe.skip('Тести для MyComponent', () => {
-  it('цей тест не виконається', () => {
-    expect(true).toBe(false)
-  })
-})
+// describe.skip('Тести для MyComponent', () => {
+//   it('цей тест не виконається', () => {
+//     expect(true).toBe(false)
+//   })
+// })
 
 //Протестовано головні аспекти
-/*
-beforeEach(() => {
-  jest.spyOn(console, 'warn').mockImplementation(() => {});
-  jest.spyOn(console, 'error').mockImplementation(() => {});
-  jest.spyOn(console, 'log').mockImplementation(() => {});
-});
 
 import { mount } from '@vue/test-utils';
 import FooterComponent from '@/components/home/FooterComponent.vue';
@@ -39,6 +33,13 @@ jest.mock('axios', () => {
   };
 });
 
+// 🔇 Один раз глушимо консоль
+beforeAll(() => {
+  jest.spyOn(console, 'error').mockImplementation(() => {});
+  jest.spyOn(console, 'warn').mockImplementation(() => {});
+  jest.spyOn(console, 'log').mockImplementation(() => {});
+});
+
 describe('FooterComponent.vue', () => {
   let wrapper;
 
@@ -55,7 +56,7 @@ describe('FooterComponent.vue', () => {
               userAccount: 'Особистий кабінет',
               followUs: 'Слідкуйте за нами',
               contactUs: 'Зв’язатися з нами',
-              links: 'links'
+              links: 'links',
             };
             return translations[msg] || msg;
           },
@@ -69,14 +70,17 @@ describe('FooterComponent.vue', () => {
       },
     });
 
-    // Чекаємо, поки mounted хук виконає fetchSiteSettings та оновить дані
+    // даємо час для всіх async дій у mounted
     await wrapper.vm.$nextTick();
+    await new Promise(resolve => setTimeout(resolve, 0));
   });
 
-  afterEach(() => {
+  afterEach(async () => {
+    jest.clearAllMocks();
     if (wrapper) {
       wrapper.unmount();
     }
+    await new Promise(resolve => setTimeout(resolve, 0)); // уникнути "log after tests"
   });
 
   it('рендериться без помилок', () => {
@@ -311,4 +315,4 @@ describe('FooterComponent.vue', () => {
     expect(logo.attributes('class')).toContain('w-20');
     expect(logo.attributes('class')).toContain('h-auto');
   });
-});*/
+});

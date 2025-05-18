@@ -1,11 +1,11 @@
-describe.skip('Тести для MyComponent', () => {
-  it('цей тест не виконається', () => {
-    expect(true).toBe(false)
-  })
-})
+// describe.skip('Тести для MyComponent', () => {
+//   it('цей тест не виконається', () => {
+//     expect(true).toBe(false)
+//   })
+// })
 
 //Протестовано головні аспекти
-/*
+
 beforeEach(() => {
   jest.spyOn(console, 'warn').mockImplementation(() => {});
   jest.spyOn(console, 'error').mockImplementation(() => {});
@@ -451,4 +451,3 @@ describe('UserLogin.vue', () => {
     expect(localStorage.setItem).toHaveBeenCalledWith('token', 'mock-token')
   })
 })
-*/

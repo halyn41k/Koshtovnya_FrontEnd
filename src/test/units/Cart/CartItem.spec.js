@@ -1,11 +1,11 @@
-describe.skip('Тести для MyComponent', () => {
-    it('цей тест не виконається', () => {
-      expect(true).toBe(false)
-    })
-  })
+// describe.skip('Тести для MyComponent', () => {
+//     it('цей тест не виконається', () => {
+//       expect(true).toBe(false)
+//     })
+//   })
 
 //Протестовано головні аспекти
-/*
+
 import { shallowMount } from '@vue/test-utils'
 import CartItem from '@/components/Cart/CartItem.vue'
 
@@ -259,7 +259,7 @@ describe('CartItem.vue - Рендеринг селектора розміру', 
     })
   })
 
-  describe('CartItem.vue - Емит подій (methods)', () => {
+  describe('CartItem.vue - Емит подій (methods).', () => {
     let wrapper
 
     const item = {
@@ -349,7 +349,7 @@ describe('CartItem.vue - Рендеринг селектора розміру', 
     });
   });
 
-  describe('CartItem.vue - Повідомлення про помилку', () => {
+  describe('CartItem.vue - Повідомлення про помилку,', () => {
     let wrapper;
     const errorItem = {
       id: '1',
@@ -377,4 +377,4 @@ describe('CartItem.vue - Рендеринг селектора розміру', 
       const err = wrapper.find('.error-message');
       expect(err.exists()).toBe(false);
     });
-  });*/
+  });

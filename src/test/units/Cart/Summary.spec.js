@@ -1,11 +1,11 @@
-describe.skip('Тести для MyComponent', () => {
-  it('цей тест не виконається', () => {
-    expect(true).toBe(false)
-  })
-})
+// describe.skip('Тести для MyComponent', () => {
+//   it('цей тест не виконається', () => {
+//     expect(true).toBe(false)
+//   })
+// })
 
 //Протестовано головні аспекти
-/*
+
 import { shallowMount } from '@vue/test-utils';
 import Summary from '@/components/cart/CartSummary.vue';
 
@@ -221,4 +221,4 @@ describe('Summary - Перевірка основних класів у DOM', ()
     expect(svg.exists()).toBe(true);
     expect(svg.find('path').exists()).toBe(true);
   });
-});*/
+});
