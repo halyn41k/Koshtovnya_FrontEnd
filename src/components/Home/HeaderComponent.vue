@@ -445,7 +445,13 @@ navigateToCategory(link) {
     toggleLanguageDropdown() { this.isLanguageDropdownOpen = !this.isLanguageDropdownOpen; },
     changeLanguage(lang) { this.selectedLanguage = lang; this.$i18n.locale = lang; this.isLanguageDropdownOpen = false; this.isBurgerOpen = false;},
     toggleCurrencyDropdown() { this.isCurrencyDropdownOpen = !this.isCurrencyDropdownOpen; },
-    changeCurrency(curr) { this.selectedCurrency = curr; this.isCurrencyDropdownOpen = false; this.isBurgerOpen = false;},
+changeCurrency(curr) {
+  this.selectedCurrency = curr;
+  localStorage.setItem('currency', curr.toLowerCase()); // зберігаємо
+  this.isCurrencyDropdownOpen = false;
+  this.isBurgerOpen = false;
+  window.location.reload(); // або викликаєш глобальний refresh всіх даних
+},
     toggleBurger() { this.isBurgerOpen = !this.isBurgerOpen; if (!this.isBurgerOpen) this.isCategoriesOpen = false; },
     toggleCategories() { this.isCategoriesOpen = !this.isCategoriesOpen; },
     toggleMobileSearch() { this.mobileSearchActive = !this.mobileSearchActive; },
@@ -471,9 +477,16 @@ navigateToCategory(link) {
     startSearch() {},
     resetResults() { this.results = []; this.isVisible = false; this.loading = false; },
     goToProduct(id) { this.$router.push(`/productpage/${id}`); this.resetResults(); this.isBurgerOpen = false;},
-    formatPrice(p) {
-      return new Intl.NumberFormat('uk-UA', { style: 'currency', currency: this.selectedCurrency }).format(p);
-    },
+    formatPrice(price) {
+  const val = Number(price);
+  const curr = this.selectedCurrency?.toUpperCase?.() || 'UAH';
+  const locale = curr === 'USD' ? 'en-US' : 'uk-UA';
+
+  return new Intl.NumberFormat(locale, {
+    style: 'currency',
+    currency: curr,
+  }).format(val);
+},
     handleOutsideClick(e) { if (!this.$el.contains(e.target)) this.resetResults(); }
   },
   mounted() {
@@ -484,6 +497,7 @@ navigateToCategory(link) {
     this.fetchCategories();
     bus.on('cart-updated', this.fetchCartCount);
     this.fetchCartCount();
+    this.selectedCurrency = localStorage.getItem('currency')?.toUpperCase() || 'UAH';
   },
   beforeUnmount() {
     document.removeEventListener('mousedown', this.handleOutsideClick);

@@ -75,7 +75,6 @@
       </div>
     </section>
 
-    
   </div>
 </template>
 
@@ -109,7 +108,21 @@ export default {
       currentStep: 0,
       tempUserAddress: null,
       selectedDeliveryCategory: '',
-      
+      formData: {
+        paymentMethod: "",
+        firstName: "",
+        lastName: "",
+        secondName: "",
+        phone: "",
+        city: "",
+        streetSearch: "",
+        cityRef: "",
+        deliveryType: "",
+        street: "",
+        houseNumber: "",
+        warehouse: "",
+        typeOfCard: "",
+      },
       errors: {},
       cities: [],
       streets: [],
@@ -121,14 +134,6 @@ export default {
     };
   },
   computed: {
-  formData: {
-    get() {
-      return this.modelValue || {}; // ← захист від undefined
-    },
-    set(value) {
-      this.$emit('update:modelValue', value);
-    }
-  },
     isStorePickupSelected() {
   return this.formData.deliveryType?.name === 'Самовивіз з наших магазинів';
 },
@@ -138,6 +143,7 @@ export default {
       opt => opt.value === this.selectedDeliveryCategory
     );
   },
+
 
     canProceedToNextStep() {
       if (this.currentStep === 0) {
@@ -157,18 +163,17 @@ export default {
       "updateDeliveryCost",
     ]),
     getStepComponent(title) {
-  switch (title) {
-    case "Особиста інформація":
-      return "PersonalInfo";
-    case "Поштове відділення":
-      return "PostalInfo";
-    case "Оплата":
-      return "PaymentInfo";
-    default:
-      console.warn("Невідомий крок:", title);
-      return "div"; // 🔒 надійна заглушка
-  }
-},
+      switch (title) {
+        case "Особиста інформація":
+          return "PersonalInfo";
+        case "Поштове відділення":
+          return "PostalInfo";
+        case "Оплата":
+          return "PaymentInfo";
+        default:
+          return "div";
+      }
+    },
     toggleStep(index) {
       if (this.currentStep !== index) {
         this.steps[this.currentStep].isExpanded = false;
@@ -512,12 +517,7 @@ async fetchWarehouses(city, cityRef, deliveryName) {
   });
 },
 
-props: {
-  modelValue: {
-    type: Object,
-    required: true,
-  },
-},
+
   watch: {
   formData: {
     handler() {

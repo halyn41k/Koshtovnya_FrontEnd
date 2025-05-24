@@ -34,7 +34,10 @@
               <h3 class="text-lg font-montserrat font-semibold line-clamp-2 h-12">
                 {{ product.name }}
               </h3>
-              <p class="text-xl font-semibold text-red-700 mt-1" style="font-family: 'Inter', sans-serif;">{{ product.price }} грн</p>
+<p class="text-xl font-semibold text-red-700 mt-1">
+  {{ formatCurrencyIntl(product.price, product.currency) }}
+
+</p>
             </div>
           </router-link>
 
@@ -233,6 +236,13 @@ export default {
         this.updateVisibleProducts();
       }
     },
+formatCurrencyIntl(price, currency) {
+  const locale = currency === 'usd' ? 'en-US' : 'uk-UA';
+  return new Intl.NumberFormat(locale, {
+    style: 'currency',
+    currency: currency.toUpperCase()
+  }).format(Number(price));
+},
 
     async toggleWishlist(product) {
       try {

@@ -40,8 +40,8 @@
     <h3 class="text-lg font-montserrat font-semibold line-clamp-2 h-12">
       {{ product.name }}
     </h3>
-    <p class="text-xl font-semibold mt-1 text-[#6B1F1F]">
-      {{ product.price }} грн
+    <p class="text-xl font-semibold text-red-700 mt-1">
+        {{ formatCurrencyIntl(product.price, product.currency) }}
     </p>
   </div>
 
@@ -138,7 +138,16 @@ export default {
     goToProduct(id) {
   this.$router.push(`/productpage/${id}`);
 },
+formatCurrencyIntl(price, currency) {
+  const val = Number(price);
+  const curr = (currency || 'UAH').toUpperCase();
+  const locale = curr === 'USD' ? 'en-US' : 'uk-UA';
 
+  return new Intl.NumberFormat(locale, {
+    style: 'currency',
+    currency: curr,
+  }).format(val);
+},
     updateProductsPerPage() {
       const perPage = window.innerWidth < 640 ? 6 : 3;
       this.productsPerPage = perPage;

@@ -25,45 +25,57 @@
           class="flex justify-between mb-2.5"
         >
           <span>{{ item.name }}</span>
-          <span class="text-[#A01212] font-semibold text-[14px]">
-            {{ item.price * item.quantity }}₴
-          </span>
+          <!-- Буде: -->
+<span class="text-[#A01212] font-semibold text-[14px]">
+  {{ formatCurrencyIntl(item.price * item.quantity, item.currency) }}
+</span>
         </div>
 
         <!-- Вартість доставки -->
         <div class="flex justify-between mb-2.5">
           <span>Доставка</span>
           <span class="text-[#A01212] font-semibold text-[14px]">
-            {{ deliveryCost }}₴
-          </span>
+  {{ formatCurrencyIntl(deliveryCost, detectedCurrency) }}
+</span>
         </div>
 
         <!-- Загальна сума -->
         <div class="flex justify-between text-[18px] mt-4">
           <span>Загальна сума</span>
           <span class="text-[#A01212] font-semibold">
-            {{ totalWithDelivery }}₴
-          </span>
+  {{ formatCurrencyIntl(totalWithDelivery, detectedCurrency) }}
+</span>
         </div>
       </div>
 
       <!-- Кнопка оформлення -->
       <button
-        @click="submitOrder"
-        class="
-          w-full flex justify-between items-center
-          bg-[#6B1F1F] text-white font-bold text-[15px] leading-[1.3]
-          rounded-[8px] py-[6px] px-[15px] mt-2.5 h-[40px]
-          transition-colors duration-300
-        "
-      >
-        <span>Оформити замовлення</span>
-        <img
-          src="https://cdn.builder.io/api/v1/image/assets/TEMP/436b738744905f60c6a542e2cd314f5694db20045d36b8991f8dab9a31b316a0?placeholderIfAbsent=true&apiKey=c3e46d0a629546c7a48302a5db3297d5"
-          alt="Order icon"
-          class="w-6 h-6"
-        />
-      </button>
+    @click="submitOrder"
+    :disabled="isButtonDisabled"
+    class="w-full flex justify-between items-center font-bold text-[15px] leading-[1.3]
+           rounded-[8px] py-[6px] px-[15px] mt-2.5 h-[40px] transition-colors duration-300
+           border border-[#6B1F1F]"
+    :class="{
+      'bg-[#6B1F1F] text-white hover:bg-[#A01212] cursor-pointer': !isButtonDisabled,
+      'bg-gray-300 text-gray-500 cursor-not-allowed': isButtonDisabled
+    }"
+  >
+    <span>Оформити замовлення</span>
+    <img
+      src="https://cdn.builder.io/api/v1/image/assets/TEMP/436b738744905f60c6a542e2cd314f5694db20045d36b8991f8dab9a31b316a0"
+      alt="Order icon"
+      class="w-6 h-6"
+    />
+  </button>
+
+  <!-- Тултіп -->
+  <div
+    v-if="isButtonDisabled"
+    class="absolute top-full mt-2 left-1/2 -translate-x-1/2 bg-black text-white text-[12px]
+           px-3 py-1 rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+  >
+    Заповніть усі кроки оформлення
+  </div>
     </div>
   </section>
 </template>
@@ -75,10 +87,23 @@ import { mapGetters, mapActions } from "vuex";
 export default {
   name: "PaymentSummary",
   props: {
-    cityRef: { type: String, default: "" },
-    deliveryType: { type: [String, Object], default: "" }
-  },
+  cityRef: { type: String, default: "" },
+  deliveryType: { type: [String, Object], default: "" },
+  stepsCompleted: { type: Boolean, default: false } // ← ДОДАЙ ЦЕ
+},
+
   computed: {
+    isButtonDisabled() {
+  return !this.stepsCompleted;
+},
+  detectedCurrency() {
+    return (
+      this.safeCartItems.find(i => i.currency)?.currency ||
+      localStorage.getItem("currency") ||
+      "UAH"
+    ).toUpperCase();
+  },
+
     ...mapGetters("order", ["cartItems", "deliveryCost", "customerData"]),
     safeCartItems() {
       return Array.isArray(this.cartItems) ? this.cartItems : [];
@@ -116,6 +141,14 @@ export default {
     }
   },
   methods: {
+    formatCurrencyIntl(amount, currency) {
+    const finalCurrency = (currency || this.detectedCurrency).toUpperCase();
+    const locale = finalCurrency === 'USD' ? 'en-US' : 'uk-UA';
+    return new Intl.NumberFormat(locale, {
+      style: 'currency',
+      currency: finalCurrency,
+    }).format(Number(amount));
+  },
     ...mapActions("order", ["updateCartItems", "updateDeliveryCost"]),
     async fetchCartItems() {
       const token = localStorage.getItem("token");
@@ -137,14 +170,17 @@ export default {
         : "WarehouseWarehouse";
       const productIds = this.safeCartItems.map(item => item.id);
       try {
-        const response = await axios.get("https://koshtovnya.api-dev.bmax-edu.website/api/nova-poshta/delivery/cost", {
-          headers: { Authorization: `Bearer ${token}` },
-          params: {
-            CityRecipient: this.effectiveCityRef,
-            ServiceType: serviceType,
-            product_ids: productIds
-          }
-        });
+        const currency = localStorage.getItem('currency')?.toLowerCase() || 'uah';
+
+const response = await axios.get("https://koshtovnya.api-dev.bmax-edu.website/api/nova-poshta/delivery/cost", {
+  headers: { Authorization: `Bearer ${token}` },
+  params: {
+    CityRecipient: this.effectiveCityRef,
+    ServiceType: serviceType,
+    product_ids: productIds,
+    currency // ← передати валюту
+  }
+});
         const cost = response.data?.data?.cost || 0;
         this.updateDeliveryCost(cost);
         return cost;
@@ -158,7 +194,10 @@ export default {
       if (!token || !this.safeCartItems.length) return;
       const currentDeliveryCost = await this.calculateDeliveryCost();
       const customer = this.customerData;
+      const currency = localStorage.getItem('currency')?.toLowerCase() || 'uah';
+
       const orderData = {
+        currency,
         last_name: customer.lastName,
         first_name: customer.firstName,
         second_name: customer.secondName || "",
@@ -174,6 +213,7 @@ export default {
         type_of_card: customer.paymentMethod === "Післяоплата" ? "" : customer.typeOfCard,
         delivery_cost: currentDeliveryCost,
         cart_cost: this.cartTotalAmount
+        
       };
       try {
         const orderResponse = await axios.post("https://koshtovnya.api-dev.bmax-edu.website/api/orders", orderData, {
@@ -188,7 +228,8 @@ export default {
           const paymentResponse = await axios.post("https://koshtovnya.api-dev.bmax-edu.website/api/payment", {
             amount,
             order_id: orderId,
-            description: "Оплата замовлення"
+            description: "Оплата замовлення",
+            currency,
           }, {
             headers: { Authorization: `Bearer ${token}` }
           });

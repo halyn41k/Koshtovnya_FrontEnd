@@ -22,8 +22,9 @@
           {{ item.name }}
         </h3>
         <p class="mt-1 text-lg text-red-600 font-medium">
-          {{ item.price }}₴
-        </p>
+  {{ formatCurrencyIntl(item.price, item.currency) }}
+</p>
+
       </div>
 
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
@@ -92,6 +93,16 @@ export default {
     remove() {
       this.$emit('remove-item', this.item.id);
     },
+    formatCurrencyIntl(price, currency) {
+    const fallbackCurrency = (localStorage.getItem('currency') || 'UAH').toUpperCase();
+    const finalCurrency = (currency || fallbackCurrency).toUpperCase();
+    const locale = finalCurrency === 'USD' ? 'en-US' : 'uk-UA';
+
+    return new Intl.NumberFormat(locale, {
+      style: 'currency',
+      currency: finalCurrency,
+    }).format(Number(price));
+  },
     onSizeChange() {
       this.$emit('change-size', { id: this.item.id, size: this.localSize });
     }

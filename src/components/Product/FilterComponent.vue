@@ -80,8 +80,9 @@
       <!-- Ціна -->
       <div class="section bg-white p-4 rounded-lg shadow-sm">
         <h3 class="subsection-title mb-3 text-lg font-semibold text-gray-800">
-          Ціна (₴)
-        </h3>
+  Ціна ({{ selectedCurrency === 'USD' ? '$' : '₴' }})
+</h3>
+
         <Slider
           class="w-full"
           v-model="filters.price"
@@ -219,6 +220,8 @@ export default {
 
   emits: ['apply', 'close'],
   setup(props, { emit }) {
+    const selectedCurrency = ref(localStorage.getItem('currency')?.toUpperCase() || 'UAH')
+
     const loading = ref(true)
 
     const filters = reactive({

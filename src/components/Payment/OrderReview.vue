@@ -11,8 +11,8 @@
           <div class="flex-1">
             <h3 class="text-gray-900 font-medium text-lg mb-1">{{ item.title }}</h3>
             <p class="text-gray-600">
-              <span class="font-semibold">{{ item.price }}₴</span> за штуку
-            </p>
+  <span class="font-semibold">{{ formatCurrencyIntl(item.price, item.currency) }}</span> за штуку
+</p>
             <p class="text-gray-600">Кількість: {{ item.quantity }}</p>
           </div>
         </div>
@@ -61,12 +61,14 @@ export default {
           { headers: { Authorization: `Bearer ${token}` } }
         );
         this.localCartItems = data.products.map(item => ({
-          id: item.id,
-          image: item.image_url,
-          title: item.name,
-          price: item.price,
-          quantity: item.quantity,
-        }));
+        id: item.id,
+        image: item.image_url,
+        title: item.name,
+        price: item.price,
+        quantity: item.quantity,
+        currency: item.currency || 'UAH',
+      }));
+
       } catch {
         alert('Не вдалося завантажити кошик.');
       } finally {
@@ -76,6 +78,14 @@ export default {
     submitOrder() {
       alert('Ваше замовлення успішно оформлено!');
     },
+     formatCurrencyIntl(amount, currency) {
+    const finalCurrency = (currency || localStorage.getItem('currency') || 'UAH').toUpperCase();
+    const locale = finalCurrency === 'USD' ? 'en-US' : 'uk-UA';
+    return new Intl.NumberFormat(locale, {
+      style: 'currency',
+      currency: finalCurrency,
+    }).format(Number(amount));
+  },
   },
   mounted() {
     this.fetchCartItems();

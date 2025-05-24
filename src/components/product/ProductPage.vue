@@ -24,7 +24,18 @@
         <div class="text-center space-y-2">
           <h1 class="text-2xl font-bold text-gray-900">{{ product.name }}</h1>
           <hr class="border-gray-300 mx-auto w-24" />
-          <p class="text-2xl font-semibold text-red-700">{{ product.price }}₴</p>
+<p
+  v-if="product.price && product.currency"
+  class="text-2xl font-semibold text-red-700"
+>
+  {{ formatCurrencyIntl(product.price, product.currency) }}
+</p>
+<p
+  v-else
+  class="text-2xl font-semibold text-red-700"
+>
+  Ціна не вказана
+</p>
           <span
             class="inline-block px-4 py-1 rounded-md text-sm text-white"
             :class="isAvailable ? 'bg-green-600' : 'bg-red-700'"
@@ -265,6 +276,16 @@ export default {
     }
   },
   methods: {
+   formatCurrencyIntl(price, currency) {
+  const val = Number(price);
+  const validCurrency = currency?.toUpperCase?.() || 'UAH';
+  const locale = validCurrency === 'USD' ? 'en-US' : 'uk-UA';
+  return new Intl.NumberFormat(locale, {
+    style: 'currency',
+    currency: validCurrency
+  }).format(val);
+},
+
    async fetchProduct(id) {
   try {
     const resp = await api.getProduct(id);

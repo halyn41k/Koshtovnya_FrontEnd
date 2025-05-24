@@ -26,10 +26,25 @@ apiClient.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+
+    const currency = (localStorage.getItem('currency') || 'uah').toLowerCase();
+
+    // Додаємо currency до всіх запитів
+    if (config.method === 'get') {
+      config.params = { ...(config.params || {}), currency };
+    } else if (config.data instanceof FormData) {
+      config.data.append('currency', currency);
+    } else if (config.data) {
+      config.data.currency = currency;
+    } else if (!config.data) {
+      config.data = { currency }; // якщо POST без payload
+    }
+
     return config;
   },
   error => Promise.reject(error)
 );
+
 
 
 

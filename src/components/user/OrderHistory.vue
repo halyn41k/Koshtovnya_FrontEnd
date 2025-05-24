@@ -39,14 +39,17 @@
               </h3>
               <h3 v-else class="text-base sm:text-lg text-red-600">Товар видалено</h3>
               <p class="text-sm text-gray-600 whitespace-nowrap">Кількість: {{ item.quantity }}</p>
-              <p class="text-sm text-gray-600 whitespace-nowrap">Ціна: {{ item.price }}₴</p>
-            </div>
+<p class="text-sm text-gray-600 whitespace-nowrap">
+  Ціна: {{ formatCurrencyIntl(item.price, item.currency) }}
+</p>            </div>
           </div>
         </div>
 
         <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
-          <span class="text-lg font-semibold text-gray-800 whitespace-nowrap">Всього: {{ order.amount }}₴</span>
-          <div class="flex gap-2">
+<span class="text-lg font-semibold text-gray-800 whitespace-nowrap">
+  Всього: {{ formatCurrencyIntl(order.amount, order.currency) }}
+</span>          
+        <div class="flex gap-2">
             <button
               @click="openOrderDetails(order)"
               class="inline-flex items-center px-4 py-2 bg-[#6B1F1F] text-white text-sm font-medium rounded-lg hover:bg-[#A01212] transition"
@@ -93,37 +96,50 @@ export default {
   },
   methods: {
     async fetchOrders() {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        alert("Будь ласка, увійдіть у свій обліковий запис.");
-        this.$router.push("/login");
-        return;
-      }
-      try {
-        const { data } = await axios.get("https://koshtovnya.api-dev.bmax-edu.website/api/orders", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        this.orders = (data.orders || []).map(order => ({
-          id: order.id,
-          order_date: order.order_date,
-          status: order.status,
-          amount: order.amount,
-          items: (order.products || []).map(item => ({
-            id: item.id,
-            title: item.name,
-            price: item.price,
-            quantity: item.quantity,
-            image_url: item.image_url || "default_image_path",
-            is_deleted: item.is_deleted,
-          })),
-        }));
-      } catch (error) {
-        console.error("Помилка завантаження замовлень:", error);
-        alert("Не вдалося завантажити ваші замовлення.");
-      } finally {
-        this.loading = false;
-      }
-    },
+  const token = localStorage.getItem("token");
+  if (!token) {
+    alert("Будь ласка, увійдіть у свій обліковий запис.");
+    this.$router.push("/login");
+    return;
+  }
+  try {
+    const { data } = await axios.get("https://koshtovnya.api-dev.bmax-edu.website/api/orders", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    this.orders = (data.orders || []).map(order => ({
+      id: order.id,
+      order_date: order.order_date,
+      status: order.status,
+      amount: order.amount,
+      currency: order.currency, // ДОДАНО!
+      items: (order.products || []).map(item => ({
+        id: item.id,
+        title: item.name,
+        price: item.price,
+        currency: item.currency, // ДОДАНО!
+        quantity: item.quantity,
+        image_url: item.image_url || "default_image_path",
+        is_deleted: item.is_deleted,
+      })),
+    }));
+  } catch (error) {
+    console.error("Помилка завантаження замовлень:", error);
+    alert("Не вдалося завантажити ваші замовлення.");
+  } finally {
+    this.loading = false;
+  }
+},
+    formatCurrencyIntl(price, currency) {
+  const fallbackCurrency = (localStorage.getItem('currency') || 'UAH').toUpperCase();
+  const finalCurrency = (currency || fallbackCurrency).toUpperCase();
+  const locale = finalCurrency === 'USD' ? 'en-US' : 'uk-UA';
+
+  return new Intl.NumberFormat(locale, {
+    style: 'currency',
+    currency: finalCurrency,
+  }).format(Number(price));
+},
+
     async cancelOrder(id) {
       if (!confirm("Ви дійсно хочете скасувати це замовлення?")) return;
       try {

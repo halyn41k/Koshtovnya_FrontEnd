@@ -5,7 +5,7 @@
     </h2>
 
     <div class="flex justify-between items-baseline mb-6">
-      <span class="text-xl font-semibold text-red-700">{{ totalSum }}₴</span>
+<span class="text-xl font-semibold text-red-700">{{ formatCurrencyIntl(totalSum, detectedCurrency) }}</span>
     </div>
 
     <button
@@ -24,19 +24,38 @@
 export default {
   name: 'SummaryCart',
   props: {
-    cartItems: { type: Array, required: true }
-  },
+  cartItems: {
+    type: Array,
+    required: true,
+    default: () => []
+  }
+},
   computed: {
     totalSum() {
       return this.cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
-    }
+    },
+    detectedCurrency() {
+  if (!Array.isArray(this.cartItems)) return (localStorage.getItem('currency') || 'UAH').toUpperCase();
+  const fromItem = this.cartItems.find(i => i.currency)?.currency;
+  return (fromItem || localStorage.getItem('currency') || 'UAH').toUpperCase();
+},
+
   },
   methods: {
     goToPayment() {
       this.$router.push('/payment');
-    }
+    },
+    formatCurrencyIntl(price, currency) {
+      const locale = currency === 'USD' ? 'en-US' : 'uk-UA';
+      return new Intl.NumberFormat(locale, {
+        style: 'currency',
+        currency: currency.toUpperCase(),
+      }).format(Number(price));
+    },
+    
   }
 };
+
 </script>
 
 <style scoped>

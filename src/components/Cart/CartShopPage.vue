@@ -50,7 +50,7 @@
 
       <!-- Summary: mobile first, desktop last -->
       <div class="w-full order-first lg:order-last lg:w-auto">
-        <CartSummary  v-if="cartItems.length > 0" :cart-items="cartItems" />
+<CartSummary v-if="!loading && cartItems.length > 0" :cart-items="cartItems" />
       </div>
     </section>
   </main>
@@ -87,7 +87,8 @@ export default {
           id: item.id,
           image: item.image_url,
           name: item.name,
-          price: item.price,
+price: item.price,
+currency: item.currency, // ✅ додано
           quantity: item.quantity,
           selectedSize: item.selected_size,
           variants: item.variants.map(v => ({ size: v.size, quantity: v.quantity, isAvailable: v.is_available })),

@@ -105,7 +105,9 @@
               </div>
               <div class="px-4 py-3 flex-1 flex flex-col justify-between">
                 <h3 class="text-lg font-semibold line-clamp-2 h-12">{{ product.name }}</h3>
-                <p class="text-xl font-semibold text-red-700 mt-1">{{ product.price }} грн</p>
+<p class="text-xl font-semibold text-red-700 mt-1">
+  {{ formatCurrencyIntl(product.price, product.currency) }}
+</p>
               </div>
             </router-link>
             <div class="px-4 flex items-center mb-2 space-x-2">
@@ -306,6 +308,13 @@ export default {
   } catch (e) {
     console.error('Помилка підписки на сповіщення:', e);
   }
+},
+formatCurrencyIntl(price, currency) {
+  const locale = currency === 'usd' ? 'en-US' : 'uk-UA';
+  return new Intl.NumberFormat(locale, {
+    style: 'currency',
+    currency: currency.toUpperCase()
+  }).format(Number(price));
 },
 
     toggleFilter() {

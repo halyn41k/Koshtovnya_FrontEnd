@@ -18,7 +18,9 @@
               <div>
                 <!-- Назва та ціна -->
                 <h3 class="text-lg font-montserrat font-semibold line-clamp-2 h-12" style="font-family: 'Montserrat', sans-serif;">{{ product.name }}</h3>
-                <p class="text-xl font-semibold text-red-700 mt-1" style="font-family: 'Inter', sans-serif;">{{ product.price }} грн</p>
+<p class="text-xl font-semibold text-red-700 mt-1">
+  {{ formatCurrencyIntl(product.price, product.currency) }}
+</p>
               </div>
             </div>
           </router-link>
@@ -182,6 +184,14 @@ export default {
         console.error('Помилка додавання в кошик:', error.response?.data || error);
       }
     },
+    formatCurrencyIntl(price, currency) {
+  const locale = currency === 'usd' ? 'en-US' : 'uk-UA';
+  return new Intl.NumberFormat(locale, {
+    style: 'currency',
+    currency: currency.toUpperCase()
+  }).format(Number(price));
+},
+
     async notifyWhenAvailable(product) {
   try {
     await api.sendNotification({ product_id: product.id });

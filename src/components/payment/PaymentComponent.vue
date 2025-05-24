@@ -20,11 +20,13 @@
 <main class="flex flex-col lg:flex-row lg:items-start gap-10 relative min-h-[900px]">
 <div class="flex-1 flex flex-col space-y-6">
   <PaymentSteps
-    v-model="formData"
-    :currentStep="currentStep"
-    @steps-complete="stepsCompleted = $event"
-    ref="paymentSteps"
-  />
+  ref="paymentSteps"
+   :form-data="formData"
+  @update-form-data="formData = $event"
+  :currentStep="currentStep"
+  @steps-complete="stepsCompleted = $event"
+/>
+
 
   <OrderReview
     :cartItems="cartItems"
@@ -40,12 +42,17 @@
 <!-- ВСЕРЕДИНІ <main> -->
 <div class="w-full lg:w-[360px] shrink-0 lg:ml-[60px] mt-6 lg:mt-0">
   <div class="sticky top-[100px] z-10">
-    <PaymentSummary
-      :cart-items="cartItems"
-      :city-ref="formData.cityRef"
-      :delivery-type="formData.deliveryType"
-      :customer-data="formData"
-    />
+   <PaymentSummary
+  ref="paymentSummary"
+  :cart-items="cartItems"
+  :city-ref="formData.cityRef"
+  :delivery-type="formData.deliveryType"
+  :customer-data="formData"
+  :steps-completed="stepsCompleted"
+/>
+
+
+
   </div>
 </div>
 
@@ -114,12 +121,19 @@ export default {
 },
 
   watch: {
-    cartItems: { handler: "calculateTotalAmount", deep: true },
-    deliveryCost: "calculateTotalAmount",
-    currentStep() {
+  cartItems: { handler: "calculateTotalAmount", deep: true },
+  deliveryCost: "calculateTotalAmount",
+  currentStep() {
     this.checkStepsCompletion();
-  }
   },
+  'formData.cityRef'(val) {
+    this.$refs.paymentSummary?.calculateDeliveryCost?.();
+  },
+  'formData.deliveryType'(val) {
+    this.$refs.paymentSummary?.calculateDeliveryCost?.();
+  }
+},
+
   methods: {
     calculateTotalAmount() {
       this.totalAmount =

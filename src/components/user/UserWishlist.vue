@@ -26,7 +26,9 @@
           />
           <div class="flex-1">
             <h3 class="text-lg font-semibold text-gray-800 mb-1 line-clamp-2">{{ item.title }}</h3>
-            <p class="text-base font-medium text-gray-600">{{ item.price }}₴</p>
+<p class="text-base font-medium text-gray-600">
+  {{ formatCurrencyIntl(item.price, item.currency) }}
+</p>
           </div>
         </router-link>
 
@@ -91,6 +93,7 @@ export default {
   id: item.id,
   title: item.name,
   price: item.price,
+  currency: item.currency,
   imageSrc: item.image_url || 'default_image_path',
   loading: false,
   is_in_cart: item.is_in_cart,
@@ -130,6 +133,17 @@ export default {
     item.loading = false;
   }
 },
+formatCurrencyIntl(price, currency) {
+  const fallbackCurrency = (localStorage.getItem('currency') || 'UAH').toUpperCase();
+  const finalCurrency = (currency || fallbackCurrency).toUpperCase();
+  const locale = finalCurrency === 'USD' ? 'en-US' : 'uk-UA';
+
+  return new Intl.NumberFormat(locale, {
+    style: 'currency',
+    currency: finalCurrency,
+  }).format(Number(price));
+},
+
     async removeItem(index) {
       try {
         const { id } = this.items[index];
