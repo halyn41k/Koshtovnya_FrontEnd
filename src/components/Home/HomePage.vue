@@ -8,16 +8,16 @@
       <!-- Hero Text: центр на мобілці, ліворуч на десктопі -->
       <div class="absolute inset-0 flex flex-col items-center lg:items-start justify-center text-center lg:text-left px-4 lg:px-24 space-y-4">
         <div class="text-white font-kyivtype font-bold text-[32px] lg:text-[45px]">
-          {{ $t('handmadeProducts') }}
+          {{ $t('home.handmadeProducts') }}
         </div>
         <div class="text-white font-kyivtype font-bold text-[20px] lg:text-[30px]">
-          {{ $t('exclusiveJewelry') }}
+          {{ $t('home.exclusiveJewelry') }}
         </div>
         <router-link
           to="/allproducts"
           class="view-products-button mt-4 lg:mt-6"
         >
-          {{ $t('viewProducts') }}
+          {{ $t('home.viewProducts') }}
         </router-link>
       </div>
     </div>
@@ -35,17 +35,17 @@
       <div class="flex flex-col lg:flex-row items-center lg:items-start lg:justify-between gap-8">
         <!-- Text Left on Desktop -->
         <div class="flex-1 text-center lg:text-left">
-          <p class="font-montserrat font-semibold text-3xl lg:text-4xl leading-tight">
-            Слідкуй за нами в Instagram, щоб<br />
-            не пропустити найцікавіше!
-          </p>
+         <p class="font-montserrat font-semibold text-3xl lg:text-4xl leading-tight">
+  {{ $t('home.followInsta') }}<br />
+  {{ $t('home.dontMissTheMost') }}
+</p>
           <a
-            href="https://www.instagram.com/koshtovnya_jewelry/"
-            target="_blank"
-            class="font-montserrat text-2xl lg:text-3xl underline mt-4 inline-block"
-          >
-            @koshtovnya_jewelry
-          </a>
+  href="https://www.instagram.com/koshtovnya_jewelry/"
+  target="_blank"
+  class="font-montserrat text-2xl lg:text-3xl underline mt-4 inline-block"
+>
+  @koshtovnya_jewelry
+</a>
         </div>
         <!-- Pattern Image Right on Desktop -->
         <div class="flex-1 flex justify-center lg:justify-end">

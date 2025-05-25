@@ -6,7 +6,7 @@
     <!-- Заголовок з лініями -->
     <header class="relative z-10 flex items-center justify-center mb-10 w-full">
       <div class="hidden md:flex flex-1 h-[2px] bg-gray-300"></div>
-      <h1 class="px-4 title-kyiv">Зміна паролю</h1>
+      <h1 class="px-4 title-kyiv">	{{ $t('authorization.changePassword.title') }}</h1>
       <div class="hidden md:flex flex-1 h-[2px] bg-gray-300"></div>
     </header>
 
@@ -15,13 +15,13 @@
       <form @submit.prevent="submitPasswordChange" class="w-full space-y-5">
         <!-- Поточний пароль -->
         <div class="flex flex-col">
-          <label for="currentPassword" class="mb-1 text-sm font-medium text-gray-600">Поточний пароль</label>
+          <label for="currentPassword" class="mb-1 text-sm font-medium text-gray-600">{{ $t('authorization.changePassword.labels.current') }}</label>
           <div class="relative">
             <input
               id="currentPassword"
               :type="showCurrentPassword ? 'text' : 'password'"
               v-model="currentPassword"
-              placeholder="Введіть ваш поточний пароль"
+              :placeholder="$t('authorization.changePassword.placeholders.current')"
               required
               class="w-full h-12 rounded-lg border border-gray-300 bg-white px-4 text-gray-800 placeholder-gray-400 hover:shadow-md focus:outline-none focus:border-[#6B1F1F] focus:shadow-lg transition-all duration-200"
             />
@@ -41,13 +41,13 @@
 
         <!-- Новий пароль -->
         <div class="flex flex-col">
-          <label for="newPassword" class="mb-1 text-sm font-medium text-gray-600">Новий пароль</label>
+          <label for="newPassword" class="mb-1 text-sm font-medium text-gray-600">{{ $t('authorization.changePassword.labels.new') }}</label>
           <div class="relative">
             <input
               id="newPassword"
               :type="showNewPassword ? 'text' : 'password'"
               v-model="newPassword"
-              placeholder="Введіть новий пароль"
+              :placeholder="$t('authorization.changePassword.placeholders.new')"
               required
               class="w-full h-12 rounded-lg border border-gray-300 bg-white px-4 text-gray-800 placeholder-gray-400 hover:shadow-md focus:outline-none focus:border-[#6B1F1F] focus:shadow-lg transition-all duration-200"
             />
@@ -67,13 +67,13 @@
 
         <!-- Підтвердження пароля -->
         <div class="flex flex-col">
-          <label for="confirmPassword" class="mb-1 text-sm font-medium text-gray-600">Підтвердьте пароль</label>
+          <label for="confirmPassword" class="mb-1 text-sm font-medium text-gray-600">{{ $t('authorization.changePassword.labels.confirm') }}</label>
           <div class="relative">
             <input
               id="confirmPassword"
               :type="showConfirmPassword ? 'text' : 'password'"
               v-model="confirmPassword"
-              placeholder="Підтвердіть новий пароль"
+              :placeholder="$t('authorization.changePassword.placeholders.confirm')"
               required
               class="w-full h-12 rounded-lg border border-gray-300 bg-white px-4 text-gray-800 placeholder-gray-400 hover:shadow-md focus:outline-none focus:border-[#6B1F1F] focus:shadow-lg transition-all duration-200"
             />
@@ -97,7 +97,7 @@
             type="submit"
             class="w-full h-12 flex items-center justify-center bg-[#6B1F1F] hover:bg-[#A01212] active:bg-[#A01212] text-white text-base font-semibold rounded-xl transition-colors duration-200 shadow-sm hover:shadow-md"
           >
-            Змінити пароль
+            {{ $t('authorization.changePassword.button') }}
           </button>
         </div>
       </form>

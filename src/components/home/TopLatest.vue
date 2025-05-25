@@ -1,8 +1,9 @@
 <template>
   <section class="mt-24 px-4 sm:px-6 lg:px-8 font-montserrat">
-    <h2 class="text-3xl lg:text-4xl font-semibold mb-10 text-center">
-      Відгуки наших покупців
-    </h2>
+   <h2 class="text-3xl lg:text-4xl font-semibold mb-10 text-center">
+  {{ $t('home.customerReviews') }}
+</h2>
+
 
     <div class="relative">
       <transition name="fade">

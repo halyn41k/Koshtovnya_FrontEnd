@@ -9,7 +9,7 @@
     <div class="relative z-10 w-full bg-[#fdf5f4] pt-32 pb-20 px-4 max-w-[1000px] mx-auto">
       <!-- Заголовок -->
       <h2 v-fade class="text-3xl font-kyivBlack2 text-center mb-12">
-        Наша історія
+        {{ $t('infoshop.title') }}
       </h2>
 
       <!-- Таймлайн -->
@@ -22,9 +22,9 @@
         >
           <div class="hidden lg:block lg:w-1/2"></div>
           <div class="w-full lg:w-1/2 p-6 bg-white rounded-2xl shadow-lg">
-            <span class="text-sm text-gray-500">{{ item.date }}</span>
-            <h3 class="font-kyivBlack2 text-xl mt-2 mb-4">{{ item.title }}</h3>
-            <p class="text-base text-gray-700">{{ item.content }}</p>
+            <span class="text-sm text-gray-500">{{ $t(`infoshop.timeline[${i}].date`) }}</span>
+            <h3 class="font-kyivBlack2 text-xl mt-2 mb-4">{{ $t(`infoshop.timeline[${i}].title`) }}</h3>
+            <p class="text-base text-gray-700">{{ $t(`infoshop.timeline[${i}].content`) }}</p>
           </div>
         </div>
       </div>
@@ -33,21 +33,20 @@
       <section v-fade class="bg-[#faf4f4] p-8 rounded-lg mb-16">
         <h2 class="flex items-center justify-center mb-6 text-2xl font-kyivBlack2">
           <div class="flex-1 h-[2px] bg-gray-400 mx-3"></div>
-          Часті запитання
+          {{ $t('infoshop.faqTitle') }}
           <div class="flex-1 h-[2px] bg-gray-400 mx-3"></div>
         </h2>
+
         <div v-for="(open, i) in faqOpen" :key="i" class="mb-4">
           <button
             @click="toggleFAQ(i)"
             class="w-full flex justify-between items-center text-lg font-medium text-[#6B1F1F] py-2"
           >
-            <span>{{ faqQuestions[i] }}</span>
-            <span :class="{ 'rotate-180': faqOpen[i] }" class="transform transition-transform duration-300">
-              ▼
-            </span>
+            <span>{{ $t(`infoshop.faqQuestions[${i}]`) }}</span>
+            <span :class="{ 'rotate-180': faqOpen[i] }" class="transform transition-transform duration-300">▼</span>
           </button>
           <div v-if="faqOpen[i]" class="mt-2 pl-4 border-l-4 border-[#6B1F1F] text-base leading-relaxed">
-            {{ faqAnswers[i] }}
+            {{ $t(`infoshop.faqAnswers[${i}]`) }}
           </div>
         </div>
       </section>
@@ -56,43 +55,45 @@
       <section v-fade class="bg-[#faf4f4] p-8 rounded-lg mb-16">
         <h2 class="flex items-center justify-center mb-6 text-2xl font-kyivBlack2">
           <div class="flex-1 h-[2px] bg-gray-400 mx-3"></div>
-          Зв'яжіться з нами
+          {{ $t('infoshop.contactTitle') }}
           <div class="flex-1 h-[2px] bg-gray-400 mx-3"></div>
         </h2>
+
         <form @submit.prevent="handleSubmit" class="space-y-4">
           <div>
-            <label for="email" class="block text-base font-medium mb-1">Електронна пошта</label>
+            <label for="email" class="block text-base font-medium mb-1">{{ $t('infoshop.emailLabel') }}</label>
             <input
               id="email"
               v-model="form.email"
               type="email"
               required
-              placeholder="Ваша електронна адреса"
+              :placeholder="$t('infoshop.emailPlaceholder')"
               class="w-full bg-[#fafafa] border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-[#6B1F1F]"
             />
           </div>
           <div>
-            <label for="message" class="block text-base font-medium mb-1">Повідомлення</label>
+            <label for="message" class="block text-base font-medium mb-1">{{ $t('infoshop.messageLabel') }}</label>
             <textarea
               id="message"
               v-model="form.message"
               required
-              placeholder="Ваше повідомлення"
+              :placeholder="$t('infoshop.messagePlaceholder')"
               class="w-full bg-[#fafafa] border border-gray-300 rounded p-2 h-[120px] resize-y focus:outline-none focus:ring-2 focus:ring-[#6B1F1F]"
             ></textarea>
-            <p v-if="errorMessage" class="text-red-600 text-sm mt-1">{{ errorMessage }}</p>
+            <p v-if="errorMessage" class="text-red-600 text-sm mt-1">{{ $t('infoshop.errorMessageShort') }}</p>
           </div>
           <button
             type="submit"
             class="bg-[#6B1F1F] hover:bg-[#8E0E0E] text-white font-medium py-2 px-6 rounded transition-colors duration-300"
           >
-            Надіслати
+            {{ $t('infoshop.sendButton') }}
           </button>
         </form>
       </section>
     </div>
   </div>
 </template>
+
 
 <script>
 import { ref, onMounted, nextTick } from 'vue';

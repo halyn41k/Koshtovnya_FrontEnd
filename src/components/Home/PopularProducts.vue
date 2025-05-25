@@ -1,8 +1,9 @@
 <template>
   <section class="py-16">
-    <h2 class="font-heading text-h2 text-[32px] font-black text-gray-900 mb-8 text-center text-semantic-primary">
-      Популярні товари
-    </h2>
+<h2 class="font-heading text-h2 text-[32px] font-black text-gray-900 mb-8 text-center text-semantic-primary">
+  {{ $t('home.popularProducts') }}
+</h2>
+
 
     <div class="relative flex items-center justify-center max-w-[1400px] mx-auto">
       <!-- Ліва стрілка -->

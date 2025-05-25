@@ -1,9 +1,12 @@
 <template>
     <section v-if="products.length" class="py-16">
 
-    <h2 class="font-heading text-[32px] font-black text-gray-900 mb-8 text-center text-semantic-primary">
-      Останні переглянуті товари
-    </h2>
+   <h2 class="font-heading text-[32px] font-black text-gray-900 mb-8 text-center text-semantic-primary">
+  {{ $t('home.recentlyViewed') }}
+</h2>
+
+
+
 
     <div class="relative flex items-center justify-center max-w-[1600px] mx-auto px-4 md:px-8 xl:px-[80px] 2xl:px-[100px]">
 

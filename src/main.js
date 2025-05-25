@@ -5,7 +5,8 @@ import App from './App.vue'
 // Vue-плагіни
 import router from './router'
 import store from './store'
-import i18n from './i18n'
+import i18n from './locales'
+
 
 // Tailwind CSS
 import './assets/tailwind.css'

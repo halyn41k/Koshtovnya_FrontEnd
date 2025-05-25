@@ -10,11 +10,11 @@
             class="w-20 h-auto"
           />
           <h1 class="font-heading text-h3 text-semantic-primary font-black">
-            Коштовня
-          </h1>
+            {{ $t('home.siteName') }}</h1>
+          
         </router-link>
         <p class="text-base leading-relaxed font-['Montserrat']">
-          {{ $t('description') }}
+          {{ $t('home.description') }}
         </p>
       </div>
 
@@ -25,7 +25,7 @@
           <h2 class="text-lg font-semibold text-center mb-4 font-['Montserrat'] flex items-center justify-center
               before:content-[''] before:inline-block before:w-8 before:h-[2px] before:bg-[#090909] before:mr-2
               after:content-[''] after:inline-block after:w-8 after:h-[2px] after:bg-[#090909] after:ml-2">
-            {{ $t('links') }}
+            {{ $t('home.links') }}
           </h2>
           <ul class="space-y-2">
             <li>
@@ -35,7 +35,7 @@
                        before:content-[''] before:absolute before:left-0 before:right-0 before:bottom-0 before:h-[2px] before:bg-[#090909] before:scale-x-0 hover:before:scale-x-100 before:origin-left before:transition-transform before:duration-300"
               >
                 <img src="@/assets/icons/arrow_right.svg" alt="arrow" class="w-4 h-4" />
-                <span class="font-['Montserrat']">{{ $t('aboutUs') }}</span>
+                <span class="font-['Montserrat']">{{ $t('home.aboutUs') }}</span>
               </router-link>
             </li>
             <li>
@@ -55,7 +55,7 @@
                        before:content-[''] before:absolute before:left-0 before:right-0 before:bottom-0 before:h-[2px] before:bg-[#090909] before:scale-x-0 hover:before:scale-x-100 before:origin-left before:transition-transform before:duration-300"
               >
                 <img src="@/assets/icons/arrow_right.svg" alt="arrow" class="w-4 h-4" />
-                <span class="font-['Montserrat']">{{ $t('userAccount') }}</span>
+                <span class="font-['Montserrat']">{{ $t('home.userAccount') }}</span>
               </router-link>
             </li>
           </ul>
@@ -66,7 +66,7 @@
           <h2 class="text-lg font-semibold text-center mb-4 font-['Montserrat'] flex items-center justify-center
               before:content-[''] before:inline-block before:w-8 before:h-[2px] before:bg-[#090909] before:mr-2
               after:content-[''] after:inline-block after:w-8 after:h-[2px] after:bg-[#090909] after:ml-2">
-            {{ $t('contactUs') }}
+            {{ $t('home.contactUs') }}
           </h2>
           <address class="not-italic space-y-4 font-['Montserrat']">
             <div class="flex items-start space-x-2">
@@ -91,7 +91,7 @@
           <h2 class="text-lg font-semibold text-center mb-4 font-['Montserrat'] flex items-center justify-center
               before:content-[''] before:inline-block before:w-8 before:h-[2px] before:bg-[#090909] before:mr-2
               after:content-[''] after:inline-block after:w-8 after:h-[2px] after:bg-[#090909] after:ml-2">
-            {{ $t('followUs') }}
+            {{ $t('home.followUs') }}
           </h2>
           <div class="flex justify-center space-x-4">
             <a href="https://www.instagram.com" target="_blank" class="transform hover:scale-110 transition-transform">

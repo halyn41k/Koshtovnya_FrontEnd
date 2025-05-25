@@ -6,72 +6,60 @@
     <!-- No Address Block -->
     <div v-if="!addressAvailable && !loading && !showForm" class="text-center mb-6">
       <p class="text-gray-500 text-lg mb-4">
-        Немає адреси доставки. Створіть нову адресу!
+        {{ $t('user.noAddress') }}
       </p>
       <button
         class="inline-flex items-center mx-auto px-4 py-2 bg-[#6B1F1F] hover:bg-[#A01212] text-white rounded-lg transition"
         @click="openForm">
         <span class="text-2xl mr-2">+</span>
-        <span>Створити нову адресу</span>
+        <span>{{ $t('user.createAddress') }}</span>
       </button>
     </div>
 
     <!-- Address Form -->
     <div v-if="showForm" class="bg-white rounded-2xl shadow-lg p-6 space-y-6">
       <h2 class="text-2xl font-semibold text-gray-800">
-        {{ addressAvailable ? 'Оновити адресу' : 'Додати нову адресу' }}
+        {{ addressAvailable ? $t('user.updateAddress') : $t('user.addAddress') }}
       </h2>
       <form @submit.prevent="submitAddress" class="space-y-4">
+
         <!-- Phone -->
         <div>
-          <label class="block text-gray-700 mb-1">Телефон:</label>
-          <input v-model="phoneNumber" @input="formatPhoneNumber" placeholder="Введіть номер телефону (тільки цифри)"
+          <label class="block text-gray-700 mb-1">{{ $t('user.phone') }}:</label>
+          <input v-model="phoneNumber" @input="formatPhoneNumber"
+            :placeholder="$t('user.enterPhone')"
             maxlength="10" inputmode="numeric" pattern="[0-9]*"
             class="w-full px-3 py-2 border rounded-lg focus:ring focus:ring-opacity-50"
             :class="errors.phoneNumber ? 'border-red-500' : 'border-gray-300'" />
-
-
-
-
           <p v-if="errors.phoneNumber" class="text-red-500 text-sm mt-1">{{ errors.phoneNumber }}</p>
         </div>
-        <!-- Delivery Type (Multiselect) -->
+
+        <!-- Delivery Type -->
         <div>
-          <label class="block text-gray-700 mb-1">Тип доставки:</label>
+          <label class="block text-gray-700 mb-1">{{ $t('user.deliveryType') }}:</label>
           <Multiselect v-model="formData.deliveryType" :options="deliveryOptions"
-            :custom-label="opt => `${opt.label} — ${opt.name}`" :track-by="'id'" placeholder="Оберіть тип доставки"
-            @input="updateDeliveryOptions"  
-            
-            />
-
-
-
-
-
+            :custom-label="opt => `${opt.label} — ${opt.name}`" :track-by="'id'"
+            :placeholder="$t('user.selectDeliveryType')" @input="updateDeliveryOptions" />
           <p v-if="errors.deliveryType" class="text-red-500 text-sm mt-1">{{ errors.deliveryType }}</p>
         </div>
 
-
-        <!-- Courier Fields -->
+        <!-- Courier -->
         <template v-if="formData.deliveryType?.value === 'courier'">
           <div>
-            <label class="block text-gray-700 mb-1">Спосіб доставки:</label>
-            <input type="text" readonly value="Кур'єр Нової Пошти"
+            <label class="block text-gray-700 mb-1">{{ $t('user.deliveryMethod') }}:</label>
+            <input type="text" readonly :value="$t('user.courierNovaPoshta')"
               class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100" />
           </div>
 
           <div ref="cityWrapper" class="relative w-full">
-
             <Combobox v-model="selectedCity" as="div" class="relative">
               <div class="relative">
-                <label class="block text-gray-700 mb-1">Місто:</label>
-
+                <label class="block text-gray-700 mb-1">{{ $t('user.city') }}:</label>
                 <ComboboxInput
-                
-  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring focus:ring-opacity-50"
-
-                   @input="event => onCitySearch(event.target.value)" :displayValue="city => city?.city || city"
-                  placeholder="Введіть місто" />
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring focus:ring-opacity-50"
+                  @input="event => onCitySearch(event.target.value)"
+                  :displayValue="city => city?.city || city"
+                  :placeholder="$t('user.enterCity')" />
                 <ComboboxOptions v-if="cities.length"
                   class="absolute z-50 w-full mt-1 max-h-48 overflow-auto rounded bg-white border shadow-lg">
                   <ComboboxOption v-for="city in cities" :key="city.Ref" :value="city"
@@ -82,153 +70,107 @@
               </div>
             </Combobox>
           </div>
-          <div>
-            <label class="block text-gray-700 mb-1">Вулиця:</label>
-            <div class="relative">
-             <Combobox v-model="selectedStreet"
-  @update:modelValue="selectStreet"
- as="div" class="relative">
-  <ComboboxInput
-    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring focus:ring-opacity-50"
-    @input="handleStreetSearch"
-    :displayValue="s => s?.street || s"
-    placeholder="Введіть назву вулиці"
-  />
-  <ComboboxOptions v-if="streets.length" class="absolute z-50 w-full mt-1 max-h-48 overflow-auto rounded bg-white border shadow-lg">
-    <ComboboxOption
-      v-for="street in streets"
-      :key="street.Ref || street.Name"
-      :value="street"
-      class="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-    >
-      {{ street.street || street.Name }}
-    </ComboboxOption>
-  </ComboboxOptions>
-</Combobox>
 
+          <div>
+            <label class="block text-gray-700 mb-1">{{ $t('user.street') }}:</label>
+            <div class="relative">
+              <Combobox v-model="selectedStreet" @update:modelValue="selectStreet" as="div" class="relative">
+                <ComboboxInput
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring focus:ring-opacity-50"
+                  @input="handleStreetSearch"
+                  :displayValue="s => s?.street || s"
+                  :placeholder="$t('user.enterStreet')" />
+                <ComboboxOptions v-if="streets.length"
+                  class="absolute z-50 w-full mt-1 max-h-48 overflow-auto rounded bg-white border shadow-lg">
+                  <ComboboxOption v-for="street in streets" :key="street.Ref || street.Name" :value="street"
+                    class="px-4 py-2 hover:bg-gray-100 cursor-pointer">
+                    {{ street.street || street.Name }}
+                  </ComboboxOption>
+                </ComboboxOptions>
+              </Combobox>
             </div>
           </div>
-          <div>
-            <label class="block text-gray-700 mb-1">Будинок/Квартира:</label>
-            <input v-model="deliveryAddress.number" required placeholder="Введіть номер будинку або квартири"
-              :class="['w-full px-3 py-2 border rounded-lg focus:ring focus:ring-opacity-50', errors.number ? 'border-red-500' : 'border-gray-300']" />
 
+          <div>
+            <label class="block text-gray-700 mb-1">{{ $t('user.houseNumber') }}:</label>
+            <input v-model="deliveryAddress.number" required :placeholder="$t('user.enterHouseNumber')"
+              :class="['w-full px-3 py-2 border rounded-lg focus:ring focus:ring-opacity-50', errors.number ? 'border-red-500' : 'border-gray-300']" />
             <p v-if="errors.number" class="text-red-500 text-sm mt-1">{{ errors.number }}</p>
           </div>
         </template>
 
-        <template v-if="formData.deliveryType?.value === 'pickup'">
-  <!-- Самовивіз з наших магазинів -->
-  <template v-if="isStorePickup">
-    <p class="text-gray-700"><strong>Місто:</strong> Коломия</p>
-    <p class="text-gray-700"><strong>Адреса:</strong> вул. Степана Бандери 22, Коломия</p>
-  </template>
+        <!-- Pickup з магазину -->
+        <template v-if="formData.deliveryType?.name === 'Самовивіз з наших магазинів'">
+          <p class="text-gray-700"><strong>{{ $t('user.city') }}:</strong> Коломия</p>
+          <p class="text-gray-700"><strong>{{ $t('user.address') }}:</strong> {{ $t('user.pickupAddress') }}</p>
+        </template>
 
-          <!-- Самовивіз з поштоматів -->
-  <template v-else-if="isPostomatPickup">
-    <div>
-      <label class="block text-gray-700 mb-1">Місто:</label>
-      <Combobox v-model="selectedCity" as="div" class="relative">
-        <div class="relative">
-          <ComboboxInput
-                
-  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring focus:ring-opacity-50"
+        <!-- Pickup інші -->
+        <template v-else-if="formData.deliveryType?.value === 'pickup'">
+          <div>
+            <label class="block text-gray-700 mb-1">{{ $t('user.city') }}:</label>
+            <Combobox v-model="selectedCity" as="div" class="relative">
+              <div class="relative">
+                <ComboboxInput
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring focus:ring-opacity-50"
+                  @input="event => onCitySearch(event.target.value)"
+                  :displayValue="city => city?.city || city"
+                  :placeholder="$t('user.enterCity')" />
+                <ComboboxOptions v-if="cities.length"
+                  class="absolute z-50 w-full mt-1 max-h-48 overflow-auto rounded bg-white border shadow-lg">
+                  <ComboboxOption v-for="city in cities" :key="city.Ref" :value="city"
+                    class="px-4 py-2 hover:bg-gray-100 cursor-pointer">
+                    {{ city.city }}
+                  </ComboboxOption>
+                </ComboboxOptions>
+              </div>
+            </Combobox>
+            <p v-if="errors.city" class="text-red-500 text-sm mt-1">{{ errors.city }}</p>
+          </div>
 
-                   @input="event => onCitySearch(event.target.value)" :displayValue="city => city?.city || city"
-                  placeholder="Введіть місто" />
-          <ComboboxOptions v-if="cities.length"
-            class="absolute z-50 w-full mt-1 max-h-48 overflow-auto rounded bg-white border shadow-lg">
-            <ComboboxOption v-for="city in cities" :key="city.Ref" :value="city"
-              class="px-4 py-2 hover:bg-gray-100 cursor-pointer">
-              {{ city.city }}
-            </ComboboxOption>
-          </ComboboxOptions>
-        </div>
-      </Combobox>
-      <p v-if="errors.city" class="text-red-500 text-sm mt-1">{{ errors.city }}</p>
-    </div>
+          <div v-if="isPostomatPickup">
+            <label class="block text-gray-700 mb-1">{{ $t('user.pickupPostomat') }}:</label>
+            <Multiselect
+              v-model="deliveryAddress.postomat"
+              :options="warehouses.map(w => w.name)"
+              :placeholder="$t('user.selectPostomat')"
+              :searchable="true"
+              :allow-empty="false"
+              class="w-full mt-2"
+              :class="{ 'border border-red-500 rounded-md': errors.postomat }"
+            >
+              <template #noResult><span class="text-gray-500 px-2">{{ $t('user.listEmpty') }}</span></template>
+              <template #noOptions><span class="text-gray-500 px-2">{{ $t('user.listEmpty') }}</span></template>
+            </Multiselect>
+            <p v-if="errors.postomat" class="text-red-500 text-sm mt-1">{{ errors.postomat }}</p>
+          </div>
 
-    <div>
-      <label class="block text-gray-700 mb-1">Поштомат:</label>
-      <Multiselect
-  v-model="deliveryAddress.postomat"
-  :options="warehouses.map(w => w.name)"
-  placeholder="Оберіть поштомат"
-  :searchable="true"
-  :allow-empty="false"
-  class="w-full mt-2"
-  :class="{ 'border border-red-500 rounded-md': errors.postomat }"
->
-  <template #noResult>
-    <span class="text-gray-500 px-2">Список порожній</span>
-  </template>
-  <template #noOptions>
-    <span class="text-gray-500 px-2">Список порожній</span>
-  </template>
-</Multiselect>
+          <div v-if="isNovaPoshtaPickup || isUkrposhtaPickup">
+            <label class="block text-gray-700 mb-1">{{ $t('user.pickupBranch') }}:</label>
+            <Multiselect
+              v-model="deliveryAddress.branch"
+              :options="warehouses.map(w => w.name)"
+              :placeholder="$t('user.selectBranch')"
+              :searchable="true"
+              :allow-empty="false"
+              class="w-full mt-2"
+              :class="{ 'border border-red-500 rounded-md': errors.branch }"
+            >
+              <template #noResult><span class="text-gray-500 px-2">{{ $t('user.listEmpty') }}</span></template>
+              <template #noOptions><span class="text-gray-500 px-2">{{ $t('user.listEmpty') }}</span></template>
+            </Multiselect>
+            <p v-if="errors.branch" class="text-red-500 text-sm mt-1">{{ errors.branch }}</p>
+          </div>
+        </template>
 
-
-      <p v-if="errors.postomat" class="text-red-500 text-sm mt-1">{{ errors.postomat }}</p>
-    </div>
-  </template>
-
-  <!-- Самовивіз з НП або Укрпошти -->
-  <template v-else-if="isNovaPoshtaPickup || isUkrposhtaPickup">
-    <div>
-      <label class="block text-gray-700 mb-1">Місто:</label>
-      <Combobox v-model="selectedCity" as="div" class="relative">
-        <div class="relative">
-          <ComboboxInput
-                
-  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring focus:ring-opacity-50"
-
-                   @input="event => onCitySearch(event.target.value)" :displayValue="city => city?.city || city"
-                  placeholder="Введіть місто" />
-          <ComboboxOptions v-if="cities.length"
-            class="absolute z-50 w-full mt-1 max-h-48 overflow-auto rounded bg-white border shadow-lg">
-            <ComboboxOption v-for="city in cities" :key="city.Ref" :value="city"
-              class="px-4 py-2 hover:bg-gray-100 cursor-pointer">
-              {{ city.city }}
-            </ComboboxOption>
-          </ComboboxOptions>
-        </div>
-      </Combobox>
-      <p v-if="errors.city" class="text-red-500 text-sm mt-1">{{ errors.city }}</p>
-    </div>
-
-    <div>
-      <label class="block text-gray-700 mb-1">Відділення:</label>
-      <Multiselect
-  v-model="deliveryAddress.branch"
-  :options="warehouses.map(w => w.name)"
-  placeholder="Оберіть відділення"
-  :searchable="true"
-  :allow-empty="false"
-  class="w-full mt-2"
-  :class="{ 'border border-red-500 rounded-md': errors.branch }"
->
-  <template #noResult>
-    <span class="text-gray-500 px-2">Список порожній</span>
-  </template>
-  <template #noOptions>
-    <span class="text-gray-500 px-2">Список порожній</span>
-  </template>
-</Multiselect>
-
-
-      <p v-if="errors.branch" class="text-red-500 text-sm mt-1">{{ errors.branch }}</p>
-    </div>
-  </template>
-</template>
-
-
+        <!-- Buttons -->
         <div class="flex flex-wrap gap-4 mt-4">
           <button type="submit" class="px-5 py-2 bg-[#6B1F1F] hover:bg-[#A01212] text-white rounded-lg transition">
-            Зберегти
+            {{ $t('user.save') }}
           </button>
           <button type="button" @click="cancelEdit"
             class="px-5 py-2 border border-gray-400 text-gray-700 rounded-lg hover:bg-gray-100 transition">
-            Скасувати
+            {{ $t('user.cancel') }}
           </button>
         </div>
       </form>
@@ -236,60 +178,48 @@
 
     <!-- Saved Address Card -->
     <div v-else-if="addressAvailable && !loading && !showForm" class="bg-white rounded-2xl shadow-lg p-6 space-y-4">
-      <h2 class="text-2xl font-semibold text-gray-800">Ваша адреса доставки</h2>
-      <p class="text-gray-700"><strong>Телефон:</strong> {{ phoneNumber }}</p>
-      <p class="text-gray-700"><strong>Тип доставки:</strong> {{ formData.deliveryName }}</p>
+      <h2 class="text-2xl font-semibold text-gray-800">{{ $t('user.yourAddress') }}</h2>
+      <p class="text-gray-700"><strong>{{ $t('user.phone') }}:</strong> {{ phoneNumber }}</p>
+      <p class="text-gray-700"><strong>{{ $t('user.deliveryType') }}:</strong> {{ formData.deliveryName }}</p>
 
       <template v-if="formData.deliveryType?.value === 'courier'">
-        <p class="text-gray-700 whitespace-nowrap"><strong>Місто:</strong> {{ formData.city }}</p>
-<p class="text-gray-700">
-  <strong>Адреса:</strong>
-  {{ deliveryAddress.street && deliveryAddress.number
-      ? deliveryAddress.street + ' ' + deliveryAddress.number
-      : savedDeliveryAddress || '(не вказано)' }}
-</p>
+        <p class="text-gray-700 whitespace-nowrap"><strong>{{ $t('user.city') }}:</strong> {{ formData.city }}</p>
+        <p class="text-gray-700">
+          <strong>{{ $t('user.address') }}:</strong>
+          {{ deliveryAddress.street && deliveryAddress.number
+              ? deliveryAddress.street + ' ' + deliveryAddress.number
+              : savedDeliveryAddress || '(не вказано)' }}
+        </p>
       </template>
 
-      <!-- Якщо самовивіз з наших магазинів -->
-<template v-if="formData.deliveryType?.name === 'Самовивіз з наших магазинів'">
-  <p class="text-gray-700">
-    <strong>Адреса:</strong> вул. Степана Бандери 22, Коломия
-  </p>
-</template>
+      <template v-else-if="formData.deliveryType?.value === 'pickup'">
+        <p class="text-gray-700"><strong>{{ $t('user.city') }}:</strong> {{ formData.city }}</p>
 
-<template v-else-if="formData.deliveryType?.value === 'pickup'">
-<p class="text-gray-700">
-  <strong>Місто:</strong> {{ formData.city }}
-</p>
-
-<p class="text-gray-700" v-if="deliveryAddress.branch">
-  <strong>Адреса:</strong> {{ deliveryAddress.branch }}
-</p>
-<p class="text-gray-700" v-else-if="deliveryAddress.postomat">
-  <strong>Адреса:</strong> {{ deliveryAddress.postomat }}
-</p>
-<p class="text-gray-700">
-  <strong>Адреса:</strong> {{ savedDeliveryAddress || '(не вказано)' }}
-</p>
-
-
-
-</template>
-
+        <p class="text-gray-700" v-if="deliveryAddress.branch">
+          <strong>{{ $t('user.address') }}:</strong> {{ deliveryAddress.branch }}
+        </p>
+        <p class="text-gray-700" v-else-if="deliveryAddress.postomat">
+          <strong>{{ $t('user.address') }}:</strong> {{ deliveryAddress.postomat }}
+        </p>
+        <p class="text-gray-700">
+          <strong>{{ $t('user.address') }}:</strong> {{ savedDeliveryAddress || '(не вказано)' }}
+        </p>
+      </template>
 
       <div class="flex gap-4 mt-4">
         <button @click="editAddress"
           class="px-5 py-2 border-2 border-[#6B1F1F] text-[#6B1F1F] rounded-lg hover:bg-[#6B1F1F] hover:text-white transition">
-          Оновити
+          {{ $t('user.update') }}
         </button>
         <button @click="deleteAddress"
           class="px-5 py-2 border-2 border-red-600 text-red-600 rounded-lg hover:bg-red-600 hover:text-white transition">
-          Видалити
+          {{ $t('user.delete') }}
         </button>
       </div>
     </div>
   </div>
 </template>
+
 
 <script>
 import Loader from '../home/Loader.vue';

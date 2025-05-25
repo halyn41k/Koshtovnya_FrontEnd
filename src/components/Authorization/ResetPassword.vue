@@ -6,7 +6,7 @@
     <!-- Заголовок з лініями -->
     <header class="relative z-10 flex items-center justify-center mb-10 w-full">
       <div class="hidden md:flex flex-1 h-[2px] bg-gray-300"></div>
-      <h1 class="px-4 title-kyiv">Скидання пароля</h1>
+      <h1 class="px-4 title-kyiv">{{ $t('authorization.title') }}</h1>
       <div class="hidden md:flex flex-1 h-[2px] bg-gray-300"></div>
     </header>
 
@@ -15,12 +15,12 @@
       <!-- Крок 1 -->
       <form v-if="step === 1" @submit.prevent="sendResetCode" class="w-full space-y-5">
         <div class="flex flex-col">
-          <label for="email" class="mb-1 text-sm font-medium text-gray-600">Email</label>
+          <label for="email" class="mb-1 text-sm font-medium text-gray-600">{{ $t('authorization.labels.email') }}</label>
           <input
             id="email"
             type="email"
             v-model="email"
-            placeholder="Введіть email"
+            :placeholder="$t('authorization.inputEmail')"
             required
             class="w-full h-12 rounded-lg border border-gray-300 bg-white px-4 text-gray-800 placeholder-gray-400
                    hover:shadow-md focus:outline-none focus:border-[#6B1F1F] focus:shadow-lg transition-all duration-200"
@@ -28,7 +28,8 @@
         </div>
         <div class="flex justify-center">
           <button type="submit" class="w-full h-12 flex items-center justify-center bg-[#6B1F1F] hover:bg-[#A01212] active:bg-[#A01212] text-white text-base font-semibold rounded-xl transition-colors duration-200 shadow-sm hover:shadow-md">
-            Надіслати код
+           {{ $t('authorization.sendCode') }}
+
           </button>
         </div>
       </form>
@@ -36,13 +37,13 @@
       <!-- Крок 2 -->
       <form v-if="step === 2" @submit.prevent="verifyCode" class="w-full space-y-5">
         <div class="flex flex-col">
-          <label for="code" class="mb-1 text-sm font-medium text-gray-600">Код підтвердження</label>
+          <label for="code" class="mb-1 text-sm font-medium text-gray-600">{{ $t('authorization.codeLabel') }}</label>
           <input
             id="code"
             type="text"
             v-model="code"
             maxlength="6"
-            placeholder="Введіть код"
+            :placeholder="$t('authorization.codePlaceholder')"
             required
             class="w-full h-12 rounded-lg border border-gray-300 bg-white px-4 text-gray-800 placeholder-gray-400
                    hover:shadow-md focus:outline-none focus:border-[#6B1F1F] focus:shadow-lg transition-all duration-200"
@@ -50,7 +51,7 @@
         </div>
         <div class="flex justify-center">
           <button type="submit" class="w-full h-12 flex items-center justify-center bg-[#6B1F1F] hover:bg-[#A01212] active:bg-[#A01212] text-white text-base font-semibold rounded-xl transition-colors duration-200 shadow-sm hover:shadow-md">
-            Перевірити код
+            {{ $t('authorization.verifyCode') }}
           </button>
         </div>
       </form>
@@ -58,24 +59,24 @@
       <!-- Крок 3 -->
       <form v-if="step === 3" @submit.prevent="resetPassword" class="w-full space-y-5">
         <div class="flex flex-col">
-          <label for="newPassword" class="mb-1 text-sm font-medium text-gray-600">Новий пароль</label>
+          <label for="newPassword" class="mb-1 text-sm font-medium text-gray-600">{{ $t('authorization.newPassword') }}</label>
           <input
             id="newPassword"
             type="password"
             v-model="newPassword"
-            placeholder="Введіть новий пароль"
+            :placeholder="$t('authorization.newPasswordPlaceholder')"
             required
             class="w-full h-12 rounded-lg border border-gray-300 bg-white px-4 text-gray-800 placeholder-gray-400
                    hover:shadow-md focus:outline-none focus:border-[#6B1F1F] focus:shadow-lg transition-all duration-200"
           />
         </div>
         <div class="flex flex-col">
-          <label for="confirmPassword" class="mb-1 text-sm font-medium text-gray-600">Підтвердіть пароль</label>
+          <label for="confirmPassword" class="mb-1 text-sm font-medium text-gray-600">{{ $t('authorization.confirmPassword') }}</label>
           <input
             id="confirmPassword"
             type="password"
             v-model="confirmPassword"
-            placeholder="Підтвердіть пароль"
+            :placeholder="$t('authorization.confirmPasswordPlaceholder')"
             required
             class="w-full h-12 rounded-lg border border-gray-300 bg-white px-4 text-gray-800 placeholder-gray-400
                    hover:shadow-md focus:outline-none focus:border-[#6B1F1F] focus:shadow-lg transition-all duration-200"
@@ -83,7 +84,7 @@
         </div>
         <div class="flex justify-center">
           <button type="submit" class="w-full h-12 flex items-center justify-center bg-[#6B1F1F] hover:bg-[#A01212] active:bg-[#A01212] text-white text-base font-semibold rounded-xl transition-colors duration-200 shadow-sm hover:shadow-md">
-            Скинути пароль
+            {{ $t('authorization.submit') }}
           </button>
         </div>
       </form>

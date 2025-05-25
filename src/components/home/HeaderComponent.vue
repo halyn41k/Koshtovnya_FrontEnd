@@ -17,7 +17,7 @@
                      before:bottom-0 before:h-[2px] before:bg-black before:scale-x-0
                      hover:before:scale-x-100 before:origin-left before:transition-transform"
             >
-              {{ $t('aboutUs') }}
+              {{ $t('home.aboutUs') }}
             </router-link>
           </li>
           <li>
@@ -28,7 +28,7 @@
                      before:bottom-0 before:h-[2px] before:bg-black before:scale-x-0
                      hover:before:scale-x-100 before:origin-left before:transition-transform"
             >
-            Про Оплату | Доставку
+            {{ $t('home.aboutDelivery') }}
             </router-link>
           </li>
         </ul>
@@ -129,7 +129,7 @@
                    before:bottom-0 before:h-[2px] before:bg-black before:scale-x-0
                    hover:before:scale-x-100 before:origin-left before:transition-transform"
           >
-            {{ $t('wishlist') }}
+            {{ $t('home.wishlist') }}
           </router-link>
         </div>
       </div>
@@ -146,7 +146,8 @@
           <input
             v-model="searchQuery"
             @keyup.enter="startSearch"
-            placeholder="Пошук товарів..."
+            :placeholder="$t('home.searchPlaceholder')"
+
             class="flex-1 px-3 py-2 bg-transparent border-none focus:outline-none text-input
                    transition-all duration-200"
           />
@@ -193,7 +194,7 @@
         <!-- Logo -->
         <router-link to="/" class="relative flex items-center space-x-2 md:left-[-150px]">
           <img :src="siteSettings.site_logo" alt="Logo" class="w-14 h-12"/>
-          <h1 class="font-heading text-h3 text-semantic-primary font-black">Коштовня</h1>
+          <h1 class="font-heading text-h3 text-semantic-primary font-black">{{ $t('home.siteName') }}</h1>
         </router-link>
 
         <!-- User / Cart / Mobile Search / Burger -->
@@ -225,7 +226,8 @@
         <ul class="flex justify-center space-x-1 py-1 px-4 md:px-0 font-base">
           <li
   v-for="cat in categories"
-  :key="cat.link"
+  :key="cat.link || cat.name"
+
   @click="handleCategoryClick(cat.link)"
 >
   <span
@@ -285,7 +287,7 @@
   class="block px-4 py-2 hover:bg-gray-100 rounded-lg transition-all duration-200"
   @click="isBurgerOpen = false"
 >
-  {{ $t('wishlist') }}
+  {{ $t('home.wishlist') }}
 </router-link>
 
 <router-link
@@ -293,7 +295,7 @@
   class="block px-4 py-2 hover:bg-gray-100 rounded-lg transition-all duration-200"
   @click="isBurgerOpen = false"
 >
-  {{ $t('aboutUs') }}
+  {{ $t('home.aboutUs') }}
 </router-link>
 
 <router-link
@@ -301,7 +303,7 @@
   class="block px-4 py-2 hover:bg-gray-100 rounded-lg transition-all duration-200"
   @click="isBurgerOpen = false"
 >
-Про Оплату | Доставку
+{{ $t('home.aboutDelivery') }}
 </router-link>
 
       </li>
@@ -322,7 +324,7 @@
           <input
             v-model="searchQuery"
             @keyup.enter="startSearch"
-            placeholder="Пошук товарів..."
+:placeholder="$t('home.searchPlaceholder')"
             class="flex-1 px-3 py-2 bg-[#F2E8E8] border-none focus:outline-none text-input"
           />
           <button @click="startSearch" class="px-3">

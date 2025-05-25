@@ -1,11 +1,11 @@
 <template> 
   <div class="max-w-3xl p-4 sm:p-6 overflow-y-auto h-[90vh] font-sans">
-    <h2 class="text-2xl font-bold text-gray-800 mb-5">Список бажаного</h2>
+    <h2 class="text-2xl font-bold text-gray-800 mb-5">  {{ $t('user.wishlistTitle') }}</h2>
 
     <Loader v-if="loading" class="mx-auto my-16" />
 
     <div v-else-if="items.length === 0" class="text-center text-lg text-gray-500 mt-10">
-      Ваш список бажаного порожній :(  
+      {{ $t('user.wishlistEmpty') }}
     </div>
 
     <div v-else class="space-y-6">
@@ -41,7 +41,7 @@
   :disabled="item.loading"
   @click.prevent="addToCart(item)"
 >
-  <span v-if="!item.loading">Купити</span>
+  <span v-if="!item.loading">{{ $t('user.buy') }}</span>
   <svg v-else class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
@@ -54,7 +54,8 @@
   class="flex items-center px-4 py-2 bg-gray-300 text-gray-700 text-sm font-medium rounded-lg cursor-not-allowed"
   disabled
 >
-  Немає в наявності
+{{ $t('user.notAvailable') }}
+
 </button>
 
 

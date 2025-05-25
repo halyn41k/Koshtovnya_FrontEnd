@@ -1,9 +1,9 @@
 <template>
   <div class="font-sans p-5 rounded-lg">
-    <h2 class="text-2xl font-bold text-gray-800 mb-5">Ваша особиста інформація</h2>
+<h2 class="text-2xl font-bold text-gray-800 mb-5">{{ $t('user.personalInfoTitle') }}</h2>
 
     <div class="mb-5 flex flex-col sm:flex-row sm:items-center">
-  <label for="first_name" class="w-full sm:w-[150px] font-bold mb-2 sm:mb-0 sm:mr-3">Ім’я:</label>
+  <label for="first_name" class="w-full sm:w-[150px] font-bold mb-2 sm:mb-0 sm:mr-3">{{ $t('user.firstName') }}:</label>
   <input
     id="first_name"
     type="text"
@@ -13,7 +13,7 @@
 </div>
 
 <div class="mb-5 flex flex-col sm:flex-row sm:items-center">
-  <label for="last_name" class="w-full sm:w-[150px] font-bold mb-2 sm:mb-0 sm:mr-3">Прізвище:</label>
+  <label for="last_name" class="w-full sm:w-[150px] font-bold mb-2 sm:mb-0 sm:mr-3">{{ $t('user.lastName') }}:</label>
   <input
     id="last_name"
     type="text"
@@ -23,7 +23,7 @@
 </div>
 
 <div class="mb-5 flex flex-col sm:flex-row sm:items-center">
-  <label for="second_name" class="w-full sm:w-[150px] font-bold mb-2 sm:mb-0 sm:mr-3">По батькові:</label>
+  <label for="second_name" class="w-full sm:w-[150px] font-bold mb-2 sm:mb-0 sm:mr-3">{{ $t('user.patronymic') }}:</label>
   <input
     id="second_name"
     type="text"
@@ -33,7 +33,7 @@
 </div>
 
 <div class="mb-5 flex flex-col sm:flex-row sm:items-center">
-  <label for="email" class="w-full sm:w-[150px] font-bold mb-2 sm:mb-0 sm:mr-3">Email:</label>
+  <label for="email" class="w-full sm:w-[150px] font-bold mb-2 sm:mb-0 sm:mr-3">{{ $t('user.email') }}:</label>
   <input
     id="email"
     type="email"
@@ -53,7 +53,8 @@
            text-white bg-[#6B1F1F] hover:bg-[#A01212]
            disabled:bg-gray-300 disabled:text-gray-600 disabled:cursor-not-allowed"
   >
-    Оновити інформацію
+    {{ $t('user.updateInfo') }}
+
   </button>
 
   <!-- Tooltip -->
@@ -62,7 +63,7 @@
     class="absolute top-full left-0 mt-1 w-max max-w-[250px] text-xs text-white bg-gray-800 px-3 py-2 rounded shadow-lg
            opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10"
   >
-    Щоб оновити дані, заповніть всі обов'язкові поля: ім’я, прізвище та по батькові.
+{{ $t('user.fillRequiredFields') }}
   </div>
 </div>
 
@@ -72,7 +73,7 @@
     @click="changePassword"
     class="w-full sm:w-[200px] h-[40px] bg-[#6B1F1F] text-white text-sm sm:text-base font-medium rounded-lg hover:bg-[#A01212] transition-colors"
   >
-    Змінити пароль
+    {{ $t('user.changePassword') }}
   </button>
 
   <router-link
@@ -80,7 +81,8 @@
     to="/admin"
     class="w-full sm:w-[240px] h-[40px] border border-[#6B1F1F] text-black text-sm sm:text-base font-semibold rounded-lg flex items-center justify-center hover:bg-[#f9eaea] transition-colors"
   >
-    Перейти в {{ role === 'manager' ? 'менеджер-панель' : 'адмін-панель' }}
+    {{ $t(role === 'manager' ? 'user.goToManagerPanel' : 'user.goToAdminPanel') }}
+
   </router-link>
 </div>
 

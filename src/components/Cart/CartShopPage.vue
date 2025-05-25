@@ -3,7 +3,8 @@
     <header class="flex items-center justify-center gap-4 py-8">
       <div class="h-px bg-gray-300 flex-1"></div>
       <h1 class="text-4xl font-black text-center" style="font-family: 'KyivType Titling Black2';">
-        Кошик
+         {{ $t('cart.title') }}
+
       </h1>
       <div class="h-px bg-gray-300 flex-1"></div>
     </header>
@@ -23,13 +24,13 @@
 
   <div class="flex flex-col items-center">
     <img src="@/assets/icons/empty-cart.svg" alt="Порожній кошик" class="w-24 h-24 mb-6 opacity-50" />
-    <p class="text-2xl font-semibold text-gray-600 mb-2">Ваш кошик порожній</p>
-    <p class="text-base text-gray-400">Перейдіть до каталогу, щоб додати товари</p>
+    <p class="text-2xl font-semibold text-gray-600 mb-2">  {{ $t('cart.emptyTitle') }}</p>
+    <p class="text-base text-gray-400">{{ $t('cart.emptySubtitle') }}</p>
     <router-link
       to="/allproducts"
       class="mt-6 px-6 py-2 bg-[#6B1F1F] text-white rounded-lg hover:bg-[#A01212] transition"
     >
-      До каталогу
+      {{ $t('cart.goToCatalog') }}
     </router-link>
   </div>
 </div>

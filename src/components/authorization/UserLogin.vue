@@ -1,26 +1,20 @@
 <template>
   <div class="flex flex-col relative w-screen overflow-x-hidden pt-[200px] pb-[100px] font-montserrat">
-    <!-- Фон -->
     <div class="absolute inset-0 bg-[url('@/assets/logins.png')] bg-cover bg-center -z-10"></div>
 
-    <!-- Заголовок з лініями -->
     <header class="relative z-10 flex items-center justify-center mb-10 w-full">
       <div class="hidden md:flex flex-1 h-[2px] bg-gray-300"></div>
       <h1 class="px-4 title-kyiv">
-        Вхід
+        {{ $t('authorization.titleLogin') }}
       </h1>
       <div class="hidden md:flex flex-1 h-[2px] bg-gray-300"></div>
     </header>
 
-    <!-- Основний контейнер форми -->
-    <main
-      class="relative z-20 flex flex-col items-center justify-center w-full md:max-w-xl mx-auto px-6 py-8 bg-white bg-opacity-90 backdrop-blur-md border border-gray-200 rounded-2xl shadow-md"
-    >
+    <main class="relative z-20 flex flex-col items-center justify-center w-full md:max-w-xl mx-auto px-6 py-8 bg-white bg-opacity-90 backdrop-blur-md border border-gray-200 rounded-2xl shadow-md">
       <form @submit.prevent="submitLogin" class="w-full space-y-5">
-        <!-- Email -->
         <div class="flex flex-col">
           <label for="email" class="mb-1 text-sm font-medium text-gray-600">
-            Email
+            {{ $t('authorization.emailLabel') }}
           </label>
           <div class="relative">
             <input
@@ -28,21 +22,20 @@
               type="email"
               v-model="email"
               @input="validateEmail"
-              placeholder="Введіть ваш email"
+              :placeholder="$t('authorization.emailPlaceholder')"
               required
               class="w-full h-12 rounded-lg border border-gray-300 bg-white px-4 text-gray-800 placeholder-gray-400
                      hover:shadow-md focus:outline-none focus:border-[#6B1F1F] focus:shadow-lg transition-all duration-200"
             />
             <span v-if="emailError" class="absolute top-full left-0 mt-1 text-xs text-red-600">
-              {{ emailError }}
+              {{ $t('authorization.emailInvalid') }}
             </span>
           </div>
         </div>
 
-        <!-- Password -->
         <div class="flex flex-col">
           <label for="password" class="mb-1 text-sm font-medium text-gray-600">
-            Пароль
+            {{ $t('authorization.passwordLabel') }}
           </label>
           <div class="relative">
             <input
@@ -50,7 +43,7 @@
               :type="showPassword ? 'text' : 'password'"
               v-model="password"
               @input="validatePassword"
-              placeholder="Введіть пароль"
+              :placeholder="$t('authorization.passwordPlaceholder')"
               required
               class="w-full h-12 rounded-lg border border-gray-300 bg-white px-4 text-gray-800 placeholder-gray-400
                      hover:shadow-md focus:outline-none focus:border-[#6B1F1F] focus:shadow-lg transition-all duration-200"
@@ -72,49 +65,37 @@
           </div>
         </div>
 
-        <!-- Посилання реєстрації та відновлення -->
         <p class="text-center text-xs text-gray-500">
-          Немає облікового запису?
-          <router-link
-            to="/registration"
-            class="font-medium text-[#6B1F1F] hover:text-[#A01212] transition-colors duration-200"
-          >
-            Створіть тут
+          {{ $t('authorization.noAccount') }}
+          <router-link to="/registration" class="font-medium text-[#6B1F1F] hover:text-[#A01212] transition-colors duration-200">
+            {{ $t('authorization.createHere') }}
           </router-link>
           |
-          <router-link
-            to="/reset-password"
-            class="font-medium text-[#6B1F1F] hover:text-[#A01212] transition-colors duration-200"
-          >
-            Забули пароль?
+          <router-link to="/reset-password" class="font-medium text-[#6B1F1F] hover:text-[#A01212] transition-colors duration-200">
+            {{ $t('authorization.forgotPassword') }}
           </router-link>
         </p>
 
-        <!-- Кнопки: Увійти + або + Google -->
-<div class="flex flex-col gap-4 w-full mt-4">
-  <!-- Кнопка входу -->
-  <button
-    type="submit"
-    class="w-full h-12 flex items-center justify-center bg-[#6B1F1F] hover:bg-[#A01212] active:bg-[#A01212]
-           text-white text-base font-semibold rounded-xl transition-colors duration-200 shadow-sm hover:shadow-md"
-  >
-    Увійти
-  </button>
+        <div class="flex flex-col gap-4 w-full mt-4">
+          <button
+            type="submit"
+            class="w-full h-12 flex items-center justify-center bg-[#6B1F1F] hover:bg-[#A01212] active:bg-[#A01212]
+                   text-white text-base font-semibold rounded-xl transition-colors duration-200 shadow-sm hover:shadow-md"
+          >
+            {{ $t('authorization.loginButton') }}
+          </button>
 
-  <!-- або -->
-  <p class="text-sm text-gray-500 text-center">або</p>
+          <p class="text-sm text-gray-500 text-center">{{ $t('authorization.or') }}</p>
 
-  <!-- Кнопка Google -->
-  <button
-    type="button"
-    @click="redirectToGoogle"
-    class="w-full h-12 flex items-center justify-center gap-3 border border-gray-300 rounded-xl bg-white text-gray-700 hover:bg-gray-50 transition-shadow shadow-sm hover:shadow-md"
-  >
-    <img src="@/assets/icons/google.svg" alt="Google" class="w-5 h-5" />
-    <span class="text-sm font-medium">Увійти через Google</span>
-  </button>
-</div>
-
+          <button
+            type="button"
+            @click="redirectToGoogle"
+            class="w-full h-12 flex items-center justify-center gap-3 border border-gray-300 rounded-xl bg-white text-gray-700 hover:bg-gray-50 transition-shadow shadow-sm hover:shadow-md"
+          >
+            <img src="@/assets/icons/google.svg" alt="Google" class="w-5 h-5" />
+            <span class="text-sm font-medium">{{ $t('authorization.googleLogin') }}</span>
+          </button>
+        </div>
       </form>
     </main>
   </div>
@@ -139,37 +120,37 @@ export default {
     };
   },
   methods: {
-     redirectToGoogle() {
-    window.location.href = "http://koshtovnya.api-dev.bmax-edu.website/auth/google/redirect";
-  },
+    redirectToGoogle() {
+      window.location.href = "http://koshtovnya.api-dev.bmax-edu.website/auth/google/redirect";
+    },
     validateEmail() {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      this.emailError = emailRegex.test(this.email) ? '' : 'Введіть дійсний email.';
+      this.emailError = emailRegex.test(this.email) ? '' : this.$t('authorization.emailInvalid');
     },
     validatePassword() {
       const hasSpaces = /\s/.test(this.password);
       if (this.password.length < 8) {
-        this.passwordError = 'Пароль повинен містити мінімум 8 символів.';
+        this.passwordError = this.$t('authorization.passwordShort');
       } else if (hasSpaces) {
-        this.passwordError = 'Пароль не повинен містити пробілів.';
+        this.passwordError = this.$t('authorization.passwordSpace');
       } else {
         this.passwordError = '';
       }
     },
     async submitLogin() {
       if (this.emailError || this.passwordError) {
-        alert('Виправте помилки у формі.');
+        alert(this.$t('authorization.formError'));
         return;
       }
       try {
         const data = await api.login({ email: this.email, password: this.password });
         localStorage.setItem('token', data.token);
         localStorage.setItem('user', JSON.stringify(data.user));
-        alert('Вхід успішний!');
+        alert(this.$t('authorization.success'));
         this.$router.push('/account');
       } catch (error) {
         console.error('Помилка авторизації:', error);
-        alert(error.response?.data?.message || 'Сталася помилка. Спробуйте ще раз.');
+        alert(error.response?.data?.message || this.$t('authorization.errorFallback'));
       }
     },
     togglePasswordVisibility() {
@@ -177,31 +158,30 @@ export default {
     },
   },
   mounted() {
-  document.title = 'Вхід';
+    document.title = this.$t('authorization.title');
+    const query = new URLSearchParams(window.location.search);
+    const token = query.get('token');
+    const userJson = query.get('user');
 
-  const query = new URLSearchParams(window.location.search);
-  const token = query.get('token');
-  const userJson = query.get('user');
+    if (token && userJson) {
+      try {
+        const user = JSON.parse(decodeURIComponent(userJson));
+        localStorage.setItem('token', token);
+        localStorage.setItem('user', JSON.stringify(user));
 
-  if (token && userJson) {
-    try {
-      const user = JSON.parse(decodeURIComponent(userJson));
-      localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify(user));
-
-      const role = user?.role;
-      if (role === 'admin' || role === 'superadmin' || role === 'manager') {
-        this.$router.push('/admin');
-      } else {
-        this.$router.push('/account');
+        const role = user?.role;
+        if (['admin', 'superadmin', 'manager'].includes(role)) {
+          this.$router.push('/admin');
+        } else {
+          this.$router.push('/account');
+        }
+      } catch (e) {
+        console.error('❌ Помилка парсингу user:', e);
+        alert(this.$t('authorization.googleError'));
+        this.$router.replace('/login');
       }
-    } catch (e) {
-      console.error('❌ Помилка парсингу user:', e);
-      alert('Невдала авторизація через Google.');
-      this.$router.replace('/login');
     }
-  }
-},
+  },
 };
 </script>
 
@@ -225,8 +205,8 @@ export default {
   font-size: 30px;
   color: #000;
 }
+
 input[type="password"]::-ms-reveal {
   display: none;
 }
-
 </style>

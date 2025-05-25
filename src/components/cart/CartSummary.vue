@@ -1,7 +1,8 @@
 <template>
   <aside class="order-summary flex-shrink-0 w-64 bg-[#FFF7F6] border border-gray-200 rounded-2xl p-4 font-montserrat">
     <h2 class="text-2xl font-bold text-gray-900 mb-4">
-      Сума до оплати
+        {{ $t('cart.summaryTitle') }}
+
     </h2>
 
     <div class="flex justify-between items-baseline mb-6">
@@ -12,7 +13,8 @@
       @click="goToPayment"
       class="mt-4 w-full flex items-center justify-center space-x-2 bg-[#6B1F1F] hover:bg-[#A01212] text-white rounded-lg py-2 text-sm transition-colors"
     >
-      <span>Перейти до оплати</span>
+      <span>{{ $t('cart.proceedToPayment') }}</span>
+
       <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
       </svg>

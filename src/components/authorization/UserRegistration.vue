@@ -1,98 +1,84 @@
 <template>
   <div class="flex flex-col relative w-screen overflow-x-hidden pt-[200px] pb-[100px] font-montserrat">
-    <!-- Фон -->
     <div class="absolute inset-0 bg-[url('@/assets/logins.png')] bg-cover bg-center -z-10"></div>
 
-    <!-- Заголовок з лініями -->
     <header class="relative z-10 flex items-center justify-center mb-10 w-full">
       <div class="hidden md:flex flex-1 h-[2px] bg-gray-300"></div>
-      <h1 class="px-4 title-kyiv">Реєстрація</h1>
+      <h1 class="px-4 title-kyiv">{{ $t('authorization.titleRegister') }}</h1>
       <div class="hidden md:flex flex-1 h-[2px] bg-gray-300"></div>
     </header>
 
-    <!-- Основний контейнер форми -->
     <main class="relative z-20 flex flex-col items-center justify-center w-full md:max-w-xl mx-auto px-6 py-8 bg-white bg-opacity-90 backdrop-blur-md border border-gray-200 rounded-2xl shadow-md">
       <form @submit.prevent="submitRegistration" class="w-full space-y-5">
-        <!-- Ім'я та Прізвище та По батькові -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <!-- Ім'я -->
           <div class="flex flex-col">
-            <label for="first_name" class="mb-1 text-sm font-medium text-gray-600">Ім'я</label>
+            <label for="first_name" class="mb-1 text-sm font-medium text-gray-600">{{ $t('authorization.labels.first_name') }}</label>
             <input
               id="first_name"
               type="text"
               v-model="first_name"
               @input="validateName"
-              placeholder="Введіть ім'я"
+              :placeholder="$t('authorization.inputFirstName')"
               required
-              :class="['w-full h-12 rounded-lg border px-4 placeholder-gray-400 hover:shadow-md transition-all duration-200',
-                        nameError ? 'border-red-600 focus:border-red-600' : 'border-gray-300 focus:border-[#6B1F1F]']"
+              :class="['w-full h-12 rounded-lg border px-4 placeholder-gray-400 hover:shadow-md transition-all duration-200', nameError ? 'border-red-600 focus:border-red-600' : 'border-gray-300 focus:border-[#6B1F1F]']"
             />
             <span v-if="nameError" class="mt-1 text-xs text-red-600">{{ nameError }}</span>
           </div>
 
-          <!-- Прізвище -->
           <div class="flex flex-col">
-            <label for="last_name" class="mb-1 text-sm font-medium text-gray-600">Прізвище</label>
+            <label for="last_name" class="mb-1 text-sm font-medium text-gray-600">{{ $t('authorization.labels.last_name') }}</label>
             <input
               id="last_name"
               type="text"
               v-model="last_name"
               @input="validateLastName"
-              placeholder="Введіть прізвище"
+              :placeholder="$t('authorization.inputLastName')"
               required
-              :class="['w-full h-12 rounded-lg border px-4 placeholder-gray-400 hover:shadow-md transition-all duration-200',
-                        lastNameError ? 'border-red-600 focus:border-red-600' : 'border-gray-300 focus:border-[#6B1F1F]']"
+              :class="['w-full h-12 rounded-lg border px-4 placeholder-gray-400 hover:shadow-md transition-all duration-200', lastNameError ? 'border-red-600 focus:border-red-600' : 'border-gray-300 focus:border-[#6B1F1F]']"
             />
             <span v-if="lastNameError" class="mt-1 text-xs text-red-600">{{ lastNameError }}</span>
           </div>
 
-          <!-- По батькові -->
           <div class="flex flex-col sm:col-span-2">
-            <label for="second_name" class="mb-1 text-sm font-medium text-gray-600">По батькові</label>
+            <label for="second_name" class="mb-1 text-sm font-medium text-gray-600">{{ $t('authorization.labels.second_name') }}</label>
             <input
               id="second_name"
               type="text"
               v-model="second_name"
               @input="validateSecondName"
-              placeholder="Введіть по батькові"
+              :placeholder="$t('authorization.inputSecondName')"
               required
-              :class="['w-full h-12 rounded-lg border px-4 placeholder-gray-400 hover:shadow-md transition-all duration-200',
-                        secondNameError ? 'border-red-600 focus:border-red-600' : 'border-gray-300 focus:border-[#6B1F1F]']"
+              :class="['w-full h-12 rounded-lg border px-4 placeholder-gray-400 hover:shadow-md transition-all duration-200', secondNameError ? 'border-red-600 focus:border-red-600' : 'border-gray-300 focus:border-[#6B1F1F]']"
             />
             <span v-if="secondNameError" class="mt-1 text-xs text-red-600">{{ secondNameError }}</span>
           </div>
         </div>
 
-        <!-- Email -->
         <div class="flex flex-col">
-          <label for="email" class="mb-1 text-sm font-medium text-gray-600">Email</label>
+          <label for="email" class="mb-1 text-sm font-medium text-gray-600">{{ $t('authorization.labels.email') }}</label>
           <input
             id="email"
             type="email"
             v-model="email"
             @input="validateEmail"
-            placeholder="Введіть email"
+            :placeholder="$t('authorization.inputEmail')"
             required
-            :class="['w-full h-12 rounded-lg border px-4 placeholder-gray-400 hover:shadow-md transition-all duration-200',
-                      emailError ? 'border-red-600 focus:border-red-600' : 'border-gray-300 focus:border-[#6B1F1F]']"
+            :class="['w-full h-12 rounded-lg border px-4 placeholder-gray-400 hover:shadow-md transition-all duration-200', emailError ? 'border-red-600 focus:border-red-600' : 'border-gray-300 focus:border-[#6B1F1F]']"
           />
           <span v-if="emailError" class="mt-1 text-xs text-red-600">{{ emailError }}</span>
         </div>
 
-        <!-- Пароль -->
         <div class="flex flex-col">
-          <label for="password" class="mb-1 text-sm font-medium text-gray-600">Пароль</label>
+          <label for="password" class="mb-1 text-sm font-medium text-gray-600">{{ $t('authorization.labels.password') }}</label>
           <div class="relative">
             <input
               id="password"
               :type="showPassword ? 'text' : 'password'"
               v-model="password"
               @input="validatePassword"
-              placeholder="Введіть пароль"
+              :placeholder="$t('authorization.inputPassword')"
               required
-              :class="['w-full h-12 rounded-lg border px-4 placeholder-gray-400 hover:shadow-md transition-all duration-200',
-                        passwordError ? 'border-red-600 focus:border-red-600' : 'border-gray-300 focus:border-[#6B1F1F]']"
+              :class="['w-full h-12 rounded-lg border px-4 placeholder-gray-400 hover:shadow-md transition-all duration-200', passwordError ? 'border-red-600 focus:border-red-600' : 'border-gray-300 focus:border-[#6B1F1F]']"
             />
             <button type="button" @click="togglePasswordVisibility" class="absolute right-4 top-1/2 -translate-y-1/2 focus:outline-none">
               <img
@@ -105,40 +91,35 @@
           <span v-if="passwordError" class="mt-1 text-xs text-red-600">{{ passwordError }}</span>
         </div>
 
-        <!-- Посилання на вхід -->
         <p class="text-center text-xs text-gray-500">
-          Вже маєте обліковий запис?
-          <router-link to="/login" class="font-medium text-[#6B1F1F] hover:text-[#A01212] transition-colors duration-200">Увійти</router-link>
+          {{ $t('authorization.alreadyHaveAccount') }}
+          <router-link to="/login" class="font-medium text-[#6B1F1F] hover:text-[#A01212] transition-colors duration-200">{{ $t('authorization.loginButton') }}</router-link>
         </p>
 
-       <!-- Кнопки: реєстрація + або + Google -->
-<div class="flex flex-col gap-4 mt-6 w-full">
-  <!-- Кнопка реєстрації -->
-  <button
-    type="submit"
-    class="w-full h-12 flex items-center justify-center bg-[#6B1F1F] hover:bg-[#A01212] active:bg-[#A01212] text-white text-base font-semibold rounded-xl transition-colors duration-200 shadow-sm hover:shadow-md"
-  >
-    Зареєструватися
-  </button>
+        <div class="flex flex-col gap-4 mt-6 w-full">
+          <button
+            type="submit"
+            class="w-full h-12 flex items-center justify-center bg-[#6B1F1F] hover:bg-[#A01212] active:bg-[#A01212] text-white text-base font-semibold rounded-xl transition-colors duration-200 shadow-sm hover:shadow-md"
+          >
+            {{ $t('authorization.registerButton') }}
+          </button>
 
-  <!-- або -->
-  <p class="text-sm text-gray-500 text-center">або</p>
+          <p class="text-sm text-gray-500 text-center">{{ $t('authorization.or') }}</p>
 
-  <!-- Кнопка Google -->
-  <button
-    type="button"
-    @click="redirectToGoogle"
-    class="w-full h-12 flex items-center justify-center gap-3 border border-gray-300 rounded-xl bg-white text-gray-700 hover:bg-gray-50 transition-shadow shadow-sm hover:shadow-md"
-  >
-    <img src="@/assets/icons/google.svg" alt="Google" class="w-5 h-5" />
-    <span class="text-sm font-medium">Увійти через Google</span>
-  </button>
-</div>
-
+          <button
+            type="button"
+            @click="redirectToGoogle"
+            class="w-full h-12 flex items-center justify-center gap-3 border border-gray-300 rounded-xl bg-white text-gray-700 hover:bg-gray-50 transition-shadow shadow-sm hover:shadow-md"
+          >
+            <img src="@/assets/icons/google.svg" alt="Google" class="w-5 h-5" />
+            <span class="text-sm font-medium">{{ $t('authorization.loginWithGoogle') }}</span>
+          </button>
+        </div>
       </form>
     </main>
   </div>
 </template>
+
 
 <script>
 import eyeOpenIcon from "@/assets/eye-hide-svgrepo-com.svg";

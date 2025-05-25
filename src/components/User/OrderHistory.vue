@@ -1,11 +1,13 @@
 <template>
   <div class="max-w-3xl p-4 sm:p-6 overflow-y-auto h-[90vh] font-sans">
-    <h2 class="text-2xl font-bold text-gray-800 mb-5">Історія замовлень</h2>
+    <h2 class="text-2xl font-bold text-gray-800 mb-5">
+      {{ $t('user.orderHistory') }}
+    </h2>
 
     <Loader v-if="loading" class="mx-auto my-16" />
 
     <div v-else-if="orders.length === 0" class="text-center text-lg text-gray-500 mt-10">
-      Ви не розмістили жодного замовлення :(
+      {{ $t('user.noOrders') }}
     </div>
 
     <div v-else class="space-y-6">
@@ -16,10 +18,14 @@
       >
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
           <div class="flex items-center gap-2">
-            <span class="text-lg sm:text-xl font-semibold text-gray-900 truncate">Замовлення №{{ order.id }}</span>
+            <span class="text-lg sm:text-xl font-semibold text-gray-900 truncate">
+              {{ $t('user.orderNumber') }} №{{ order.id }}
+            </span>
             <span class="text-sm text-gray-600 whitespace-nowrap">{{ order.order_date }}</span>
           </div>
-          <span class="text-sm sm:text-base font-medium text-gray-700 whitespace-nowrap">Статус: {{ order.status }}</span>
+          <span class="text-sm sm:text-base font-medium text-gray-700 whitespace-nowrap">
+            {{ $t('user.status') }}: {{ order.status }}
+          </span>
         </div>
 
         <div class="space-y-4">
@@ -37,31 +43,36 @@
               <h3 v-if="!item.is_deleted" class="text-base sm:text-lg font-medium text-gray-800 truncate">
                 {{ item.title }}
               </h3>
-              <h3 v-else class="text-base sm:text-lg text-red-600">Товар видалено</h3>
-              <p class="text-sm text-gray-600 whitespace-nowrap">Кількість: {{ item.quantity }}</p>
-<p class="text-sm text-gray-600 whitespace-nowrap">
-  Ціна: {{ formatCurrencyIntl(item.price, item.currency) }}
-</p>            </div>
+              <h3 v-else class="text-base sm:text-lg text-red-600">
+                {{ $t('user.productDeleted') }}
+              </h3>
+              <p class="text-sm text-gray-600 whitespace-nowrap">
+                {{ $t('user.quantity') }}: {{ item.quantity }}
+              </p>
+              <p class="text-sm text-gray-600 whitespace-nowrap">
+                {{ $t('user.price') }}: {{ formatCurrencyIntl(item.price, item.currency) }}
+              </p>
+            </div>
           </div>
         </div>
 
         <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
-<span class="text-lg font-semibold text-gray-800 whitespace-nowrap">
-  Всього: {{ formatCurrencyIntl(order.amount, order.currency) }}
-</span>          
-        <div class="flex gap-2">
+          <span class="text-lg font-semibold text-gray-800 whitespace-nowrap">
+            {{ $t('user.total') }}: {{ formatCurrencyIntl(order.amount, order.currency) }}
+          </span>
+          <div class="flex gap-2">
             <button
               @click="openOrderDetails(order)"
               class="inline-flex items-center px-4 py-2 bg-[#6B1F1F] text-white text-sm font-medium rounded-lg hover:bg-[#A01212] transition"
             >
-              Деталі замовлення
+              {{ $t('user.orderDetails') }}
             </button>
             <button
               v-if="order.status === 'В очікуванні'"
               @click="cancelOrder(order.id)"
               class="inline-flex items-center px-4 py-2 bg-gray-200 hover:bg-gray-300 text-sm text-gray-800 font-medium rounded-lg transition"
             >
-              Скасувати
+              {{ $t('user.cancel') }}
             </button>
           </div>
         </div>
@@ -75,6 +86,7 @@
     />
   </div>
 </template>
+
 
 <script>
 import axios from "axios";

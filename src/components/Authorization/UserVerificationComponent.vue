@@ -6,7 +6,7 @@
       <!-- Заголовок з лініями -->
       <header class="relative z-10 flex items-center justify-center mb-10 w-full">
         <div class="hidden md:flex flex-1 h-[2px] bg-gray-300"></div>
-        <h1 class="px-4 title-kyiv">Підтвердження акаунту</h1>
+        {{ $t('authorization.verification.title') }}
         <div class="hidden md:flex flex-1 h-[2px] bg-gray-300"></div>
       </header>
   
@@ -17,13 +17,13 @@
           <div class="grid grid-cols-1 gap-4">
             <!-- Email -->
             <div class="flex flex-col relative">
-              <label for="email" class="mb-1 text-sm font-medium text-gray-600">Email</label>
+              <label for="email" class="mb-1 text-sm font-medium text-gray-600">{{ $t('authorization.verification.labels.email') }}</label>
               <input
                 id="email"
                 type="email"
                 v-model="email"
                 @input="validateEmail"
-                placeholder="Введіть ваш email"
+               :placeholder="$t('authorization.verification.placeholders.email')"
                 required
                 class="w-full h-12 rounded-lg border border-gray-300 bg-white px-4 text-gray-800 placeholder-gray-400 hover:shadow-md focus:outline-none focus:border-[#6B1F1F] focus:shadow-lg transition-all duration-200"
               />
@@ -31,14 +31,14 @@
             </div>
             <!-- Код підтвердження -->
             <div class="flex flex-col relative">
-              <label for="code" class="mb-1 text-sm font-medium text-gray-600">Код підтвердження</label>
+              <label for="code" class="mb-1 text-sm font-medium text-gray-600">{{ $t('authorization.verification.labels.code') }}</label>
               <input
                 id="code"
                 type="text"
                 maxlength="6"
                 v-model="code"
                 @input="validateCode"
-                placeholder="Введіть код"
+                :placeholder="$t('authorization.verification.placeholders.code')"
                 required
                 class="w-full h-12 rounded-lg border border-gray-300 bg-white px-4 text-gray-800 placeholder-gray-400 hover:shadow-md focus:outline-none focus:border-[#6B1F1F] focus:shadow-lg transition-all duration-200"
               />
@@ -48,8 +48,8 @@
   
           <!-- Дії -->
           <div class="flex justify-between text-sm text-gray-500">
-            <router-link to="/registration" class="hover:underline text-[#6B1F1F]">Змінити email</router-link>
-            <button type="button" @click="resendCode" class="hover:underline text-[#6B1F1F]">Надіслати код ще раз</button>
+            <router-link to="/registration" class="hover:underline text-[#6B1F1F]">{{ $t('authorization.verification.actions.changeEmail') }}</router-link>
+            <button type="button" @click="resendCode" class="hover:underline text-[#6B1F1F]">{{ $t('authorization.verification.actions.resendCode') }}</button>
           </div>
   
           <!-- Кнопка підтвердження -->
@@ -58,7 +58,7 @@
               type="submit"
               class="w-full h-12 flex items-center justify-center bg-[#6B1F1F] hover:bg-[#A01212] active:bg-[#A01212] text-white text-base font-semibold rounded-xl transition-colors duration-200 shadow-sm hover:shadow-md"
             >
-              Підтвердити
+              {{ $t('authorization.verification.actions.submit') }}
             </button>
           </div>
         </form>

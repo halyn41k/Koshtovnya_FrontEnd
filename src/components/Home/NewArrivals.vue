@@ -1,7 +1,8 @@
 <template>
   <section class="py-16">
-    <h2 class="font-heading text-h2 text-[32px] font-black text-gray-900 mb-8 text-center text-semantic-primary font-black">Новинки</h2>
-    <div class="relative flex items-center justify-center max-w-[1400px] mx-auto">
+<h2 class="font-heading text-h2 text-[32px] font-black text-gray-900 mb-8 text-center text-semantic-primary">
+  {{ $t('home.newArrivals') }}
+</h2>    <div class="relative flex items-center justify-center max-w-[1400px] mx-auto">
       <!-- Ліва стрілка -->
       <button @click="showPreviousProducts" class="hidden sm:block absolute left-36 transform hover:scale-125 transition-all duration-500 ease-in-out z-10">
         <img src="@/assets/left_arrow.png" alt="left-arrow" class="w-10 h-10" />

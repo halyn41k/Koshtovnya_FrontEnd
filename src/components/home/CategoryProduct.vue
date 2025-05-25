@@ -4,7 +4,7 @@
     <h2
       class="text-[#333] text-[32px] font-black font-kyivtype text-center mb-12"
     >
-      {{ $t('shopByCategory') }}
+      {{ $t('home.shopByCategory') }}
     </h2>
 
     <!-- Categories grid -->

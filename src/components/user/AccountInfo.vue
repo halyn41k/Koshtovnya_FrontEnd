@@ -6,10 +6,10 @@
   <h1
     class="flex items-center justify-center mt-[80px] font-kyivBlack2 text-[34px] font-black tracking-[-1.2px] text-center"
   >
-    <div class="flex-1 h-[2px] bg-gray-400 mx-2"></div>
-    Особистий кабінет
-    <div class="flex-1 h-[2px] bg-gray-400 mx-2"></div>
-  </h1>
+      <div class="flex-1 h-[2px] bg-gray-400 mx-2"></div>
+  {{ $t('user.title') }}
+  <div class="flex-1 h-[2px] bg-gray-400 mx-2"></div>
+</h1>
 </header>
 
 
@@ -40,8 +40,9 @@
     <div class="flex items-center">
       <img :src="item.icon" :alt="item.title" class="w-5 h-5 mr-2" />
       <span class="font-semibold text-base">
-        {{ item.title }}
-      </span>
+  {{ $t(item.title) }}
+</span>
+
     </div>
 
     <svg
@@ -127,12 +128,13 @@ export default {
       second_name: '',
       email: '',
       menuItems: [
-        { title: 'Інформація', icon: require('@/assets/icons/user2.svg') },
-        { title: 'Адреси', icon: require('@/assets/location.png') },
-        { title: 'Історія замовлень', icon: require('@/assets/history.png') },
-        { title: 'Список бажаного', icon: require('@/assets/icons/heart.svg') },
-        { title: 'Вийти', icon: require('@/assets/exit.png') },
-      ],
+  { title: 'user.info', icon: require('@/assets/icons/user2.svg') },
+  { title: 'user.addresses', icon: require('@/assets/location.png') },
+  { title: 'user.orderHistory', icon: require('@/assets/history.png') },
+  { title: 'user.wishlist', icon: require('@/assets/icons/heart.svg') },
+  { title: 'user.logout', icon: require('@/assets/exit.png') },
+],
+
       message: '',
       messageType: '',
     };

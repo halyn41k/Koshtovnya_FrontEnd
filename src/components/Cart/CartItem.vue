@@ -4,7 +4,7 @@
     <button
       @click="remove"
       class="absolute top-2 right-2 text-2xl text-gray-500 hover:text-red-600 hover:bg-red-100 rounded-full transition-all duration-200 w-8 h-8 flex items-center justify-center"
-      aria-label="Видалити товар"
+  :aria-label="$t('cart.removeItem')"
     >
       ×
     </button>
@@ -29,7 +29,8 @@
 
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
         <div class="flex items-center space-x-2">
-          <label class="text-gray-700">Розмір:</label>
+          <label class="text-gray-700">{{ $t('cart.size') }}</label>
+
           <select
             v-model="localSize"
             @change="onSizeChange"
@@ -48,7 +49,8 @@
         </div>
 
         <div class="flex items-center space-x-2">
-          <label class="text-gray-700">Кількість:</label>
+          <label class="text-gray-700">{{ $t('cart.quantity') }}</label>
+
           <div class="flex items-center border border-gray-300 rounded-lg overflow-hidden">
             <button
               @click="decrease"
