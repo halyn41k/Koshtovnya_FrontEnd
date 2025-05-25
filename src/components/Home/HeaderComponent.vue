@@ -443,14 +443,20 @@ navigateToCategory(link) {
   },
 
     toggleLanguageDropdown() { this.isLanguageDropdownOpen = !this.isLanguageDropdownOpen; },
-    changeLanguage(lang) { this.selectedLanguage = lang; this.$i18n.locale = lang; this.isLanguageDropdownOpen = false; this.isBurgerOpen = false;},
+changeLanguage(lang) {
+  this.selectedLanguage = lang;
+  this.$i18n.locale = lang;
+  localStorage.setItem('language', lang);
+  this.isLanguageDropdownOpen = false;
+  this.isBurgerOpen = false;
+},
     toggleCurrencyDropdown() { this.isCurrencyDropdownOpen = !this.isCurrencyDropdownOpen; },
 changeCurrency(curr) {
   this.selectedCurrency = curr;
-  localStorage.setItem('currency', curr.toLowerCase()); // зберігаємо
+  localStorage.setItem('currency', curr.toLowerCase());
   this.isCurrencyDropdownOpen = false;
   this.isBurgerOpen = false;
-  window.location.reload(); // або викликаєш глобальний refresh всіх даних
+  window.location.reload(); // або emit, якщо хочеш без reload
 },
     toggleBurger() { this.isBurgerOpen = !this.isBurgerOpen; if (!this.isBurgerOpen) this.isCategoriesOpen = false; },
     toggleCategories() { this.isCategoriesOpen = !this.isCategoriesOpen; },
@@ -490,15 +496,42 @@ changeCurrency(curr) {
     handleOutsideClick(e) { if (!this.$el.contains(e.target)) this.resetResults(); }
   },
   mounted() {
-    this.$nextTick(() => this.headerHeight = this.$refs.headerEl?.offsetHeight || 64);
-    document.addEventListener('mousedown', this.handleOutsideClick);
-    this.fetchCartCount();
-    this.fetchSiteSettings();
-    this.fetchCategories();
-    bus.on('cart-updated', this.fetchCartCount);
-    this.fetchCartCount();
-    this.selectedCurrency = localStorage.getItem('currency')?.toUpperCase() || 'UAH';
-  },
+  this.$nextTick(() => this.headerHeight = this.$refs.headerEl?.offsetHeight || 64);
+  document.addEventListener('mousedown', this.handleOutsideClick);
+  this.fetchCartCount();
+  this.fetchSiteSettings();
+  this.fetchCategories();
+  bus.on('cart-updated', this.fetchCartCount);
+
+  // --- АВТОМАТИЧНА УСТАНОВКА МОВИ ТА ВАЛЮТИ ---
+  const savedLang = localStorage.getItem('language');
+  const savedCurr = localStorage.getItem('currency');
+
+  if (!savedLang && !savedCurr) {
+    const browserLang = navigator.language || navigator.userLanguage;
+    const isUkrainian = browserLang.startsWith('uk');
+
+    if (!isUkrainian) {
+      this.selectedLanguage = 'en';
+      this.$i18n.locale = 'en';
+      localStorage.setItem('language', 'en');
+
+      this.selectedCurrency = 'USD';
+      localStorage.setItem('currency', 'usd');
+
+      // Якщо потрібно одразу оновити, то можна:
+      // window.location.reload();
+    } else {
+      this.selectedLanguage = 'uk';
+      this.$i18n.locale = 'uk';
+      localStorage.setItem('language', 'uk');
+    }
+  } else {
+    this.selectedLanguage = savedLang || 'uk';
+    this.$i18n.locale = this.selectedLanguage;
+    this.selectedCurrency = savedCurr?.toUpperCase() || 'UAH';
+  }
+},
   beforeUnmount() {
     document.removeEventListener('mousedown', this.handleOutsideClick);
     bus.off('cart-updated', this.fetchCartCount);

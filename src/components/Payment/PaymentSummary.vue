@@ -154,9 +154,12 @@ export default {
       const token = localStorage.getItem("token");
       if (!token) return;
       try {
-        const response = await axios.get("https://koshtovnya.api-dev.bmax-edu.website/api/cart", {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const currency = localStorage.getItem('currency')?.toLowerCase() || 'uah';
+const response = await axios.get("https://koshtovnya.api-dev.bmax-edu.website/api/cart", {
+  headers: { Authorization: `Bearer ${token}` },
+  params: { currency }
+});
+
         this.updateCartItems(response.data.products || []);
       } catch (error) {
         console.error("[fetchCartItems] Помилка:", error);

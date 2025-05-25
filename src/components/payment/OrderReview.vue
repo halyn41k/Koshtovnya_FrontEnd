@@ -56,10 +56,15 @@ export default {
       if (!token) return this.$router.push('/login');
       this.loading = true;
       try {
-        const { data } = await axios.get(
-          'https://koshtovnya.api-dev.bmax-edu.website/api/cart',
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
+        const currency = localStorage.getItem('currency')?.toLowerCase() || 'uah';
+const { data } = await axios.get(
+  'https://koshtovnya.api-dev.bmax-edu.website/api/cart',
+  {
+    headers: { Authorization: `Bearer ${token}` },
+    params: { currency }
+  }
+);
+
         this.localCartItems = data.products.map(item => ({
         id: item.id,
         image: item.image_url,
