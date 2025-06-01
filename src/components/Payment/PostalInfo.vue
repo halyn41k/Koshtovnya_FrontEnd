@@ -1,6 +1,8 @@
 <template>
   <div class="postal-info font-montserrat text-[14px]">
-    <div class="flex flex-col gap-4 w-[520px]">
+    <div class="flex flex-col gap-4 w-full max-w-md px-4 sm:px-0 sm:max-w-none">
+
+
 
       <!-- Спосіб доставки -->
       <div class="relative">

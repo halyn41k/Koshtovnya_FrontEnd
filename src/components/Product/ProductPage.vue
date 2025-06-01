@@ -111,7 +111,7 @@
 
           <button @click="toggleWishlist(product)" class="p-2">
             <svg
-              v-if="wishlist.includes(product.id)"
+              v-if="product.is_in_wishlist"
               xmlns="http://www.w3.org/2000/svg"
               class="w-6 h-6 text-red-600"
               viewBox="0 0 24 24"
@@ -329,17 +329,20 @@ export default {
       }
     },
     async toggleWishlist(product) {
-      try {
-        if (product.is_in_wishlist) {
-          await api.deleteWishlistItem(product.id);
-        } else {
-          await api.addToWishlist({ product_id: product.id });
-        }
-        product.is_in_wishlist = !product.is_in_wishlist;
-      } catch (error) {
-        console.error('Помилка оновлення списку бажаного:', error);
-      }
-    },
+  try {
+    if (product.is_in_wishlist) {
+      await api.deleteWishlistItem(product.id);
+    } else {
+      await api.addToWishlist({ product_id: product.id });
+    }
+    product.is_in_wishlist = !product.is_in_wishlist;
+
+    // 🔁 ОБОВʼЯЗКОВО онови локальний список після зміни
+    await this.fetchWishlist?.(); // якщо є або emit на батька
+  } catch (error) {
+    console.error('Помилка оновлення списку бажаного:', error);
+  }
+},
     async addToCart() {
       await api.addToCart({
         product_id: this.product.id,

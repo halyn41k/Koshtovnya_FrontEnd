@@ -51,7 +51,8 @@
         <div class="flex items-center space-x-2">
           <label class="text-gray-700">{{ $t('cart.quantity') }}</label>
 
-          <div class="flex items-center border border-gray-300 rounded-lg overflow-hidden">
+          <div class="flex items-center border border-gray-300 rounded-lg overflow-hidden w-[104px] justify-between">
+
             <button
               @click="decrease"
               :disabled="item.quantity <= 1"

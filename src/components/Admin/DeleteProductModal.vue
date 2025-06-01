@@ -1,8 +1,6 @@
 <template>
-  <div
-    class="fixed inset-0 bg-black bg-opacity-25 flex items-center justify-center z-50"
-    @click.self="close"
-  >
+  
+<div class="fixed inset-0 bg-[rgba(0,0,0,0.5)] flex items-center justify-center z-50" @click.self="close">
     <div
       class="bg-white rounded-lg w-full max-w-md mx-4 p-6 text-center font-montserrat shadow-lg"
     >

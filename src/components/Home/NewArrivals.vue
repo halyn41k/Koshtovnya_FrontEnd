@@ -9,7 +9,7 @@
       </button>
 
       <!-- Свайп/Грід товарів -->
-      <div class="flex gap-4 overflow-x-auto snap-x snap-mandatory sm:grid sm:grid-cols-3 sm:gap-6 sm:overflow-visible sm:snap-none justify-center">
+      <div class="flex gap-4 overflow-x-auto snap-x snap-mandatory sm:grid sm:grid-cols-3 sm:gap-6 sm:overflow-visible sm:snap-none justify-start scroll-pl-4">
         <article v-for="product in visibleProducts" :key="product.id" class="snap-start w-72 flex-shrink-0 h-[440px] bg-[#fff7f6] border-2 border-gray-200 rounded-2xl shadow-md hover:shadow-lg transform hover:-translate-y-1 transition-all duration-500 ease-in-out flex flex-col overflow-hidden">
           <router-link :to="`/productpage/${product.id}`" class="flex-1 flex flex-col">
             <div class="h-48 overflow-hidden">

@@ -175,12 +175,16 @@ export default {
       }
     },
     toggleStep(index) {
-      if (this.currentStep !== index) {
-        this.steps[this.currentStep].isExpanded = false;
-        this.currentStep = index;
-        this.steps[this.currentStep].isExpanded = true;
-      }
-    },
+  // Якщо натискаєш на той самий крок — просто перемикаєш isExpanded
+  if (this.currentStep === index) {
+    this.steps[index].isExpanded = !this.steps[index].isExpanded;
+  } else {
+    // Інакше — звична логіка переходу
+    this.steps[this.currentStep].isExpanded = false;
+    this.currentStep = index;
+    this.steps[this.currentStep].isExpanded = true;
+  }
+},
     updateDeliveryOptions() {
   const deliveryData = {
     courier: [

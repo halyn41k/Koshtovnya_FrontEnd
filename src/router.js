@@ -13,10 +13,11 @@ const routes = [
     component: () => import('@/components/home/HomePage.vue')
   },
   {
-    path: '/not-found',
-    name: 'Not Found',
-    component: () => import('@/components/home/NotFound.vue')
-  },
+  path: '/:pathMatch(.*)*',
+  name: 'NotFound',
+  component: () => import('@/components/home/NotFound.vue') // або '@/components/NotFound.vue'
+},
+
   {
     path: '/category/:categoryId',
     name: 'Category',

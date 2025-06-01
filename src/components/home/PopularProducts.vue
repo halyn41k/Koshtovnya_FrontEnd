@@ -16,7 +16,7 @@
 
       <!-- Свайп/Грід товарів -->
       <div
-        class="flex gap-4 overflow-x-auto snap-x snap-mandatory sm:grid sm:grid-cols-3 sm:gap-6 sm:overflow-visible sm:snap-none justify-center"
+  class="flex gap-4 overflow-x-auto snap-x snap-mandatory sm:grid sm:grid-cols-3 sm:gap-6 sm:overflow-visible sm:snap-none justify-start scroll-pl-4"
       >
         <article
           v-for="product in visibleProducts"
@@ -131,13 +131,14 @@
           <div class="px-4 pb-4">
   <!-- Якщо є доступні варіанти → КУПИТИ -->
   <button
-    v-if="product.has_available_variant"
-    @click="addToCart(product)"
-    class="w-full h-11 bg-[#6B1F1F] hover:bg-[#A01212] text-white font-semibold rounded-lg flex items-center justify-between px-4 transition duration-300"
-  >
-    <span>Купити</span>
-    <img src="@/assets/miniarrow.png" alt="arrow" class="w-5 h-4" />
-  </button>
+  v-if="product.has_available_variant"
+  @click="addToCart(product)"
+  class="w-full h-11 bg-[#6B1F1F] hover:bg-[#A01212] text-white font-montserrat font-semibold rounded-lg flex items-center justify-between px-4 transition duration-300"
+>
+  <span>Купити</span>
+  <img src="@/assets/miniarrow.png" alt="arrow" class="w-5 h-4" />
+</button>
+
 
   <!-- Інакше → ПОВІДОМИТИ -->
 <!-- Інакше → ПОВІДОМИТИ -->

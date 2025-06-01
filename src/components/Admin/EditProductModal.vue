@@ -180,7 +180,7 @@
       <!-- Дії -->
       <div class="flex justify-end space-x-4 pt-4 border-t border-gray-200">
         <button type="button" @click="close" class="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400">Скасувати</button>
-        <button type="submit" class="px-4 py-2 bg-[#6B1F1F] text-white rounded-md hover:bg-[#A01212]">Додати</button>
+        <button type="submit" class="px-4 py-2 bg-[#6B1F1F] text-white rounded-md hover:bg-[#A01212]">Зберегти</button>
       </div>
     </form>
   </div>

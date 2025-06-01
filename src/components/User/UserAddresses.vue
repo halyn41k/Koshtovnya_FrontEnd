@@ -164,15 +164,22 @@
         </template>
 
         <!-- Buttons -->
-        <div class="flex flex-wrap gap-4 mt-4">
-          <button type="submit" class="px-5 py-2 bg-[#6B1F1F] hover:bg-[#A01212] text-white rounded-lg transition">
-            {{ $t('user.save') }}
-          </button>
-          <button type="button" @click="cancelEdit"
-            class="px-5 py-2 border border-gray-400 text-gray-700 rounded-lg hover:bg-gray-100 transition">
-            {{ $t('user.cancel') }}
-          </button>
-        </div>
+        <div class="flex gap-4 mt-4 w-full">
+  <button
+    type="submit"
+    class="w-full text-center py-2 bg-[#6B1F1F] hover:bg-[#A01212] text-white font-montserrat font-semibold rounded-lg transition"
+  >
+    {{ $t('user.save') }}
+  </button>
+  <button
+    type="button"
+    @click="cancelEdit"
+    class="w-full text-center py-2 border border-gray-400 text-gray-700 font-montserrat font-semibold rounded-lg hover:bg-gray-100 transition"
+  >
+    {{ $t('user.cancel') }}
+  </button>
+</div>
+
       </form>
     </div>
 
@@ -315,47 +322,43 @@ export default {
   const name = this.formData.deliveryType?.name?.toLowerCase();
   const value = this.formData.deliveryType?.value;
 
-  // Скидаємо всі змінні
-  this.formData.selectedDeliveryMethod = this.formData.deliveryType;
-  this.formData.cityRef = '';
-  this.formData.streetSearch = '';
-  this.selectedCity = null;
-  this.selectedStreet = null;
+  // 🧹 Очищаємо тільки якщо це нова адреса (тобто не редагування)
+  if (!this.addressAvailable) {
+    this.formData.selectedDeliveryMethod = this.formData.deliveryType;
+    this.formData.cityRef = '';
+    this.formData.streetSearch = '';
+    this.selectedCity = null;
+    this.selectedStreet = null;
 
-  // 🧹 Очищення адрес
-  this.deliveryAddress = {
-    street: '',
-    number: '',
-    branch: '',
-    postomat: '',
-    warehouse: ''
-  };
+    this.deliveryAddress = {
+      street: '',
+      number: '',
+      branch: '',
+      postomat: '',
+      warehouse: ''
+    };
 
-  // 🧹 Очищення списків
-  this.streets = [];
-  this.cities = [];
-  this.warehouses = [];
-
-  if (value === 'pickup' && name.includes('самовивіз з наших магазинів')) {
-  this.formData.city = "Коломия";
-  this.formData.cityRef = "db5c891f-391c-11dd-90d9-001a92567626"; // <- додай сюди коректний Ref
-  return;
-}
-
-
-  // Якщо вже обране місто — одразу підтягуємо відділення/поштомати
-  if (this.formData.city && this.formData.cityRef) {
-    this.fetchWarehouses();
+    this.streets = [];
+    this.cities = [];
+    this.warehouses = [];
   }
 
-  // Якщо ще нема міста — пропонуємо його знайти
+  // Спецвипадок: самовивіз з магазину
+  if (value === 'pickup' && name.includes('самовивіз з наших магазинів')) {
+    this.formData.city = "Коломия";
+    this.formData.cityRef = "db5c891f-391c-11dd-90d9-001a92567626";
+    return;
+  }
+
+  // Якщо є дані — фетчимо
+  if (this.formData.city && this.formData.cityRef) {
+    if (value === 'pickup') this.fetchWarehouses();
+    if (value === 'courier') this.fetchStreets();
+  }
+
+  // Якщо нема міста — підтягуємо список міст
   if (!this.formData.city && value === 'pickup') {
     this.fetchCities();
-  }
-
-  // Якщо курʼєр — підтягуємо вулиці
-  if (value === 'courier') {
-    this.fetchStreets();
   }
 },
     updateDropdownPosition() {
@@ -875,8 +878,10 @@ this.$nextTick(() => {
     },
    editAddress() {
   this.showForm = true;
+  this.formData.selectedDeliveryMethod = this.formData.deliveryType;
 
-  // Відновлюємо selectedCity
+  const deliveryType = this.formData.deliveryType?.value;
+
   if (this.formData.city && this.formData.cityRef) {
     this.selectedCity = {
       city: this.formData.city,
@@ -884,28 +889,57 @@ this.$nextTick(() => {
     };
   }
 
-  // Якщо courier — відновлюємо selectedStreet і поле пошуку
-  if (this.formData.deliveryType?.value === 'courier') {
-    const street = this.deliveryAddress.street;
-    if (street) {
-      this.selectedStreet = { street };
+  if (deliveryType === 'courier') {
+    // жорстко встановлюємо всі потрібні поля
+    if (this.savedDeliveryAddress) {
+      const full = this.savedDeliveryAddress.trim();
+      const split = full.split(' ');
+      const number = split.pop();
+      const street = split.join(' ');
+
+      this.deliveryAddress.street = street;
+      this.deliveryAddress.number = number;
       this.formData.streetSearch = street;
+      this.selectedStreet = { street };
     }
   }
 
-  // 🔁 Форсуємо оновлення опцій + підтягуємо потрібні дані
-  this.$nextTick(() => {
-    this.updateDeliveryOptions();
+  if (deliveryType === 'pickup') {
+    const lower = this.savedDeliveryAddress?.toLowerCase() || '';
+    if (this.isStorePickup) {
+      this.formData.city = 'Коломия';
+      this.formData.cityRef = 'db5c891f-391c-11dd-90d9-001a92567626';
+    } else if (lower.includes('поштомат')) {
+      this.deliveryAddress.postomat = this.savedDeliveryAddress;
+    } else if (lower.includes('відділення')) {
+      this.deliveryAddress.branch = this.savedDeliveryAddress;
+    } else {
+      this.deliveryAddress.branch = this.savedDeliveryAddress;
+    }
+  }
 
-    if (this.formData.deliveryType?.value === 'courier') {
-      this.fetchStreets();
+  this.$nextTick(async () => {
+    await this.updateDeliveryOptions(); // не очищає, бо addressAvailable = true
+    this.formData.selectedDeliveryMethod = this.formData.deliveryType;
+
+    if (deliveryType === 'courier') {
+      await this.fetchStreets();
     }
 
-    if (this.formData.deliveryType?.value === 'pickup') {
-      this.fetchWarehouses();
+    if (deliveryType === 'pickup') {
+      await this.fetchWarehouses();
     }
+
+    // 💥 додатково форсуємо оновлення в Combobox (Vue буває тупий)
+    this.$nextTick(() => {
+      this.selectedCity = { city: this.formData.city, Ref: this.formData.cityRef };
+      if (this.deliveryAddress.street) {
+        this.selectedStreet = { street: this.deliveryAddress.street };
+      }
+    });
   });
 },
+
 
     openForm() {
       if (!this.phoneNumber) {

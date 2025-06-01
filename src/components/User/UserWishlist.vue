@@ -87,26 +87,25 @@ export default {
   },
   methods: {
     async fetchWishlist() {
-      this.loading = true;
-      try {
-        const data = await api.getWishlist();
-       this.items = data.products.map(item => ({
-  id: item.id,
-  title: item.name,
-  price: item.price,
-  currency: item.currency,
-  imageSrc: item.image_url || 'default_image_path',
-  loading: false,
-  is_in_cart: item.is_in_cart,
-  has_available_variant: (item.variants || []).some(v => v.is_available) // ← перевірка
-}));
-
-      } catch (error) {
-        console.error("Помилка завантаження списку бажань:", error);
-      } finally {
-        this.loading = false;
-      }
-    },
+  this.loading = true;
+  try {
+    const data = await api.getWishlist();
+    this.items = data.products.map(item => ({
+      id: item.id,
+      title: item.name,
+      price: item.price,
+      currency: item.currency,
+      imageSrc: item.image_url || 'default_image_path',
+      loading: false,
+      is_in_cart: item.is_in_cart,
+      has_available_variant: item.is_available, // ← оце ключове
+    }));
+  } catch (error) {
+    console.error("Помилка завантаження списку бажань:", error);
+  } finally {
+    this.loading = false;
+  }
+},
    async addToCart(item) {
   item.loading = true;
   try {

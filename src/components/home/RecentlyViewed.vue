@@ -21,7 +21,8 @@
 
 
       <!-- Слайдер -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 justify-center">
+      <div   class="flex gap-4 overflow-x-auto snap-x snap-mandatory sm:grid sm:grid-cols-3 sm:gap-6 sm:overflow-visible sm:snap-none justify-start scroll-pl-4"
+>
 
         <article
           v-for="product in visibleProducts"
