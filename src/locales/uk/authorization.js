@@ -37,7 +37,7 @@ export default {
   registerButton: "Зареєструватися",
 
   loginWithGoogle: "Увійти через Google",
-    title: "Скидання пароля",
+    titlePassword: "Скидання пароля",
   sendCode: "Надіслати код",
   codeLabel: "Код підтвердження",
   codePlaceholder: "Введіть код",

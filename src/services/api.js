@@ -1,4 +1,7 @@
 import axios from 'axios'; 
+import router from '@/router';
+
+
 import { createToastInterface } from 'vue-toastification';
 import 'vue-toastification/dist/index.css';
 
@@ -46,79 +49,89 @@ apiClient.interceptors.request.use(
 );
 
 
-
-
 apiClient.interceptors.response.use(
-  
   response => response,
-  error => {
-    const { response } = error;
-    if (!response) {
-      toast.error('Немає зв’язку із сервером. Спробуйте ще раз.');
-      console.error('Network or timeout error', error);
-      return Promise.reject({ message: 'Network error or timeout' });
-    }
+ error => {
+  const response = error.response;
 
-    const message = response.data?.message || '';
+if (response?.status === 401) {
+  localStorage.removeItem('token');
 
-  
-   const normalizedMessage = message.toLowerCase().trim();
-
-
-if (normalizedMessage.includes('you are already subscribed for notifications')) {
-  toast.error('Ви вже підписані на сповіщення для цього товару 😢');
-  return Promise.reject(response.data);
+  const currentPath = window.location.pathname;
+  if (currentPath !== '/login') {
+    window.location.href = '/login';
+  }
 }
 
 
-
-    // 🟡 Додай перевірку тут – ДО switch
-    if (normalizedMessage.includes('not enough stock available')) {
-      toast.error('Немає достатньо товару в наявності 😢');
-      return Promise.reject(response.data);
-    }
-
-    switch (response.status) {
-      case 400:
-        toast.error(message || 'Неправильні дані запиту');
-        break;
-        case 401:
-          if (!hasShownAuthToast) {
-            toast.warning('Будь ласка, увійдіть у систему');
-            hasShownAuthToast = true;
-            // Можна скинути прапор після деякого часу, якщо треба
-            setTimeout(() => {
-              hasShownAuthToast = false;
-            }, 10000); // 10 секунд або інший інтервал
-          }
-          break;        
-      case 403:
-        toast.error('У вас недостатньо прав для цієї дії');
-        break;
-      case 404:
-        toast.info('Ресурс не знайдено');
-        break;
-      case 422: {
-        const errors = response.data.errors || {};
-        Object.values(errors).flat().forEach(msg => toast.error(msg));
-        break;
-      }
-      case 500:
-  if (message.toLowerCase().includes('out of range value for column')) {
-    toast.error('Цей товар більше не в наявності 😢');
-  } else if (message.toLowerCase().includes('not enough stock available')) {
-    toast.error('Немає достатньо товару в наявності 😢');
-  } else {
-    toast.error('Сталася помилка на сервері. Спробуйте пізніше');
+  if (!response) {
+    toast.error('Немає зв’язку із сервером. Спробуйте ще раз.');
+    return Promise.reject({ message: 'Network error or timeout' });
   }
-  break;
 
-      default:
-        toast.error(message || `Сталася помилка: ${response.status}`);
-    }
+  const message = response.data?.message || '';
+  const normalizedMessage = message.toLowerCase().trim();
+
+  if (normalizedMessage.includes('banned')) {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    window.location.href = '/login?error=user_is_banned';
     return Promise.reject(response.data);
   }
+
+  // інші повідомлення
+  if (normalizedMessage.includes('you are already subscribed for notifications')) {
+    toast.error('Ви вже підписані на сповіщення для цього товару 😢');
+    return Promise.reject(response.data);
+  }
+
+  if (normalizedMessage.includes('not enough stock available')) {
+    toast.error('Немає достатньо товару в наявності 😢');
+    return Promise.reject(response.data);
+  }
+
+  switch (response.status) {
+    case 400:
+      toast.error(message || 'Неправильні дані запиту');
+      break;
+    case 401:
+      if (!hasShownAuthToast) {
+        toast.warning('Будь ласка, увійдіть у систему');
+        hasShownAuthToast = true;
+        setTimeout(() => {
+          hasShownAuthToast = false;
+        }, 10000);
+      }
+      break;
+    case 403:
+      toast.error('У вас недостатньо прав для цієї дії');
+      break;
+    case 404:
+  toast.info('Сторінку не знайдено');
+  router.push({ name: 'NotFound' }); // 🔁 редірект на сторінку 404
+  break;
+
+    case 422: {
+      const errors = response.data.errors || {};
+      Object.values(errors).flat().forEach(msg => toast.error(msg));
+      break;
+    }
+    case 500:
+      if (normalizedMessage.includes('out of range value for column')) {
+        toast.error('Цей товар більше не в наявності 😢');
+      } else {
+        toast.error('Сталася помилка на сервері. Спробуйте пізніше');
+      }
+      break;
+    default:
+      toast.error(message || `Сталася помилка: ${response.status}`);
+  }
+
+  return Promise.reject(response.data);
+}
+
 );
+
 
 
 export default {

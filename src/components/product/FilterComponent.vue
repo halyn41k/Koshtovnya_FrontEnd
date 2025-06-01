@@ -83,6 +83,7 @@
   Ціна ({{ selectedCurrency === 'USD' ? '$' : '₴' }})
 </h3>
 
+
         <Slider
           class="w-full"
           v-model="filters.price"
@@ -204,7 +205,8 @@
 </template>
 
 <script>
-import { ref, reactive, watch, onMounted, computed } from 'vue'
+import { ref, reactive, watch, onMounted, computed, watchEffect} from 'vue'
+
 import Slider from '@vueform/slider'
 import api from '@/services/api'
 
@@ -220,7 +222,12 @@ export default {
 
   emits: ['apply', 'close'],
   setup(props, { emit }) {
-    const selectedCurrency = ref(localStorage.getItem('currency')?.toUpperCase() || 'UAH')
+const selectedCurrency = ref(localStorage.getItem('currency')?.toUpperCase() || 'UAH')
+
+// слідкуй за змінами currency у localStorage
+watchEffect(() => {
+  selectedCurrency.value = localStorage.getItem('currency')?.toUpperCase() || 'UAH'
+})
 
     const loading = ref(true)
 
@@ -262,12 +269,14 @@ export default {
       if (init.category) filters.category = [...init.category]
     }
 
-    const loadFilters = async () => {
-      try {
-const params = {}
-if (props.categoryId) params.category_id = props.categoryId
+const loadFilters = async () => {
+  try {
+    const params = {
+      currency: selectedCurrency.value.toLowerCase()
+    }
+    if (props.categoryId) params.category_id = props.categoryId
 
-const data = await api.getFilter({ params })
+    const data = await api.getFilter({ params })
         availabilityOptions.value = data['Доступність'] || []
 
         const sz = data['Розмір'] || { min: '0', max: '150' }
@@ -343,6 +352,7 @@ const data = await api.getFilter({ params })
     return {
       loading,
       filters,
+      selectedCurrency,
       availabilityOptions,
       sizeOptions,
       weightOptions,

@@ -35,7 +35,7 @@ export default {
   alreadyHaveAccount: "Already have an account?",
   registerButton: "Register",
   loginWithGoogle: "Log in with Google",
-   title: "Reset Password",
+   titlePassword: "Reset Password",
   sendCode: "Send Code",
   codeLabel: "Verification Code",
   codePlaceholder: "Enter the code",

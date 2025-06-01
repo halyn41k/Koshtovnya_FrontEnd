@@ -1,13 +1,13 @@
 <template>
   <main class="w-full p-4 space-y-6 relative">
-    <!-- Заголовок та кнопки -->
+    <!-- Заголовок та кнопка -->
     <div class="flex justify-between items-center">
       <h1 class="text-2xl font-semibold">Користувачі</h1>
       <button
         @click="openAddModal"
         class="flex items-center gap-2 bg-[#6B1F1F] hover:bg-[#A01212] text-white px-4 py-2 rounded"
       >
-        <img src="@/assets/icons/plus.svg" alt="Add" class="w-5 h-5"/>
+        <img src="@/assets/icons/plus.svg" alt="Add" class="w-5 h-5" />
         <span class="font-medium">Додати</span>
       </button>
     </div>
@@ -32,49 +32,65 @@
 
     <!-- Таблиця -->
     <div v-if="clients.length" class="overflow-x-auto">
-      <!-- Обгортка з border-radius -->
       <div class="inline-block min-w-full border border-[#E0E0E0] rounded-md overflow-hidden">
         <table class="min-w-full bg-white divide-y divide-[#E0E0E0]">
           <thead class="bg-[#F6E7E7]">
-            <tr>
-              <th
-                v-for="col in columns"
-                :key="col.key"
-                @click="cycleSort(col.key)"
-                class="px-4 py-2 text-sm font-medium text-gray-600 text-left cursor-pointer select-none"
-              >
-                <div class="inline-flex items-center gap-2">
-                  {{ col.label }}
-                  <img
-                    v-if="col.sortable"
-                    :src="getSortIcon(sortState[col.key])"
-                    class="w-4 h-4"
-                    alt=""
-                  />
-                </div>
-              </th>
-              <th class="px-4 py-2 text-sm font-medium text-gray-600 text-left">Дії</th>
-            </tr>
-          </thead>
+  <tr>
+    <th
+      v-for="col in columns"
+      :key="col.key"
+      @click="cycleSort(col.key)"
+      class="px-4 py-2 text-sm font-medium text-gray-600 text-left cursor-pointer select-none"
+    >
+      <div class="inline-flex items-center gap-2">
+        {{ col.label }}
+        <img
+          v-if="col.sortable"
+          :src="getSortIcon(sortState[col.key])"
+          class="w-4 h-4"
+          alt=""
+        />
+      </div>
+    </th>
+    <th class="px-4 py-2 text-sm font-medium text-gray-600 text-left">Статус</th>
+    <th class="px-4 py-2 text-sm font-medium text-gray-600 text-left">Дії</th>
+  </tr>
+</thead>
+
           <tbody class="bg-white">
             <tr
-  v-for="client in clients"
-  :key="client.id"
-  :class="client.id === highlightedUserId ? 'bg-green-50 transition-all duration-300' : ''"
->
-
-              <td class="px-4 py-2 border-b border-[#E0E0E0] text-sm text-gray-800 text-left">{{ client.id }}</td>
-              <td class="px-4 py-2 border-b border-[#E0E0E0] text-sm text-gray-800 text-left">{{ client.first_name }}</td>
-              <td class="px-4 py-2 border-b border-[#E0E0E0] text-sm text-gray-800 text-left">{{ client.last_name }}</td>
-              <td class="px-4 py-2 border-b border-[#E0E0E0] text-sm text-gray-800 text-left">{{ client.email }}</td>
-              <td class="px-4 py-2 border-b border-[#E0E0E0] text-sm text-gray-800 text-left">{{ client.order_id || '—' }}</td>
-              <td class="px-4 py-2 border-b border-[#E0E0E0] text-sm text-gray-800 text-left">{{ client.date }}</td>
+              v-for="client in clients"
+              :key="client.id"
+              :class="client.id === highlightedUserId ? 'bg-green-50 transition-all duration-300' : ''"
+            >
+              <td class="px-4 py-2 border-b border-[#E0E0E0] text-sm text-gray-800">{{ client.id }}</td>
+              <td class="px-4 py-2 border-b border-[#E0E0E0] text-sm text-gray-800">{{ client.first_name }}</td>
+              <td class="px-4 py-2 border-b border-[#E0E0E0] text-sm text-gray-800">{{ client.last_name }}</td>
+              <td class="px-4 py-2 border-b border-[#E0E0E0] text-sm text-gray-800">{{ client.email }}</td>
+              <td class="px-4 py-2 border-b border-[#E0E0E0] text-sm text-gray-800">{{ client.order_id || '—' }}</td>
+              <td class="px-4 py-2 border-b border-[#E0E0E0] text-sm text-gray-800">{{ client.date }}</td>
+              <td class="px-4 py-2 border-b border-[#E0E0E0] text-sm">
+                <span :class="client.is_banned ? 'text-red-600 font-semibold' : 'text-green-600 font-semibold'">
+                  {{ client.is_banned ? '🚫 Забанений' : '✅ Активний' }}
+                </span>
+              </td>
               <td class="px-4 py-2 border-b border-[#E0E0E0] flex gap-2">
                 <button @click="openUpdateModal(client)" class="p-1 hover:bg-gray-100 rounded">
-                  <img src="@/assets/icons/edit.svg" class="w-5 h-5" alt="Edit"/>
+                  <img src="@/assets/icons/edit.svg" class="w-5 h-5" alt="Edit" />
                 </button>
                 <button @click="deleteUser(client.id)" class="p-1 hover:bg-gray-100 rounded">
-                  <img src="@/assets/icons/delete.svg" class="w-5 h-5" alt="Delete"/>
+                  <img src="@/assets/icons/delete.svg" class="w-5 h-5" alt="Delete" />
+                </button>
+                <button
+                  @click="client.is_banned ? unbanUser(client.id) : banUser(client.id)"
+                  class="p-1 hover:bg-gray-100 rounded"
+                  :title="client.is_banned ? 'Розбанити' : 'Забанити'"
+                >
+                  <img
+                    :src="client.is_banned ? require('@/assets/icons/unban.svg') : require('@/assets/icons/ban.svg')"
+                    class="w-5 h-5"
+                    alt="Ban"
+                  />
                 </button>
               </td>
             </tr>
@@ -115,7 +131,7 @@
       >&gt;</button>
     </div>
 
-    <!-- Модал користувача -->
+    <!-- Модал -->
     <UserModal
       v-if="showUserModal"
       :user="modalClient"
@@ -134,6 +150,7 @@
     </div>
   </main>
 </template>
+
 
 <script>
 import axios from 'axios'
@@ -166,7 +183,8 @@ export default {
         { key: 'last_name', label: 'Прізвище', sortable: true },
         { key: 'email', label: 'Електронна пошта', sortable: true },
         { key: 'order_id', label: '№ Замовлення', sortable: true },
-        { key: 'date', label: 'Додано', sortable: true }
+        { key: 'date', label: 'Додано', sortable: true },
+
       ]
     }
   },
@@ -208,7 +226,8 @@ export default {
     }
 
     // Записуємо дані
-    this.clients = res.data.data;
+this.clients = res.data.data;
+console.log('⬅️ Юзери з API:', this.clients);
     const m = res.data.meta || {};
     this.meta = {
       links: m.links || [],
@@ -256,6 +275,41 @@ export default {
   this.modalClient = { ...client }
   this.showUserModal = true
 },
+banUser(id) {
+  axios.post(`https://koshtovnya.api-dev.bmax-edu.website/api/admin/users/${id}/ban`, {}, {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem('token')}`
+    }
+  })
+  .then(() => {
+    toast.success('Користувача забанено');
+    const user = this.clients.find(c => c.id === id);
+    if (user) user.is_banned = true;
+  })
+  .catch((e) => {
+    console.error('❌ Помилка при бані:', e?.response?.data || e);
+    toast.error('Не вдалося забанити користувача');
+  });
+},
+
+unbanUser(id) {
+  axios.post(`https://koshtovnya.api-dev.bmax-edu.website/api/admin/users/${id}/unban`, {}, {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem('token')}`
+    }
+  })
+  .then(() => {
+    toast.success('Користувача розбанено');
+    const user = this.clients.find(c => c.id === id);
+    if (user) user.is_banned = false;
+  })
+  .catch((e) => {
+    console.error('❌ Помилка при розбані:', e?.response?.data || e);
+    toast.error('Не вдалося розбанити користувача');
+  });
+},
+
+
     closeUserModal() {
       this.showUserModal = false
     },

@@ -80,8 +80,9 @@
       <!-- Ціна -->
       <div class="section bg-white p-4 rounded-lg shadow-sm">
         <h3 class="subsection-title mb-3 text-lg font-semibold text-gray-800">
-          Ціна (₴)
-        </h3>
+  Ціна ({{ selectedCurrency === 'USD' ? '$' : '₴' }})
+</h3>
+
         <Slider
           class="w-full"
           v-model="filters.price"
@@ -203,7 +204,8 @@
 </template>
 
 <script>
-import { ref, reactive, watch, onMounted, computed } from 'vue'
+import { ref, reactive, watch, onMounted, computed, watchEffect} from 'vue'
+
 import Slider from '@vueform/slider'
 import api from '@/services/api'
 
@@ -220,83 +222,90 @@ export default {
   emits: ['applyFilters', 'close'],
 
   setup(props, { emit }) {
-    const loading = ref(true)
+  const loading = ref(true)
 
-    const filters = reactive({
-      availability: [],
-      size: [0, 100],
-      weight: [0, 1000],
-      price: [0, 10000],
-      color: '',
-      beadTypes: [],
-      producers: [],
-      category: [],
-      rating: []
-    })
+  const selectedCurrency = ref(localStorage.getItem('currency')?.toUpperCase() || 'UAH')
+  watchEffect(() => {
+    selectedCurrency.value = localStorage.getItem('currency')?.toUpperCase() || 'UAH'
+  })
 
-    const availabilityOptions = ref([])
-    const sizeOptions = reactive({ min: 0, max: 100 })
-    const weightOptions = reactive({ min: 0, max: 1000 })
-    const priceOptions = reactive({ min: 0, max: 10000 })
-    const colorOptions = ref([])
-    const beadTypeOptions = ref([])
-    const beadProducerOptions = ref([])
-    const categoryOptions = ref([])
+  const filters = reactive({
+    availability: [],
+    size: [0, 100],
+    weight: [0, 1000],
+    price: [0, 10000],
+    color: '',
+    beadTypes: [],
+    producers: [],
+    category: [],
+    rating: []
+  })
 
-    const sortedColorOptions = computed(() =>
-      [...colorOptions.value].sort((a, b) => a.localeCompare(b))
-    )
+  const availabilityOptions = ref([])
+  const sizeOptions = reactive({ min: 0, max: 100 })
+  const weightOptions = reactive({ min: 0, max: 1000 })
+  const priceOptions = reactive({ min: 0, max: 10000 })
+  const colorOptions = ref([])
+  const beadTypeOptions = ref([])
+  const beadProducerOptions = ref([])
+  const categoryOptions = ref([])
 
-    const applyInitialFilters = () => {
-      const init = props.initialFilters
-      if (init.availability) filters.availability = [...init.availability]
-      if (init.size?.length === 2) filters.size = [...init.size]
-      if (init.weight?.length === 2) filters.weight = [...init.weight]
-      if (init.price?.length === 2) filters.price = [...init.price]
-      if (init.color) filters.color = init.color
-      if (init.rating) filters.rating = [...init.rating]
-      if (init.beadTypes) filters.beadTypes = [...init.beadTypes]
-      if (init.producers) filters.producers = [...init.producers]
-      if (init.category) filters.category = [...init.category]
-    }
+  const sortedColorOptions = computed(() =>
+    [...colorOptions.value].sort((a, b) => a.localeCompare(b))
+  )
 
-    const loadFilters = async () => {
-      try {
-const params = {}
-if (props.categoryId) params.category_id = props.categoryId
+  const applyInitialFilters = () => {
+    const init = props.initialFilters
+    if (init.availability) filters.availability = [...init.availability]
+    if (init.size?.length === 2) filters.size = [...init.size]
+    if (init.weight?.length === 2) filters.weight = [...init.weight]
+    if (init.price?.length === 2) filters.price = [...init.price]
+    if (init.color) filters.color = init.color
+    if (init.rating) filters.rating = [...init.rating]
+    if (init.beadTypes) filters.beadTypes = [...init.beadTypes]
+    if (init.producers) filters.producers = [...init.producers]
+    if (init.category) filters.category = [...init.category]
+  }
 
-const data = await api.getAdminFilter({ params })
-        availabilityOptions.value = data['Доступність'] || []
-
-        const sz = data['Розмір'] || { min: '0', max: '150' }
-        sizeOptions.min = +sz.min
-        sizeOptions.max = +sz.max
-
-        if (!props.initialFilters.size ||
-            (props.initialFilters.size[0] === 0 && props.initialFilters.size[1] === 100)) {
-          filters.size = [+sz.min, +sz.max]
-        }
-
-        const wt = data['Вага'] || { min: '0', max: '1000' }
-        weightOptions.min = +wt.min
-        weightOptions.max = +wt.max
-
-        const pr = data['Ціна'] || { min: '0', max: '10000' }
-        priceOptions.min = +pr.min
-        priceOptions.max = +pr.max
-
-        colorOptions.value = data['Колір'] || []
-        beadTypeOptions.value = data['Тип бісеру'] || []
-        beadProducerOptions.value = data['Виробник бісеру'] || []
-        categoryOptions.value = data['Категорія'] || []
-
-        applyInitialFilters()
-      } catch (e) {
-        console.error('Помилка завантаження фільтрів:', e)
-      } finally {
-        loading.value = false
+  const loadFilters = async () => {
+    try {
+      const params = {
+        currency: selectedCurrency.value.toLowerCase()
       }
+      if (props.categoryId) params.category_id = props.categoryId
+
+      const data = await api.getAdminFilter({ params })
+
+      availabilityOptions.value = data['Доступність'] || []
+
+      const sz = data['Розмір'] || { min: '0', max: '150' }
+      sizeOptions.min = +sz.min
+      sizeOptions.max = +sz.max
+      if (!props.initialFilters.size ||
+          (props.initialFilters.size[0] === 0 && props.initialFilters.size[1] === 100)) {
+        filters.size = [+sz.min, +sz.max]
+      }
+
+      const wt = data['Вага'] || { min: '0', max: '1000' }
+      weightOptions.min = +wt.min
+      weightOptions.max = +wt.max
+
+      const pr = data['Ціна'] || { min: '0', max: '10000' }
+      priceOptions.min = +pr.min
+      priceOptions.max = +pr.max
+
+      colorOptions.value = data['Колір'] || []
+      beadTypeOptions.value = data['Тип бісеру'] || []
+      beadProducerOptions.value = data['Виробник бісеру'] || []
+      categoryOptions.value = data['Категорія'] || []
+
+      applyInitialFilters()
+    } catch (e) {
+      console.error('Помилка завантаження фільтрів:', e)
+    } finally {
+      loading.value = false
     }
+  }
 
     const applyFilters = () => {
       const cleaned = {}
@@ -339,6 +348,7 @@ const data = await api.getAdminFilter({ params })
     })
 
     return {
+      selectedCurrency ,
       loading,
       filters,
       availabilityOptions,

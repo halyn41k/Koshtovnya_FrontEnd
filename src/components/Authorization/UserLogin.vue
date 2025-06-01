@@ -138,50 +138,76 @@ export default {
       }
     },
     async submitLogin() {
-      if (this.emailError || this.passwordError) {
-        alert(this.$t('authorization.formError'));
-        return;
-      }
-      try {
-        const data = await api.login({ email: this.email, password: this.password });
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('user', JSON.stringify(data.user));
-        alert(this.$t('authorization.success'));
-        this.$router.push('/account');
-      } catch (error) {
-        console.error('Помилка авторизації:', error);
-        alert(error.response?.data?.message || this.$t('authorization.errorFallback'));
-      }
-    },
+  if (this.emailError || this.passwordError) {
+    alert(this.$t('authorization.formError'));
+    return;
+  }
+  try {
+    const data = await api.login({ email: this.email, password: this.password });
+
+    // 🔐 перевірка бану
+    if (data?.user?.is_banned) {
+      alert(this.$t('authorization.bannedMessage') || 'Ваш акаунт заблоковано.');
+      return;
+    }
+
+    localStorage.setItem('token', data.token);
+    localStorage.setItem('user', JSON.stringify(data.user));
+    alert(this.$t('authorization.success'));
+
+    this.$router.push('/account');
+  } catch (error) {
+    console.error('Помилка авторизації:', error);
+
+    const message = error.response?.data?.message?.toLowerCase() || '';
+
+    if (message.includes('banned')) {
+      alert(this.$t('authorization.bannedMessage') || 'Ваш акаунт заблоковано.');
+    } else {
+      alert(error.response?.data?.message || this.$t('authorization.errorFallback'));
+    }
+  }
+},
     togglePasswordVisibility() {
       this.showPassword = !this.showPassword;
     },
   },
+  
   mounted() {
-    document.title = this.$t('authorization.title');
-    const query = new URLSearchParams(window.location.search);
-    const token = query.get('token');
-    const userJson = query.get('user');
+  localStorage.removeItem('token'); // очистка при відкритті логіну
 
-    if (token && userJson) {
-      try {
-        const user = JSON.parse(decodeURIComponent(userJson));
-        localStorage.setItem('token', token);
-        localStorage.setItem('user', JSON.stringify(user));
+  document.title = this.$t('authorization.titleLogin');
+  const query = new URLSearchParams(window.location.search);
+  const token = query.get('token');
+  const userJson = query.get('user');
 
-        const role = user?.role;
-        if (['admin', 'superadmin', 'manager'].includes(role)) {
-          this.$router.push('/admin');
-        } else {
-          this.$router.push('/account');
-        }
-      } catch (e) {
-        console.error('❌ Помилка парсингу user:', e);
-        alert(this.$t('authorization.googleError'));
+  if (token && userJson) {
+    try {
+      const user = JSON.parse(decodeURIComponent(userJson));
+
+      if (user?.is_banned) {
+        alert(this.$t('authorization.bannedMessage') || 'Ваш акаунт заблоковано.');
         this.$router.replace('/login');
+        return;
       }
+
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(user));
+
+      const role = user?.role;
+      if (['admin', 'superadmin', 'manager'].includes(role)) {
+        this.$router.push('/admin');
+      } else {
+        this.$router.push('/account');
+      }
+    } catch (e) {
+      console.error('❌ Помилка парсингу user:', e);
+      alert(this.$t('authorization.googleError'));
+      this.$router.replace('/login');
     }
-  },
+  }
+}
+
 };
 </script>
 
