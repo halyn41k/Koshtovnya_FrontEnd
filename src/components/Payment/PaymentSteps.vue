@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col font-montserrat text-[14px] bg-white/80 rounded-lg shadow-md p-6 transition-all">
+  <div class="flex flex-col font-montserrat text-[14px] bg-white dark:bg-gray-900/80 rounded-lg shadow-md p-6 transition-all">
     <!-- Кроки оформлення -->
     <section class="mb-5">
       <div class="font-bold text-[20px] leading-[1.3] text-gray-400">

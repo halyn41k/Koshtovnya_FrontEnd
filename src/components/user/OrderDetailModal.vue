@@ -4,7 +4,7 @@
     @click.self="closeModal"
   >
     <div
-      class="bg-white p-6 sm:p-8 rounded-xl shadow-lg w-full max-w-lg relative font-[Montserrat] text-gray-800"
+      class="bg-white dark:bg-gray-900 p-6 sm:p-8 rounded-xl shadow-lg w-full max-w-lg relative font-[Montserrat] text-gray-800"
     >
       <h3 class="text-2xl font-semibold text-[#6B1F1F] mb-4">
         Деталі замовлення №{{ order.id }}
@@ -37,7 +37,7 @@
             </h4>
             <h4
               v-else
-              class="text-lg italic text-red-600"
+              class="text-lg italic text-red-600 dark:text-gray-100"
             >
               Товар видалено
             </h4>

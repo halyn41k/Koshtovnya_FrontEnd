@@ -19,5 +19,5 @@ export function useDarkMode() {
     document.documentElement.classList.remove('dark')
   }
 
-  return { isDark, toggleDarkMode }
+  return { isDark, toggleDarkMode, applyTheme }
 }

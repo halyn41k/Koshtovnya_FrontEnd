@@ -1,9 +1,9 @@
 <template>
-  <article class="relative flex bg-white rounded-3xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 font-montserrat">
+  <article class="relative flex bg-white dark:bg-gray-900 rounded-3xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 font-montserrat">
     <!-- Велике X у кутку -->
     <button
       @click="remove"
-      class="absolute top-2 right-2 text-2xl text-gray-500 hover:text-red-600 hover:bg-red-100 rounded-full transition-all duration-200 w-8 h-8 flex items-center justify-center"
+      class="absolute top-2 right-2 text-2xl text-gray-500 hover:text-red-600 dark:text-gray-100 hover:bg-red-100 rounded-full transition-all duration-200 w-8 h-8 flex items-center justify-center"
   :aria-label="$t('cart.removeItem')"
     >
       ×
@@ -21,7 +21,7 @@
         <h3 class="text-xl font-semibold text-gray-900 line-clamp-2">
           {{ item.name }}
         </h3>
-        <p class="mt-1 text-lg text-red-600 font-medium">
+        <p class="mt-1 text-lg text-red-600 dark:text-gray-100 font-medium">
   {{ formatCurrencyIntl(item.price, item.currency) }}
 </p>
 
@@ -34,7 +34,7 @@
           <select
             v-model="localSize"
             @change="onSizeChange"
-            class="px-3 py-2 border border-gray-300 rounded-lg focus:ring focus:ring-opacity-50"
+            class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring focus:ring-opacity-50"
           >
             <option
               v-for="v in item.variants"
@@ -51,7 +51,7 @@
         <div class="flex items-center space-x-2">
           <label class="text-gray-700">{{ $t('cart.quantity') }}</label>
 
-          <div class="flex items-center border border-gray-300 rounded-lg overflow-hidden w-[104px] justify-between">
+          <div class="flex items-center border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden w-[104px] justify-between">
 
             <button
               @click="decrease"

@@ -21,7 +21,7 @@
           :class="['mb-16 flex flex-col lg:flex-row items-center', i % 2 === 0 ? 'lg:flex-row-reverse' : '']"
         >
           <div class="hidden lg:block lg:w-1/2"></div>
-          <div class="w-full lg:w-1/2 p-6 bg-white rounded-2xl shadow-lg">
+          <div class="w-full lg:w-1/2 p-6 bg-white dark:bg-gray-900 rounded-2xl shadow-lg">
             <span class="text-sm text-gray-500">{{ $t(`infoshop.timeline[${i}].date`) }}</span>
             <h3 class="font-kyivBlack2 text-xl mt-2 mb-4">{{ $t(`infoshop.timeline[${i}].title`) }}</h3>
             <p class="text-base text-gray-700">{{ $t(`infoshop.timeline[${i}].content`) }}</p>
@@ -68,7 +68,7 @@
               type="email"
               required
               :placeholder="$t('infoshop.emailPlaceholder')"
-              class="w-full bg-[#fafafa] border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-[#6B1F1F]"
+              class="w-full bg-[#fafafa] border border-gray-300 dark:border-gray-600 rounded p-2 focus:outline-none focus:ring-2 focus:ring-[#6B1F1F]"
             />
           </div>
           <div>
@@ -78,9 +78,9 @@
               v-model="form.message"
               required
               :placeholder="$t('infoshop.messagePlaceholder')"
-              class="w-full bg-[#fafafa] border border-gray-300 rounded p-2 h-[120px] resize-y focus:outline-none focus:ring-2 focus:ring-[#6B1F1F]"
+              class="w-full bg-[#fafafa] border border-gray-300 dark:border-gray-600 rounded p-2 h-[120px] resize-y focus:outline-none focus:ring-2 focus:ring-[#6B1F1F]"
             ></textarea>
-            <p v-if="errorMessage" class="text-red-600 text-sm mt-1">{{ $t('infoshop.errorMessageShort') }}</p>
+            <p v-if="errorMessage" class="text-red-600 dark:text-gray-100 text-sm mt-1">{{ $t('infoshop.errorMessageShort') }}</p>
           </div>
           <button
             type="submit"

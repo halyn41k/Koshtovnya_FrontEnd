@@ -35,7 +35,7 @@
               <h3 class="text-lg font-montserrat font-semibold line-clamp-2 h-12">
                 {{ product.name }}
               </h3>
-<p class="text-xl font-semibold text-red-700 mt-1">
+<p class="text-xl font-semibold text-red-700 dark:text-gray-100 mt-1">
   {{ formatCurrencyIntl(product.price, product.currency) }}
 
 </p>

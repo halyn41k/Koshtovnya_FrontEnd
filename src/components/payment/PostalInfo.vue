@@ -1,12 +1,12 @@
 <template>
-  <div class="postal-info font-montserrat text-[14px]">
+  <div class="postal-info font-montserrat text-[14px] text-black dark:text-white">
     <div class="flex flex-col gap-4 w-full max-w-md px-4 sm:px-0 sm:max-w-none">
 
 
 
       <!-- Спосіб доставки -->
       <div class="relative">
-        <label class="block mb-1 text-sm font-medium text-gray-700">Спосіб доставки:</label>
+        <label class="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">Спосіб доставки:</label>
         <Multiselect
           v-model="localData.deliveryType"
           :options="deliveryOptions || []"
@@ -17,16 +17,16 @@
           :allow-empty="false"
           @input="onDeliveryTypeChange"
         />
-        <span v-if="errors.deliveryType" class="text-red-500 text-xs">{{ errors.deliveryType }}</span>
+        <span v-if="errors.deliveryType" class="text-red-500 dark:text-gray-100 text-xs">{{ errors.deliveryType }}</span>
       </div>
 
      <!-- Місто -->
 <div v-if="localData.deliveryType && !isStorePickup">
-  <label class="block mb-1 text-sm font-medium text-gray-700">Місто:</label>
+  <label class="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">Місто:</label>
   <Combobox v-model="selectedCity" as="div" class="relative">
     <div class="relative">
       <ComboboxInput
-        class="block w-full p-2 border border-gray-300 rounded-md text-gray-900 font-normal focus:outline-none focus:ring-2 focus:ring-red-500"
+        class="block w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-900 dark:text-gray-100 font-normal focus:outline-none focus:ring-2 focus:ring-red-500"
         :class="{ 'border-red-500': errors.city }"
         @input="handleCitySearch"
         :displayValue="city => city?.city || city"
@@ -34,7 +34,7 @@
       />
       <ComboboxOptions
         v-if="citiesLocal.length"
-        class="absolute z-50 w-full mt-1 max-h-48 overflow-auto rounded bg-white border shadow-lg"
+        class="absolute z-50 w-full mt-1 max-h-48 overflow-auto rounded bg-white dark:bg-gray-800 border dark:border-gray-600 shadow-lg"
       >
         <ComboboxOption
           v-for="city in citiesLocal"
@@ -47,17 +47,17 @@
       </ComboboxOptions>
     </div>
   </Combobox>
-  <p v-if="errors.city" class="text-red-500 text-xs mt-1">{{ errors.city }}</p>
+  <p v-if="errors.city" class="text-red-500 dark:text-gray-100 text-xs mt-1">{{ errors.city }}</p>
 </div>
 
 
       <!-- Вулиця -->
       <div v-if="isCourier">
-        <label class="block mb-1 text-sm font-medium text-gray-700">Вулиця:</label>
+        <label class="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">Вулиця:</label>
         <Combobox v-model="selectedStreet" as="div" class="relative">
           <div class="relative">
             <ComboboxInput
-  class="block w-full p-2 border border-gray-300 rounded-md text-gray-900 font-normal focus:outline-none focus:ring-2 focus:ring-red-500"
+  class="block w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-900 dark:text-gray-100 font-normal focus:outline-none focus:ring-2 focus:ring-red-500"
               :class="{ 'border-red-500': errors.street }"
               @input="handleStreetSearch"
 
@@ -65,7 +65,7 @@
               placeholder="Введіть вулицю"
             />
             <ComboboxOptions v-if="streetsLocal.length"
-              class="absolute z-50 w-full mt-1 max-h-48 ovehandleStreetSearchrflow-auto rounded bg-white border shadow-lg">
+              class="absolute z-50 w-full mt-1 max-h-48 ovehandleStreetSearchrflow-auto rounded bg-white dark:bg-gray-800 border dark:border-gray-600 shadow-lg">
               <ComboboxOption v-for="(street, idx) in streetsLocal" :key="idx" :value="street"
                 class="px-4 py-2 hover:bg-gray-100 cursor-pointer">
                 {{ street.Name || street.street }}
@@ -73,25 +73,25 @@
             </ComboboxOptions>
           </div>
         </Combobox>
-        <p v-if="errors.street" class="text-red-500 text-xs mt-1">{{ errors.street }}</p>
+        <p v-if="errors.street" class="text-red-500 dark:text-gray-100 text-xs mt-1">{{ errors.street }}</p>
 
         <div class="mt-4">
-          <label class="block mb-1 text-sm font-medium text-gray-700">Номер будинку:</label>
+          <label class="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">Номер будинку:</label>
           <input   v-model="houseNumberProxy"
  
 
-class="block w-full p-2 border border-gray-300 rounded-md text-gray-900 font-normal focus:outline-none focus:ring-2 focus:ring-red-500"
+class="block w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-900 dark:text-gray-100 font-normal focus:outline-none focus:ring-2 focus:ring-red-500"
             :class="{ 'border-red-500': errors.houseNumber }"
             @input="updateData"
             placeholder="Номер будинку"
           />
-          <p v-if="errors.houseNumber" class="text-red-500 text-xs mt-1">{{ errors.houseNumber }}</p>
+          <p v-if="errors.houseNumber" class="text-red-500 dark:text-gray-100 text-xs mt-1">{{ errors.houseNumber }}</p>
         </div>
       </div>
 
       <!-- Відділення / Поштомат -->
       <div v-if="showWarehouse">
-        <label class="block mb-1 text-sm font-medium text-gray-700">{{ isPostomat ? 'Поштомат' : 'Відділення' }}:</label>
+        <label class="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">{{ isPostomat ? 'Поштомат' : 'Відділення' }}:</label>
         <Multiselect
           v-model="localData.warehouse"
           :options="warehousesLocal || []"
@@ -102,11 +102,11 @@ class="block w-full p-2 border border-gray-300 rounded-md text-gray-900 font-nor
           :allow-empty="false"
           @input="updateData"
         />
-        <span v-if="errors.warehouse" class="text-red-500 text-xs mt-1">{{ errors.warehouse }}</span>
+        <span v-if="errors.warehouse" class="text-red-500 dark:text-gray-100 text-xs mt-1">{{ errors.warehouse }}</span>
       </div>
 
       <!-- Магазин -->
-      <div v-if="isStorePickup" class="text-sm text-gray-800">
+      <div v-if="isStorePickup" class="text-sm text-gray-800 dark:text-gray-200">
         <p><strong>Місто:</strong> Коломия</p>
         <p><strong>Адреса:</strong> вул. Степана Бандери 22</p>
       </div>
@@ -116,7 +116,7 @@ class="block w-full p-2 border border-gray-300 rounded-md text-gray-900 font-nor
 
 
 <script>
-import axios from 'axios';
+import api from '@/services/api';
 import Multiselect from 'vue-multiselect';
 import { Combobox, ComboboxInput, ComboboxOptions, ComboboxOption } from '@headlessui/vue'
 
@@ -307,9 +307,7 @@ handleTempAddress(address) {
     async fetchDeliveryTypes() {
       const token = localStorage.getItem('token');
       try {
-        const { data } = await axios.get('https://koshtovnya.api-dev.bmax-edu.website/api/delivery-types', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const data = await api.getDeliveryTypes();
         const result = [];
         for (const type in data.data) {
           data.data[type].forEach(option => {
@@ -362,13 +360,10 @@ handleTempAddress(address) {
     async fetchCities() {
       const token = localStorage.getItem('token');
       try {
-        const { data } = await axios.get(
-          'https://koshtovnya.api-dev.bmax-edu.website/api/nova-poshta/cities',
-          { headers: { Authorization: `Bearer ${token}` }, params: {
-            city: this.localData.city,
-            delivery_type: this.localData.deliveryType?.name || ''
-          } }
-        );
+        const data = await api.getNPtcities({
+          city: this.localData.city,
+          delivery_type: this.localData.deliveryType?.name || ''
+        });
         this.citiesLocal = data.success && Array.isArray(data.data) ? data.data : [];
       } catch (e) { console.error('Помилка отримання міст', e); }
     },
@@ -381,10 +376,7 @@ handleTempAddress(address) {
       const token = localStorage.getItem('token');
       if (!token || this.localData.streetSearch.length < 3) return;
       try {
-        const { data } = await axios.get(
-          'https://koshtovnya.api-dev.bmax-edu.website/api/nova-poshta/streets',
-          { headers: { Authorization: `Bearer ${token}` }, params: { Ref: this.localData.cityRef, street: this.localData.streetSearch } }
-        );
+        const data = await api.getNPtstreets({ Ref: this.localData.cityRef, street: this.localData.streetSearch });
         this.streetsLocal = Array.isArray(data.data) ? data.data : [];
       } catch (e) { console.error('Помилка отримання вулиць', e); }
     },
@@ -414,16 +406,13 @@ handleTempAddress(address) {
     async fetchWarehouses() {
       const token = localStorage.getItem('token');
       try {
-        const { status, data } = await axios.get(
-          'https://koshtovnya.api-dev.bmax-edu.website/api/nova-poshta/ware-houses',
-          { headers: { Authorization: `Bearer ${token}`}, params: {
-            city: this.localData.city,
-            Ref: this.localData.cityRef,
-            delivery_type: this.localData.deliveryType?.name || ''
-          } }
-        );
-        this.warehousesLocal = status === 200 && Array.isArray(data.data)
-          ? data.data.map((item,i) => ({ id: i+1, name: item.warehouse }))
+        const { status, data } = await api.getNPtwarehouses({
+          city: this.localData.city,
+          Ref: this.localData.cityRef,
+          delivery_type: this.localData.deliveryType?.name || ''
+        });
+        this.warehousesLocal = status === 200 && Array.isArray(data)
+          ? data.map((item,i) => ({ id: i+1, name: item.warehouse }))
           : [];
       } catch (e) { console.error('Помилка отримання відділень', e); }
     }

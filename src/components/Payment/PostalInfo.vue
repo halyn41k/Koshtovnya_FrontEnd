@@ -17,7 +17,7 @@
           :allow-empty="false"
           @input="onDeliveryTypeChange"
         />
-        <span v-if="errors.deliveryType" class="text-red-500 text-xs">{{ errors.deliveryType }}</span>
+        <span v-if="errors.deliveryType" class="text-red-500 dark:text-gray-100 text-xs">{{ errors.deliveryType }}</span>
       </div>
 
      <!-- Місто -->
@@ -26,7 +26,7 @@
   <Combobox v-model="selectedCity" as="div" class="relative">
     <div class="relative">
       <ComboboxInput
-        class="block w-full p-2 border border-gray-300 rounded-md text-gray-900 font-normal focus:outline-none focus:ring-2 focus:ring-red-500"
+        class="block w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-900 font-normal focus:outline-none focus:ring-2 focus:ring-red-500"
         :class="{ 'border-red-500': errors.city }"
         @input="handleCitySearch"
         :displayValue="city => city?.city || city"
@@ -34,7 +34,7 @@
       />
       <ComboboxOptions
         v-if="citiesLocal.length"
-        class="absolute z-50 w-full mt-1 max-h-48 overflow-auto rounded bg-white border shadow-lg"
+        class="absolute z-50 w-full mt-1 max-h-48 overflow-auto rounded bg-white dark:bg-gray-900 border shadow-lg"
       >
         <ComboboxOption
           v-for="city in citiesLocal"
@@ -47,7 +47,7 @@
       </ComboboxOptions>
     </div>
   </Combobox>
-  <p v-if="errors.city" class="text-red-500 text-xs mt-1">{{ errors.city }}</p>
+  <p v-if="errors.city" class="text-red-500 dark:text-gray-100 text-xs mt-1">{{ errors.city }}</p>
 </div>
 
 
@@ -57,7 +57,7 @@
         <Combobox v-model="selectedStreet" as="div" class="relative">
           <div class="relative">
             <ComboboxInput
-  class="block w-full p-2 border border-gray-300 rounded-md text-gray-900 font-normal focus:outline-none focus:ring-2 focus:ring-red-500"
+  class="block w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-900 font-normal focus:outline-none focus:ring-2 focus:ring-red-500"
               :class="{ 'border-red-500': errors.street }"
               @input="handleStreetSearch"
 
@@ -65,7 +65,7 @@
               placeholder="Введіть вулицю"
             />
             <ComboboxOptions v-if="streetsLocal.length"
-              class="absolute z-50 w-full mt-1 max-h-48 ovehandleStreetSearchrflow-auto rounded bg-white border shadow-lg">
+              class="absolute z-50 w-full mt-1 max-h-48 ovehandleStreetSearchrflow-auto rounded bg-white dark:bg-gray-900 border shadow-lg">
               <ComboboxOption v-for="(street, idx) in streetsLocal" :key="idx" :value="street"
                 class="px-4 py-2 hover:bg-gray-100 cursor-pointer">
                 {{ street.Name || street.street }}
@@ -73,19 +73,19 @@
             </ComboboxOptions>
           </div>
         </Combobox>
-        <p v-if="errors.street" class="text-red-500 text-xs mt-1">{{ errors.street }}</p>
+        <p v-if="errors.street" class="text-red-500 dark:text-gray-100 text-xs mt-1">{{ errors.street }}</p>
 
         <div class="mt-4">
           <label class="block mb-1 text-sm font-medium text-gray-700">Номер будинку:</label>
           <input   v-model="houseNumberProxy"
  
 
-class="block w-full p-2 border border-gray-300 rounded-md text-gray-900 font-normal focus:outline-none focus:ring-2 focus:ring-red-500"
+class="block w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-900 font-normal focus:outline-none focus:ring-2 focus:ring-red-500"
             :class="{ 'border-red-500': errors.houseNumber }"
             @input="updateData"
             placeholder="Номер будинку"
           />
-          <p v-if="errors.houseNumber" class="text-red-500 text-xs mt-1">{{ errors.houseNumber }}</p>
+          <p v-if="errors.houseNumber" class="text-red-500 dark:text-gray-100 text-xs mt-1">{{ errors.houseNumber }}</p>
         </div>
       </div>
 
@@ -102,7 +102,7 @@ class="block w-full p-2 border border-gray-300 rounded-md text-gray-900 font-nor
           :allow-empty="false"
           @input="updateData"
         />
-        <span v-if="errors.warehouse" class="text-red-500 text-xs mt-1">{{ errors.warehouse }}</span>
+        <span v-if="errors.warehouse" class="text-red-500 dark:text-gray-100 text-xs mt-1">{{ errors.warehouse }}</span>
       </div>
 
       <!-- Магазин -->

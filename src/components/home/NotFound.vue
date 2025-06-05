@@ -1,5 +1,5 @@
 <template>
-  <div class="relative min-h-screen flex flex-col items-center justify-center bg-white overflow-hidden font-montserrat">
+  <div class="relative min-h-screen flex flex-col items-center justify-center bg-white dark:bg-gray-900 overflow-hidden font-montserrat">
     <!-- Орнаменти -->
     <div class="absolute inset-0">
       <div

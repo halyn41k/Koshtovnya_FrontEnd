@@ -31,7 +31,7 @@
             <li>
               <router-link
                 to="/aboutus"
-                class="relative flex items-center space-x-2 text-base hover:text-black-700 transition-colors
+                class="relative flex items-center space-x-2 text-base hover:text-black dark:text-white-700 transition-colors
                        before:content-[''] before:absolute before:left-0 before:right-0 before:bottom-0 before:h-[2px] before:bg-[#090909] before:scale-x-0 hover:before:scale-x-100 before:origin-left before:transition-transform before:duration-300"
               >
                 <img src="@/assets/icons/arrow_right.svg" alt="arrow" class="w-4 h-4" />

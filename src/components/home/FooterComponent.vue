@@ -31,7 +31,7 @@
             <li>
               <router-link
                 to="/aboutus"
-                class="relative flex items-center space-x-2 text-base hover:text-black-700 transition-colors
+                class="relative flex items-center space-x-2 text-base hover:text-black dark:text-white-700 transition-colors
                        before:content-[''] before:absolute before:left-0 before:right-0 before:bottom-0 before:h-[2px] before:bg-[#090909] before:scale-x-0 hover:before:scale-x-100 before:origin-left before:transition-transform before:duration-300"
               >
                 <img src="@/assets/icons/arrow_right.svg" alt="arrow" class="w-4 h-4" />
@@ -73,12 +73,12 @@
               <img src="@/assets/icons/location.svg" alt="address" class="w-5 h-5 mt-1" />
               <p>{{ siteSettings.footer_address_info }}</p>
             </div>
-            <div class="border-t border-gray-300"></div>
+            <div class="border-t border-gray-300 dark:border-gray-600"></div>
             <div class="flex items-center space-x-2">
               <img src="@/assets/icons/phone.svg" alt="phone" class="w-5 h-5" />
               <p>{{ siteSettings.footer_phone_number }}</p>
             </div>
-            <div class="border-t border-gray-300"></div>
+            <div class="border-t border-gray-300 dark:border-gray-600"></div>
             <div class="flex items-center space-x-2">
               <img src="@/assets/icons/mail.svg" alt="email" class="w-5 h-5" />
               <p>{{ siteSettings.footer_email_info }}</p>

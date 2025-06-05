@@ -23,7 +23,7 @@
 
       <!-- Sidebar -->
       <!-- Mobile-friendly sidebar -->
-      <aside class="w-full lg:w-64 border-b lg:border-b-0 lg:border-r border-gray-300 p-4">
+      <aside class="w-full lg:w-64 border-b lg:border-b-0 lg:border-r border-gray-300 dark:border-gray-600 p-4">
   <ul class="flex flex-col divide-y divide-gray-300">
     <li
   v-for="(item, i) in menuItems"
@@ -99,7 +99,7 @@
       v-if="message"
       class="fixed top-4 right-4 px-4 py-2 rounded shadow text-sm font-medium"
       :class="messageType === 'error'
-        ? 'bg-red-100 text-red-700'
+        ? 'bg-red-100 text-red-700 dark:text-gray-100'
         : 'bg-green-100 text-green-700'"
     >
       {{ message }}

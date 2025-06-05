@@ -79,7 +79,7 @@
   <router-link
     v-if="isAdminOrManager"
     to="/admin"
-    class="w-full sm:w-[240px] h-[40px] border border-[#6B1F1F] text-black text-sm sm:text-base font-semibold rounded-lg flex items-center justify-center hover:bg-[#f9eaea] transition-colors"
+    class="w-full sm:w-[240px] h-[40px] border border-[#6B1F1F] text-black dark:text-white text-sm sm:text-base font-semibold rounded-lg flex items-center justify-center hover:bg-[#f9eaea] transition-colors"
   >
     {{ $t(role === 'manager' ? 'user.goToManagerPanel' : 'user.goToAdminPanel') }}
 

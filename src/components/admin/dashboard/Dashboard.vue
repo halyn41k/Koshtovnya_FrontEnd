@@ -122,7 +122,7 @@
 
 <script setup>
 import { ref, onMounted, watch, computed } from 'vue'
-import axios from 'axios'
+import api from '@/services/api'
 import OrderChart from '@/components/admin/dashboard/OrderChart.vue'
 import VueDatePicker from '@vuepic/vue-datepicker'
 import '@vuepic/vue-datepicker/dist/main.css'
@@ -177,14 +177,13 @@ const getParams = () => {
 
 const loadData = async () => {
   try {
-    const headers = { Authorization: `Bearer ${localStorage.getItem('token')}` }
     const params = getParams()
 
     const [summaryRes, chartRes, popRes, latestRes] = await Promise.all([
-      axios.get('https://koshtovnya.api-dev.bmax-edu.website/api/admin/stats/summary', { params, headers }),
-      axios.get('https://koshtovnya.api-dev.bmax-edu.website/api/admin/stats/order-dynamics', { params, headers }),
-      axios.get('https://koshtovnya.api-dev.bmax-edu.website/api/admin/stats/popular-products', { params, headers }),
-      axios.get('https://koshtovnya.api-dev.bmax-edu.website/api/admin/stats/latest-orders', { headers })
+      api.getAdminStatsSummary(params),
+      api.getAdminStatsOrderDynamics(params),
+      api.getAdminStatsPopularProducts(params),
+      api.getAdminStatsLatestOrders()
     ])
 
     summary.value = {

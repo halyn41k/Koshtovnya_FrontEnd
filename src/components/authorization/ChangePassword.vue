@@ -11,7 +11,7 @@
     </header>
 
     <!-- Основний контейнер форми -->
-    <main class="relative z-20 flex flex-col items-center justify-center w-full md:max-w-xl mx-auto px-6 py-8 bg-white bg-opacity-90 backdrop-blur-md border border-gray-200 rounded-2xl shadow-md">
+    <main class="relative z-20 flex flex-col items-center justify-center w-full md:max-w-xl mx-auto px-6 py-8 bg-white dark:bg-gray-900 bg-opacity-90 backdrop-blur-md border border-gray-200 rounded-2xl shadow-md">
       <form @submit.prevent="submitPasswordChange" class="w-full space-y-5">
         <!-- Поточний пароль -->
         <div class="flex flex-col">
@@ -23,7 +23,7 @@
               v-model="currentPassword"
               :placeholder="$t('authorization.changePassword.placeholders.current')"
               required
-              class="w-full h-12 rounded-lg border border-gray-300 bg-white px-4 text-gray-800 placeholder-gray-400 hover:shadow-md focus:outline-none focus:border-[#6B1F1F] focus:shadow-lg transition-all duration-200"
+              class="w-full h-12 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-4 text-gray-800 placeholder-gray-400 hover:shadow-md focus:outline-none focus:border-[#6B1F1F] focus:shadow-lg transition-all duration-200"
             />
             <button
               type="button"
@@ -49,7 +49,7 @@
               v-model="newPassword"
               :placeholder="$t('authorization.changePassword.placeholders.new')"
               required
-              class="w-full h-12 rounded-lg border border-gray-300 bg-white px-4 text-gray-800 placeholder-gray-400 hover:shadow-md focus:outline-none focus:border-[#6B1F1F] focus:shadow-lg transition-all duration-200"
+              class="w-full h-12 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-4 text-gray-800 placeholder-gray-400 hover:shadow-md focus:outline-none focus:border-[#6B1F1F] focus:shadow-lg transition-all duration-200"
             />
             <button
               type="button"
@@ -75,7 +75,7 @@
               v-model="confirmPassword"
               :placeholder="$t('authorization.changePassword.placeholders.confirm')"
               required
-              class="w-full h-12 rounded-lg border border-gray-300 bg-white px-4 text-gray-800 placeholder-gray-400 hover:shadow-md focus:outline-none focus:border-[#6B1F1F] focus:shadow-lg transition-all duration-200"
+              class="w-full h-12 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-4 text-gray-800 placeholder-gray-400 hover:shadow-md focus:outline-none focus:border-[#6B1F1F] focus:shadow-lg transition-all duration-200"
             />
             <button
               type="button"
@@ -108,6 +108,7 @@
 <script>
 import eyeOpenIcon from "@/assets/eye-hide-svgrepo-com.svg";
 import eyeClosedIcon from "@/assets/eye-1-svgrepo-com.svg";
+import api from '@/services/api';
 
 export default {
   name: 'PasswordChangeComponent',
@@ -134,19 +135,12 @@ export default {
         return;
       }
       try {
-        const response = await fetch('https://koshtovnya.api-dev.bmax-edu.website/api/change-password', {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${localStorage.getItem("token")}`
-          },
-          body: JSON.stringify({
-            current_password: this.currentPassword,
-            new_password: this.newPassword,
-            new_password_confirmation: this.confirmPassword
-          })
+        const response = await api.changePassword({
+          current_password: this.currentPassword,
+          new_password: this.newPassword,
+          new_password_confirmation: this.confirmPassword
         });
-        if (response.ok) {
+        if (response) {
           alert('Пароль успішно змінено!');
           this.$router.push('/account');
         } else {

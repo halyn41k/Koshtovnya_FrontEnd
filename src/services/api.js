@@ -220,6 +220,27 @@ export default {
     return data;
   },
 
+  sendResetCode: async email => {
+    const { data } = await apiClient.post("/api/send-code", { email });
+    return data;
+  },
+  verifyResetCode: async payload => {
+    const { data } = await apiClient.post("/api/verify-reset-code", payload);
+    return data;
+  },
+  resetPassword: async payload => {
+    const { data } = await apiClient.patch("/api/reset-password", payload);
+    return data;
+  },
+  verifyAccount: async payload => {
+    const { data } = await apiClient.post("/api/verify", payload);
+    return data;
+  },
+  resendVerificationCode: async payload => {
+    const { data } = await apiClient.post("/api/resend-code", payload);
+    return data;
+  },
+
   // User Info & Addresses
   getUserAddress: async () => {
     const { data } = await apiClient.get('/api/user-address');
@@ -273,6 +294,10 @@ export default {
   },
   getOrder: async id => {
     const { data } = await apiClient.get(`/api/orders/${id}`);
+    return data;
+  },
+  cancelOrder: async id => {
+    const { data } = await apiClient.post(`/api/orders/${id}/cancel`);
     return data;
   },
   createOrder: async params => {
@@ -356,6 +381,11 @@ getAdminFilter: async (config = {}) => {
     toast.success('Відповідь на відгук додана');
     return data;
   },
+  getTopLatestReviews: async () => {
+    const { data } = await apiClient.get("/api/reviews/top-latest");
+    return data;
+  },
+
 
   // Delivery types & Profile
   getDeliveryTypes: async () => {
@@ -440,6 +470,24 @@ getAdminFilter: async (config = {}) => {
     toast.success('Адмін: налаштування сайту оновлено');
     return data;
   },
+  // Admin statistics
+  getAdminStatsSummary: async params => {
+    const { data } = await apiClient.get("/api/admin/stats/summary", { params });
+    return data;
+  },
+  getAdminStatsOrderDynamics: async params => {
+    const { data } = await apiClient.get("/api/admin/stats/order-dynamics", { params });
+    return data;
+  },
+  getAdminStatsPopularProducts: async params => {
+    const { data } = await apiClient.get("/api/admin/stats/popular-products", { params });
+    return data;
+  },
+  getAdminStatsLatestOrders: async params => {
+    const { data } = await apiClient.get("/api/admin/stats/latest-orders", { params });
+    return data;
+  },
+
 
   // Categories
   getCategories: async () => {

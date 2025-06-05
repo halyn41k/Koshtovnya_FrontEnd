@@ -6,7 +6,7 @@
     </h2>
 
     <div class="flex justify-between items-baseline mb-6">
-<span class="text-xl font-semibold text-red-700">{{ formatCurrencyIntl(totalSum, detectedCurrency) }}</span>
+<span class="text-xl font-semibold text-red-700 dark:text-gray-100">{{ formatCurrencyIntl(totalSum, detectedCurrency) }}</span>
     </div>
 
     <button

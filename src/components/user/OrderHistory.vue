@@ -14,7 +14,7 @@
       <div
         v-for="order in orders"
         :key="order.id"
-        class="relative bg-white p-4 sm:p-6 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-200 flex flex-col gap-4"
+        class="relative bg-white dark:bg-gray-900 p-4 sm:p-6 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-200 flex flex-col gap-4"
       >
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
           <div class="flex items-center gap-2">
@@ -43,7 +43,7 @@
               <h3 v-if="!item.is_deleted" class="text-base sm:text-lg font-medium text-gray-800 truncate">
                 {{ item.title }}
               </h3>
-              <h3 v-else class="text-base sm:text-lg text-red-600">
+              <h3 v-else class="text-base sm:text-lg text-red-600 dark:text-gray-100">
                 {{ $t('user.productDeleted') }}
               </h3>
               <p class="text-sm text-gray-600 whitespace-nowrap">
@@ -89,7 +89,7 @@
 
 
 <script>
-import axios from "axios";
+import api from '@/services/api';
 import Loader from '../home/Loader.vue';
 import OrderDetailModal from "./OrderDetailModal.vue";
 import { useToast } from 'vue-toastification';
@@ -115,9 +115,7 @@ export default {
     return;
   }
   try {
-    const { data } = await axios.get("https://koshtovnya.api-dev.bmax-edu.website/api/orders", {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const data = await api.getOrders();
     this.orders = (data.orders || []).map(order => ({
       id: order.id,
       order_date: order.order_date,
@@ -155,9 +153,7 @@ export default {
     async cancelOrder(id) {
       if (!confirm("Ви дійсно хочете скасувати це замовлення?")) return;
       try {
-        await axios.post(`https://koshtovnya.api-dev.bmax-edu.website/api/orders/${id}/cancel`, null, {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        });
+        await api.cancelOrder(id);
         toast.success("Замовлення успішно скасовано");
         this.fetchOrders();
       } catch (e) {
