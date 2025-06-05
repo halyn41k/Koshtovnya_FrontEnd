@@ -2,24 +2,22 @@
 import { ref } from 'vue'
 
 const stored = localStorage.getItem('theme')
-const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-const isDark = ref(stored ? stored === 'dark' : prefersDark)
-
-const apply = (val) => {
-  document.documentElement.classList.toggle('dark', val)
-}
-
-// apply on load
-apply(isDark.value)
+const initial = stored ? stored === 'dark' : document.documentElement.classList.contains('dark')
+const isDark = ref(initial)
 
 export function useDarkMode() {
   const toggleDarkMode = () => {
-    isDark.value = !isDark.value
-    apply(isDark.value)
+    document.documentElement.classList.toggle('dark')
+    isDark.value = document.documentElement.classList.contains('dark')
     localStorage.setItem('theme', isDark.value ? 'dark' : 'light')
   }
 
-  const applyTheme = () => apply(isDark.value)
+  // apply initial state
+  if (isDark.value) {
+    document.documentElement.classList.add('dark')
+  } else {
+    document.documentElement.classList.remove('dark')
+  }
 
   return { isDark, toggleDarkMode, applyTheme }
 }
