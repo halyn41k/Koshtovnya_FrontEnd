@@ -8,16 +8,14 @@
   <div class="flex items-center gap-3 flex-wrap">
     <div class="flex flex-col">
       <label class="text-sm text-gray-600 mb-1 ml-1">Період</label>
-      <select
+      <Multiselect
         v-model="selectedPeriod"
-        @change="loadData"
-        class="border border-gray-300 rounded px-3 py-2 focus:ring-[#6B1F1F] focus:outline-none"
-      >
-        <option value="day">За сьогодні</option>
-        <option value="week">За тиждень</option>
-        <option value="month">За місяць</option>
-        <option value="year">За рік</option>
-      </select>
+        :options="periodOptions"
+        :reduce="opt => opt.value"
+        label="label"
+        class="custom-multiselect w-40"
+        @input="loadData"
+      />
     </div>
 
     <div class="flex flex-col">
@@ -129,6 +127,14 @@ import OrderChart from '@/components/admin/dashboard/OrderChart.vue'
 import VueDatePicker from '@vuepic/vue-datepicker'
 import '@vuepic/vue-datepicker/dist/main.css'
 import { uk } from 'date-fns/locale'
+import Multiselect from 'vue-multiselect'
+
+const periodOptions = [
+  { value: 'day', label: 'За сьогодні' },
+  { value: 'week', label: 'За тиждень' },
+  { value: 'month', label: 'За місяць' },
+  { value: 'year', label: 'За рік' }
+]
 
 
 const selectedPeriod = ref('month')
@@ -216,6 +222,26 @@ onMounted(loadData)
 
 .animate-fade-in-up {
   animation: fadeInUp 0.5s ease-out both;
+}
+
+.custom-multiselect .multiselect__option--highlight::after {
+  display: none !important;
+}
+
+.multiselect__option--highlight {
+  background: #F3F4F6 !important;
+  color: #6B1F1F !important;
+}
+.multiselect__option--selected {
+  font-weight: 600 !important;
+}
+.multiselect__option--selected::after {
+  content: 'Обрано' !important;
+  color: #9CA3AF;
+  font-size: 0.75rem;
+  font-weight: 500;
+  float: right;
+  margin-right: 1rem;
 }
 
 
