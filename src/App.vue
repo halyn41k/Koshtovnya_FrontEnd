@@ -1,5 +1,5 @@
 <template>
-  <div id="app" class="relative">
+  <div id="app" class="relative bg-white dark:bg-gray-900 text-black dark:text-white min-h-screen">
     <!-- Хедер -->
     <HeaderComponent v-if="!isAdminRoute" />
 
@@ -26,6 +26,9 @@
 <script>
 import HeaderComponent from '@/components/home/HeaderComponent.vue';
 import FooterComponent from '@/components/home/FooterComponent.vue';
+import { useDarkMode } from '@/composables/useDarkMode';
+
+const { applyTheme } = useDarkMode();
 
 export default {
   name: 'App',
@@ -46,6 +49,10 @@ export default {
   mounted() {
     window.addEventListener('scroll', this.handleScroll);
 
+    if (!this.isAdminRoute) {
+      applyTheme();
+    }
+
     // Автоматичний скрол вгору при переході (запасний варіант)
     this.$router.afterEach(() => {
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -65,6 +72,12 @@ export default {
     '$route'(to, from) {
       // очищення body класів (якщо раптом щось залишилось після модалок)
       document.body.classList.remove('overflow-hidden');
+
+      if (to.path.startsWith('/admin')) {
+        document.documentElement.classList.remove('dark');
+      } else {
+        applyTheme();
+      }
     }
   },
   methods: {

@@ -1,5 +1,5 @@
 // store/modules/cart.js
-import axios from 'axios';
+import api from '@/services/api';
 
 export default {
   namespaced: true,
@@ -40,11 +40,8 @@ export default {
       }
 
       try {
-        const response = await axios.get('https://koshtovnya.api-dev.bmax-edu.website/api/cart', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-
-        const cartData = response.data.data || [];
+        const data = await api.getCart();
+        const cartData = data.data || [];
         commit('setCartItems', cartData);
         commit('setLoading', false);
       } catch (error) {
@@ -71,23 +68,17 @@ export default {
         : 'WarehouseWarehouse';
 
       try {
-        const response = await axios.get(
-          'https://koshtovnya.api-dev.bmax-edu.website/api/nova-poshta/delivery/cost',
-          {
-            headers: { Authorization: `Bearer ${token}` },
-            params: {
-              CityRecipient: cityRef,
-              ServiceType: serviceType,
-              product_ids: productIds
-            }
-          }
-        );
+        const data = await api.getNPtdeliveryCost({
+          CityRecipient: cityRef,
+          ServiceType: serviceType,
+          product_ids: productIds
+        });
 
-        if (response.data?.deliveryCost !== undefined) {
-          commit('setDeliveryCost', response.data.deliveryCost);
+        if (data?.deliveryCost !== undefined) {
+          commit('setDeliveryCost', data.deliveryCost);
           commit('updateTotalAmount');
         } else {
-          console.error('Невірна відповідь API розрахунку доставки', response.data);
+          console.error('Невірна відповідь API розрахунку доставки', data);
         }
       } catch (error) {
         console.error('Помилка розрахунку вартості доставки', error);

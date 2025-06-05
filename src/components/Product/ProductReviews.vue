@@ -2,9 +2,9 @@
   <section class="py-8 font-montserrat">
     <!-- Заголовок -->
     <div class="flex items-center my-6">
-      <hr class="flex-grow border-t-2 border-gray-300" />
+      <hr class="flex-grow border-t-2 border-gray-300 dark:border-gray-600" />
       <h2 class="mx-4 text-2xl font-bold text-gray-900">Відгуки</h2>
-      <hr class="flex-grow border-t-2 border-gray-300" />
+      <hr class="flex-grow border-t-2 border-gray-300 dark:border-gray-600" />
     </div>
 
     <!-- Загальна оцінка -->
@@ -97,7 +97,7 @@
         v-model="newReview.comment"
         placeholder="Напишіть відгук..."
         required
-        class="w-full h-32 p-2 border border-gray-300 rounded focus:outline-none focus:ring font-montserrat"
+        class="w-full h-32 p-2 border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:ring font-montserrat"
       ></textarea>
       <button
         @click="submitReview"
@@ -139,7 +139,7 @@
           <div
             v-for="(r, idx) in review.replies"
             :key="idx"
-            class="pl-4 border-l-4 border-red-300 bg-white rounded shadow-sm"
+            class="pl-4 border-l-4 border-red-300 bg-white dark:bg-gray-900 rounded shadow-sm"
           >
             <p class="text-sm text-gray-600">
               <strong>Відповідь адміністратора:</strong> {{ r.comment }}
@@ -150,20 +150,20 @@
         <div v-if="isAdmin" class="mt-3">
           <button
             @click="replyToReview(review.id)"
-            class="text-sm font-medium text-red-800 hover:underline"
+            class="text-sm font-medium text-red-800 dark:text-gray-100 hover:underline"
           >
             Відповісти
           </button>
 
           <div
             v-if="replyTo === review.id"
-            class="mt-2 p-4 bg-white rounded-lg shadow space-y-2"
+            class="mt-2 p-4 bg-white dark:bg-gray-900 rounded-lg shadow space-y-2"
           >
             <textarea
               v-model="replyText"
               placeholder="Напишіть відповідь..."
               required
-              class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring font-montserrat"
+              class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:ring font-montserrat"
             ></textarea>
             <button
               @click="submitReply"

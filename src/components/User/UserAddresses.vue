@@ -17,7 +17,7 @@
     </div>
 
     <!-- Address Form -->
-    <div v-if="showForm" class="bg-white rounded-2xl shadow-lg p-6 space-y-6">
+    <div v-if="showForm" class="bg-white dark:bg-gray-900 rounded-2xl shadow-lg p-6 space-y-6">
       <h2 class="text-2xl font-semibold text-gray-800">
         {{ addressAvailable ? $t('user.updateAddress') : $t('user.addAddress') }}
       </h2>
@@ -30,8 +30,8 @@
             :placeholder="$t('user.enterPhone')"
             maxlength="10" inputmode="numeric" pattern="[0-9]*"
             class="w-full px-3 py-2 border rounded-lg focus:ring focus:ring-opacity-50"
-            :class="errors.phoneNumber ? 'border-red-500' : 'border-gray-300'" />
-          <p v-if="errors.phoneNumber" class="text-red-500 text-sm mt-1">{{ errors.phoneNumber }}</p>
+            :class="errors.phoneNumber ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'" />
+          <p v-if="errors.phoneNumber" class="text-red-500 dark:text-gray-100 text-sm mt-1">{{ errors.phoneNumber }}</p>
         </div>
 
         <!-- Delivery Type -->
@@ -40,7 +40,7 @@
           <Multiselect v-model="formData.deliveryType" :options="deliveryOptions"
             :custom-label="opt => `${opt.label} — ${opt.name}`" :track-by="'id'"
             :placeholder="$t('user.selectDeliveryType')" @input="updateDeliveryOptions" />
-          <p v-if="errors.deliveryType" class="text-red-500 text-sm mt-1">{{ errors.deliveryType }}</p>
+          <p v-if="errors.deliveryType" class="text-red-500 dark:text-gray-100 text-sm mt-1">{{ errors.deliveryType }}</p>
         </div>
 
         <!-- Courier -->
@@ -48,7 +48,7 @@
           <div>
             <label class="block text-gray-700 mb-1">{{ $t('user.deliveryMethod') }}:</label>
             <input type="text" readonly :value="$t('user.courierNovaPoshta')"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100" />
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-100" />
           </div>
 
           <div ref="cityWrapper" class="relative w-full">
@@ -56,12 +56,12 @@
               <div class="relative">
                 <label class="block text-gray-700 mb-1">{{ $t('user.city') }}:</label>
                 <ComboboxInput
-                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring focus:ring-opacity-50"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring focus:ring-opacity-50"
                   @input="event => onCitySearch(event.target.value)"
                   :displayValue="city => city?.city || city"
                   :placeholder="$t('user.enterCity')" />
                 <ComboboxOptions v-if="cities.length"
-                  class="absolute z-50 w-full mt-1 max-h-48 overflow-auto rounded bg-white border shadow-lg">
+                  class="absolute z-50 w-full mt-1 max-h-48 overflow-auto rounded bg-white dark:bg-gray-900 border shadow-lg">
                   <ComboboxOption v-for="city in cities" :key="city.Ref" :value="city"
                     class="px-4 py-2 hover:bg-gray-100 cursor-pointer">
                     {{ city.city }}
@@ -76,12 +76,12 @@
             <div class="relative">
               <Combobox v-model="selectedStreet" @update:modelValue="selectStreet" as="div" class="relative">
                 <ComboboxInput
-                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring focus:ring-opacity-50"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring focus:ring-opacity-50"
                   @input="handleStreetSearch"
                   :displayValue="s => s?.street || s"
                   :placeholder="$t('user.enterStreet')" />
                 <ComboboxOptions v-if="streets.length"
-                  class="absolute z-50 w-full mt-1 max-h-48 overflow-auto rounded bg-white border shadow-lg">
+                  class="absolute z-50 w-full mt-1 max-h-48 overflow-auto rounded bg-white dark:bg-gray-900 border shadow-lg">
                   <ComboboxOption v-for="street in streets" :key="street.Ref || street.Name" :value="street"
                     class="px-4 py-2 hover:bg-gray-100 cursor-pointer">
                     {{ street.street || street.Name }}
@@ -94,8 +94,8 @@
           <div>
             <label class="block text-gray-700 mb-1">{{ $t('user.houseNumber') }}:</label>
             <input v-model="deliveryAddress.number" required :placeholder="$t('user.enterHouseNumber')"
-              :class="['w-full px-3 py-2 border rounded-lg focus:ring focus:ring-opacity-50', errors.number ? 'border-red-500' : 'border-gray-300']" />
-            <p v-if="errors.number" class="text-red-500 text-sm mt-1">{{ errors.number }}</p>
+              :class="['w-full px-3 py-2 border rounded-lg focus:ring focus:ring-opacity-50', errors.number ? 'border-red-500' : 'border-gray-300 dark:border-gray-600']" />
+            <p v-if="errors.number" class="text-red-500 dark:text-gray-100 text-sm mt-1">{{ errors.number }}</p>
           </div>
         </template>
 
@@ -112,12 +112,12 @@
             <Combobox v-model="selectedCity" as="div" class="relative">
               <div class="relative">
                 <ComboboxInput
-                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring focus:ring-opacity-50"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring focus:ring-opacity-50"
                   @input="event => onCitySearch(event.target.value)"
                   :displayValue="city => city?.city || city"
                   :placeholder="$t('user.enterCity')" />
                 <ComboboxOptions v-if="cities.length"
-                  class="absolute z-50 w-full mt-1 max-h-48 overflow-auto rounded bg-white border shadow-lg">
+                  class="absolute z-50 w-full mt-1 max-h-48 overflow-auto rounded bg-white dark:bg-gray-900 border shadow-lg">
                   <ComboboxOption v-for="city in cities" :key="city.Ref" :value="city"
                     class="px-4 py-2 hover:bg-gray-100 cursor-pointer">
                     {{ city.city }}
@@ -125,7 +125,7 @@
                 </ComboboxOptions>
               </div>
             </Combobox>
-            <p v-if="errors.city" class="text-red-500 text-sm mt-1">{{ errors.city }}</p>
+            <p v-if="errors.city" class="text-red-500 dark:text-gray-100 text-sm mt-1">{{ errors.city }}</p>
           </div>
 
           <div v-if="isPostomatPickup">
@@ -142,7 +142,7 @@
               <template #noResult><span class="text-gray-500 px-2">{{ $t('user.listEmpty') }}</span></template>
               <template #noOptions><span class="text-gray-500 px-2">{{ $t('user.listEmpty') }}</span></template>
             </Multiselect>
-            <p v-if="errors.postomat" class="text-red-500 text-sm mt-1">{{ errors.postomat }}</p>
+            <p v-if="errors.postomat" class="text-red-500 dark:text-gray-100 text-sm mt-1">{{ errors.postomat }}</p>
           </div>
 
           <div v-if="isNovaPoshtaPickup || isUkrposhtaPickup">
@@ -159,7 +159,7 @@
               <template #noResult><span class="text-gray-500 px-2">{{ $t('user.listEmpty') }}</span></template>
               <template #noOptions><span class="text-gray-500 px-2">{{ $t('user.listEmpty') }}</span></template>
             </Multiselect>
-            <p v-if="errors.branch" class="text-red-500 text-sm mt-1">{{ errors.branch }}</p>
+            <p v-if="errors.branch" class="text-red-500 dark:text-gray-100 text-sm mt-1">{{ errors.branch }}</p>
           </div>
         </template>
 
@@ -184,34 +184,26 @@
     </div>
 
     <!-- Saved Address Card -->
-    <div v-else-if="addressAvailable && !loading && !showForm" class="bg-white rounded-2xl shadow-lg p-6 space-y-4">
+    <div v-else-if="addressAvailable && !loading && !showForm" class="bg-white dark:bg-gray-900 rounded-2xl shadow-lg p-6 space-y-4">
       <h2 class="text-2xl font-semibold text-gray-800">{{ $t('user.yourAddress') }}</h2>
       <p class="text-gray-700"><strong>{{ $t('user.phone') }}:</strong> {{ phoneNumber }}</p>
       <p class="text-gray-700"><strong>{{ $t('user.deliveryType') }}:</strong> {{ formData.deliveryName }}</p>
 
       <template v-if="formData.deliveryType?.value === 'courier'">
-        <p class="text-gray-700 whitespace-nowrap"><strong>{{ $t('user.city') }}:</strong> {{ formData.city }}</p>
-        <p class="text-gray-700">
-          <strong>{{ $t('user.address') }}:</strong>
-          {{ deliveryAddress.street && deliveryAddress.number
-              ? deliveryAddress.street + ' ' + deliveryAddress.number
-              : savedDeliveryAddress || '(не вказано)' }}
+        <p class="text-gray-700 whitespace-nowrap">
+          <strong>{{ $t('user.city') }}:</strong> {{ formData.city }}
         </p>
       </template>
 
       <template v-else-if="formData.deliveryType?.value === 'pickup'">
-        <p class="text-gray-700"><strong>{{ $t('user.city') }}:</strong> {{ formData.city }}</p>
-
-        <p class="text-gray-700" v-if="deliveryAddress.branch">
-          <strong>{{ $t('user.address') }}:</strong> {{ deliveryAddress.branch }}
-        </p>
-        <p class="text-gray-700" v-else-if="deliveryAddress.postomat">
-          <strong>{{ $t('user.address') }}:</strong> {{ deliveryAddress.postomat }}
-        </p>
         <p class="text-gray-700">
-          <strong>{{ $t('user.address') }}:</strong> {{ savedDeliveryAddress || '(не вказано)' }}
+          <strong>{{ $t('user.city') }}:</strong> {{ formData.city }}
         </p>
       </template>
+
+      <p class="text-gray-700">
+        <strong>{{ $t('user.address') }}:</strong> {{ displayAddress }}
+      </p>
 
       <div class="flex gap-4 mt-4">
         <button @click="editAddress"
@@ -219,7 +211,7 @@
           {{ $t('user.update') }}
         </button>
         <button @click="deleteAddress"
-          class="px-5 py-2 border-2 border-red-600 text-red-600 rounded-lg hover:bg-red-600 hover:text-white transition">
+          class="px-5 py-2 border-2 border-red-600 text-red-600 dark:text-gray-100 rounded-lg hover:bg-red-600 hover:text-white transition">
           {{ $t('user.delete') }}
         </button>
       </div>
@@ -955,6 +947,20 @@ this.$nextTick(() => {
     document.title = "Ваша адреса";
   },
   computed: {
+    displayAddress() {
+      if (this.formData.deliveryType?.value === 'courier') {
+        return this.deliveryAddress.street && this.deliveryAddress.number
+          ? `${this.deliveryAddress.street} ${this.deliveryAddress.number}`
+          : this.savedDeliveryAddress || '(не вказано)';
+      }
+
+      if (this.formData.deliveryType?.value === 'pickup') {
+        if (this.deliveryAddress.branch) return this.deliveryAddress.branch;
+        if (this.deliveryAddress.postomat) return this.deliveryAddress.postomat;
+      }
+
+      return this.savedDeliveryAddress || '(не вказано)';
+    },
     formattedDeliveryAddress() {
     // Якщо тип pickup і нічого не зайшло — fallback
     return this.deliveryAddress.branch ||

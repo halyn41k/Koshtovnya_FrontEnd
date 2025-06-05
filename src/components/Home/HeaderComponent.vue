@@ -3,7 +3,7 @@
     <!-- Header -->
     <header
       ref="headerEl"
-      class="fixed top-0 w-full bg-[#fafafa] shadow z-50 md:px-[50px] font-base text-body3 leading-[18px]"
+      class="fixed top-0 w-full bg-[#fafafa] dark:bg-gray-900 dark:text-white shadow z-50 md:px-[50px] font-base text-body3 leading-[18px]"
     >
       <!-- Top bar -->
       <div class="flex justify-between items-center pt-4 pb-2 px-4 md:px-0">
@@ -38,7 +38,7 @@
           <div class="relative z-50">
             <button
               @click="toggleLanguageDropdown"
-              class="flex items-center space-x-2 p-2 hover:bg-gray-200 rounded-lg transition-all duration-200"
+              class="flex items-center space-x-2 p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-all duration-200"
             >
               <img
                 :src="currentFlag"
@@ -59,12 +59,12 @@
             </button>
             <ul
               v-if="isLanguageDropdownOpen"
-              class="absolute right-0 mt-2 w-40 bg-white border border-stroke rounded-lg shadow-lg overflow-hidden z-50"
+              class="absolute right-0 mt-2 w-40 bg-white dark:bg-gray-800 border border-stroke dark:border-gray-600 rounded-lg shadow-lg overflow-hidden z-50"
             >
               <li>
                 <button
                   @click="changeLanguage('uk')"
-                  class="w-full px-4 py-2 text-left hover:bg-gray-100 transition-all duration-200 rounded-lg"
+                  class="w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 rounded-lg"
                 >
                   Українська
                 </button>
@@ -72,7 +72,7 @@
               <li>
                 <button
                   @click="changeLanguage('en')"
-                  class="w-full px-4 py-2 text-left hover:bg-gray-100 transition-all duration-200 rounded-lg"
+                  class="w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 rounded-lg"
                 >
                   English
                 </button>
@@ -80,11 +80,26 @@
             </ul>
           </div>
 
+          <!-- Theme toggle -->
+          <div class="flex items-center">
+            <span class="text-xl">☀️</span>
+            <button
+              @click="toggleDarkMode"
+              class="mx-2 w-10 h-5 bg-gray-300 dark:bg-gray-600 rounded-full relative transition-colors duration-300"
+            >
+              <span
+                class="absolute left-0 top-0 w-5 h-5 bg-white dark:bg-gray-900 rounded-full shadow transform transition-transform duration-300"
+                :class="{ 'translate-x-5': isDark }"
+              ></span>
+            </button>
+            <span class="text-xl">🌙</span>
+          </div>
+
           <!-- Currency selector -->
           <div class="relative z-50">
             <button
               @click="toggleCurrencyDropdown"
-              class="flex items-center space-x-1 p-2 hover:bg-gray-200 rounded-lg transition-all duration-200"
+              class="flex items-center space-x-1 p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-all duration-200"
             >
               <span>{{ selectedCurrency }}</span>
               <svg
@@ -100,12 +115,12 @@
             </button>
             <ul
               v-if="isCurrencyDropdownOpen"
-              class="absolute right-0 mt-2 w-32 bg-white border border-stroke rounded-lg shadow-lg overflow-hidden z-50"
+              class="absolute right-0 mt-2 w-32 bg-white dark:bg-gray-800 border border-stroke dark:border-gray-600 rounded-lg shadow-lg overflow-hidden z-50"
             >
               <li>
                 <button
                   @click="changeCurrency('UAH')"
-                  class="w-full px-4 py-2 text-left hover:bg-gray-100 transition-all duration-200 rounded-lg"
+                  class="w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 rounded-lg"
                 >
                   UAH ₴
                 </button>
@@ -113,7 +128,7 @@
               <li>
                 <button
                   @click="changeCurrency('USD')"
-                  class="w-full px-4 py-2 text-left hover:bg-gray-100 transition-all duration-200 rounded-lg"
+                  class="w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 rounded-lg"
                 >
                   USD $
                 </button>
@@ -140,7 +155,7 @@
       <div class="flex items-center justify-between py-3 px-4 md:px-0">
         <!-- Desktop search + results -->
         <div
-          class="hidden md:flex items-center bg-[#F2E8E8] rounded-lg focus-within:border focus-within:border-stroke
+          class="hidden md:flex items-center bg-[#F2E8E8] dark:bg-gray-800 rounded-lg focus-within:border focus-within:border-stroke dark:focus-within:border-gray-600
                  transition-all duration-200 relative w-full max-w-sm"
         >
           <input
@@ -158,7 +173,7 @@
           <!-- Search results dropdown -->
           <div
             v-if="isVisible"
-            class="absolute top-full left-0 w-full bg-[#F6E7E7] rounded-lg shadow-lg z-50
+            class="absolute top-full left-0 w-full bg-[#F6E7E7] dark:bg-gray-800 rounded-lg shadow-lg z-50
                    max-h-[400px] overflow-y-auto"
           >
             <div v-if="loading" class="p-4 text-center text-gray-600">
@@ -173,7 +188,7 @@
                   v-for="item in results"
                   :key="item.id"
                   @click="goToProduct(item.id)"
-                  class="flex items-center p-2 hover:bg-gray-100 transition cursor-pointer"
+                  class="flex items-center p-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition cursor-pointer"
                   style="max-height: 100px;"
                 >
                   <img
@@ -222,7 +237,7 @@
       </div>
 
       <!-- Desktop categories -->
-      <nav class="hidden md:block bg-[#F6E7E7] md:-mx-[50px]">
+      <nav class="hidden md:block bg-[#F6E7E7] dark:bg-gray-800 md:-mx-[50px]">
         <ul class="flex justify-center space-x-1 py-1 px-4 md:px-0 font-base">
           <li
   v-for="cat in categories"
@@ -249,13 +264,13 @@
       <transition name="slide-fade">
   <div
     v-if="isBurgerOpen"
-    class="md:hidden bg-[#FFF7F6] border-t border-stroke z-40"
+    class="md:hidden bg-[#FFF7F6] dark:bg-gray-800 border-t border-stroke dark:border-gray-600 z-40"
   >
     <ul class="px-4 py-2 space-y-2">
       <li>
         <button
           @click="toggleCategories"
-          class="w-full flex justify-between items-center px-4 py-2 hover:bg-gray-100 rounded-lg transition-all duration-200"
+          class="w-full flex justify-between items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all duration-200"
         >
           Категорії
           <svg
@@ -272,7 +287,7 @@
           <li v-for="cat in categories" :key="cat.link">
   <a
     @click.prevent="navigateToCategory(cat.link)"
-    class="block px-4 py-2 hover:bg-gray-100 rounded-lg transition-all duration-200 cursor-pointer"
+    class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all duration-200 cursor-pointer"
   >
     {{ $t(cat.name) }}
   </a>
@@ -284,7 +299,7 @@
         <router-link
   to="/account"
   :query="{ tab: 'wishlist' }"
-  class="block px-4 py-2 hover:bg-gray-100 rounded-lg transition-all duration-200"
+  class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all duration-200"
   @click="isBurgerOpen = false"
 >
   {{ $t('home.wishlist') }}
@@ -292,7 +307,7 @@
 
 <router-link
   to="/aboutus"
-  class="block px-4 py-2 hover:bg-gray-100 rounded-lg transition-all duration-200"
+  class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all duration-200"
   @click="isBurgerOpen = false"
 >
   {{ $t('home.aboutUs') }}
@@ -300,7 +315,7 @@
 
 <router-link
   to="/aboutdelivery"
-  class="block px-4 py-2 hover:bg-gray-100 rounded-lg transition-all duration-200"
+  class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all duration-200"
   @click="isBurgerOpen = false"
 >
 {{ $t('home.aboutDelivery') }}
@@ -317,15 +332,15 @@
     <transition name="slide-down">
       <div
         v-if="mobileSearchActive"
-        class="fixed left-0 right-0 bg-[#FAFAFA] px-4 py-2 border-b border-stroke md:hidden z-40"
+        class="fixed left-0 right-0 bg-[#FAFAFA] dark:bg-gray-900 px-4 py-2 border-b border-stroke dark:border-gray-600 md:hidden z-40"
         :style="{ top: headerHeight + 'px' }"
       >
-        <div class="flex items-center bg-card rounded-lg overflow-hidden">
+        <div class="flex items-center bg-card dark:bg-gray-800 rounded-lg overflow-hidden">
           <input
             v-model="searchQuery"
             @keyup.enter="startSearch"
 :placeholder="$t('home.searchPlaceholder')"
-            class="flex-1 px-3 py-2 bg-[#F2E8E8] border-none focus:outline-none text-input"
+            class="flex-1 px-3 py-2 bg-[#F2E8E8] dark:bg-gray-800 dark:bg-gray-700 border-none focus:outline-none text-input"
           />
           <button @click="startSearch" class="px-3">
             <img src="@/assets/magnifying-glass-svgrepo-com.svg" alt="Search" class="w-5 h-5"/>
@@ -334,7 +349,7 @@
 
         <div
           v-if="isVisible"
-          class="mt-2 bg-[#F6E7E7] rounded-lg shadow-lg z-50 max-h-[300px] overflow-y-auto"
+          class="mt-2 bg-[#F6E7E7] dark:bg-gray-800 rounded-lg shadow-lg z-50 max-h-[300px] overflow-y-auto"
         >
           <div v-if="loading" class="p-4 text-center text-gray-600">
             Завантаження<span class="loading-dots"></span>
@@ -348,7 +363,7 @@
                 v-for="item in results"
                 :key="item.id"
                 @click="goToProduct(item.id)"
-                class="flex items-center p-2 hover:bg-gray-100 transition cursor-pointer"
+                class="flex items-center p-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition cursor-pointer"
                 style="max-height: 100px;"
               >
                 <img
@@ -373,9 +388,14 @@
 import { debounce } from 'lodash';
 import api from '@/services/api';
 import bus from '@/eventBus';
+import { useDarkMode } from '@/composables/useDarkMode';
 
 export default {
   name: 'HeaderComponent',
+  setup() {
+    const { isDark, toggleDarkMode } = useDarkMode();
+    return { isDark, toggleDarkMode };
+  },
   data() {
     return {
       categories: [],

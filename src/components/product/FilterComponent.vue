@@ -6,7 +6,7 @@
 
     <section v-if="!loading" class="space-y-8">
       <!-- Доступність -->
-      <div class="section bg-white p-4 rounded-lg shadow-sm">
+      <div class="section bg-white dark:bg-gray-900 p-4 rounded-lg shadow-sm">
         <h2 class="section-title text-center text-xl font-bold text-gray-800 mb-4">
           Доступність
         </h2>
@@ -30,7 +30,7 @@
       </div>
 
       <!-- Рейтинг -->
-      <div class="section bg-white p-4 rounded-lg shadow-sm">
+      <div class="section bg-white dark:bg-gray-900 p-4 rounded-lg shadow-sm">
         <h3 class="subsection-title mb-3 text-lg font-semibold text-gray-800">
           Рейтинг
         </h3>
@@ -48,7 +48,7 @@
       </div>
 
       <!-- Розмір -->
-      <div class="section bg-white p-4 rounded-lg shadow-sm">
+      <div class="section bg-white dark:bg-gray-900 p-4 rounded-lg shadow-sm">
         <h3 class="subsection-title mb-3 text-lg font-semibold text-gray-800">
           Розмір (см)
         </h3>
@@ -63,7 +63,7 @@
       </div>
 
       <!-- Вага -->
-      <div class="section bg-white p-4 rounded-lg shadow-sm">
+      <div class="section bg-white dark:bg-gray-900 p-4 rounded-lg shadow-sm">
         <h3 class="subsection-title mb-3 text-lg font-semibold text-gray-800">
           Вага (г)
         </h3>
@@ -78,7 +78,7 @@
       </div>
 
       <!-- Ціна -->
-      <div class="section bg-white p-4 rounded-lg shadow-sm">
+      <div class="section bg-white dark:bg-gray-900 p-4 rounded-lg shadow-sm">
         <h3 class="subsection-title mb-3 text-lg font-semibold text-gray-800">
   Ціна ({{ selectedCurrency === 'USD' ? '$' : '₴' }})
 </h3>
@@ -95,13 +95,13 @@
       </div>
 
       <!-- Колір -->
-      <div class="section bg-white p-4 rounded-lg shadow-sm">
+      <div class="section bg-white dark:bg-gray-900 p-4 rounded-lg shadow-sm">
         <h3 class="subsection-title mb-3 text-lg font-semibold text-gray-800">
           Колір
         </h3>
         <select
           v-model="filters.color"
-          class="w-full p-2 border border-gray-300 bg-white rounded focus:outline-none focus:ring-2 focus:ring-[#6B1F1F]"
+          class="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 rounded focus:outline-none focus:ring-2 focus:ring-[#6B1F1F]"
         >
           <option value="">(без фільтра)</option>
           <option v-for="color in sortedColorOptions" :key="color" :value="color">
@@ -111,7 +111,7 @@
       </div>
 
       <!-- Тип бісеру -->
-      <div class="section bg-white p-4 rounded-lg shadow-sm">
+      <div class="section bg-white dark:bg-gray-900 p-4 rounded-lg shadow-sm">
         <h3 class="subsection-title mb-3 text-lg font-semibold text-gray-800">
           Тип бісеру
         </h3>
@@ -135,7 +135,7 @@
       </div>
 
       <!-- Виробник бісеру -->
-      <div class="section bg-white p-4 rounded-lg shadow-sm">
+      <div class="section bg-white dark:bg-gray-900 p-4 rounded-lg shadow-sm">
         <h3 class="subsection-title mb-3 text-lg font-semibold text-gray-800">
           Виробник бісеру
         </h3>
@@ -162,7 +162,7 @@
       <!-- Категорія -->
 <div
   v-if="!hideCategory"
-  class="section bg-white p-4 rounded-lg shadow-sm"
+  class="section bg-white dark:bg-gray-900 p-4 rounded-lg shadow-sm"
 >
   <h3 class="subsection-title mb-3 text-lg font-semibold text-gray-800">
     Категорія

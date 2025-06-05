@@ -3,31 +3,29 @@
 
 <!-- Заголовок і фільтри -->
 <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
-  <h1 class="text-2xl font-extrabold text-gray-900 whitespace-nowrap">Статистика</h1>
+  <h1 class="text-2xl font-extrabold text-gray-900 whitespace-nowrap">{{ $t('admin.dashboard.title') }}</h1>
 
   <div class="flex items-center gap-3 flex-wrap">
     <div class="flex flex-col">
-      <label class="text-sm text-gray-600 mb-1 ml-1">Період</label>
-      <select
+      <label class="text-sm text-gray-600 mb-1 ml-1">{{ $t('admin.dashboard.period') }}</label>
+      <Multiselect
         v-model="selectedPeriod"
-        @change="loadData"
-        class="border border-gray-300 rounded px-3 py-2 focus:ring-[#6B1F1F] focus:outline-none"
-      >
-        <option value="day">За сьогодні</option>
-        <option value="week">За тиждень</option>
-        <option value="month">За місяць</option>
-        <option value="year">За рік</option>
-      </select>
+        :options="periodOptions"
+        :reduce="opt => opt.value"
+        label="label"
+        class="custom-multiselect w-40"
+        @input="loadData"
+      />
     </div>
 
     <div class="flex flex-col">
-      <label class="text-sm text-gray-600 mb-1 ml-1">Період вручну</label>
+      <label class="text-sm text-gray-600 mb-1 ml-1">{{ $t('admin.dashboard.customPeriod') }}</label>
       <VueDatePicker
   v-model="dateRange"
   range
   format="yyyy-MM-dd"
   :enable-time-picker="false"
-  placeholder="Оберіть період"
+  :placeholder="$t('admin.dashboard.selectPeriod')"
   @update:model-value="loadData"
   input-class-name="custom-datepicker-input"
   :locale="uk"
@@ -53,13 +51,13 @@
 
     <!-- Графік замовлень -->
     <section class="bg-white p-6 rounded-lg shadow-sm">
-      <h2 class="text-xl font-semibold mb-4">Динаміка замовлень</h2>
+      <h2 class="text-xl font-semibold mb-4">{{ $t('admin.dashboard.orderDynamics') }}</h2>
       <OrderChart :labels="orderChart.labels" :values="orderChart.values" :type="orderChart.type" />
     </section>
 
     <!-- Популярні товари -->
     <section>
-      <h2 class="text-xl font-semibold mb-4 mt-6">🔥 Популярні товари</h2>
+      <h2 class="text-xl font-semibold mb-4 mt-6">🔥 {{ $t('admin.dashboard.popular') }}</h2>
       <div v-if="popular.length" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
         <div
           v-for="(item, index) in popular"
@@ -89,7 +87,7 @@
 
     <!-- Останні замовлення -->
     <section>
-      <h2 class="text-xl font-semibold mb-4 mt-8">💸 Останні замовлення</h2>
+      <h2 class="text-xl font-semibold mb-4 mt-8">💸 {{ $t('admin.dashboard.latest') }}</h2>
       <ul v-if="latest.length" class="space-y-4">
         <li
           v-for="(order, i) in latest"
@@ -124,11 +122,22 @@
 
 <script setup>
 import { ref, onMounted, watch, computed } from 'vue'
-import axios from 'axios'
+import api from '@/services/api'
 import OrderChart from '@/components/admin/dashboard/OrderChart.vue'
 import VueDatePicker from '@vuepic/vue-datepicker'
 import '@vuepic/vue-datepicker/dist/main.css'
 import { uk } from 'date-fns/locale'
+import Multiselect from 'vue-multiselect'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
+
+const periodOptions = computed(() => [
+  { value: 'day', label: t('admin.dashboard.today') },
+  { value: 'week', label: t('admin.dashboard.week') },
+  { value: 'month', label: t('admin.dashboard.month') },
+  { value: 'year', label: t('admin.dashboard.year') }
+])
 
 
 const selectedPeriod = ref('month')
@@ -147,10 +156,10 @@ const latest = ref([])
 const popular = ref([])
 
 const cards = computed(() => [
-  { label: 'Кількість замовлень', value: summary.value.orders },
-  { label: 'Кількість коментарів', value: summary.value.comments },
-  { label: 'Зареєстрованих користувачів', value: summary.value.users_count },
-  { label: 'Продано товарів', value: summary.value.sold_products_count },
+  { label: t('admin.dashboard.ordersCount'), value: summary.value.orders },
+  { label: t('admin.dashboard.commentsCount'), value: summary.value.comments },
+  { label: t('admin.dashboard.usersCount'), value: summary.value.users_count },
+  { label: t('admin.dashboard.soldCount'), value: summary.value.sold_products_count }
 ])
 
 const getParams = () => {
@@ -168,14 +177,13 @@ const getParams = () => {
 
 const loadData = async () => {
   try {
-    const headers = { Authorization: `Bearer ${localStorage.getItem('token')}` }
     const params = getParams()
 
     const [summaryRes, chartRes, popRes, latestRes] = await Promise.all([
-      axios.get('https://koshtovnya.api-dev.bmax-edu.website/api/admin/stats/summary', { params, headers }),
-      axios.get('https://koshtovnya.api-dev.bmax-edu.website/api/admin/stats/order-dynamics', { params, headers }),
-      axios.get('https://koshtovnya.api-dev.bmax-edu.website/api/admin/stats/popular-products', { params, headers }),
-      axios.get('https://koshtovnya.api-dev.bmax-edu.website/api/admin/stats/latest-orders', { headers })
+      api.getAdminStatsSummary(params),
+      api.getAdminStatsOrderDynamics(params),
+      api.getAdminStatsPopularProducts(params),
+      api.getAdminStatsLatestOrders()
     ])
 
     summary.value = {
@@ -216,6 +224,26 @@ onMounted(loadData)
 
 .animate-fade-in-up {
   animation: fadeInUp 0.5s ease-out both;
+}
+
+.custom-multiselect .multiselect__option--highlight::after {
+  display: none !important;
+}
+
+.multiselect__option--highlight {
+  background: #F3F4F6 !important;
+  color: #6B1F1F !important;
+}
+.multiselect__option--selected {
+  font-weight: 600 !important;
+}
+.multiselect__option--selected::after {
+  content: 'Обрано' !important;
+  color: #9CA3AF;
+  font-size: 0.75rem;
+  font-weight: 500;
+  float: right;
+  margin-right: 1rem;
 }
 
 

@@ -12,7 +12,7 @@
      
 
       <!-- Заголовок -->
-      <h2 class="text-black font-bold text-[20px] leading-[1.3] mb-4">
+      <h2 class="text-black dark:text-white font-bold text-[20px] leading-[1.3] mb-4">
         Сума до оплати
       </h2>
 

@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col font-montserrat text-[14px] bg-white/80 rounded-lg shadow-md p-6 transition-all">
+  <div class="flex flex-col font-montserrat text-[14px] bg-white dark:bg-gray-900/80 rounded-lg shadow-md p-6 transition-all">
     <!-- Кроки оформлення -->
     <section class="mb-5">
       <div class="font-bold text-[20px] leading-[1.3] text-gray-400">
@@ -188,14 +188,14 @@ export default {
     updateDeliveryOptions() {
   const deliveryData = {
     courier: [
-      { id: 5, name: "Кур'єр Нової Пошти", value: 'courier', label: 'Курʼєр' },
-      { id: 6, name: "Кур'єр УКРПОШТИ", value: 'courier', label: 'Курʼєр' }
+      { id: 5, name: "Кур'єр Нової Пошти", value: 'courier', label: 'Курʼєр', delivery_type: 'courier' },
+      { id: 6, name: "Кур'єр УКРПОШТИ", value: 'courier', label: 'Курʼєр', delivery_type: 'courier' }
     ],
     pickup: [
-      { id: 1, name: "Самовивіз з наших магазинів", value: 'pickup', label: 'Самовивіз' },
-      { id: 2, name: "Самовивіз з поштоматів Нової Пошти", value: 'pickup', label: 'Самовивіз' },
-      { id: 3, name: "Самовивіз з Нової Пошти", value: 'pickup', label: 'Самовивіз' },
-      { id: 4, name: "Самовивіз з УКРПОШТИ", value: 'pickup', label: 'Самовивіз' }
+      { id: 1, name: "Самовивіз з наших магазинів", value: 'pickup', label: 'Самовивіз', delivery_type: 'pickup' },
+      { id: 2, name: "Самовивіз з поштоматів Нової Пошти", value: 'pickup', label: 'Самовивіз', delivery_type: 'pickup' },
+      { id: 3, name: "Самовивіз з Нової Пошти", value: 'pickup', label: 'Самовивіз', delivery_type: 'pickup' },
+      { id: 4, name: "Самовивіз з УКРПОШТИ", value: 'pickup', label: 'Самовивіз', delivery_type: 'pickup' }
     ]
   };
 
@@ -440,7 +440,7 @@ async fetchWarehouses(city, cityRef, deliveryName) {
         headers: { Authorization: `Bearer ${token}` },
         params: {
           city,
-          Ref: cityRef,
+          city_ref: cityRef,
           delivery_type: deliveryName || '',
         }
       }
@@ -535,7 +535,27 @@ async fetchWarehouses(city, cityRef, deliveryName) {
   'formData.phone'(val) {
     this.revalidateSteps();
   },
-   currentStep() {
+  'formData.deliveryType'(val) {
+    this.selectedDeliveryCategory = val?.delivery_type || val?.value || ''
+    this.revalidateSteps()
+  },
+  'formData.cityRef'(val) {
+    if (
+      val &&
+      this.selectedDeliveryCategory === 'pickup' &&
+      !this.isStorePickupSelected &&
+      this.formData.city
+    ) {
+      this.fetchWarehouses(
+        this.formData.city,
+        this.formData.cityRef,
+        this.formData.deliveryType?.name
+      ).then(ws => {
+        this.warehouses = ws
+      })
+    }
+  },
+  currentStep() {
     this.revalidateSteps(); // це обовʼязково! перевіряє при перемиканні кроку
   },
 },

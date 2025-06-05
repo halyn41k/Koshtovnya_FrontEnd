@@ -1,6 +1,6 @@
 <template>
   <div class="w-full bg-[#FFF7F6]">
-    <article class="relative text-black font-montserrat py-[170px] px-[30px] w-full max-w-[1450px] mx-auto rounded-lg overflow-hidden shadow-[0_4px_15px_rgba(0,0,0,0.1)]">
+    <article class="relative text-black dark:text-white font-montserrat py-[170px] px-[30px] w-full max-w-[1450px] mx-auto rounded-lg overflow-hidden shadow-[0_4px_15px_rgba(0,0,0,0.1)]">
       <!-- Title -->
       <header class="mb-8">
         <h1 class="flex items-center justify-center mt-[40px] font-kyivBlack2 text-[34px] font-black tracking-[-1.2px] text-center">
@@ -19,7 +19,7 @@
               <li
                 v-for="(option, index) in deliveryOptions"
                 :key="index"
-                class="bg-white bg-opacity-50 p-4 shadow-sm rounded-lg"
+                class="bg-white dark:bg-gray-900 bg-opacity-50 p-4 shadow-sm rounded-lg"
               >
                 <h4 class="text-[#6B1F1F] font-medium mb-2 flex items-center">
                   • {{ option.carrier }}
@@ -54,7 +54,7 @@
             <li
               v-for="(method, index) in paymentMethods"
               :key="index"
-              class="bg-white bg-opacity-50 p-4 shadow-sm rounded-lg"
+              class="bg-white dark:bg-gray-900 bg-opacity-50 p-4 shadow-sm rounded-lg"
             >
               <h4 class="text-[#6B1F1F] font-medium mb-2">• {{ method.title }}</h4>
               <p class="text-base leading-relaxed">{{ method.text }}</p>

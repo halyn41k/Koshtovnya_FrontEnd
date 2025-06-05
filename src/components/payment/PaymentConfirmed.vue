@@ -4,21 +4,21 @@
     :style="{ backgroundImage: `url(${require('@/assets/cartpattern.png')})` }"
   >
     <header class="flex items-center justify-center gap-6 mb-12 animate-fade-in">
-      <div class="flex-1 h-px bg-gray-300"></div>
-      <h1 class="text-3xl sm:text-4xl font-black tracking-tight text-center text-gray-900 drop-shadow-md font-kyiv">
+      <div class="flex-1 h-px bg-gray-300 dark:bg-gray-600"></div>
+      <h1 class="text-3xl sm:text-4xl font-black tracking-tight text-center text-gray-900 dark:text-white drop-shadow-md font-kyiv">
         Оплата підтверджена
       </h1>
-      <div class="flex-1 h-px bg-gray-300"></div>
+      <div class="flex-1 h-px bg-gray-300 dark:bg-gray-600"></div>
     </header>
 
-    <div class="max-w-md mx-auto bg-white bg-opacity-80 backdrop-blur-md rounded-2xl shadow-lg p-8 animate-slide-up">
+    <div class="max-w-md mx-auto bg-white dark:bg-gray-800 bg-opacity-80 dark:bg-opacity-70 backdrop-blur-md rounded-2xl shadow-lg p-8 animate-slide-up text-black dark:text-white">
       <section class="space-y-6 text-center">
-        <p class="text-lg text-gray-700 font-montserrat">
+        <p class="text-lg text-gray-700 dark:text-gray-300 font-montserrat">
           Ви успішно здійснили оплату. Зачекайте, будь ласка, вас перенаправляють...
         </p>
-        <p class="text-gray-600 font-montserrat">
+        <p class="text-gray-600 dark:text-gray-400 font-montserrat">
           Якщо перенаправлення не відбулося, перейдіть за посиланням
-          <router-link to="/account?tab=orderhistory" class="text-red-600 font-semibold hover:underline">
+          <router-link to="/account?tab=orderhistory" class="text-red-600 dark:text-gray-100 font-semibold hover:underline">
             Історія замовлень
           </router-link>.
         </p>

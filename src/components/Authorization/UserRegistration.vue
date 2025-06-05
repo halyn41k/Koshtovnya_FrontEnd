@@ -8,7 +8,7 @@
       <div class="hidden md:flex flex-1 h-[2px] bg-gray-300"></div>
     </header>
 
-    <main class="relative z-20 flex flex-col items-center justify-center w-full md:max-w-xl mx-auto px-6 py-8 bg-white bg-opacity-90 backdrop-blur-md border border-gray-200 rounded-2xl shadow-md">
+    <main class="relative z-20 flex flex-col items-center justify-center w-full md:max-w-xl mx-auto px-6 py-8 bg-white dark:bg-gray-900 bg-opacity-90 backdrop-blur-md border border-gray-200 rounded-2xl shadow-md">
       <form @submit.prevent="submitRegistration" class="w-full space-y-5">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div class="flex flex-col">
@@ -20,9 +20,9 @@
               @input="validateName"
               :placeholder="$t('authorization.inputFirstName')"
               required
-              :class="['w-full h-12 rounded-lg border px-4 placeholder-gray-400 hover:shadow-md transition-all duration-200', nameError ? 'border-red-600 focus:border-red-600' : 'border-gray-300 focus:border-[#6B1F1F]']"
+              :class="['w-full h-12 rounded-lg border px-4 placeholder-gray-400 hover:shadow-md transition-all duration-200', nameError ? 'border-red-600 focus:border-red-600' : 'border-gray-300 dark:border-gray-600 focus:border-[#6B1F1F]']"
             />
-            <span v-if="nameError" class="mt-1 text-xs text-red-600">{{ nameError }}</span>
+            <span v-if="nameError" class="mt-1 text-xs text-red-600 dark:text-gray-100">{{ nameError }}</span>
           </div>
 
           <div class="flex flex-col">
@@ -34,9 +34,9 @@
               @input="validateLastName"
               :placeholder="$t('authorization.inputLastName')"
               required
-              :class="['w-full h-12 rounded-lg border px-4 placeholder-gray-400 hover:shadow-md transition-all duration-200', lastNameError ? 'border-red-600 focus:border-red-600' : 'border-gray-300 focus:border-[#6B1F1F]']"
+              :class="['w-full h-12 rounded-lg border px-4 placeholder-gray-400 hover:shadow-md transition-all duration-200', lastNameError ? 'border-red-600 focus:border-red-600' : 'border-gray-300 dark:border-gray-600 focus:border-[#6B1F1F]']"
             />
-            <span v-if="lastNameError" class="mt-1 text-xs text-red-600">{{ lastNameError }}</span>
+            <span v-if="lastNameError" class="mt-1 text-xs text-red-600 dark:text-gray-100">{{ lastNameError }}</span>
           </div>
 
           <div class="flex flex-col sm:col-span-2">
@@ -48,9 +48,9 @@
               @input="validateSecondName"
               :placeholder="$t('authorization.inputSecondName')"
               required
-              :class="['w-full h-12 rounded-lg border px-4 placeholder-gray-400 hover:shadow-md transition-all duration-200', secondNameError ? 'border-red-600 focus:border-red-600' : 'border-gray-300 focus:border-[#6B1F1F]']"
+              :class="['w-full h-12 rounded-lg border px-4 placeholder-gray-400 hover:shadow-md transition-all duration-200', secondNameError ? 'border-red-600 focus:border-red-600' : 'border-gray-300 dark:border-gray-600 focus:border-[#6B1F1F]']"
             />
-            <span v-if="secondNameError" class="mt-1 text-xs text-red-600">{{ secondNameError }}</span>
+            <span v-if="secondNameError" class="mt-1 text-xs text-red-600 dark:text-gray-100">{{ secondNameError }}</span>
           </div>
         </div>
 
@@ -63,9 +63,9 @@
             @input="validateEmail"
             :placeholder="$t('authorization.inputEmail')"
             required
-            :class="['w-full h-12 rounded-lg border px-4 placeholder-gray-400 hover:shadow-md transition-all duration-200', emailError ? 'border-red-600 focus:border-red-600' : 'border-gray-300 focus:border-[#6B1F1F]']"
+            :class="['w-full h-12 rounded-lg border px-4 placeholder-gray-400 hover:shadow-md transition-all duration-200', emailError ? 'border-red-600 focus:border-red-600' : 'border-gray-300 dark:border-gray-600 focus:border-[#6B1F1F]']"
           />
-          <span v-if="emailError" class="mt-1 text-xs text-red-600">{{ emailError }}</span>
+          <span v-if="emailError" class="mt-1 text-xs text-red-600 dark:text-gray-100">{{ emailError }}</span>
         </div>
 
         <div class="flex flex-col">
@@ -78,7 +78,7 @@
               @input="validatePassword"
               :placeholder="$t('authorization.inputPassword')"
               required
-              :class="['w-full h-12 rounded-lg border px-4 placeholder-gray-400 hover:shadow-md transition-all duration-200', passwordError ? 'border-red-600 focus:border-red-600' : 'border-gray-300 focus:border-[#6B1F1F]']"
+              :class="['w-full h-12 rounded-lg border px-4 placeholder-gray-400 hover:shadow-md transition-all duration-200', passwordError ? 'border-red-600 focus:border-red-600' : 'border-gray-300 dark:border-gray-600 focus:border-[#6B1F1F]']"
             />
             <button type="button" @click="togglePasswordVisibility" class="absolute right-4 top-1/2 -translate-y-1/2 focus:outline-none">
               <img
@@ -88,7 +88,7 @@
               />
             </button>
           </div>
-          <span v-if="passwordError" class="mt-1 text-xs text-red-600">{{ passwordError }}</span>
+          <span v-if="passwordError" class="mt-1 text-xs text-red-600 dark:text-gray-100">{{ passwordError }}</span>
         </div>
 
         <p class="text-center text-xs text-gray-500">
@@ -109,7 +109,7 @@
           <button
             type="button"
             @click="redirectToGoogle"
-            class="w-full h-12 flex items-center justify-center gap-3 border border-gray-300 rounded-xl bg-white text-gray-700 hover:bg-gray-50 transition-shadow shadow-sm hover:shadow-md"
+            class="w-full h-12 flex items-center justify-center gap-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-700 hover:bg-gray-50 transition-shadow shadow-sm hover:shadow-md"
           >
             <img src="@/assets/icons/google.svg" alt="Google" class="w-5 h-5" />
             <span class="text-sm font-medium">{{ $t('authorization.loginWithGoogle') }}</span>
