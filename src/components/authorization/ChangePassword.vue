@@ -129,6 +129,10 @@ export default {
         alert('Новий пароль і підтвердження не збігаються.');
         return;
       }
+      if (this.newPassword === this.currentPassword) {
+        alert('Поточний та новий пароль збігаються.');
+        return;
+      }
       try {
         const response = await fetch('https://koshtovnya.api-dev.bmax-edu.website/api/change-password', {
           method: 'PATCH',
@@ -146,8 +150,22 @@ export default {
           alert('Пароль успішно змінено!');
           this.$router.push('/account');
         } else {
-          const errorData = await response.json();
-          alert(`Помилка: ${errorData.message || 'Спробуйте ще раз.'}`);
+          let message = 'Спробуйте ще раз.';
+          try {
+            const errorData = await response.json();
+            message = errorData.message || message;
+            if (
+              response.status === 400 &&
+              message.toLowerCase().includes('поточ')
+            ) {
+              message = 'Поточний пароль введено не коректно.';
+            }
+          } catch (e) {
+            console.error('Помилка обробки помилки:', e);
+            alert("Помилка під час з'єднання з сервером. Спробуйте ще раз.");
+            return;
+          }
+          alert(`Помилка: ${message}`);
         }
       } catch (error) {
         console.error('Помилка при зміні паролю:', error);
