@@ -80,6 +80,21 @@
             </ul>
           </div>
 
+          <!-- Theme toggle -->
+          <div class="flex items-center">
+            <span class="text-xl">☀️</span>
+            <button
+              @click="toggleDarkMode"
+              class="mx-2 w-10 h-5 bg-gray-300 dark:bg-gray-600 rounded-full relative transition-colors duration-300"
+            >
+              <span
+                class="absolute left-0 top-0 w-5 h-5 bg-white dark:bg-gray-900 rounded-full shadow transform transition-transform duration-300"
+                :class="{ 'translate-x-5': isDark }"
+              ></span>
+            </button>
+            <span class="text-xl">🌙</span>
+          </div>
+
           <!-- Currency selector -->
           <div class="relative z-50">
             <button
@@ -373,9 +388,14 @@
 import { debounce } from 'lodash';
 import api from '@/services/api';
 import bus from '@/eventBus';
+import { useDarkMode } from '@/composables/useDarkMode';
 
 export default {
   name: 'HeaderComponent',
+  setup() {
+    const { isDark, toggleDarkMode } = useDarkMode()
+    return { isDark, toggleDarkMode }
+  },
   data() {
     return {
       categories: [],
