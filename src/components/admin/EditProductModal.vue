@@ -2,7 +2,7 @@
 
 <div class="fixed inset-0 bg-[rgba(0,0,0,0.5)] flex items-center justify-center z-50" @click.self="close">
   <div class="bg-white rounded-lg w-full max-w-2xl p-6 overflow-y-auto max-h-[90vh] shadow-lg">
-    <h2 class="text-2xl font-semibold text-center mb-6">Редагувати товар</h2>
+    <h2 class="text-2xl font-semibold text-center mb-6">{{ $t('admin.editProduct.title') }}</h2>
     <form @submit.prevent="submitForm" class="space-y-6">
       <!-- Назва та Ціна -->
       <div class="grid grid-cols-2 gap-4">
@@ -179,8 +179,8 @@
 
       <!-- Дії -->
       <div class="flex justify-end space-x-4 pt-4 border-t border-gray-200">
-        <button type="button" @click="close" class="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400">Скасувати</button>
-        <button type="submit" class="px-4 py-2 bg-[#6B1F1F] text-white rounded-md hover:bg-[#A01212]">Зберегти</button>
+        <button type="button" @click="close" class="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400">{{ $t('admin.addProduct.cancel') }}</button>
+        <button type="submit" class="px-4 py-2 bg-[#6B1F1F] text-white rounded-md hover:bg-[#A01212]">{{ $t('admin.editProduct.save') }}</button>
       </div>
     </form>
   </div>
