@@ -2,7 +2,7 @@
   <main class="w-full p-4 space-y-6 relative">
     <!-- Заголовок -->
     <div class="flex justify-between items-center mb-6">
-      <h1 class="text-2xl font-semibold">Замовлення</h1>
+      <h1 class="text-2xl font-semibold">{{ $t('admin.orders.title') }}</h1>
     </div>
 
     <!-- Пошук -->
@@ -11,7 +11,7 @@
         <input
           v-model="searchQuery"
           type="text"
-          placeholder="Пошук"
+          :placeholder="$t('admin.orders.search')"
           class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring focus:ring-pink-200"
         />
         <img
@@ -59,7 +59,7 @@
   <Multiselect
     v-model="order.status"
     :options="statusOptions"
-    placeholder="Оберіть статус"
+    :placeholder="$t('admin.orders.selectStatus')"
     :allow-empty="false"
     :close-on-select="true"
     :show-labels="false"
@@ -79,10 +79,10 @@
 
     <!-- Порожній стани -->
     <div v-else-if="!orders.length && !searchQuery" class="py-20 text-center text-gray-500">
-      Поки що не було додано жодного замовлення.
+      {{ $t('admin.orders.noOrders') }}
     </div>
     <div v-else-if="searchQuery && !filteredAndSorted.length" class="py-20 text-center text-gray-500">
-      За запитом «<strong>{{ searchQuery }}</strong>» нічого не знайдено.
+      {{ $t('admin.orders.noResults', { query: searchQuery }) }}
     </div>
 
     <!-- Пагінація -->
@@ -114,7 +114,7 @@
       @click.self="closeDetailsModal"
     >
       <div class="bg-white rounded-lg p-6 w-full max-w-md shadow-lg">
-        <h3 class="text-xl font-semibold mb-4">Деталі замовлення #{{ orderDetails.id }}</h3>
+        <h3 class="text-xl font-semibold mb-4">{{ $t('admin.orders.details') }} #{{ orderDetails.id }}</h3>
         <p class="mb-2"><strong>Дата:</strong> {{ orderDetails.order_date }}</p>
         <p class="mb-2"><strong>Статус:</strong> {{ orderDetails.status }}</p>
         <p class="mb-2"><strong>Телефон:</strong> {{ orderDetails.phone_number }}</p>
@@ -122,7 +122,7 @@
         <button
           @click="closeDetailsModal"
           class="mt-2 px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400"
-        >Закрити</button>
+        >{{ $t('admin.orders.close') }}</button>
       </div>
     </div>
   </main>
@@ -159,11 +159,11 @@ export default {
   computed: {
     columns() {
       return [
-        { key: "id", label: "ID", sortable: true },
-        { key: "order_date", label: "Дата", sortable: true },
-        { key: "status", label: "Статус", sortable: true },
-        { key: "phone_number", label: "Телефон", sortable: true },
-        { key: "products", label: "Продукти", sortable: true }
+        { key: "id", label: this.$t('admin.orders.id'), sortable: true },
+        { key: "order_date", label: this.$t('admin.orders.date'), sortable: true },
+        { key: "status", label: this.$t('admin.orders.status'), sortable: true },
+        { key: "phone_number", label: this.$t('admin.orders.phone'), sortable: true },
+        { key: "products", label: this.$t('admin.orders.products'), sortable: true }
       ];
     },
     filteredAndSorted() {

@@ -2,13 +2,13 @@
   <main class="w-full p-4 space-y-6 relative">
     <!-- Заголовок та кнопки -->
     <div class="flex justify-between items-center">
-      <h1 class="text-2xl font-semibold text-gray-800">Товари</h1>
+      <h1 class="text-2xl font-semibold text-gray-800">{{ $t('admin.products.title') }}</h1>
       <button
         @click="openAddModal"
         class="flex items-center gap-2 bg-[#6B1F1F] hover:bg-[#A01212] text-white px-4 py-2 rounded text-sm transition"
       >
         <img src="@/assets/icons/plus.svg" alt="Add" class="w-5 h-5" />
-        <span>Додати</span>
+        <span>{{ $t('admin.products.add') }}</span>
       </button>
     </div>
 
@@ -18,7 +18,7 @@
         @click="openFilter"
         class="flex items-center gap-2 px-2 py-1 rounded-md hover:bg-gray-200 transition"
       >
-        <span class="text-sm font-semibold text-gray-700">Фільтр</span>
+        <span class="text-sm font-semibold text-gray-700">{{ $t('admin.products.filter') }}</span>
         <img src="@/assets/icons/filter.svg" alt="Filter icon" class="w-4 h-4" />
       </button>
 
@@ -39,7 +39,7 @@
     @click="clearAllFilters"
     class="px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm"
   >
-    Очистити всі
+    {{ $t('admin.products.clearAll') }}
   </button>
 </div>
 
@@ -51,7 +51,7 @@
             v-model="searchQuery"
             @input="onSearch"
             type="text"
-            placeholder="Пошук"
+            :placeholder="$t('admin.products.search')"
             class="flex-1 px-3 py-1 bg-transparent outline-none text-red-900 text-sm"
           />
           <img src="@/assets/icons/search.svg" alt="Search icon" class="w-4 h-4 mr-3 pointer-events-none" />
