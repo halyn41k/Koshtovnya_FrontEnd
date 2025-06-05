@@ -1,25 +1,25 @@
 <template>
   <main class="w-full p-4 space-y-6 relative">
-    <h1 class="text-2xl font-semibold text-gray-800">Налаштування</h1>
+    <h1 class="text-2xl font-semibold text-gray-800">{{ $t('admin.settings.title') }}</h1>
 
     <form @submit.prevent="saveSettings" class="space-y-4 bg-white p-4 rounded shadow">
       <div>
-        <label class="text-sm font-medium text-gray-700">Адреса</label>
+        <label class="text-sm font-medium text-gray-700">{{ $t('admin.settings.address') }}</label>
         <input v-model="settings.address" placeholder="Введіть адресу" type="text" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-pink-200 text-sm" />
       </div>
 
       <div>
-        <label class="text-sm font-medium text-gray-700">Телефон</label>
+        <label class="text-sm font-medium text-gray-700">{{ $t('admin.settings.phone') }}</label>
         <input v-model="settings.phone" placeholder="Введіть номер телефону" type="tel" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-pink-200 text-sm" />
       </div>
 
       <div>
-        <label class="text-sm font-medium text-gray-700">Email</label>
+        <label class="text-sm font-medium text-gray-700">{{ $t('admin.settings.email') }}</label>
         <input v-model="settings.email" placeholder="Введіть email" type="email" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-pink-200 text-sm" />
       </div>
 
       <div>
-        <label class="text-sm font-medium text-gray-700">Логотип</label>
+        <label class="text-sm font-medium text-gray-700">{{ $t('admin.settings.logo') }}</label>
         <div class="mt-2 w-24 h-24 border-2 border-dashed border-gray-300 rounded flex items-center justify-center cursor-pointer" @click="triggerFileInput" @dragover.prevent @drop.prevent="handleDrop">
           <img v-if="logoPreview" :src="logoPreview" alt="Logo" class="w-full h-full object-contain" />
           <svg v-else class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -36,9 +36,9 @@
 
     <section class="bg-white p-4 rounded shadow space-y-4">
       <div class="flex items-center justify-between">
-        <h2 class="text-xl font-semibold text-gray-800">Категорії</h2>
+        <h2 class="text-xl font-semibold text-gray-800">{{ $t('admin.settings.categories') }}</h2>
         <button @click="showAddModal = true" class="px-4 py-2 bg-[#6B1F1F] text-white rounded text-sm hover:bg-[#A01212] transition">
-          Додати категорію
+          {{ $t('admin.settings.addCategory') }}
         </button>
       </div>
 
@@ -84,7 +84,7 @@
           <input v-model="newCategory.name" placeholder="Назва" class="w-full px-3 py-2 border border-gray-300 rounded text-sm" />
           <input type="file" @change="e => newCategory.image = e.target.files[0]" />
           <button @click="createCategory" class="w-full py-2 bg-[#6B1F1F] text-white rounded hover:bg-[#A01212] text-sm transition">
-            Створити
+            {{ $t('admin.settings.create') }}
           </button>
         </div>
       </div>

@@ -337,10 +337,18 @@ handleTempAddress(address) {
     return;
   }
 
-  this.localData.city = '';
-  this.localData.street = '';
-  this.localData.houseNumber = '';
-  this.localData.warehouse = null;
+  // При зміні між доставкою кур'єром та самовивозом
+  if (this.isPickup) {
+    this.localData.street = '';
+    this.localData.houseNumber = '';
+  } else {
+    this.localData.warehouse = null;
+  }
+
+  if (this.showWarehouse && this.localData.city && this.localData.cityRef) {
+    this.fetchWarehouses();
+  }
+
   this.updateData();
 },
   
@@ -382,7 +390,6 @@ handleTempAddress(address) {
     },
     handleStreetSearch(event) {
   const value = event.target.value;
-  this.selectedStreet = value;
   this.localData.streetSearch = value;
   this.updateData();
   if (value.length >= 3) {

@@ -7,69 +7,69 @@
     <div
       class="bg-white rounded-lg w-full max-w-2xl p-6 overflow-y-auto max-h-[90vh] shadow-lg"
     >
-      <h2 class="text-2xl font-semibold text-center mb-6">Додати товар</h2>
+      <h2 class="text-2xl font-semibold text-center mb-6">{{ $t('admin.addProduct.title') }}</h2>
 
       <form @submit.prevent="submitForm" class="space-y-6">
         <!-- Назва та Ціна -->
         <div class="grid grid-cols-2 gap-4">
           <div class="flex flex-col">
-            <label for="name" class="mb-1 text-sm font-medium text-gray-700">Назва</label>
+            <label for="name" class="mb-1 text-sm font-medium text-gray-700">{{ $t('admin.addProduct.name') }}</label>
             <input
               id="name"
               type="text"
               v-model="form.name"
-              required placeholder="Наприклад: Срібний браслет"
+              required :placeholder="$t('admin.addProduct.example')"
               class="border border-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50"
             />
           </div>
           <div class="flex flex-col">
-            <label for="price" class="mb-1 text-sm font-medium text-gray-700">Ціна</label>
+            <label for="price" class="mb-1 text-sm font-medium text-gray-700">{{ $t('admin.addProduct.price') }}</label>
             <input
               id="price"
               type="number"
               v-model="form.price"
-              required placeholder="грн"
+              required :placeholder="$t('admin.addProduct.price')"
            class="border border-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50" />
           </div>
         </div>
 
        <div class="grid grid-cols-2 gap-4">
   <div class="flex flex-col">
-    <label class="mb-1 text-sm font-medium text-gray-700">Категорія</label>
+    <label class="mb-1 text-sm font-medium text-gray-700">{{ $t('admin.addProduct.category') }}</label>
     <Multiselect
       v-model="form.category"
       :options="formData.categories"
-      placeholder="Оберіть категорію"
+      :placeholder="$t('admin.addProduct.chooseCategory')"
       class="custom-multiselect"
     />
   </div>
 
   <div class="flex flex-col">
-    <label class="mb-1 text-sm font-medium text-gray-700">Бісер виробник</label>
+    <label class="mb-1 text-sm font-medium text-gray-700">{{ $t('admin.addProduct.beadProducer') }}</label>
     <Multiselect
       v-model="form.bead_producer"
       :options="formData.bead_producers"
-      placeholder="Оберіть виробника"
+      :placeholder="$t('admin.addProduct.chooseProducer')"
       class="custom-multiselect"
     />
   </div>
 
   <div class="flex flex-col">
-    <label class="mb-1 text-sm font-medium text-gray-700">Країна виробництва</label>
+    <label class="mb-1 text-sm font-medium text-gray-700">{{ $t('admin.addProduct.countryOfManufacture') }}</label>
     <Multiselect
       v-model="form.country_of_manufacture"
       :options="formData.countries_of_manufacture"
-      placeholder="Оберіть країну"
+      :placeholder="$t('admin.addProduct.chooseCountry')"
       class="custom-multiselect"
     />
   </div>
 
   <div class="flex flex-col">
-    <label class="mb-1 text-sm font-medium text-gray-700">Тип бісеру</label>
+    <label class="mb-1 text-sm font-medium text-gray-700">{{ $t('admin.addProduct.beadType') }}</label>
     <Multiselect
       v-model="form.type_of_bead"
       :options="formData.type_of_bead"
-      placeholder="Оберіть тип"
+      :placeholder="$t('admin.addProduct.chooseType')"
       class="custom-multiselect"
     />
   </div>
@@ -78,18 +78,18 @@
         <!-- Вага та Кольори -->
         <div class="grid grid-cols-2 gap-4">
           <div class="flex flex-col">
-            <label for="weight" class="mb-1 text-sm font-medium text-gray-700">Вага</label>
+            <label for="weight" class="mb-1 text-sm font-medium text-gray-700">{{ $t('admin.addProduct.weight') }}</label>
             <input
               id="weight"
               type="number"
-              placeholder="Введіть вагу (г)"
+              :placeholder="$t('admin.addProduct.weightPlaceholder')"
               v-model="form.weight"
               required
               class="border border-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50"
             />
           </div>
           <div class="flex flex-col">
-            <label class="mb-2 text-sm font-medium text-gray-700">Кольори</label>
+            <label class="mb-2 text-sm font-medium text-gray-700">{{ $t('admin.addProduct.colors') }}</label>
             <div class="flex flex-wrap gap-2">
               <button
                 v-for="color in formData.colors"
@@ -115,12 +115,12 @@
         </div>
 
        <div class="flex flex-col space-y-3">
-  <label class="text-sm font-medium text-gray-700">Розміри</label>
+  <label class="text-sm font-medium text-gray-700">{{ $t('admin.addProduct.sizes') }}</label>
 
   <div v-for="(sizeItem, index) in form.sizes" :key="index" class="grid grid-cols-12 gap-2 items-end">
     <!-- Поле розміру -->
     <div class="col-span-6">
-      <label class="text-sm font-medium text-gray-700">Розмір (см)</label>
+      <label class="text-sm font-medium text-gray-700">{{ $t('admin.addProduct.size') }}</label>
       <input
   v-model.number="sizeItem.size"
   type="number"
@@ -135,7 +135,7 @@
 
     <!-- Поле кількості -->
     <div class="col-span-3">
-      <label class="text-sm font-medium text-gray-700">К-ть</label>
+            <label class="text-sm font-medium text-gray-700">{{ $t('admin.addProduct.quantityShort') }}</label>
       <input
         v-model.number="sizeItem.quantity"
         type="number"
@@ -163,14 +163,14 @@
     @click="addSize"
     class="w-max px-4 py-2 bg-[#6B1F1F] text-white rounded-md hover:bg-[#A01212]"
   >
-    Додати розмір
+    {{ $t('admin.addProduct.addSize') }}
   </button>
 </div>
 
         <!-- Фурнітура -->
 <!-- Фурнітура -->
 <div class="flex flex-col space-y-3">
-  <label class="text-sm font-medium text-gray-700">Фурнітура</label>
+  <label class="text-sm font-medium text-gray-700">{{ $t('admin.addProduct.fittings') }}</label>
 
   <div
     v-for="(fitItem, index) in form.fittings"
@@ -179,29 +179,29 @@
   >
     <!-- Фурнітура -->
     <div class="col-span-4">
-      <label class="text-sm font-medium text-gray-700">Фурнітура</label>
+      <label class="text-sm font-medium text-gray-700">{{ $t('admin.addProduct.fittings') }}</label>
       <Multiselect
         v-model="fitItem.fitting"
         :options="formData.fittings"
-        placeholder="Оберіть фурнітуру"
+        :placeholder="$t('admin.addProduct.chooseFitting')"
         class="custom-multiselect"
       />
     </div>
 
     <!-- Матеріал -->
     <div class="col-span-4">
-      <label class="text-sm font-medium text-gray-700">Матеріал</label>
+      <label class="text-sm font-medium text-gray-700">{{ $t('admin.addProduct.material') }}</label>
       <Multiselect
         v-model="fitItem.material"
         :options="formData.materials"
-        placeholder="Оберіть матеріал"
+        :placeholder="$t('admin.addProduct.chooseMaterial')"
         class="custom-multiselect"
       />
     </div>
 
     <!-- Кількість -->
     <div class="col-span-2">
-      <label class="text-sm font-medium text-gray-700">К-ть</label>
+      <label class="text-sm font-medium text-gray-700">{{ $t('admin.addProduct.quantityShort') }}</label>
       <input
         v-model.number="fitItem.quantity"
         type="number"
@@ -229,19 +229,19 @@
     @click="addFitting"
     class="w-max px-4 py-2 bg-[#6B1F1F] text-white rounded-md hover:bg-[#A01212]"
   >
-    Додати фурнітуру
+    {{ $t('admin.addProduct.addFitting') }}
   </button>
 </div>
 
 <!-- Зображення -->
 <div class="flex flex-col">
-  <label class="mb-1 text-sm font-medium text-gray-700">Зображення</label>
+  <label class="mb-1 text-sm font-medium text-gray-700">{{ $t('admin.addProduct.image') }}</label>
 
   <!-- Кнопка вибору файлу -->
   <label
     class="inline-flex items-center px-4 py-2 border-2 border-dashed border-gray-300 rounded-md cursor-pointer text-sm text-gray-600 hover:border-[#A01212]"
   >
-    Вибрати файл
+    {{ $t('admin.addProduct.chooseFile') }}
     <input
       type="file"
       @change="handleFileChange"
@@ -255,7 +255,7 @@
     <img
   :src="imagePreview"
 
-      alt="Превʼю"
+      :alt="$t('admin.addProduct.previewAlt')"
       class="w-24 h-24 object-cover rounded-md border"
     />
     <button
@@ -264,7 +264,7 @@
 
       class="px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-500"
     >
-      Видалити
+      {{ $t('admin.addProduct.delete') }}
     </button>
   </div>
 </div>
@@ -277,13 +277,13 @@
             @click="close"
             class="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400"
           >
-            Скасувати
+            {{ $t('admin.addProduct.cancel') }}
           </button>
           <button
             type="submit"
             class="px-4 py-2 bg-[#6B1F1F] text-white rounded-md hover:bg-[#A01212]"
           >
-            Додати
+            {{ $t('admin.addProduct.add') }}
           </button>
         </div>
       </form>
@@ -398,34 +398,34 @@ export default {
     submitForm() {
   // Клієнтська валідація
   if (!this.form.colors.length) {
-    alert('Будь ласка, оберіть хоча б один колір.');
+    alert(this.$t('admin.addProduct.colorRequired'));
     return;
   }
 
   if (!this.form.sizes.length) {
-    alert('Додайте хоча б один розмір.');
+    alert(this.$t('admin.addProduct.sizeRequired'));
     return;
   }
 
   const sizeInvalid = this.form.sizes.some(s => !s.size || s.quantity === null || s.quantity === '');
   if (sizeInvalid) {
-    alert('Заповніть всі поля для розмірів.');
+    alert(this.$t('admin.addProduct.sizeInvalid'));
     return;
   }
 
   if (!this.form.fittings.length) {
-    alert('Додайте хоча б одну фурнітуру.');
+    alert(this.$t('admin.addProduct.fittingRequired'));
     return;
   }
 
   const fittingInvalid = this.form.fittings.some(f => !f.fitting || !f.material || !f.quantity);
   if (fittingInvalid) {
-    alert('Заповніть всі поля для фурнітури.');
+    alert(this.$t('admin.addProduct.fittingInvalid'));
     return;
   }
 
   if (!this.form.image) {
-    alert('Будь ласка, завантажте зображення товару.');
+    alert(this.$t('admin.addProduct.imageRequired'));
     return;
   }
 
@@ -465,7 +465,7 @@ export default {
     })
     .catch((err) => {
       console.error('❌ Помилка створення товару:', err);
-      alert('Сталася помилка при додаванні товару.');
+      alert(this.$t('admin.addProduct.createError'));
     });
 },
     close() {

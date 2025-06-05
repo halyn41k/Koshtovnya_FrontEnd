@@ -12,12 +12,12 @@
       >✕</button>
 
       <!-- Заголовок -->
-      <h2 class="text-2xl font-semibold mb-6">Профіль адміністратора</h2>
+      <h2 class="text-2xl font-semibold mb-6">{{ $t('admin.profile.title') }}</h2>
 
       <!-- Поля форми -->
       <div class="space-y-4">
         <div class="flex flex-col">
-          <label for="first_name" class="mb-1 font-medium">Ім’я:</label>
+          <label for="first_name" class="mb-1 font-medium">{{ $t('admin.profile.firstName') }}:</label>
           <input
   id="first_name"
   type="text"
@@ -28,7 +28,7 @@
 
         </div>
         <div class="flex flex-col">
-          <label for="last_name" class="mb-1 font-medium">Прізвище:</label>
+          <label for="last_name" class="mb-1 font-medium">{{ $t('admin.profile.lastName') }}:</label>
           <input
             id="last_name"
             type="text"
@@ -38,7 +38,7 @@
           />
         </div>
         <div class="flex flex-col">
-          <label for="second_name" class="mb-1 font-medium">По батькові:</label>
+          <label for="second_name" class="mb-1 font-medium">{{ $t('admin.profile.patronymic') }}:</label>
           <input
             id="second_name"
             type="text"
@@ -48,7 +48,7 @@
           />
         </div>
         <div class="flex flex-col">
-          <label for="role" class="mb-1 font-medium">Роль:</label>
+          <label for="role" class="mb-1 font-medium">{{ $t('admin.profile.role') }}:</label>
           <input
             id="role"
             type="text"
@@ -58,7 +58,7 @@
           />
         </div>
         <div class="flex flex-col">
-          <label for="email" class="mb-1 font-medium">Email:</label>
+          <label for="email" class="mb-1 font-medium">{{ $t('admin.profile.email') }}:</label>
           <input
             id="email"
             type="email"
@@ -75,11 +75,11 @@
         <button
           @click="updateAdmin"
           class="flex-1 h-10 bg-[#6B1F1F] text-white rounded hover:bg-[#A01212] transition"
-        >Оновити</button>
+        >{{ $t('admin.profile.update') }}</button>
         <button
           @click="changePassword"
           class="flex-1 h-10 bg-[#6B1F1F] text-white rounded hover:bg-[#A01212] transition"
-        >Змінити пароль</button>
+        >{{ $t('admin.profile.changePassword') }}</button>
       </div>
     </div>
   </div>
@@ -101,7 +101,7 @@ export default {
     async fetchAdminProfile() {
       const token = localStorage.getItem('token');
       if (!token) {
-        alert('Ви не авторизовані.');
+        alert(this.$t('admin.profile.unauthorized'));
         return;
       }
       try {
@@ -123,13 +123,13 @@ export default {
         this.localEmail      = profile.email       || '';
       } catch (err) {
         console.error(err);
-        alert('Не вдалося завантажити профіль.');
+        alert(this.$t('admin.profile.loadError'));
       }
     },
     async updateAdmin() {
       const token = localStorage.getItem('token');
       if (!token) {
-        alert('Ви не авторизовані.');
+        alert(this.$t('admin.profile.unauthorized'));
         return;
       }
       const payload = {
@@ -150,11 +150,11 @@ export default {
           }
         );
         if (!res.ok) throw new Error(res.status);
-        alert('Дані оновлено.');
+        alert(this.$t('admin.profile.updated'));
         this.fetchAdminProfile();
       } catch (err) {
         console.error(err);
-        alert('Помилка оновлення.');
+        alert(this.$t('admin.profile.updateError'));
       }
     },
     changePassword() {
