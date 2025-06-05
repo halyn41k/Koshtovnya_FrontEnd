@@ -18,7 +18,7 @@ const initTheme = () => {
   apply(isDark.value)
 }
 
-// Initialize immediately so the correct theme is set before Vue mounts
+// ⚠ Ініціалізація ДО монтування Vue, щоб не блимає
 initTheme()
 
 export function useDarkMode() {
