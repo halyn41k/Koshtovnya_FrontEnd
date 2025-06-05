@@ -155,10 +155,18 @@ export default {
   }
 },
     isCourier() {
-      return this.localData.deliveryType?.delivery_type === 'courier';
+      const type = this.localData.deliveryType
+      return (
+        type?.delivery_type === 'courier' ||
+        type?.value === 'courier'
+      )
     },
     isPickup() {
-      return this.localData.deliveryType?.delivery_type === 'pickup';
+      const type = this.localData.deliveryType
+      return (
+        type?.delivery_type === 'pickup' ||
+        type?.value === 'pickup'
+      )
     },
     isStorePickup() {
       return this.localData.deliveryType?.name === 'Самовивіз з наших магазинів';
@@ -197,10 +205,15 @@ export default {
 },
 
   selectedStreet(val) {
-  if (val?.Name || val?.street) {
-    this.selectStreet(val);
-  }
-},
+    if (val?.Name || val?.street) {
+      this.selectStreet(val);
+    }
+  },
+  selectedCity(val) {
+    if (val?.city && val?.Ref) {
+      this.selectCity(val)
+    }
+  },
 
 tempUserAddress: {
   handler(address) {
@@ -411,7 +424,7 @@ handleTempAddress(address) {
           'https://koshtovnya.api-dev.bmax-edu.website/api/nova-poshta/ware-houses',
           { headers: { Authorization: `Bearer ${token}`}, params: {
             city: this.localData.city,
-            Ref: this.localData.cityRef,
+            city_ref: this.localData.cityRef,
             delivery_type: this.localData.deliveryType?.name || ''
           } }
         );

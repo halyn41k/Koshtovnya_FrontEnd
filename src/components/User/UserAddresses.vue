@@ -190,28 +190,20 @@
       <p class="text-gray-700"><strong>{{ $t('user.deliveryType') }}:</strong> {{ formData.deliveryName }}</p>
 
       <template v-if="formData.deliveryType?.value === 'courier'">
-        <p class="text-gray-700 whitespace-nowrap"><strong>{{ $t('user.city') }}:</strong> {{ formData.city }}</p>
-        <p class="text-gray-700">
-          <strong>{{ $t('user.address') }}:</strong>
-          {{ deliveryAddress.street && deliveryAddress.number
-              ? deliveryAddress.street + ' ' + deliveryAddress.number
-              : savedDeliveryAddress || '(не вказано)' }}
+        <p class="text-gray-700 whitespace-nowrap">
+          <strong>{{ $t('user.city') }}:</strong> {{ formData.city }}
         </p>
       </template>
 
       <template v-else-if="formData.deliveryType?.value === 'pickup'">
-        <p class="text-gray-700"><strong>{{ $t('user.city') }}:</strong> {{ formData.city }}</p>
-
-        <p class="text-gray-700" v-if="deliveryAddress.branch">
-          <strong>{{ $t('user.address') }}:</strong> {{ deliveryAddress.branch }}
-        </p>
-        <p class="text-gray-700" v-else-if="deliveryAddress.postomat">
-          <strong>{{ $t('user.address') }}:</strong> {{ deliveryAddress.postomat }}
-        </p>
         <p class="text-gray-700">
-          <strong>{{ $t('user.address') }}:</strong> {{ savedDeliveryAddress || '(не вказано)' }}
+          <strong>{{ $t('user.city') }}:</strong> {{ formData.city }}
         </p>
       </template>
+
+      <p class="text-gray-700">
+        <strong>{{ $t('user.address') }}:</strong> {{ displayAddress }}
+      </p>
 
       <div class="flex gap-4 mt-4">
         <button @click="editAddress"
@@ -955,6 +947,20 @@ this.$nextTick(() => {
     document.title = "Ваша адреса";
   },
   computed: {
+    displayAddress() {
+      if (this.formData.deliveryType?.value === 'courier') {
+        return this.deliveryAddress.street && this.deliveryAddress.number
+          ? `${this.deliveryAddress.street} ${this.deliveryAddress.number}`
+          : this.savedDeliveryAddress || '(не вказано)';
+      }
+
+      if (this.formData.deliveryType?.value === 'pickup') {
+        if (this.deliveryAddress.branch) return this.deliveryAddress.branch;
+        if (this.deliveryAddress.postomat) return this.deliveryAddress.postomat;
+      }
+
+      return this.savedDeliveryAddress || '(не вказано)';
+    },
     formattedDeliveryAddress() {
     // Якщо тип pickup і нічого не зайшло — fallback
     return this.deliveryAddress.branch ||
