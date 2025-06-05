@@ -1,5 +1,5 @@
 <template>
-  <footer class="bg-[#F4E7E5] text-gray-800 py-12 px-[50px]">
+  <footer class="bg-[#F4E7E5] dark:bg-gray-800 text-gray-800 dark:text-gray-200 py-12 px-[50px]">
     <div class="max-w-[1400px] mx-auto flex flex-col md:flex-row justify-start space-y-8 md:space-y-0 md:space-x-8">
       <!-- Logo Section -->
       <div class="flex-1 md:flex-[0.3] flex flex-col items-start space-y-4">
@@ -73,12 +73,12 @@
               <img src="@/assets/icons/location.svg" alt="address" class="w-5 h-5 mt-1" />
               <p>{{ siteSettings.footer_address_info }}</p>
             </div>
-            <div class="border-t border-gray-300"></div>
+            <div class="border-t border-gray-300 dark:border-gray-600"></div>
             <div class="flex items-center space-x-2">
               <img src="@/assets/icons/phone.svg" alt="phone" class="w-5 h-5" />
               <p>{{ siteSettings.footer_phone_number }}</p>
             </div>
-            <div class="border-t border-gray-300"></div>
+            <div class="border-t border-gray-300 dark:border-gray-600"></div>
             <div class="flex items-center space-x-2">
               <img src="@/assets/icons/mail.svg" alt="email" class="w-5 h-5" />
               <p>{{ siteSettings.footer_email_info }}</p>

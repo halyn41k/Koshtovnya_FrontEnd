@@ -1,26 +1,23 @@
 // src/composables/useDarkMode.js
-import { ref, watchEffect } from 'vue'
+import { ref } from 'vue'
 
-const isDark = ref(
-  localStorage.getItem('theme') === 'dark' ||
-  (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)
-)
+const stored = localStorage.getItem('theme')
+const initial = stored ? stored === 'dark' : document.documentElement.classList.contains('dark')
+const isDark = ref(initial)
 
 export function useDarkMode() {
   const toggleDarkMode = () => {
-    isDark.value = !isDark.value
+    document.documentElement.classList.toggle('dark')
+    isDark.value = document.documentElement.classList.contains('dark')
+    localStorage.setItem('theme', isDark.value ? 'dark' : 'light')
   }
 
-  watchEffect(() => {
-    const root = document.documentElement
-    if (isDark.value) {
-      root.classList.add('dark')
-      localStorage.setItem('theme', 'dark')
-    } else {
-      root.classList.remove('dark')
-      localStorage.setItem('theme', 'light')
-    }
-  })
+  // apply initial state
+  if (isDark.value) {
+    document.documentElement.classList.add('dark')
+  } else {
+    document.documentElement.classList.remove('dark')
+  }
 
   return { isDark, toggleDarkMode }
 }
