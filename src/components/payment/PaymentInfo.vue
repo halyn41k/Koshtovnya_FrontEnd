@@ -21,7 +21,7 @@
         />
         <label
           :for="`payment-${idx}`"
-          class="relative pl-6 text-[14px] font-medium text-black cursor-pointer
+          class="relative pl-6 text-[14px] font-medium text-black dark:text-white cursor-pointer
                  before:content-[''] before:absolute before:left-0 before:top-1/2
                  before:-translate-y-1/2 before:w-3 before:h-3 before:border-2
                  before:border-gray-400 before:rounded-full
@@ -33,7 +33,7 @@
 
       <span
         v-if="errors.paymentOption"
-        class="text-red-500 text-xs montserrat"
+        class="text-red-500 dark:text-gray-100 text-xs montserrat"
       >
         {{ errors.paymentOption }}
       </span>

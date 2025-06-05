@@ -6,7 +6,7 @@
 
     <section ref="orderItems" class="overflow-y-auto max-h-[400px] mb-6 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
       <div v-if="localCartItems.length > 0" class="flex flex-col space-y-4">
-        <div v-for="item in localCartItems" :key="item.id" class="flex items-center bg-white rounded-lg shadow p-4">
+        <div v-for="item in localCartItems" :key="item.id" class="flex items-center bg-white dark:bg-gray-900 rounded-lg shadow p-4">
           <img :src="item.image" alt="Product Image" class="w-20 h-20 object-cover rounded-md mr-4" />
           <div class="flex-1">
             <h3 class="text-gray-900 font-medium text-lg mb-1">{{ item.title }}</h3>

@@ -4,22 +4,22 @@
     <div
       class="bg-white rounded-lg w-full max-w-md mx-4 p-6 text-center font-montserrat shadow-lg"
     >
-      <h2 class="text-xl font-semibold mb-4">Підтвердіть видалення</h2>
+      <h2 class="text-xl font-semibold mb-4">{{ $t('admin.deleteProduct.title') }}</h2>
       <p class="text-gray-700">
-        Ви впевнені, що хочете видалити товар "<strong>{{ product.name }}</strong>"?
+        {{ $t('admin.deleteProduct.question', { name: product.name }) }}
       </p>
       <div class="flex justify-center space-x-4 mt-6">
         <button
           @click="close"
           class="px-4 py-2 bg-gray-300 text-gray-800 rounded-md font-medium hover:bg-gray-400"
         >
-          Скасувати
+          {{ $t('admin.deleteProduct.cancel') }}
         </button>
         <button
           @click="confirmDelete"
           class="px-4 py-2 bg-[#6B1F1F] text-white rounded-md font-medium hover:bg-[#A01212]"
         >
-          Видалити
+          {{ $t('admin.deleteProduct.delete') }}
         </button>
       </div>
     </div>

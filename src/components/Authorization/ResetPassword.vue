@@ -11,7 +11,7 @@
     </header>
 
     <!-- Основний контейнер форми -->
-    <main class="relative z-20 flex flex-col items-center justify-center w-full md:max-w-xl mx-auto px-6 py-8 bg-white bg-opacity-90 backdrop-blur-md border border-gray-200 rounded-2xl shadow-md">
+    <main class="relative z-20 flex flex-col items-center justify-center w-full md:max-w-xl mx-auto px-6 py-8 bg-white dark:bg-gray-900 bg-opacity-90 backdrop-blur-md border border-gray-200 rounded-2xl shadow-md">
       <!-- Крок 1 -->
       <form v-if="step === 1" @submit.prevent="sendResetCode" class="w-full space-y-5">
         <div class="flex flex-col">
@@ -22,7 +22,7 @@
             v-model="email"
             :placeholder="$t('authorization.inputEmail')"
             required
-            class="w-full h-12 rounded-lg border border-gray-300 bg-white px-4 text-gray-800 placeholder-gray-400
+            class="w-full h-12 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-4 text-gray-800 placeholder-gray-400
                    hover:shadow-md focus:outline-none focus:border-[#6B1F1F] focus:shadow-lg transition-all duration-200"
           />
         </div>
@@ -45,7 +45,7 @@
             maxlength="6"
             :placeholder="$t('authorization.codePlaceholder')"
             required
-            class="w-full h-12 rounded-lg border border-gray-300 bg-white px-4 text-gray-800 placeholder-gray-400
+            class="w-full h-12 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-4 text-gray-800 placeholder-gray-400
                    hover:shadow-md focus:outline-none focus:border-[#6B1F1F] focus:shadow-lg transition-all duration-200"
           />
         </div>
@@ -66,7 +66,7 @@
             v-model="newPassword"
             :placeholder="$t('authorization.newPasswordPlaceholder')"
             required
-            class="w-full h-12 rounded-lg border border-gray-300 bg-white px-4 text-gray-800 placeholder-gray-400
+            class="w-full h-12 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-4 text-gray-800 placeholder-gray-400
                    hover:shadow-md focus:outline-none focus:border-[#6B1F1F] focus:shadow-lg transition-all duration-200"
           />
         </div>
@@ -78,7 +78,7 @@
             v-model="confirmPassword"
             :placeholder="$t('authorization.confirmPasswordPlaceholder')"
             required
-            class="w-full h-12 rounded-lg border border-gray-300 bg-white px-4 text-gray-800 placeholder-gray-400
+            class="w-full h-12 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-4 text-gray-800 placeholder-gray-400
                    hover:shadow-md focus:outline-none focus:border-[#6B1F1F] focus:shadow-lg transition-all duration-200"
           />
         </div>

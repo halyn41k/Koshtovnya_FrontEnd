@@ -10,7 +10,7 @@
       <div class="hidden md:flex flex-1 h-[2px] bg-gray-300"></div>
     </header>
 
-    <main class="relative z-20 flex flex-col items-center justify-center w-full md:max-w-xl mx-auto px-6 py-8 bg-white bg-opacity-90 backdrop-blur-md border border-gray-200 rounded-2xl shadow-md">
+    <main class="relative z-20 flex flex-col items-center justify-center w-full md:max-w-xl mx-auto px-6 py-8 bg-white dark:bg-gray-900 bg-opacity-90 backdrop-blur-md border border-gray-200 rounded-2xl shadow-md">
       <form @submit.prevent="submitLogin" class="w-full space-y-5">
         <div class="flex flex-col">
           <label for="email" class="mb-1 text-sm font-medium text-gray-600">
@@ -24,10 +24,10 @@
               @input="validateEmail"
               :placeholder="$t('authorization.emailPlaceholder')"
               required
-              class="w-full h-12 rounded-lg border border-gray-300 bg-white px-4 text-gray-800 placeholder-gray-400
+              class="w-full h-12 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-4 text-gray-800 placeholder-gray-400
                      hover:shadow-md focus:outline-none focus:border-[#6B1F1F] focus:shadow-lg transition-all duration-200"
             />
-            <span v-if="emailError" class="absolute top-full left-0 mt-1 text-xs text-red-600">
+            <span v-if="emailError" class="absolute top-full left-0 mt-1 text-xs text-red-600 dark:text-gray-100">
               {{ $t('authorization.emailInvalid') }}
             </span>
           </div>
@@ -45,7 +45,7 @@
               @input="validatePassword"
               :placeholder="$t('authorization.passwordPlaceholder')"
               required
-              class="w-full h-12 rounded-lg border border-gray-300 bg-white px-4 text-gray-800 placeholder-gray-400
+              class="w-full h-12 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-4 text-gray-800 placeholder-gray-400
                      hover:shadow-md focus:outline-none focus:border-[#6B1F1F] focus:shadow-lg transition-all duration-200"
             />
             <button
@@ -59,7 +59,7 @@
                 class="w-5 h-5 object-contain transition-transform duration-200 hover:scale-110"
               />
             </button>
-            <span v-if="passwordError" class="absolute top-full left-0 mt-1 text-xs text-red-600">
+            <span v-if="passwordError" class="absolute top-full left-0 mt-1 text-xs text-red-600 dark:text-gray-100">
               {{ passwordError }}
             </span>
           </div>
@@ -90,7 +90,7 @@
           <button
             type="button"
             @click="redirectToGoogle"
-            class="w-full h-12 flex items-center justify-center gap-3 border border-gray-300 rounded-xl bg-white text-gray-700 hover:bg-gray-50 transition-shadow shadow-sm hover:shadow-md"
+            class="w-full h-12 flex items-center justify-center gap-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-700 hover:bg-gray-50 transition-shadow shadow-sm hover:shadow-md"
           >
             <img src="@/assets/icons/google.svg" alt="Google" class="w-5 h-5" />
             <span class="text-sm font-medium">{{ $t('authorization.googleLogin') }}</span>

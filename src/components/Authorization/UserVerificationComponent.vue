@@ -11,7 +11,7 @@
       </header>
   
       <!-- Основний контейнер форми -->
-      <main class="relative z-20 flex flex-col items-center justify-center w-full md:max-w-xl mx-auto px-6 py-8 bg-white bg-opacity-90 backdrop-blur-md border border-gray-200 rounded-2xl shadow-md">
+      <main class="relative z-20 flex flex-col items-center justify-center w-full md:max-w-xl mx-auto px-6 py-8 bg-white dark:bg-gray-900 bg-opacity-90 backdrop-blur-md border border-gray-200 rounded-2xl shadow-md">
         <form @submit.prevent="submitVerification" class="w-full space-y-5">
           <!-- Email та Код -->
           <div class="grid grid-cols-1 gap-4">
@@ -25,9 +25,9 @@
                 @input="validateEmail"
                :placeholder="$t('authorization.verification.placeholders.email')"
                 required
-                class="w-full h-12 rounded-lg border border-gray-300 bg-white px-4 text-gray-800 placeholder-gray-400 hover:shadow-md focus:outline-none focus:border-[#6B1F1F] focus:shadow-lg transition-all duration-200"
+                class="w-full h-12 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-4 text-gray-800 placeholder-gray-400 hover:shadow-md focus:outline-none focus:border-[#6B1F1F] focus:shadow-lg transition-all duration-200"
               />
-              <span v-if="emailError" class="absolute top-full left-0 mt-1 text-xs text-red-600">{{ emailError }}</span>
+              <span v-if="emailError" class="absolute top-full left-0 mt-1 text-xs text-red-600 dark:text-gray-100">{{ emailError }}</span>
             </div>
             <!-- Код підтвердження -->
             <div class="flex flex-col relative">
@@ -40,9 +40,9 @@
                 @input="validateCode"
                 :placeholder="$t('authorization.verification.placeholders.code')"
                 required
-                class="w-full h-12 rounded-lg border border-gray-300 bg-white px-4 text-gray-800 placeholder-gray-400 hover:shadow-md focus:outline-none focus:border-[#6B1F1F] focus:shadow-lg transition-all duration-200"
+                class="w-full h-12 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-4 text-gray-800 placeholder-gray-400 hover:shadow-md focus:outline-none focus:border-[#6B1F1F] focus:shadow-lg transition-all duration-200"
               />
-              <span v-if="codeError" class="absolute top-full left-0 mt-1 text-xs text-red-600">{{ codeError }}</span>
+              <span v-if="codeError" class="absolute top-full left-0 mt-1 text-xs text-red-600 dark:text-gray-100">{{ codeError }}</span>
             </div>
           </div>
   

@@ -59,7 +59,7 @@
             </button>
             <ul
               v-if="isLanguageDropdownOpen"
-              class="absolute right-0 mt-2 w-40 bg-white border border-stroke rounded-lg shadow-lg overflow-hidden z-50"
+              class="absolute right-0 mt-2 w-40 bg-white dark:bg-gray-900 border border-stroke rounded-lg shadow-lg overflow-hidden z-50"
             >
               <li>
                 <button
@@ -100,7 +100,7 @@
             </button>
             <ul
               v-if="isCurrencyDropdownOpen"
-              class="absolute right-0 mt-2 w-32 bg-white border border-stroke rounded-lg shadow-lg overflow-hidden z-50"
+              class="absolute right-0 mt-2 w-32 bg-white dark:bg-gray-900 border border-stroke rounded-lg shadow-lg overflow-hidden z-50"
             >
               <li>
                 <button

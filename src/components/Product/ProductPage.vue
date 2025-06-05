@@ -12,7 +12,7 @@
         />
         <button
           @click="openModal"
-          class="absolute top-4 right-4 bg-white/90 p-2 rounded-full shadow-md hover:bg-white/100 transition-colors duration-200"
+          class="absolute top-4 right-4 bg-white dark:bg-gray-900/90 p-2 rounded-full shadow-md hover:bg-white dark:bg-gray-900/100 transition-colors duration-200"
           >
           <img src="@/assets/size_change.png" alt="Змінити розмір" class="w-6 h-6" />
         </button>
@@ -23,16 +23,16 @@
         <!-- TITLE & PRICE -->
         <div class="text-center space-y-2">
           <h1 class="text-2xl font-bold text-gray-900">{{ product.name }}</h1>
-          <hr class="border-gray-300 mx-auto w-24" />
+          <hr class="border-gray-300 dark:border-gray-600 mx-auto w-24" />
 <p
   v-if="product.price && product.currency"
-  class="text-2xl font-semibold text-red-700"
+  class="text-2xl font-semibold text-red-700 dark:text-gray-100"
 >
   {{ formatCurrencyIntl(product.price, product.currency) }}
 </p>
 <p
   v-else
-  class="text-2xl font-semibold text-red-700"
+  class="text-2xl font-semibold text-red-700 dark:text-gray-100"
 >
   Ціна не вказана
 </p>
@@ -80,7 +80,7 @@
 
         <!-- QUANTITY & ACTIONS -->
 <div class="flex items-center space-x-4 pt-4">
-  <div class="min-w-[120px] flex items-center border border-gray-300 rounded-md">
+  <div class="min-w-[120px] flex items-center border border-gray-300 dark:border-gray-600 rounded-md">
     <button @click="decreaseQuantity" :disabled="quantity <= 1" class="px-3 disabled:opacity-50">-</button>
     <span class="px-4">{{ quantity }}</span>
     <button
@@ -113,7 +113,7 @@
             <svg
               v-if="product.is_in_wishlist"
               xmlns="http://www.w3.org/2000/svg"
-              class="w-6 h-6 text-red-600"
+              class="w-6 h-6 text-red-600 dark:text-gray-100"
               viewBox="0 0 24 24"
               fill="currentColor"
             >
@@ -145,9 +145,9 @@
     <!-- SPECIFICATIONS -->
     <section>
       <div class="hidden md:flex items-center mb-4">
-        <hr class="flex-grow border-t-2 border-gray-300" />
+        <hr class="flex-grow border-t-2 border-gray-300 dark:border-gray-600" />
       <h2 class="mx-4 text-2xl font-bold text-gray-900">Характеристики</h2>
-      <hr class="flex-grow border-t-2 border-gray-300" />
+      <hr class="flex-grow border-t-2 border-gray-300 dark:border-gray-600" />
       </div>
       <h2 class="md:hidden text-2xl font-bold text-gray-900 text-center mb-4">Характеристики</h2>
       <div class="w-full">

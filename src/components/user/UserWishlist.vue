@@ -12,7 +12,7 @@
       <div
         v-for="(item, index) in items"
         :key="item.id"
-        class="relative bg-white p-4 sm:p-6 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-200 flex flex-col sm:flex-row gap-4 sm:gap-6"
+        class="relative bg-white dark:bg-gray-900 p-4 sm:p-6 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-200 flex flex-col sm:flex-row gap-4 sm:gap-6"
       >
         <router-link
           :to="`/productpage/${item.id}`"

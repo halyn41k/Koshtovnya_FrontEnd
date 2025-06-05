@@ -11,9 +11,9 @@
           v-model="localData[key]"
           :placeholder="field.placeholder"
           @input="updateData"
-          class="border border-gray-400 p-2 rounded text-black text-[14px] w-full montserrat"
+          class="border border-gray-400 p-2 rounded text-black dark:text-white text-[14px] w-full montserrat"
         />
-        <span v-if="errors[key]" class="text-red-500 text-xs">
+        <span v-if="errors[key]" class="text-red-500 dark:text-gray-100 text-xs">
           {{ errors[key] }}
         </span>
       </div>

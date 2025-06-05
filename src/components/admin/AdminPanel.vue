@@ -13,13 +13,13 @@
       class="w-5 h-4 rounded-sm object-cover"
     />
     <Multiselect
-  v-model="selectedLanguage"
-  :options="languageOptions"
-  :custom-label="opt => opt.name"
-  :track-by="'code'"
-  placeholder="Оберіть мову"
-  class="w-36 custom-multiselect"
-/>
+      v-model="selectedLanguage"
+      :options="languageOptions"
+      :custom-label="opt => opt.name"
+      :track-by="'code'"
+      :placeholder="$t('admin.panel.chooseLanguage')"
+      class="w-36 custom-multiselect"
+    />
 
 
   </div>
@@ -46,7 +46,7 @@
               <span
                 class="text-sm font-black ml-2"
                 style="font-family:'KyivType Titling Black2';"
-              >Коштовня</span>
+              >{{ $t('admin.panel.siteName') }}</span>
             </div>
             <button @click="sidebarCollapsed = !sidebarCollapsed" class="p-1 ml-auto">
               <img
@@ -74,7 +74,7 @@
               ]"
             >
               <img :src="menuItem.icon" alt="" class="w-5 h-5 mr-2" />
-              <span v-if="!sidebarCollapsed">{{ menuItem.title }}</span>
+              <span v-if="!sidebarCollapsed">{{ $t('admin.menu.' + menuItem.title) }}</span>
             </li>
           </ul>
         </div>
@@ -82,7 +82,7 @@
         <div @click="$router.push({ name: 'Home' })" class="px-2 mb-2">
           <div class="flex items-center h-9 px-3 rounded-[4px] cursor-pointer hover:bg-[#D1ABAB] transition">
             <img src="@/assets/icons/home.svg" alt="Home Icon" class="w-5 h-5 mr-2" />
-            <span v-if="!sidebarCollapsed">На головну</span>
+            <span v-if="!sidebarCollapsed">{{ $t('admin.menu.goHome') }}</span>
           </div>
         </div>
 
@@ -92,7 +92,7 @@
             class="flex items-center h-9 px-3 rounded-[4px] cursor-pointer hover:bg-[#D1ABAB] transition"
           >
             <img src="@/assets/exit.png" alt="Exit Icon" class="w-5 h-5 mr-2" />
-            <span v-if="!sidebarCollapsed">Вийти</span>
+            <span v-if="!sidebarCollapsed">{{ $t('admin.menu.logout') }}</span>
           </div>
         </div>
       </aside>
@@ -170,36 +170,35 @@ export default {
       if (!this.user) return [];
       const items = {
         superadmin: [
-          ['Статистика', 'DashboardView', 'stats'],
-          ['Користувачі', Clients, 'people'],
-          ['Працівники', Employees, 'people'],
-          ['Товари', ProductList, 'goods'],
-          ['Замовлення', Orders, 'orders'],
-          ['Звіти', Reports, 'reports'],
-          ['Налаштування', Settings, 'settings'],
-        
+          ['statistics', 'DashboardView', 'stats'],
+          ['users', Clients, 'people'],
+          ['employees', Employees, 'people'],
+          ['products', ProductList, 'goods'],
+          ['orders', Orders, 'orders'],
+          ['reports', Reports, 'reports'],
+          ['settings', Settings, 'settings']
         ],
         admin: [
-          ['Статистика', 'DashboardView', 'stats'],
-          ['Користувачі', Clients, 'people'],
-          ['Працівники', Employees, 'people'],
-          ['Товари', ProductList, 'goods'],
-          ['Замовлення', Orders, 'orders'],
-          ['Права доступу', Settings, 'settings'],
-          ['Налаштування сайту', Settings, 'settings']
+          ['statistics', 'DashboardView', 'stats'],
+          ['users', Clients, 'people'],
+          ['employees', Employees, 'people'],
+          ['products', ProductList, 'goods'],
+          ['orders', Orders, 'orders'],
+          ['accessRights', Settings, 'settings'],
+          ['siteSettings', Settings, 'settings']
         ],
         manager: [
-          ['Статистика', 'DashboardView', 'stats'],
-          ['Користувачі', Clients, 'people'],
-          ['Товари', ProductList, 'goods'],
-          ['Замовлення', Orders, 'orders']
+          ['statistics', 'DashboardView', 'stats'],
+          ['users', Clients, 'people'],
+          ['products', ProductList, 'goods'],
+          ['orders', Orders, 'orders']
         ]
-      };
+      }
       return items[this.user.role].map(([title, comp, icon]) => ({
         title,
         component: comp,
         icon: require(`@/assets/icons/${icon}.svg`)
-      }));
+      }))
     }
   },
   methods: {

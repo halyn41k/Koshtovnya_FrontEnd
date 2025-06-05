@@ -14,7 +14,7 @@
         <div
   v-for="review in visibleReviews"
   :key="review.id"
-  class="min-h-[260px] p-6 rounded-lg border border-gray-200 shadow-md bg-white flex flex-col justify-between"
+  class="min-h-[260px] p-6 rounded-lg border border-gray-200 shadow-md bg-white dark:bg-gray-900 flex flex-col justify-between"
 >
 
             <!-- Зірки -->
@@ -76,7 +76,7 @@
 </template>
 
 <script>
-import axios from 'axios';
+import api from '@/services/api';
 
 export default {
   name: 'TopLatest',
@@ -108,9 +108,7 @@ export default {
     },
     async fetchReviews() {
       try {
-        const { data } = await axios.get(
-          'https://koshtovnya.api-dev.bmax-edu.website/api/reviews/top-latest'
-        );
+        const data = await api.getTopLatestReviews();
         this.reviews = Array.isArray(data?.data) ? data.data : [];
         this.updateVisible();
         this.startAutoSlide();

@@ -11,14 +11,14 @@
     <div class="space-y-4">
       <!-- User Info -->
       <div class="flex items-center space-x-4">
-        <div class="text-red-600 text-xl">👤</div>
+        <div class="text-red-600 dark:text-gray-100 text-xl">👤</div>
         <div>
           <p class="text-gray-700 font-medium">{{ fullName }}</p>
           <p class="text-gray-500 text-sm">Ім’я користувача</p>
         </div>
       </div>
       <div class="flex items-center space-x-4">
-        <div class="text-red-600 text-xl">📞</div>
+        <div class="text-red-600 dark:text-gray-100 text-xl">📞</div>
         <div>
           <p class="text-gray-700 font-medium">{{ customerData.phone || 'Не вказано' }}</p>
           <p class="text-gray-500 text-sm">Телефон</p>

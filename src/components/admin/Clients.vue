@@ -2,13 +2,13 @@
   <main class="w-full p-4 space-y-6 relative">
     <!-- Заголовок та кнопка -->
     <div class="flex justify-between items-center">
-      <h1 class="text-2xl font-semibold">Користувачі</h1>
+      <h1 class="text-2xl font-semibold">{{ $t('admin.clients.title') }}</h1>
       <button
         @click="openAddModal"
         class="flex items-center gap-2 bg-[#6B1F1F] hover:bg-[#A01212] text-white px-4 py-2 rounded"
       >
         <img src="@/assets/icons/plus.svg" alt="Add" class="w-5 h-5" />
-        <span class="font-medium">Додати</span>
+        <span class="font-medium">{{ $t('admin.clients.add') }}</span>
       </button>
     </div>
 
@@ -19,7 +19,7 @@
           v-model="searchQuery"
           @input="onSearch"
           type="text"
-          placeholder="Пошук"
+          :placeholder="$t('admin.clients.search')"
           class="w-full pl-10 pr-4 py-2 border border-[#E0E0E0] rounded focus:outline-none focus:ring focus:ring-pink-200"
         />
         <img
@@ -52,8 +52,8 @@
         />
       </div>
     </th>
-    <th class="px-4 py-2 text-sm font-medium text-gray-600 text-left">Статус</th>
-    <th class="px-4 py-2 text-sm font-medium text-gray-600 text-left">Дії</th>
+    <th class="px-4 py-2 text-sm font-medium text-gray-600 text-left">{{ $t('admin.clients.status') }}</th>
+    <th class="px-4 py-2 text-sm font-medium text-gray-600 text-left">{{ $t('admin.clients.actions') }}</th>
   </tr>
 </thead>
 
@@ -71,7 +71,7 @@
               <td class="px-4 py-2 border-b border-[#E0E0E0] text-sm text-gray-800">{{ client.date }}</td>
               <td class="px-4 py-2 border-b border-[#E0E0E0] text-sm">
                 <span :class="client.is_banned ? 'text-red-600 font-semibold' : 'text-green-600 font-semibold'">
-                  {{ client.is_banned ? '🚫 Забанений' : '✅ Активний' }}
+                  {{ client.is_banned ? $t('admin.clients.banned') : $t('admin.clients.active') }}
                 </span>
               </td>
               <td class="px-4 py-2 border-b border-[#E0E0E0] flex gap-2">
@@ -101,8 +101,8 @@
 
     <!-- Пустий стан -->
     <div v-else class="py-20 text-center text-gray-500">
-      <p v-if="!searchQuery">Поки що не було додано жодного користувача.</p>
-      <p v-else>За запитом «<strong>{{ searchQuery }}</strong>» нічого не знайдено.</p>
+      <p v-if="!searchQuery">{{ $t('admin.clients.noUsers') }}</p>
+      <p v-else>{{ $t('admin.clients.noResults', { query: searchQuery }) }}</p>
     </div>
 
     <!-- Пагінація -->
@@ -178,12 +178,12 @@ export default {
       toastAction: '',
       highlightedUserId: null,
       columns: [
-        { key: 'id', label: 'ID', sortable: true },
-        { key: 'first_name', label: 'Ім’я', sortable: true },
-        { key: 'last_name', label: 'Прізвище', sortable: true },
-        { key: 'email', label: 'Електронна пошта', sortable: true },
-        { key: 'order_id', label: '№ Замовлення', sortable: true },
-        { key: 'date', label: 'Додано', sortable: true },
+        { key: 'id', label: this.$t('admin.orders.id'), sortable: true },
+        { key: 'first_name', label: this.$t('admin.profile.firstName'), sortable: true },
+        { key: 'last_name', label: this.$t('admin.profile.lastName'), sortable: true },
+        { key: 'email', label: 'Email', sortable: true },
+        { key: 'order_id', label: this.$t('admin.orders.id'), sortable: true },
+        { key: 'date', label: this.$t('admin.orders.date'), sortable: true },
 
       ]
     }

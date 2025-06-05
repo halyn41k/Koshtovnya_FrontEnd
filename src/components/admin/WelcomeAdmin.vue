@@ -1,7 +1,7 @@
 <template>
   <section class="welcome-section">
     <p class="welcome-description">
-      Виберіть вкладку зліва, щоб почати керувати сайтом.
+      {{ $t('admin.panel.welcome') }}
     </p>
   </section>
 </template>

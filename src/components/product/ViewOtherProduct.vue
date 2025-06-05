@@ -2,9 +2,9 @@
   <section class="py-16">
     <!-- Заголовок з лініями -->
     <div class="flex items-center my-6">
-      <hr class="flex-grow border-t-2 border-gray-300" />
+      <hr class="flex-grow border-t-2 border-gray-300 dark:border-gray-600" />
       <h2 class="mx-4 text-2xl font-bold text-gray-900">Перегляньте інші товари</h2>
-      <hr class="flex-grow border-t-2 border-gray-300" />
+      <hr class="flex-grow border-t-2 border-gray-300 dark:border-gray-600" />
     </div>
 
     <div class="relative flex items-center justify-center max-w-[1400px] mx-auto">
@@ -40,7 +40,7 @@
     <h3 class="text-lg font-montserrat font-semibold line-clamp-2 h-12">
       {{ product.name }}
     </h3>
-    <p class="text-xl font-semibold text-red-700 mt-1">
+    <p class="text-xl font-semibold text-red-700 dark:text-gray-100 mt-1">
         {{ formatCurrencyIntl(product.price, product.currency) }}
     </p>
   </div>
