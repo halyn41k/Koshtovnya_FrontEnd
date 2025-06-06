@@ -2,7 +2,6 @@
   <div id="app" class="relative bg-white dark:bg-gray-900 text-black dark:text-white min-h-screen">
     <!-- Хедер -->
     <HeaderComponent v-if="!isAdminRoute" />
-
     <!-- Основний контент -->
     <router-view />
 

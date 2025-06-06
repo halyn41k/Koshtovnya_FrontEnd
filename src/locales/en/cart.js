@@ -9,6 +9,6 @@ size: "Size:",
 quantity: "Quantity:",
 summaryTitle: "Total to pay",
 proceedToPayment: "Proceed to payment",
-
+clearCart: "Clear cart",
 }
 };

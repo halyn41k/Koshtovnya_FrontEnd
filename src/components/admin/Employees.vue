@@ -2,7 +2,7 @@
   <main class="w-full p-4 space-y-6 relative">
     <!-- Заголовок та кнопка Додати -->
     <div class="flex justify-between items-center mb-6">
-      <h1 class="text-2xl font-semibold">Працівники</h1>
+      <h1 class="text-2xl font-semibold text-black dark:text-white">Працівники</h1>
       <button
         @click="openAddModal"
         class="flex items-center gap-2 bg-[#6B1F1F] hover:bg-[#A01212] text-white px-4 py-2 rounded"
@@ -20,27 +20,26 @@
           @input="onSearch"
           type="text"
           placeholder="Пошук"
-          class="w-full pl-10 pr-4 py-2 border border-[#E0E0E0] rounded focus:outline-none focus:ring focus:ring-pink-200"
+          class="w-full pl-10 pr-4 py-2 border border-[#E0E0E0] dark:border-[#303b59] dark:bg-[#17223b] dark:text-white rounded focus:outline-none focus:ring focus:ring-pink-200"
         />
         <img
           src="@/assets/icons/search.svg"
           alt="Search"
-          class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 pointer-events-none"
+          class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 pointer-events-none dark:invert"
         />
       </div>
     </div>
 
     <!-- Таблиця -->
     <div v-if="users.length" class="overflow-x-auto">
-      <div class="inline-block min-w-full border border-[#E0E0E0] rounded-md overflow-hidden">
-        <table class="min-w-full bg-white divide-y divide-[#E0E0E0]">
-          <thead class="bg-[#F6E7E7]">
+      <div class="inline-block min-w-full border border-[#E0E0E0] dark:border-[#303b59] rounded-md overflow-hidden">
+        <table class="min-w-full bg-white dark:bg-[#17223b] divide-y divide-[#E0E0E0] dark:divide-[#303b59]">
+          <thead class="bg-[#F6E7E7] dark:bg-[#1f2a42]">
             <tr>
               <th
                 v-for="col in columns"
                 :key="col.key"
-                @click="cycleSort(col.key)"
-                class="px-4 py-2 text-sm font-medium text-gray-600 text-left cursor-pointer select-none"
+                class="px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 text-left cursor-pointer select-none"
               >
                 <div class="inline-flex items-center gap-2">
                   {{ col.label }}
@@ -52,27 +51,30 @@
                   />
                 </div>
               </th>
-              <th class="px-4 py-2 text-sm font-medium text-gray-600 text-left">Керування</th>
+              <th class="px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 text-left">Керування</th>
             </tr>
           </thead>
-          <tbody class="bg-white">
+          <tbody>
             <tr
               v-for="user in users"
               :key="user.id"
-              :class="user.id === highlightedUserId ? 'bg-green-50' : ''"
+              :class="[
+                'border-b border-[#E0E0E0] dark:border-[#303b59]',
+                user.id === highlightedUserId ? 'bg-green-50 dark:bg-green-900/40' : 'dark:bg-[#17223b]'
+              ]"
             >
-              <td class="px-4 py-2 border-b border-[#E0E0E0] text-sm text-gray-800">{{ user.id }}</td>
-              <td class="px-4 py-2 border-b border-[#E0E0E0] text-sm text-gray-800">{{ user.first_name }}</td>
-              <td class="px-4 py-2 border-b border-[#E0E0E0] text-sm text-gray-800">{{ user.email }}</td>
-              <td class="px-4 py-2 border-b border-[#E0E0E0] text-sm text-gray-800">{{ user.phone_number || '—' }}</td>
-              <td class="px-4 py-2 border-b border-[#E0E0E0] text-sm text-gray-800">{{ user.date }}</td>
-              <td class="px-4 py-2 border-b border-[#E0E0E0] text-sm text-gray-800">{{ user.role }}</td>
-              <td class="px-4 py-2 border-b border-[#E0E0E0] flex gap-2">
-                <button @click="openUpdateModal(user)" class="p-1 hover:bg-gray-100 rounded">
-                  <img src="@/assets/icons/edit.svg" class="w-5 h-5" alt="Edit" />
+              <td class="px-4 py-2 text-sm text-gray-800 dark:text-gray-200">{{ user.id }}</td>
+              <td class="px-4 py-2 text-sm text-gray-800 dark:text-gray-200">{{ user.first_name }}</td>
+              <td class="px-4 py-2 text-sm text-gray-800 dark:text-gray-200">{{ user.email }}</td>
+              <td class="px-4 py-2 text-sm text-gray-800 dark:text-gray-200">{{ user.phone_number || '—' }}</td>
+              <td class="px-4 py-2 text-sm text-gray-800 dark:text-gray-200">{{ user.date }}</td>
+              <td class="px-4 py-2 text-sm text-gray-800 dark:text-gray-200">{{ user.role }}</td>
+              <td class="px-4 py-2 flex gap-2">
+                <button @click="openUpdateModal(user)" class="p-1 hover:bg-gray-100 dark:hover:bg-[#2a354e] rounded">
+                  <img src="@/assets/icons/edit.svg" class="w-5 h-5 dark:invert" alt="Edit" />
                 </button>
-                <button @click="deleteUser(user.id)" class="p-1 hover:bg-gray-100 rounded">
-                  <img src="@/assets/icons/delete.svg" class="w-5 h-5" alt="Delete" />
+                <button @click="deleteUser(user.id)" class="p-1 hover:bg-gray-100 dark:hover:bg-[#2a354e] rounded">
+                  <img src="@/assets/icons/delete.svg" class="w-5 h-5 dark:invert" alt="Delete" />
                 </button>
               </td>
             </tr>
@@ -82,7 +84,7 @@
     </div>
 
     <!-- Пустий стан -->
-    <div v-else class="py-20 text-center text-gray-500">
+    <div v-else class="py-20 text-center text-gray-500 dark:text-gray-400">
       <p v-if="!searchQuery">Поки що не було додано жодного працівника.</p>
       <p v-else>За запитом «<strong>{{ searchQuery }}</strong>» нічого не знайдено.</p>
     </div>
@@ -92,7 +94,7 @@
       <button
         @click="goToPageFromUrl(meta.prev)"
         :disabled="!meta.prev"
-        class="px-3 py-1 rounded bg-white border border-[#E0E0E0] hover:bg-gray-100 disabled:opacity-50"
+        class="px-3 py-1 rounded bg-white dark:bg-[#1e273e] border border-[#E0E0E0] dark:border-[#303b59] hover:bg-gray-100 dark:hover:bg-[#2a354e] disabled:opacity-50"
       >&lt;</button>
 
       <button
@@ -100,8 +102,10 @@
         :key="link.label"
         @click="link.url && goToPageFromUrl(link.url)"
         :class="[
-          'px-3 py-1 rounded border border-[#E0E0E0] hover:bg-gray-100',
-          link.active ? 'bg-[#6B1F1F] text-white' : 'bg-white'
+          'px-3 py-1 rounded border border-[#E0E0E0] dark:border-[#303b59]',
+          link.active
+            ? 'bg-[#6B1F1F] text-white'
+            : 'bg-white dark:bg-[#1e273e] text-black dark:text-white hover:bg-gray-100 dark:hover:bg-[#2a354e]'
         ]"
         v-html="link.label"
       ></button>
@@ -109,7 +113,7 @@
       <button
         @click="goToPageFromUrl(meta.next)"
         :disabled="!meta.next"
-        class="px-3 py-1 rounded bg-white border border-[#E0E0E0] hover:bg-gray-100 disabled:opacity-50"
+        class="px-3 py-1 rounded bg-white dark:bg-[#1e273e] border border-[#E0E0E0] dark:border-[#303b59] hover:bg-gray-100 dark:hover:bg-[#2a354e] disabled:opacity-50"
       >&gt;</button>
     </div>
 
@@ -126,12 +130,13 @@
     <!-- Toast -->
     <div
       v-if="showToast"
-      class="fixed bottom-6 left-6 bg-green-100 border border-green-300 text-green-800 px-4 py-2 rounded shadow"
+      class="fixed bottom-6 left-6 bg-green-100 dark:bg-green-800/20 border border-green-300 dark:border-green-700 text-green-800 dark:text-green-300 px-4 py-2 rounded shadow"
     >
       Працівника успішно {{ toastAction }}!
     </div>
   </main>
 </template>
+
 
 <script>
 import axios from 'axios'

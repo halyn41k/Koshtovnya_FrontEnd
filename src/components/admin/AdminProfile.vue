@@ -1,14 +1,13 @@
 <template>
   <div
     @click.self="$emit('close')"
-    class="fixed inset-0 flex items-center justify-center z-50"
-    style="background-color: rgba(0,0,0,0.2);"
+    class="fixed inset-0 flex items-center justify-center z-50 bg-black/20"
   >
-    <div class="relative bg-white rounded-lg p-6 w-full max-w-md mx-4 font-montserrat">
+    <div class="relative bg-white dark:bg-[#1d1d1d] text-black dark:text-white rounded-lg p-6 w-full max-w-md mx-4 font-montserrat shadow-lg transition-all">
       <!-- Кнопка закриття -->
       <button
         @click="$emit('close')"
-        class="absolute top-3 right-3 text-gray-500 hover:text-gray-700"
+        class="absolute top-3 right-3 text-gray-500 dark:text-gray-300 hover:text-gray-700 dark:hover:text-white transition"
       >✕</button>
 
       <!-- Заголовок -->
@@ -19,24 +18,25 @@
         <div class="flex flex-col">
           <label for="first_name" class="mb-1 font-medium">{{ $t('admin.profile.firstName') }}:</label>
           <input
-  id="first_name"
-  type="text"
-  v-model="localFirstName"
-  placeholder="Введіть ім’я"
-  class="h-10 px-3 border border-gray-300 rounded focus:outline-none focus:ring focus:ring-pink-200"
-/>
-
+            id="first_name"
+            type="text"
+            v-model="localFirstName"
+            placeholder="Введіть ім’я"
+            class="h-10 px-3 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-[#2a2a2a] text-black dark:text-white focus:outline-none focus:ring focus:ring-pink-200 dark:focus:ring-pink-400"
+          />
         </div>
+
         <div class="flex flex-col">
           <label for="last_name" class="mb-1 font-medium">{{ $t('admin.profile.lastName') }}:</label>
           <input
             id="last_name"
             type="text"
-            placeholder="Введіть прізвище"
             v-model="localLastName"
-            class="h-10 px-3 border border-gray-300 rounded focus:outline-none focus:ring focus:ring-pink-200"
+            placeholder="Введіть прізвище"
+            class="h-10 px-3 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-[#2a2a2a] text-black dark:text-white focus:outline-none focus:ring focus:ring-pink-200 dark:focus:ring-pink-400"
           />
         </div>
+
         <div class="flex flex-col">
           <label for="second_name" class="mb-1 font-medium">{{ $t('admin.profile.patronymic') }}:</label>
           <input
@@ -44,9 +44,10 @@
             type="text"
             v-model="localSecondName"
             placeholder="Введіть по батькові"
-            class="h-10 px-3 border border-gray-300 rounded focus:outline-none focus:ring focus:ring-pink-200"
+            class="h-10 px-3 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-[#2a2a2a] text-black dark:text-white focus:outline-none focus:ring focus:ring-pink-200 dark:focus:ring-pink-400"
           />
         </div>
+
         <div class="flex flex-col">
           <label for="role" class="mb-1 font-medium">{{ $t('admin.profile.role') }}:</label>
           <input
@@ -54,18 +55,19 @@
             type="text"
             v-model="localRole"
             readonly
-            class="h-10 px-3 bg-gray-100 border border-gray-300 rounded"
+            class="h-10 px-3 bg-gray-100 dark:bg-[#333] border border-gray-300 dark:border-gray-600 rounded text-black dark:text-white"
           />
         </div>
+
         <div class="flex flex-col">
           <label for="email" class="mb-1 font-medium">{{ $t('admin.profile.email') }}:</label>
           <input
             id="email"
             type="email"
             v-model="localEmail"
-            placeholder="Введіть email"
             readonly
-            class="h-10 px-3 bg-gray-100 border border-gray-300 rounded"
+            placeholder="Введіть email"
+            class="h-10 px-3 bg-gray-100 dark:bg-[#333] border border-gray-300 dark:border-gray-600 rounded text-black dark:text-white"
           />
         </div>
       </div>
@@ -84,6 +86,7 @@
     </div>
   </div>
 </template>
+
 
 <script>
 export default {

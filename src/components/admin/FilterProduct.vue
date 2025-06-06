@@ -1,13 +1,12 @@
 <template>
   <div
-  class="filter-container w-[350px] min-h-[550px] p-6 bg-[#fff7f6] shadow-xl rounded-lg font-montserrat"
-  @keydown.escape="$emit('close')"
->
-
+    class="filter-container w-[350px] min-h-[550px] p-6 bg-[#fff7f6] dark:bg-[#17223b] text-black dark:text-white shadow-xl rounded-lg font-montserrat"
+    @keydown.escape="$emit('close')"
+  >
     <section v-if="!loading" class="space-y-8">
       <!-- Доступність -->
-      <div class="section bg-white p-4 rounded-lg shadow-sm">
-        <h2 class="section-title text-center text-xl font-bold text-gray-800 mb-4">
+      <div class="section bg-white dark:bg-[#1f2a42] p-4 rounded-lg shadow-sm">
+        <h2 class="section-title text-center text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">
           Доступність
         </h2>
         <div class="space-y-3">
@@ -22,7 +21,7 @@
               v-model="filters.availability"
               class="custom-checkbox"
             />
-            <span class="text-base text-gray-700">
+            <span class="text-base text-gray-700 dark:text-gray-300">
               {{ item.name }} ({{ item.count }})
             </span>
           </label>
@@ -30,8 +29,8 @@
       </div>
 
       <!-- Рейтинг -->
-      <div class="section bg-white p-4 rounded-lg shadow-sm">
-        <h3 class="subsection-title mb-3 text-lg font-semibold text-gray-800">
+      <div class="section bg-white dark:bg-[#1f2a42] p-4 rounded-lg shadow-sm">
+        <h3 class="subsection-title mb-3 text-lg font-semibold text-gray-800 dark:text-gray-100">
           Рейтинг
         </h3>
         <div class="space-y-3">
@@ -42,14 +41,14 @@
               v-model="filters.rating"
               class="custom-checkbox"
             />
-            <span class="text-base text-gray-700">{{ star }} зірки</span>
+            <span class="text-base text-gray-700 dark:text-gray-300">{{ star }} зірки</span>
           </label>
         </div>
       </div>
 
       <!-- Розмір -->
-      <div class="section bg-white p-4 rounded-lg shadow-sm">
-        <h3 class="subsection-title mb-3 text-lg font-semibold text-gray-800">
+      <div class="section bg-white dark:bg-[#1f2a42] p-4 rounded-lg shadow-sm">
+        <h3 class="subsection-title mb-3 text-lg font-semibold text-gray-800 dark:text-gray-100">
           Розмір (см)
         </h3>
         <Slider
@@ -63,8 +62,8 @@
       </div>
 
       <!-- Вага -->
-      <div class="section bg-white p-4 rounded-lg shadow-sm">
-        <h3 class="subsection-title mb-3 text-lg font-semibold text-gray-800">
+      <div class="section bg-white dark:bg-[#1f2a42] p-4 rounded-lg shadow-sm">
+        <h3 class="subsection-title mb-3 text-lg font-semibold text-gray-800 dark:text-gray-100">
           Вага (г)
         </h3>
         <Slider
@@ -78,11 +77,10 @@
       </div>
 
       <!-- Ціна -->
-      <div class="section bg-white p-4 rounded-lg shadow-sm">
-        <h3 class="subsection-title mb-3 text-lg font-semibold text-gray-800">
-  Ціна ({{ selectedCurrency === 'USD' ? '$' : '₴' }})
-</h3>
-
+      <div class="section bg-white dark:bg-[#1f2a42] p-4 rounded-lg shadow-sm">
+        <h3 class="subsection-title mb-3 text-lg font-semibold text-gray-800 dark:text-gray-100">
+          Ціна ({{ selectedCurrency === 'USD' ? '$' : '₴' }})
+        </h3>
         <Slider
           class="w-full"
           v-model="filters.price"
@@ -94,13 +92,13 @@
       </div>
 
       <!-- Колір -->
-      <div class="section bg-white p-4 rounded-lg shadow-sm">
-        <h3 class="subsection-title mb-3 text-lg font-semibold text-gray-800">
+      <div class="section bg-white dark:bg-[#1f2a42] p-4 rounded-lg shadow-sm">
+        <h3 class="subsection-title mb-3 text-lg font-semibold text-gray-800 dark:text-gray-100">
           Колір
         </h3>
         <select
           v-model="filters.color"
-          class="w-full p-2 border border-gray-300 bg-white rounded focus:outline-none focus:ring-2 focus:ring-[#6B1F1F]"
+          class="w-full p-2 border border-gray-300 dark:border-[#303b59] bg-white dark:bg-[#17223b] text-black dark:text-white rounded focus:outline-none focus:ring-2 focus:ring-[#6B1F1F]"
         >
           <option value="">(без фільтра)</option>
           <option v-for="color in sortedColorOptions" :key="color" :value="color">
@@ -110,8 +108,8 @@
       </div>
 
       <!-- Тип бісеру -->
-      <div class="section bg-white p-4 rounded-lg shadow-sm">
-        <h3 class="subsection-title mb-3 text-lg font-semibold text-gray-800">
+      <div class="section bg-white dark:bg-[#1f2a42] p-4 rounded-lg shadow-sm">
+        <h3 class="subsection-title mb-3 text-lg font-semibold text-gray-800 dark:text-gray-100">
           Тип бісеру
         </h3>
         <div class="space-y-3">
@@ -126,7 +124,7 @@
               v-model="filters.beadTypes"
               class="custom-checkbox"
             />
-            <span class="text-base text-gray-700">
+            <span class="text-base text-gray-700 dark:text-gray-300">
               {{ item.name }} ({{ item.count }})
             </span>
           </label>
@@ -134,8 +132,8 @@
       </div>
 
       <!-- Виробник бісеру -->
-      <div class="section bg-white p-4 rounded-lg shadow-sm">
-        <h3 class="subsection-title mb-3 text-lg font-semibold text-gray-800">
+      <div class="section bg-white dark:bg-[#1f2a42] p-4 rounded-lg shadow-sm">
+        <h3 class="subsection-title mb-3 text-lg font-semibold text-gray-800 dark:text-gray-100">
           Виробник бісеру
         </h3>
         <div class="space-y-3">
@@ -150,7 +148,7 @@
               v-model="filters.producers"
               class="custom-checkbox"
             />
-            <span class="text-base text-gray-700">
+            <span class="text-base text-gray-700 dark:text-gray-300">
               {{ item.origin_country }} ({{ item.count }})
             </span>
           </label>
@@ -158,33 +156,31 @@
       </div>
 
       <!-- Категорія -->
-      <!-- Категорія -->
-<div
-  v-if="!hideCategory"
-  class="section bg-white p-4 rounded-lg shadow-sm"
->
-  <h3 class="subsection-title mb-3 text-lg font-semibold text-gray-800">
-    Категорія
-  </h3>
-  <div class="space-y-3">
-    <label
-      v-for="cat in categoryOptions"
-      :key="cat"
-      class="flex items-center space-x-3"
-    >
-      <input
-        type="checkbox"
-        :value="cat"
-        v-model="filters.category"
-        class="custom-checkbox"
-      />
-      <span class="text-base text-gray-700">
-        {{ cat }}
-      </span>
-    </label>
-  </div>
-</div>
-
+      <div
+        v-if="!hideCategory"
+        class="section bg-white dark:bg-[#1f2a42] p-4 rounded-lg shadow-sm"
+      >
+        <h3 class="subsection-title mb-3 text-lg font-semibold text-gray-800 dark:text-gray-100">
+          Категорія
+        </h3>
+        <div class="space-y-3">
+          <label
+            v-for="cat in categoryOptions"
+            :key="cat"
+            class="flex items-center space-x-3"
+          >
+            <input
+              type="checkbox"
+              :value="cat"
+              v-model="filters.category"
+              class="custom-checkbox"
+            />
+            <span class="text-base text-gray-700 dark:text-gray-300">
+              {{ cat }}
+            </span>
+          </label>
+        </div>
+      </div>
 
       <!-- Кнопка застосувати -->
       <div class="flex justify-center">
@@ -197,11 +193,12 @@
       </div>
     </section>
 
-    <div v-else class="text-center text-gray-500 py-8">
+    <div v-else class="text-center text-gray-500 dark:text-gray-400 py-8">
       Завантаження фільтрів...
     </div>
   </div>
 </template>
+
 
 <script>
 import { ref, reactive, watch, onMounted, computed, watchEffect} from 'vue'

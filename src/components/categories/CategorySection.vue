@@ -2,7 +2,7 @@
   <section class="font-montserrat">
     <!-- HEADER -->
     <div class="px-8 pt-[200px] pb-4">
-      <h2 class="title-kyiv text-3xl mb-2">{{ computedTitle }}</h2>
+      <h2 class="title-kyiv text-3xl mb-2 dark:invert">{{ computedTitle }}</h2>
 
       <div class="flex items-center justify-between mb-2">
         <p class="text-lg font-medium">Знайдено {{ totalCount }} товарів</p>
@@ -21,7 +21,7 @@
           v-for="tag in activeTags"
           :key="tag.key + tag.value"
           @click="removeTag(tag)"
-          class="px-3 py-1 bg-gray-200 rounded-full flex items-center space-x-1"
+class="px-3 py-1 bg-gray-200 dark:bg-[#303b59] text-gray-800 dark:text-gray-100 rounded-full flex items-center space-x-1 transition"
         >
           <span>{{ tag.label }}</span>
           <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -30,7 +30,7 @@
         </button>
         <button
           @click="clearAll"
-          class="px-3 py-1 bg-red-100 text-red-700 dark:text-gray-100 rounded-full text-sm"
+class="px-3 py-1 bg-gray-200 dark:bg-[#303b59] text-gray-800 dark:text-gray-100 rounded-full flex items-center space-x-1 transition"
         >
           Очистити всі
         </button>
@@ -90,7 +90,7 @@
           <article
             v-for="product in visibleProducts"
             :key="product.id"
-            class="bg-[#fff7f6] border border-gray-200 rounded-2xl shadow-md hover:shadow-lg transform hover:-translate-y-2 transition duration-300 overflow-hidden flex flex-col"
+            class="bg-[#fff7f6] dark:bg-[#17223b] border-2 border-gray-200 dark:border-[#303b59] rounded-2xl shadow-md hover:shadow-lg transform hover:-translate-y-1 transition-all duration-500 ease-in-out flex flex-col overflow-hidden"
           >
             <router-link :to="`/productpage/${product.id}`" class="flex-1 flex flex-col">
               <div class="h-48 overflow-hidden">
@@ -150,7 +150,8 @@
   </div>
              
             <div class="px-3 mb-6 flex justify-between items-center">
-            <span class="text-base font-montserrat font-medium text-gray-800">
+            <span class="text-base font-montserrat font-medium text-gray-800 dark:text-white">
+
               {{ product.bead_producer_name }}
             </span>
             <button
@@ -197,8 +198,11 @@
 <button
   v-if="product.has_available_variant"
   @click="addToCart(product)"
-  class="w-full h-11 bg-[#6B1F1F] hover:bg-[#A01212] text-white font-semibold rounded-lg flex items-center justify-between px-4 transition duration-300"
+  class="w-full h-11 bg-[#6B1F1F] hover:bg-[#861818] dark:bg-[#A01212] dark:hover:bg-[#c42e2e] 
+         text-white font-montserrat font-semibold rounded-lg flex items-center justify-between px-4 
+         transition-all duration-300 ease-in-out shadow-sm hover:shadow-md"
 >
+
   <span>Купити</span>
   <img src="@/assets/miniarrow.png" alt="arrow" class="w-5 h-4" />
 </button>
@@ -207,8 +211,9 @@
 <button
   v-else
   @click="notifyWhenAvailable(product)"
-  class="w-full h-11 bg-gray-300 text-gray-700 font-semibold rounded-lg flex items-center justify-center px-4 transition duration-300"
+  class="w-full h-11 bg-gray-300 text-gray-700 dark:bg-[#3c465f] dark:text-gray-200 font-montserrat font-semibold rounded-lg flex items-center justify-center px-4 transition duration-300"
 >
+
   Повідомити про наявність
 </button>
 

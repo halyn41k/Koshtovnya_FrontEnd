@@ -5,7 +5,7 @@
       class="bg-white rounded-lg w-full max-w-md mx-4 p-6 text-center font-montserrat shadow-lg"
     >
       <h2 class="text-xl font-semibold mb-4">{{ $t('admin.deleteProduct.title') }}</h2>
-      <p class="text-gray-700">
+      <p class="text-gray-800 dark:text-gray-100">
         {{ $t('admin.deleteProduct.question', { name: product.name }) }}
       </p>
       <div class="flex justify-center space-x-4 mt-6">

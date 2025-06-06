@@ -1,5 +1,5 @@
 <template>
-  <main class="min-h-screen font-sans pt-[150px] bg-[url('@/assets/cartpattern.png')] bg-cover">
+<main class="min-h-screen font-sans pt-[150px] bg-[url('@/assets/cartpattern.png')] bg-cover dark:bg-[#1b2130] text-gray-900 dark:text-white transition-all">
     <header class="flex items-center justify-center gap-4 py-8">
       <div class="h-px bg-gray-300 flex-1"></div>
       <h1 class="text-4xl font-black text-center" style="font-family: 'KyivType Titling Black2';">
@@ -10,19 +10,25 @@
     </header>
 
     <section class="container mx-auto px-4 md:px-8 lg:px-16 flex flex-col lg:flex-row gap-8">
-      <!-- Items List із скролом -->
-      <div class="flex-1 space-y-6">
+   <div class="flex-1 space-y-6">
+  <!-- 🔴 Кнопка очистки -->
+  <div v-if="cartItems.length > 0" class="flex justify-end mb-4">
+    <button
+      @click="clearCart"
+      class="px-4 py-2 bg-red-100 text-red-700 font-medium rounded-lg hover:bg-red-200 transition"
+    >
+      {{ $t('cart.clearCart') }}
+    </button>
+  </div>
 
+  <!-- 🔄 Лоадер -->
+  <Loader v-if="loading" class="mx-auto" />
 
-        <Loader v-if="loading" class="mx-auto" />
-        <!-- Порожній стан -->
-<div
-  v-else-if="cartItems.length === 0"
-  class="flex items-center justify-center text-center min-h-[400px] w-full empty-cart-message lg:pl-5"
->
-
-
-  <div class="flex flex-col items-center">
+  <!-- 🧺 Порожній кошик -->
+  <div
+    v-else-if="cartItems.length === 0"
+    class="flex flex-col items-center"
+  >
     <img src="@/assets/icons/empty-cart.svg" alt="Порожній кошик" class="w-24 h-24 mb-6 opacity-50" />
     <p class="text-2xl font-semibold text-gray-600 mb-2">  {{ $t('cart.emptyTitle') }}</p>
     <p class="text-base text-gray-400">{{ $t('cart.emptySubtitle') }}</p>
@@ -33,21 +39,18 @@
       {{ $t('cart.goToCatalog') }}
     </router-link>
   </div>
+
+  <!-- 🛒 Список товарів -->
+  <CartItem
+    v-else
+    v-for="item in cartItems"
+    :key="item.id"
+    :item="item"
+    @change-quantity="updateCartItem"
+    @remove-item="removeItem"
+    @change-size="updateCartItem"
+  />
 </div>
-
-
-
-
-        <CartItem
-          v-else
-          v-for="item in cartItems"
-          :key="item.id"
-          :item="item"
-          @change-quantity="updateCartItem"
-          @remove-item="removeItem"
-          @change-size="updateCartItem"
-        />
-      </div>
 
       <!-- Summary: mobile first, desktop last -->
       <div class="w-full order-first lg:order-last lg:w-auto">
@@ -80,6 +83,25 @@ export default {
     };
   },
   methods: {
+    async clearCart() {
+  if (!confirm("Очистити весь кошик?")) return;
+
+  try {
+    this.loading = true;
+    const deletePromises = this.cartItems.map(item =>
+      api.removeFromCart(item.id)
+    );
+    await Promise.all(deletePromises);
+    this.cartItems = [];
+    bus.emit('cart-updated');
+  } catch (err) {
+    console.error("Помилка при очищенні кошика:", err);
+    alert("Не вдалося очистити кошик.");
+  } finally {
+    this.loading = false;
+  }
+},
+
     async fetchCartItems() {
       this.loading = true;
       try {

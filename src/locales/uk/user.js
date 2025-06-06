@@ -59,7 +59,8 @@ orderDetails: "Деталі замовлення",
 wishlistTitle: "Список бажаного",
 wishlistEmpty: "Ваш список бажаного порожній :(",
 buy: "Купити",
-notAvailable: "Немає в наявності"
+notAvailable: "Немає в наявності",
+clearWishlist: "Очистити список",
 
 }
 };

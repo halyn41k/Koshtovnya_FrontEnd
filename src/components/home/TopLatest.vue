@@ -14,8 +14,9 @@
         <div
   v-for="review in visibleReviews"
   :key="review.id"
-  class="min-h-[260px] p-6 rounded-lg border border-gray-200 shadow-md bg-white dark:bg-gray-900 flex flex-col justify-between"
+  class="min-h-[260px] p-6 rounded-lg border border-gray-200 dark:border-gray-700 shadow-md bg-white dark:bg-[#1F2937] flex flex-col justify-between transition-colors duration-300"
 >
+
 
             <!-- Зірки -->
             <div class="flex items-center mb-3">
@@ -40,19 +41,21 @@
                 alt="quote"
                 class="w-6 h-6 mr-3 mt-1 flex-shrink-0"
               />
-              <p class="text-gray-700 whitespace-pre-line leading-relaxed text-sm">
-                {{ review.comment }}
-              </p>
+              <p class="text-gray-700 dark:text-gray-300 whitespace-pre-line leading-relaxed text-sm">
+  {{ review.comment }}
+</p>
+
             </div>
 
             <!-- Автор -->
             <div class="flex items-center space-x-4 mt-auto">
-              <div
-                v-if="!review.user_image"
-                class="w-10 h-10 rounded-full flex items-center justify-center bg-gray-200 text-gray-700 font-bold text-sm uppercase overflow-hidden"
-              >
-                {{ getInitials(review.user_first_name, review.user_last_name) }}
-              </div>
+             <div
+  v-if="!review.user_image"
+  class="w-10 h-10 rounded-full flex items-center justify-center bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-white font-bold text-sm uppercase overflow-hidden"
+>
+  {{ getInitials(review.user_first_name, review.user_last_name) }}
+</div>
+
               <img
                 v-else
                 :src="review.user_image"
@@ -60,12 +63,14 @@
                 class="w-10 h-10 rounded-full object-cover"
               />
               <div>
-                <p class="font-semibold text-gray-900 leading-tight">
-                  {{ review.user_first_name }} {{ review.user_last_name }}
-                </p>
-                <p class="text-sm text-gray-500">
-                  {{ review.date }}
-                </p>
+                <p class="font-semibold text-gray-900 dark:text-white leading-tight">
+  {{ review.user_first_name }} {{ review.user_last_name }}
+</p>
+<p class="text-sm text-gray-500 dark:text-gray-400">
+  {{ review.date }}
+</p>
+
+                
               </div>
             </div>
           </div>

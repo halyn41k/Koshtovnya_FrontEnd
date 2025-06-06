@@ -10,6 +10,7 @@ proceedToPayment: "Перейти до оплати",
 removeItem: "Видалити товар",
 size: "Розмір:",
 quantity: "Кількість:",
+clearCart: "Очистити кошик",
 
 }
 };

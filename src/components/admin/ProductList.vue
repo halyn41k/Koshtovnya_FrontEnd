@@ -1,8 +1,8 @@
-<template> 
+<template>
   <main class="w-full p-4 space-y-6 relative">
-    <!-- Заголовок та кнопки -->
+    <!-- Заголовок та кнопка -->
     <div class="flex justify-between items-center">
-      <h1 class="text-2xl font-semibold text-gray-800">{{ $t('admin.products.title') }}</h1>
+      <h1 class="text-2xl font-semibold text-gray-800 dark:text-gray-100">{{ $t('admin.products.title') }}</h1>
       <button
         @click="openAddModal"
         class="flex items-center gap-2 bg-[#6B1F1F] hover:bg-[#A01212] text-white px-4 py-2 rounded text-sm transition"
@@ -12,194 +12,177 @@
       </button>
     </div>
 
-    <!-- Панель управління: Фільтр + Пошук -->
+    <!-- Фільтр і пошук -->
     <div class="flex items-center gap-2 mt-3">
       <button
         @click="openFilter"
-        class="flex items-center gap-2 px-2 py-1 rounded-md hover:bg-gray-200 transition"
+        class="flex items-center gap-2 px-2 py-1 rounded-md hover:bg-gray-200 dark:hover:bg-[#333] transition"
       >
-        <span class="text-sm font-semibold text-gray-700">{{ $t('admin.products.filter') }}</span>
+        <span class="text-sm font-semibold text-gray-700 dark:text-gray-200">{{ $t('admin.products.filter') }}</span>
         <img src="@/assets/icons/filter.svg" alt="Filter icon" class="w-4 h-4" />
       </button>
 
-
+      <!-- Активні теги -->
       <div v-if="activeTags.length" class="flex flex-wrap gap-2 mt-4">
-  <button
-    v-for="tag in activeTags"
-    :key="tag.key + tag.value"
-    @click="removeTag(tag)"
-    class="px-3 py-1 bg-gray-200 rounded-full flex items-center space-x-1"
-  >
-    <span>{{ tag.label }}</span>
-    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-      <path d="M18 6L6 18M6 6l12 12" />
-    </svg>
-  </button>
-  <button
-    @click="clearAllFilters"
-    class="px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm"
-  >
-    {{ $t('admin.products.clearAll') }}
-  </button>
-</div>
+        <button
+          v-for="tag in activeTags"
+          :key="tag.key + tag.value"
+          @click="removeTag(tag)"
+          class="px-3 py-1 bg-gray-200 dark:bg-[#333] rounded-full flex items-center space-x-1 text-sm text-black dark:text-white"
+        >
+          <span>{{ tag.label }}</span>
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M18 6L6 18M6 6l12 12" />
+          </svg>
+        </button>
+        <button
+          @click="clearAllFilters"
+          class="px-3 py-1 bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-200 rounded-full text-sm"
+        >
+          {{ $t('admin.products.clearAll') }}
+        </button>
+      </div>
 
+      <!-- Поле пошуку -->
       <div class="w-64 ml-auto">
         <div
-          class="flex items-center h-8 bg-red-50 rounded-md border border-transparent focus-within:border-black transition overflow-hidden"
+          class="flex items-center h-8 bg-red-50 dark:bg-[#303b59] rounded-md border border-transparent focus-within:border-black transition overflow-hidden"
         >
           <input
             v-model="searchQuery"
             @input="onSearch"
             type="text"
             :placeholder="$t('admin.products.search')"
-            class="flex-1 px-3 py-1 bg-transparent outline-none text-red-900 text-sm"
+            class="flex-1 px-3 py-1 bg-transparent outline-none text-red-900 dark:text-red-100 text-sm"
           />
           <img src="@/assets/icons/search.svg" alt="Search icon" class="w-4 h-4 mr-3 pointer-events-none" />
         </div>
       </div>
     </div>
 
-    <!-- В ProductList.vue -->
-<div
-  v-if="showFilter"
-  class="fixed inset-0 z-[9998]"
-  @click.self="closeFilter"
->
-  <!-- Замість FilterProduct просто переконайся що є подія applyFilters -->
-<FilterProduct
-  v-if="showFilter"
-  class="fixed top-0 right-0 bottom-0 z-[9999] bg-[#fff7f6] w-[350px] shadow-xl"
-  :initialFilters="currentFilters"
-  @applyFilters="applyFilters"
-  @closeFilter="closeFilter"
-/>
+    <!-- Фільтр праворуч -->
+    <div v-if="showFilter" class="fixed inset-0 z-[9998]" @click.self="closeFilter">
+      <FilterProduct
+        class="fixed top-0 right-0 bottom-0 z-[9999] bg-[#fff7f6] dark:bg-[#2b2b2b] w-[350px] shadow-xl"
+        :initialFilters="currentFilters"
+        @applyFilters="applyFilters"
+        @closeFilter="closeFilter"
+      />
+    </div>
 
-
-
-
-</div>
-
-
+    <!-- Список товарів -->
     <div v-if="products.length" class="space-y-5 mt-5">
       <div
         v-for="product in products"
-          @click="openProductDetails(product.id)"
-
         :key="product.id"
-        
+        @click="openProductDetails(product.id)"
         :class="[
-  'border border-[#E0E0E0] rounded-lg p-3 bg-white cursor-pointer transition transform hover:scale-[1.01] hover:shadow-md',
-  product.is_deleted ? 'opacity-50' : ''
-]"
-
+          'border rounded-lg p-3 bg-white dark:bg-[#303b59] dark:border-[#444] cursor-pointer transition transform hover:scale-[1.01] hover:shadow-md',
+          product.is_deleted ? 'opacity-50' : ''
+        ]"
       >
         <div class="flex justify-between items-center mb-2">
-          <h2 class="text-lg font-bold">{{ product.name }}</h2>
+          <h2 class="text-lg font-bold text-black dark:text-white">{{ product.name }}</h2>
           <div class="flex gap-3">
-  <button
-    v-if="!product.is_deleted"
-  @click.stop="openUpdateModal(product)"
-    class="w-10 h-10 flex items-center justify-center rounded-md hover:bg-gray-100 transition"
-    aria-label="Редагувати"
-  >
-    <img src="@/assets/icons/edit.svg" alt="Edit" class="w-7 h-7 sm:w-8 sm:h-8" />
-
-  </button>
-  <button
-    v-if="!product.is_deleted"
-  @click.stop="deleteProduct(product.id)"
-    class="w-10 h-10 flex items-center justify-center rounded-md hover:bg-gray-100 transition"
-    aria-label="Видалити"
-  >
-    <img src="@/assets/icons/delete.svg" alt="Delete" class="w-7 h-7 sm:w-8 sm:h-8" />
-  </button>
-  <button
-    v-if="product.is_deleted"
-  @click.stop="restoreProduct(product.id)"
-    class="w-10 h-10 flex items-center justify-center rounded-md hover:bg-gray-100 transition"
-    aria-label="Відновити"
-  >
-    <img src="@/assets/icons/restore.svg" alt="Restore" class="w-7 h-7 sm:w-8 sm:h-8" />
-  </button>
-</div>
-
+            <button
+              v-if="!product.is_deleted"
+              @click.stop="openUpdateModal(product)"
+              class="w-10 h-10 flex items-center justify-center rounded-md hover:bg-gray-100 dark:hover:bg-[#333] transition"
+              aria-label="Редагувати"
+            >
+              <img src="@/assets/icons/edit.svg" alt="Edit" class="w-7 h-7 sm:w-8 sm:h-8" />
+            </button>
+            <button
+              v-if="!product.is_deleted"
+              @click.stop="deleteProduct(product.id)"
+              class="w-10 h-10 flex items-center justify-center rounded-md hover:bg-gray-100 dark:hover:bg-[#333] transition"
+              aria-label="Видалити"
+            >
+              <img src="@/assets/icons/delete.svg" alt="Delete" class="w-7 h-7 sm:w-8 sm:h-8" />
+            </button>
+            <button
+              v-if="product.is_deleted"
+              @click.stop="restoreProduct(product.id)"
+              class="w-10 h-10 flex items-center justify-center rounded-md hover:bg-gray-100 dark:hover:bg-[#333] transition"
+              aria-label="Відновити"
+            >
+              <img src="@/assets/icons/restore.svg" alt="Restore" class="w-7 h-7 sm:w-8 sm:h-8" />
+            </button>
+          </div>
         </div>
         <div class="flex items-center gap-5">
           <div class="p-2">
             <img :src="product.image_url" alt="Product image" class="w-26 h-14 object-cover rounded-md" />
           </div>
           <div class="flex flex-col gap-1">
-            <div class="text-base font-semibold text-red-900">{{ product.price }} грн</div>
-            <div class="text-sm text-gray-700">{{ product.bead_producer_name }}</div>
+            <div class="text-base font-semibold text-red-900 dark:text-red-200">{{ product.price }} грн</div>
+            <div class="text-sm text-gray-700 dark:text-gray-400">{{ product.bead_producer_name }}</div>
           </div>
         </div>
       </div>
     </div>
 
+    <!-- Якщо немає продуктів -->
     <div
       v-else-if="!searchQuery"
-      class="flex items-center justify-center border border-[#E0E0E0] bg-gray-50 rounded-lg mt-10 h-48 font-semibold text-sm"
+      class="flex items-center justify-center border border-[#E0E0E0] dark:border-[#444] bg-gray-50 dark:bg-[#2a2a2a] rounded-lg mt-10 h-48 font-semibold text-sm text-gray-700 dark:text-gray-300"
     >
       Поки що не було додано жодного товару.
     </div>
     <div
       v-else
-      class="flex items-center justify-center border border-[#E0E0E0] bg-gray-50 rounded-lg mt-10 h-48 font-semibold text-sm"
+      class="flex items-center justify-center border border-[#E0E0E0] dark:border-[#444] bg-gray-50 dark:bg-[#2a2a2a] rounded-lg mt-10 h-48 font-semibold text-sm text-gray-700 dark:text-gray-300"
     >
       За запитом «<strong>{{ searchQuery }}</strong>» нічого не знайдено.
     </div>
 
-<div v-if="meta && paginationLinks().length" class="flex justify-center items-center gap-2 mt-5 h-12">
-  <!-- Стрілка вліво -->
-  <button
-    @click="changePage(meta.current_page - 1)"
-    :disabled="meta.current_page === 1"
-    class="w-9 h-9 rounded-md text-sm shadow bg-white hover:bg-gray-100 disabled:bg-gray-200 disabled:cursor-not-allowed transition"
-  >
-    &lt;
-  </button>
+    <!-- Пагінація -->
+    <div v-if="meta && paginationLinks().length" class="flex justify-center items-center gap-2 mt-5 h-12">
+      <button
+        @click="changePage(meta.current_page - 1)"
+        :disabled="meta.current_page === 1"
+        class="w-9 h-9 rounded-md text-sm shadow bg-white dark:bg-[#2c2c2c] hover:bg-gray-100 dark:hover:bg-[#3a3a3a] disabled:bg-gray-200 disabled:cursor-not-allowed transition"
+      >
+        &lt;
+      </button>
+      <button
+        v-for="(link, index) in paginationLinks()"
+        :key="index"
+        @click="changePage(link.page)"
+        :class="[
+          'w-9 h-9 rounded-md text-sm shadow transition',
+          link.active
+            ? 'bg-[#6B1F1F] text-white shadow-lg'
+            : 'bg-white dark:bg-[#2c2c2c] text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#3a3a3a]'
+        ]"
+      >
+        {{ link.label }}
+      </button>
+      <button
+        @click="changePage(meta.current_page + 1)"
+        :disabled="meta.current_page === meta.last_page"
+        class="w-9 h-9 rounded-md text-sm shadow bg-white dark:bg-[#2c2c2c] hover:bg-gray-100 dark:hover:bg-[#3a3a3a] disabled:bg-gray-200 disabled:cursor-not-allowed transition"
+      >
+        &gt;
+      </button>
+    </div>
 
-  <!-- Номери сторінок -->
-  <button
-    v-for="(link, index) in paginationLinks()"
-    :key="index"
-    @click="changePage(link.page)"
-    :class="[
-      'w-9 h-9 rounded-md text-sm shadow transition',
-      link.active
-        ? 'bg-[#6B1F1F] text-white shadow-lg'
-        : 'bg-white text-gray-700 hover:bg-gray-100'
-    ]"
-  >
-    {{ link.label }}
-  </button>
-
-  <!-- Стрілка вправо -->
-  <button
-    @click="changePage(meta.current_page + 1)"
-    :disabled="meta.current_page === meta.last_page"
-    class="w-9 h-9 rounded-md text-sm shadow bg-white hover:bg-gray-100 disabled:bg-gray-200 disabled:cursor-not-allowed transition"
-  >
-    &gt;
-  </button>
-</div>
-
-
+    <!-- Модалки -->
     <AddProductModal v-if="showAddModal" @close="closeAddModal" @product-added="onProductAdded" />
     <EditProductModal v-if="showEditModal" :product="selectedProduct" @close="closeEditModal" @product-updated="onProductUpdated" />
     <DeleteProductModal v-if="showDeleteModal" :product="selectedProduct" @close="closeDeleteModal" @product-deleted="onProductDeleted" />
-  <ProductDetailModal
-  v-if="showDetailModal && productDetails"
-  :product="productDetails"
-  :visible="showDetailModal"
-  @close="showDetailModal = false"
-  @edit="openUpdateModal"
-  @delete="deleteProduct"
-  @restore="restoreProduct"
-/>
-
+    <ProductDetailModal
+      v-if="showDetailModal && productDetails"
+      :product="productDetails"
+      :visible="showDetailModal"
+      @close="showDetailModal = false"
+      @edit="openUpdateModal"
+      @delete="deleteProduct"
+      @restore="restoreProduct"
+    />
   </main>
 </template>
+
 
 <script>
 import axios from 'axios'

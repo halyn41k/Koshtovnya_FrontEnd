@@ -5,45 +5,43 @@
   {{ $t('home.recentlyViewed') }}
 </h2>
 
-
-
-
-    <div class="relative flex items-center justify-center max-w-[1600px] mx-auto px-4 md:px-8 xl:px-[80px] 2xl:px-[100px]">
-
+    <div class="relative flex items-center justify-center max-w-[2100px] mx-auto">
       <!-- Ліва стрілка -->
 <button
   @click="showPreviousProducts"
-  class="hidden sm:flex absolute left-2 top-1/2 -translate-y-1/2 z-10 hover:scale-110 transition"
+  class="hidden sm:block absolute left-0 -translate-x-full transform hover:scale-125 transition-all duration-500 ease-in-out z-10"
 >
-  <img src="@/assets/left_arrow.png" alt="←" class="w-10 h-10" />
+  <img src="@/assets/left_arrow.png" alt="left-arrow" class="w-10 h-10 dark:invert" />
 </button>
 
 
-
-      <!-- Слайдер -->
-      <div   class="flex gap-4 overflow-x-auto snap-x snap-mandatory sm:grid sm:grid-cols-3 sm:gap-6 sm:overflow-visible sm:snap-none justify-start scroll-pl-4"
->
-
+      <!-- Свайп/Грід товарів -->
+      <div
+  class="flex gap-4 overflow-x-auto snap-x snap-mandatory sm:grid sm:grid-cols-3 sm:gap-6 sm:overflow-visible sm:snap-none justify-start scroll-pl-4"
+      >
         <article
-          v-for="product in visibleProducts"
-          :key="product.id"
-          class="bg-[#fff7f6] border-2 border-gray-200 rounded-2xl shadow-md hover:shadow-lg transform hover:-translate-y-1 transition-all duration-500 ease-in-out flex flex-col overflow-hidden"
-        >
-          <router-link :to="`/productpage/${product.id}`" class="flex-1 flex flex-col">
-            <div class="h-48 overflow-hidden">
-              <img
-                :src="product.image_url"
-                :alt="product.name"
-                class="w-full h-full object-cover hover:scale-105 transition-all duration-500 ease-in-out"
-              />
-            </div>
-            <div class="px-3 py-2 flex-1 flex flex-col justify-between">
-              <h3 class="text-lg font-montserrat font-semibold line-clamp-2 h-12">{{ product.name }}</h3>
-              <p class="text-xl font-semibold text-red-700 dark:text-gray-100 mt-1">{{ product.price }} грн</p>
-            </div>
-          </router-link>
+  v-for="product in visibleProducts"
+  :key="product.id"
+  class="snap-start w-72 flex-shrink-0 h-[440px] bg-[#fff7f6] dark:bg-[#17223b] border-2 border-gray-200 dark:border-[#303b59] rounded-2xl shadow-md hover:shadow-lg transform hover:-translate-y-1 transition-all duration-500 ease-in-out flex flex-col overflow-hidden"
+>
+  <router-link :to="`/productpage/${product.id}`" class="flex-1 flex flex-col">
+    <div class="h-48 overflow-hidden">
+      <img
+        :src="product.image_url"
+        :alt="product.name"
+        class="w-full h-full object-cover hover:scale-105 transition-all duration-500 ease-in-out"
+      />
+    </div>
+    <div class="px-3 py-2 flex-1 flex flex-col justify-between">
+      <h3 class="text-lg font-montserrat font-semibold line-clamp-2 h-12 text-gray-800 dark:text-gray-100">
+        {{ product.name }}
+      </h3>
+                    <p class="text-xl font-semibold text-red-700 dark:text-gray-100 mt-1">{{ product.price }} грн</p>
 
-                    <!-- Рейтинг та кількість відгуків -->
+    </div>
+  </router-link>
+
+   <!-- Рейтинг та кількість відгуків -->
           <div class="px-3 mb-2 flex items-center space-x-2">
             <div class="flex items-center">
               <span v-for="n in 5" :key="n">
@@ -87,9 +85,10 @@
 
           <!-- Бісер та лайк -->
           <div class="px-3 mb-6 flex justify-between items-center">
-            <span class="text-base font-montserrat font-medium text-gray-800">
-              {{ product.bead_producer_name }}
-            </span>
+            <span class="text-base font-montserrat font-medium text-gray-800 dark:text-white">
+  {{ product.bead_producer_name }}
+</span>
+
             <button
               @click.stop="toggleWishlist(product)"
               class="focus:outline-none transform hover:scale-110 transition-all duration-500 ease-in-out"
@@ -130,26 +129,40 @@
           </div>
 
           <div class="px-4 pb-4">
-            <button
-              @click="addToCart(product)"
-              class="w-full bg-[#6B1F1F] hover:bg-[#A01212] text-white font-montserrat font-semibold py-2 rounded-lg flex items-center justify-between px-4 transition-all duration-500 ease-in-out"
-            >
-              <span>{{ $t('buyButton') }}</span>
-              <img src="@/assets/miniarrow.png" alt="Arrow icon" class="w-5 h-4" />
-            </button>
-          </div>
-        </article>
+    <button
+      v-if="product.has_available_variant"
+      @click="addToCart(product)"
+       class="w-full h-11 bg-[#6B1F1F] hover:bg-[#861818] dark:bg-[#A01212] dark:hover:bg-[#c42e2e] 
+         text-white font-montserrat font-semibold rounded-lg flex items-center justify-between px-4 
+         transition-all duration-300 ease-in-out shadow-sm hover:shadow-md"
+>
+      <span>Купити</span>
+      <img src="@/assets/miniarrow.png" alt="arrow" class="w-5 h-4" />
+    </button>
+
+    <button
+      v-else
+      @click="notifyWhenAvailable(product)"
+      class="w-full h-11 bg-gray-300 text-gray-700 dark:bg-[#3c465f] dark:text-gray-200 font-montserrat font-semibold rounded-lg flex items-center justify-center px-4 transition duration-300"
+    >
+      Повідомити про наявність
+    </button>
+  </div>
+</article>
+
       </div>
-<!-- Права стрілка -->
+
+      <!-- Права стрілка -->
 <button
   @click="showNextProducts"
-  class="hidden sm:flex absolute right-2 top-1/2 -translate-y-1/2 z-10 hover:scale-110 transition"
+  class="hidden sm:block absolute right-0 translate-x-full transform hover:scale-125 transition-all duration-500 ease-in-out z-10"
 >
-  <img src="@/assets/arrow_big.png" alt="→" class="w-10 h-10" />
+  <img src="@/assets/arrow_big.png" alt="right-arrow" class="w-10 h-10 dark:invert" />
 </button>
+
     </div>
 
-    <!-- Дотси -->
+    <!-- Дотси (desktop only) -->
     <div class="hidden sm:flex justify-center items-center gap-2 mt-6">
       <span
         v-for="(_, index) in totalPages"
@@ -159,7 +172,6 @@
     </div>
   </section>
 </template>
-
 
 
 <script>

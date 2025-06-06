@@ -1,40 +1,37 @@
 <template>
   <main class="w-full p-4 space-y-6 relative">
+    <!-- Заголовок і фільтри -->
+    <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+      <h1 class="text-2xl font-extrabold text-gray-900 whitespace-nowrap">{{ $t('admin.dashboard.title') }}</h1>
 
-<!-- Заголовок і фільтри -->
-<div class="flex flex-wrap items-center justify-between gap-4 mb-6">
-  <h1 class="text-2xl font-extrabold text-gray-900 whitespace-nowrap">{{ $t('admin.dashboard.title') }}</h1>
+      <div class="flex items-center gap-3 flex-wrap">
+        <div class="flex flex-col">
+          <label class="text-sm text-gray-600 mb-1 ml-1">{{ $t('admin.dashboard.period') }}</label>
+          <Multiselect
+            v-model="selectedPeriod"
+            :options="periodOptions"
+            :reduce="opt => opt.value"
+            label="label"
+            class="custom-multiselect w-40"
+            @input="loadData"
+          />
+        </div>
 
-  <div class="flex items-center gap-3 flex-wrap">
-    <div class="flex flex-col">
-      <label class="text-sm text-gray-600 mb-1 ml-1">{{ $t('admin.dashboard.period') }}</label>
-      <Multiselect
-        v-model="selectedPeriod"
-        :options="periodOptions"
-        :reduce="opt => opt.value"
-        label="label"
-        class="custom-multiselect w-40"
-        @input="loadData"
-      />
+        <div class="flex flex-col">
+          <label class="text-sm text-gray-600 mb-1 ml-1">{{ $t('admin.dashboard.customPeriod') }}</label>
+          <VueDatePicker
+            v-model="dateRange"
+            range
+            format="yyyy-MM-dd"
+            :enable-time-picker="false"
+            :placeholder="$t('admin.dashboard.selectPeriod')"
+            @update:model-value="loadData"
+            input-class-name="custom-datepicker-input"
+            :locale="uk"
+          />
+        </div>
+      </div>
     </div>
-
-    <div class="flex flex-col">
-      <label class="text-sm text-gray-600 mb-1 ml-1">{{ $t('admin.dashboard.customPeriod') }}</label>
-      <VueDatePicker
-  v-model="dateRange"
-  range
-  format="yyyy-MM-dd"
-  :enable-time-picker="false"
-  :placeholder="$t('admin.dashboard.selectPeriod')"
-  @update:model-value="loadData"
-  input-class-name="custom-datepicker-input"
-  :locale="uk"
-/>
-
-    </div>
-  </div>
-</div>
-
 
     <!-- Картки статистики -->
     <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
@@ -118,6 +115,7 @@
     </section>
   </main>
 </template>
+
 
 
 <script setup>

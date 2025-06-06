@@ -1,50 +1,114 @@
 <template>
-  <main class="w-full p-4 space-y-6 relative">
-    <h1 class="text-2xl font-semibold text-gray-800">{{ $t('admin.settings.title') }}</h1>
+  <main class="w-full p-4 space-y-6 relative dark:bg-[#0F172A]">
+    <h1 class="text-2xl font-semibold text-gray-800 dark:text-slate-100">
+      {{ $t('admin.settings.title') }}
+    </h1>
 
-    <form @submit.prevent="saveSettings" class="space-y-4 bg-white p-4 rounded shadow">
+    <form
+      @submit.prevent="saveSettings"
+      class="space-y-4 bg-white dark:bg-[#1E293B] p-4 rounded shadow"
+    >
       <div>
-        <label class="text-sm font-medium text-gray-700">{{ $t('admin.settings.address') }}</label>
-        <input v-model="settings.address" placeholder="Введіть адресу" type="text" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-pink-200 text-sm" />
+        <label class="text-sm font-medium text-gray-700 dark:text-slate-300">
+          {{ $t('admin.settings.address') }}
+        </label>
+        <input
+          v-model="settings.address"
+          placeholder="Введіть адресу"
+          type="text"
+          class="w-full px-3 py-2 border border-gray-300 dark:border-slate-500 rounded focus:outline-none focus:ring-2 focus:ring-pink-200 text-sm dark:bg-slate-800 dark:text-white"
+        />
       </div>
 
       <div>
-        <label class="text-sm font-medium text-gray-700">{{ $t('admin.settings.phone') }}</label>
-        <input v-model="settings.phone" placeholder="Введіть номер телефону" type="tel" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-pink-200 text-sm" />
+        <label class="text-sm font-medium text-gray-700 dark:text-slate-300">
+          {{ $t('admin.settings.phone') }}
+        </label>
+        <input
+          v-model="settings.phone"
+          placeholder="Введіть номер телефону"
+          type="tel"
+          class="w-full px-3 py-2 border border-gray-300 dark:border-slate-500 rounded focus:outline-none focus:ring-2 focus:ring-pink-200 text-sm dark:bg-slate-800 dark:text-white"
+        />
       </div>
 
       <div>
-        <label class="text-sm font-medium text-gray-700">{{ $t('admin.settings.email') }}</label>
-        <input v-model="settings.email" placeholder="Введіть email" type="email" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-pink-200 text-sm" />
+        <label class="text-sm font-medium text-gray-700 dark:text-slate-300">
+          {{ $t('admin.settings.email') }}
+        </label>
+        <input
+          v-model="settings.email"
+          placeholder="Введіть email"
+          type="email"
+          class="w-full px-3 py-2 border border-gray-300 dark:border-slate-500 rounded focus:outline-none focus:ring-2 focus:ring-pink-200 text-sm dark:bg-slate-800 dark:text-white"
+        />
       </div>
 
       <div>
-        <label class="text-sm font-medium text-gray-700">{{ $t('admin.settings.logo') }}</label>
-        <div class="mt-2 w-24 h-24 border-2 border-dashed border-gray-300 rounded flex items-center justify-center cursor-pointer" @click="triggerFileInput" @dragover.prevent @drop.prevent="handleDrop">
-          <img v-if="logoPreview" :src="logoPreview" alt="Logo" class="w-full h-full object-contain" />
-          <svg v-else class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16l-4-4m0 0l4-4m-4 4h18"/>
+        <label class="text-sm font-medium text-gray-700 dark:text-slate-300">
+          {{ $t('admin.settings.logo') }}
+        </label>
+        <div
+          class="mt-2 w-24 h-24 border-2 border-dashed border-gray-300 dark:border-slate-600 rounded flex items-center justify-center cursor-pointer"
+          @click="triggerFileInput"
+          @dragover.prevent
+          @drop.prevent="handleDrop"
+        >
+          <img
+            v-if="logoPreview"
+            :src="logoPreview"
+            alt="Logo"
+            class="w-full h-full object-contain"
+          />
+          <svg
+            v-else
+            class="w-6 h-6 text-gray-400 dark:text-slate-400"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M7 16l-4-4m0 0l4-4m-4 4h18"
+            />
           </svg>
         </div>
-        <input ref="fileInput" type="file" class="hidden" @change="handleFileUpload" />
+        <input
+          ref="fileInput"
+          type="file"
+          class="hidden"
+          @change="handleFileUpload"
+        />
       </div>
 
-      <button type="submit" class="w-full py-2 bg-[#6B1F1F] hover:bg-[#A01212] text-white font-medium rounded text-sm transition">
+      <button
+        type="submit"
+        class="w-full py-2 bg-[#6B1F1F] hover:bg-[#A01212] text-white font-medium rounded text-sm transition"
+      >
         Зберегти
       </button>
     </form>
 
-    <section class="bg-white p-4 rounded shadow space-y-4">
+    <section class="bg-white dark:bg-[#1E293B] p-4 rounded shadow space-y-4">
       <div class="flex items-center justify-between">
-        <h2 class="text-xl font-semibold text-gray-800">{{ $t('admin.settings.categories') }}</h2>
-        <button @click="showAddModal = true" class="px-4 py-2 bg-[#6B1F1F] text-white rounded text-sm hover:bg-[#A01212] transition">
+        <h2 class="text-xl font-semibold text-gray-800 dark:text-slate-100">
+          {{ $t('admin.settings.categories') }}
+        </h2>
+        <button
+          @click="showAddModal = true"
+          class="px-4 py-2 bg-[#6B1F1F] text-white rounded text-sm hover:bg-[#A01212] transition"
+        >
           {{ $t('admin.settings.addCategory') }}
         </button>
       </div>
 
-      <div class="overflow-x-auto rounded-xl border border-gray-200 shadow-sm">
-        <table class="min-w-full text-sm text-gray-800">
-          <thead class="bg-[#f7e4e4] text-left font-semibold text-[#3a3a3a]">
+      <div
+        class="overflow-x-auto rounded-xl border border-gray-200 dark:border-slate-600 shadow-sm"
+      >
+        <table class="min-w-full text-sm text-gray-800 dark:text-slate-200">
+          <thead class="bg-[#f7e4e4] dark:bg-[#334155] text-left font-semibold text-[#3a3a3a] dark:text-slate-200">
             <tr>
               <th class="px-4 py-3">ID</th>
               <th class="px-4 py-3">Назва</th>
@@ -52,17 +116,29 @@
               <th class="px-4 py-3 text-right">Керування</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-gray-200 bg-white">
-            <tr v-for="cat in categories" :key="cat.id" class="hover:bg-gray-50">
+          <tbody class="divide-y divide-gray-200 dark:divide-slate-600 bg-white dark:bg-slate-800">
+            <tr v-for="cat in categories" :key="cat.id" class="hover:bg-gray-50 dark:hover:bg-slate-700">
               <td class="px-4 py-3">{{ cat.id }}</td>
               <td class="px-4 py-3">
-                <input v-model="cat.name" class="w-full border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-pink-200" @change="updateCategory(cat)" />
+                <input
+                  v-model="cat.name"
+                  class="w-full border border-gray-300 dark:border-slate-500 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-pink-200 dark:bg-slate-700 dark:text-white"
+                  @change="updateCategory(cat)"
+                />
               </td>
               <td class="px-4 py-3">
-                <img :src="cat.image_url" alt="Зображення категорії" class="w-12 h-12 object-contain border rounded" />
+                <img
+                  :src="cat.image_url"
+                  alt="Зображення категорії"
+                  class="w-12 h-12 object-contain border rounded"
+                />
               </td>
               <td class="px-4 py-3 text-right space-x-2">
-                <button @click="deleteCategory(cat.id)" class="p-1 rounded hover:bg-red-100 text-red-600 transition" title="Видалити">
+                <button
+                  @click="deleteCategory(cat.id)"
+                  class="p-1 rounded hover:bg-red-100 dark:hover:bg-red-800 text-red-600 dark:text-red-300 transition"
+                  title="Видалити"
+                >
                   <img src="@/assets/icons/delete.svg" alt="Delete" class="w-5 h-5" />
                 </button>
               </td>
@@ -73,15 +149,15 @@
     </section>
 
     <transition name="fade">
-<div
-  v-if="showAddModal"
-  class="fixed inset-0 z-50 flex items-center justify-center"
-  style="background-color: rgba(0, 0, 0, 0.5);"
->
-        <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-md space-y-4 relative">
-          <button @click="showAddModal = false" class="absolute top-2 right-3 text-xl">&times;</button>
-          <h3 class="text-lg font-semibold text-gray-800">Додати нову категорію</h3>
-          <input v-model="newCategory.name" placeholder="Назва" class="w-full px-3 py-2 border border-gray-300 rounded text-sm" />
+      <div
+        v-if="showAddModal"
+        class="fixed inset-0 z-50 flex items-center justify-center"
+        style="background-color: rgba(0, 0, 0, 0.5);"
+      >
+        <div class="bg-white dark:bg-[#1E293B] p-6 rounded-lg shadow-xl w-full max-w-md space-y-4 relative">
+          <button @click="showAddModal = false" class="absolute top-2 right-3 text-xl dark:text-slate-200">&times;</button>
+          <h3 class="text-lg font-semibold text-gray-800 dark:text-slate-100">Додати нову категорію</h3>
+          <input v-model="newCategory.name" placeholder="Назва" class="w-full px-3 py-2 border border-gray-300 dark:border-slate-500 rounded text-sm dark:bg-slate-700 dark:text-white" />
           <input type="file" @change="e => newCategory.image = e.target.files[0]" />
           <button @click="createCategory" class="w-full py-2 bg-[#6B1F1F] text-white rounded hover:bg-[#A01212] text-sm transition">
             {{ $t('admin.settings.create') }}
@@ -91,6 +167,7 @@
     </transition>
   </main>
 </template>
+
 
 <script>
 import axios from "axios";

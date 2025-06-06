@@ -1,5 +1,5 @@
 <template>
-  <main class="w-full p-4 space-y-6 relative">
+  <main class="w-full p-4 space-y-6 relative bg-white dark:bg-[#0B1A2F] text-black dark:text-white">
     <!-- Заголовок -->
     <div class="flex justify-between items-center">
       <h1 class="text-2xl font-bold">Звіт по Прибутку</h1>
@@ -10,82 +10,102 @@
       <!-- Дата -->
       <div class="flex gap-4 items-center">
         <VueDatePicker v-model="startDate" placeholder="Дата від" :locale="uk" />
-<VueDatePicker v-model="endDate" placeholder="Дата до" :locale="uk" />
+        <VueDatePicker v-model="endDate" placeholder="Дата до" :locale="uk" />
 
-       <button
-  @click="fetchIncomeReport()"
-  class="px-5 py-2 bg-[#6B1F1F] text-white rounded hover:bg-[#A01212] transition"
->
-  Застосувати
-</button>
+        <button
+          @click="fetchIncomeReport()"
+          class="px-5 py-2 bg-[#6B1F1F] text-white rounded hover:bg-[#A01212] transition"
+        >
+          Застосувати
+        </button>
 
-<!-- Скинути -->
-<button
-  v-if="startDate || endDate"
-  @click="resetDates"
-  class="px-5 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition"
->
-  Скинути
-</button>
-
-
+        <button
+          v-if="startDate || endDate"
+          @click="resetDates"
+          class="px-5 py-2 bg-gray-200 dark:bg-[#1E2B45] text-gray-800 dark:text-white rounded hover:bg-gray-300 dark:hover:bg-[#2C3E66] transition"
+        >
+          Скинути
+        </button>
       </div>
 
       <!-- Кнопки експорту -->
       <div class="flex gap-3">
-        <button @click="printReport" class="px-4 py-2 bg-[#6B1F1F] text-white rounded hover:bg-[#A01212] transition">Друк</button>
-        <button @click="exportToExcel" class="px-4 py-2 bg-[#6B1F1F] text-white rounded hover:bg-[#A01212] transition">Excel</button>
-        <button @click="exportToPDF" class="px-4 py-2 bg-[#6B1F1F] text-white rounded hover:bg-[#A01212] transition">PDF</button>
+        <button
+          @click="printReport"
+          class="px-4 py-2 bg-[#6B1F1F] text-white rounded hover:bg-[#A01212] transition"
+        >
+          Друк
+        </button>
+        <button
+          @click="exportToExcel"
+          class="px-4 py-2 bg-[#6B1F1F] text-white rounded hover:bg-[#A01212] transition"
+        >
+          Excel
+        </button>
+        <button
+          @click="exportToPDF"
+          class="px-4 py-2 bg-[#6B1F1F] text-white rounded hover:bg-[#A01212] transition"
+        >
+          PDF
+        </button>
       </div>
     </div>
 
     <!-- Таблиця -->
-    <div v-if="filteredData.length" ref="printableArea" class="overflow-x-auto bg-white shadow-sm rounded-lg border border-gray-200">
+    <div
+      v-if="filteredData.length"
+      ref="printableArea"
+      class="overflow-x-auto bg-white dark:bg-[#132544] shadow-sm rounded-lg border border-gray-200 dark:border-[#1F3B64]"
+    >
       <table class="min-w-full table-auto text-sm">
-        <thead class="bg-gray-100 text-left">
+        <thead class="bg-gray-100 dark:bg-[#1B335C] text-left">
           <tr>
-            <th class="px-4 py-3 text-gray-700">ID</th>
-            <th class="px-4 py-3 text-gray-700">Дата</th>
-            <th class="px-4 py-3 text-gray-700">Виторг</th>
-            <th class="px-4 py-3 text-gray-700">Транзакції</th>
-            <th class="px-4 py-3 text-gray-700">Витрати</th>
-            <th class="px-4 py-3 text-gray-700">Прибуток</th>
+            <th class="px-4 py-3 text-gray-700 dark:text-gray-300">ID</th>
+            <th class="px-4 py-3 text-gray-700 dark:text-gray-300">Дата</th>
+            <th class="px-4 py-3 text-gray-700 dark:text-gray-300">Виторг</th>
+            <th class="px-4 py-3 text-gray-700 dark:text-gray-300">Транзакції</th>
+            <th class="px-4 py-3 text-gray-700 dark:text-gray-300">Витрати</th>
+            <th class="px-4 py-3 text-gray-700 dark:text-gray-300">Прибуток</th>
           </tr>
         </thead>
         <tbody>
           <tr
             v-for="row in filteredData"
             :key="row.id"
-            class="hover:bg-gray-50 transition-all"
+            class="hover:bg-gray-50 dark:hover:bg-[#1C2F51] transition-all"
           >
-            <td class="px-4 py-2 border-b border-[#E0E0E0] text-sm text-gray-800 text-left">{{ row.id }}</td>
-            <td class="px-4 py-2 border-b border-[#E0E0E0] text-sm text-gray-800 text-left">{{ row.date }}</td>
-            <td class="px-4 py-2 border-b border-[#E0E0E0] text-sm text-gray-800 text-left">{{ row.revenue }} грн</td>
-            <td class="px-4 py-2 border-b border-[#E0E0E0] text-sm text-gray-800 text-left">{{ row.transaction_number || '—' }}</td>
-            <td class="px-4 py-2 border-b border-[#E0E0E0] text-sm text-gray-800 text-left">{{ row.expenses }} грн</td>
+            <td class="px-4 py-2 border-b border-[#E0E0E0] dark:border-[#2A4C79] text-sm text-gray-800 dark:text-gray-200 text-left">{{ row.id }}</td>
+            <td class="px-4 py-2 border-b border-[#E0E0E0] dark:border-[#2A4C79] text-sm text-gray-800 dark:text-gray-200 text-left">{{ row.date }}</td>
+            <td class="px-4 py-2 border-b border-[#E0E0E0] dark:border-[#2A4C79] text-sm text-gray-800 dark:text-gray-200 text-left">{{ row.revenue }} грн</td>
+            <td class="px-4 py-2 border-b border-[#E0E0E0] dark:border-[#2A4C79] text-sm text-gray-800 dark:text-gray-200 text-left">{{ row.transaction_number || '—' }}</td>
+            <td class="px-4 py-2 border-b border-[#E0E0E0] dark:border-[#2A4C79] text-sm text-gray-800 dark:text-gray-200 text-left">{{ row.expenses }} грн</td>
             <td
-              class="px-4 py-2 border-b border-[#E0E0E0] text-sm font-semibold text-left"
-              :class="{ 'text-green-700': row.net_income > 0, 'text-red-600': row.net_income < 0 }"
+              class="px-4 py-2 border-b border-[#E0E0E0] dark:border-[#2A4C79] text-sm font-semibold text-left"
+              :class="{ 'text-green-700 dark:text-green-400': row.net_income > 0, 'text-red-600 dark:text-red-400': row.net_income < 0 }"
             >
               {{ row.net_income }} грн
             </td>
           </tr>
         </tbody>
       </table>
-      <!-- Ховаємо область копії -->
-<div ref="printAreaCloned" class="hidden fixed top-0 left-0 z-[-1]"></div>
-
+      <div ref="printAreaCloned" class="hidden fixed top-0 left-0 z-[-1]"></div>
     </div>
 
     <!-- Сума -->
-    <div v-if="summary" class="bg-gray-50 p-4 rounded-md border border-gray-200 space-y-1">
+    <div
+      v-if="summary"
+      class="bg-gray-50 dark:bg-[#1A2F4D] p-4 rounded-md border border-gray-200 dark:border-[#2F4F7A] space-y-1"
+    >
       <p><strong>Всього виручка:</strong> {{ summary.total_income }} грн</p>
       <p><strong>Всього витрати:</strong> {{ summary.total_expenses }} грн</p>
       <p><strong>Чистий прибуток:</strong> {{ summary.total_net_income }} грн</p>
     </div>
 
     <!-- Порожній стан -->
-    <div v-else class="py-12 text-center text-gray-500 border border-dashed rounded-md">
+    <div
+      v-else
+      class="py-12 text-center text-gray-500 dark:text-gray-400 border border-dashed dark:border-gray-600 rounded-md"
+    >
       <p>Поки що не було додано жодного звіту по прибутку.</p>
     </div>
   </main>

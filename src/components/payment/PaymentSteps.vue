@@ -2,27 +2,26 @@
   <div class="flex flex-col font-montserrat text-[14px] bg-white/80 dark:bg-gray-800/80 text-black dark:text-white rounded-lg shadow-md p-6 transition-all">
     <!-- Кроки оформлення -->
     <section class="mb-5">
-      <div class="font-bold text-[20px] leading-[1.3] text-gray-400">
+      <div class="font-bold text-[20px] leading-[1.3] text-gray-400 dark:text-gray-300">
         <div
           v-for="(step, index) in steps"
           :key="index"
           class="flex flex-col gap-3 mt-4"
         >
+          <!-- Розділювач -->
           <div v-if="index !== 0" class="w-full h-px bg-gray-300 dark:bg-gray-600 my-2"></div>
 
+          <!-- Заголовок кроку -->
           <div
             class="flex items-center gap-3 cursor-pointer p-3 rounded-md transition hover:bg-gray-100 dark:hover:bg-gray-700"
             :class="{
-              'bg-[#FFF0F0] border-l-4 border-[#6B1F1F]': index === currentStep,
-              'bg-[#F8F8F8]': step.completed && index !== currentStep
+              'bg-[#FFF0F0] dark:bg-[#301c1c] border-l-4 border-[#6B1F1F]': index === currentStep,
+              'bg-[#F8F8F8] dark:bg-[#2a2a2a]': step.completed && index !== currentStep
             }"
             @click="toggleStep(index)"
           >
             <span
-              :class="[
-                step.completed ? 'text-gray-400' : 'text-gray-900',
-                'font-bold'
-              ]"
+              :class="[step.completed ? 'text-gray-400 dark:text-gray-500' : 'text-gray-900 dark:text-white', 'font-bold']"
             >
               {{ index + 1 }}. {{ step.title }}
             </span>
@@ -42,6 +41,7 @@
             />
           </div>
 
+          <!-- Контент кроку -->
           <div
             v-if="index === currentStep && step.isExpanded"
             class="mt-3 transition-all duration-300 ease-in-out"
@@ -74,9 +74,9 @@
         </div>
       </div>
     </section>
-
   </div>
 </template>
+
 
 
 <script>

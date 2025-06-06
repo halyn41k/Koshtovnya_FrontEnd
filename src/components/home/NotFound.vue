@@ -1,31 +1,36 @@
 <template>
-  <div class="relative min-h-screen flex flex-col items-center justify-center bg-white dark:bg-gray-900 overflow-hidden font-montserrat">
+  <div class="relative min-h-screen flex flex-col items-center justify-center bg-[#fff7f6] dark:bg-[#17223b] overflow-hidden font-montserrat">
     <!-- Орнаменти -->
     <div class="absolute inset-0">
       <div
         v-for="(pixel, index) in pixels"
         :key="index"
-        class="w-5 h-5 absolute cursor-grab border"
-        :style="{
-          top: pixel.y + 'px',
-          left: pixel.x + 'px',
-          backgroundColor: pixel.color
+        class="w-5 h-5 absolute"
+        :class="{
+          'cursor-grab': true,
+          'border': true,
+          'border-black dark:border-white': pixel.color === '#000000',
+          'bg-[#A01212]': pixel.color === '#A01212',
+          'bg-white dark:bg-white': pixel.color === '#FFFFFF',
+          'bg-black dark:bg-white': pixel.color === '#000000'
         }"
+        :style="{ top: pixel.y + 'px', left: pixel.x + 'px' }"
         @mousedown="startDrag(index, $event)"
       ></div>
     </div>
 
     <!-- Текст 404 -->
     <h1 class="font-kyiv text-7xl text-[#A01212] z-10">404</h1>
-    <p class="text-xl text-gray-800 mt-4 z-10">Сторінку не знайдено 😢</p>
+    <p class="text-xl text-gray-800 dark:text-white mt-4 z-10">Сторінку не знайдено 😢</p>
     <router-link
       to="/"
-      class="mt-6 inline-block bg-[#A01212] text-white px-5 py-2 rounded-lg z-10 hover:bg-[#6B1F1F] transition"
+      class="mt-6 inline-block bg-[#A01212] text-white px-5 py-2 rounded-lg z-10 hover:bg-[#6B1F1F] transition duration-300"
     >
       На головну
     </router-link>
   </div>
 </template>
+
 
 <script>
 export default {

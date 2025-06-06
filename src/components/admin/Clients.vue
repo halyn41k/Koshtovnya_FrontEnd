@@ -4,103 +4,123 @@
     <div class="flex justify-between items-center">
       <h1 class="text-2xl font-semibold">{{ $t('admin.clients.title') }}</h1>
       <button
-        @click="openAddModal"
-        class="flex items-center gap-2 bg-[#6B1F1F] hover:bg-[#A01212] text-white px-4 py-2 rounded"
-      >
-        <img src="@/assets/icons/plus.svg" alt="Add" class="w-5 h-5" />
-        <span class="font-medium">{{ $t('admin.clients.add') }}</span>
-      </button>
+  @click="openAddModal"
+  class="flex items-center gap-2 bg-[#6B1F1F] hover:bg-[#A01212] text-white px-4 py-2 rounded"
+>
+  <img src="@/assets/icons/plus.svg" alt="Add" class="w-5 h-5 invert dark:invert-0" />
+  <span class="font-medium">{{ $t('admin.clients.add') }}</span>
+</button>
+
     </div>
 
-    <!-- Пошук -->
-    <div class="mb-6">
-      <div class="relative w-80">
-        <input
-          v-model="searchQuery"
-          @input="onSearch"
-          type="text"
-          :placeholder="$t('admin.clients.search')"
-          class="w-full pl-10 pr-4 py-2 border border-[#E0E0E0] rounded focus:outline-none focus:ring focus:ring-pink-200"
-        />
-        <img
-          src="@/assets/icons/search.svg"
-          alt="Search"
-          class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 pointer-events-none"
-        />
-      </div>
-    </div>
+   <div class="relative w-80">
+  <input
+  v-model="searchQuery"
+  @input="onSearch"
+  type="text"
+  placeholder="Пошук"
+  class="w-full pl-10 pr-4 py-2 border border-[#E0E0E0] dark:border-[#303b59] dark:bg-[#17223b] dark:text-white rounded focus:outline-none focus:ring focus:ring-pink-200"
+/>
+<img
+  src="@/assets/icons/search.svg"
+  alt="Search"
+  class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 pointer-events-none dark:invert"
+/>
+
+</div>
+
 
     <!-- Таблиця -->
     <div v-if="clients.length" class="overflow-x-auto">
-      <div class="inline-block min-w-full border border-[#E0E0E0] rounded-md overflow-hidden">
-        <table class="min-w-full bg-white divide-y divide-[#E0E0E0]">
-          <thead class="bg-[#F6E7E7]">
-  <tr>
-    <th
-      v-for="col in columns"
-      :key="col.key"
-      @click="cycleSort(col.key)"
-      class="px-4 py-2 text-sm font-medium text-gray-600 text-left cursor-pointer select-none"
-    >
-      <div class="inline-flex items-center gap-2">
-        {{ col.label }}
-        <img
-          v-if="col.sortable"
-          :src="getSortIcon(sortState[col.key])"
-          class="w-4 h-4"
-          alt=""
-        />
-      </div>
-    </th>
-    <th class="px-4 py-2 text-sm font-medium text-gray-600 text-left">{{ $t('admin.clients.status') }}</th>
-    <th class="px-4 py-2 text-sm font-medium text-gray-600 text-left">{{ $t('admin.clients.actions') }}</th>
-  </tr>
-</thead>
+     <div class="inline-block min-w-full border border-[#E0E0E0] dark:border-gray-700 rounded-md overflow-hidden">
+<table class="min-w-full bg-white dark:bg-[#17223b] divide-y divide-[#E0E0E0] dark:divide-[#303b59]">
+<thead class="bg-[#F6E7E7] dark:bg-[#1f2a42]">
+      <tr>
+        <th
+  v-for="col in columns"
+  :key="col.key"
+  class="px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 text-left cursor-pointer select-none"
+>
 
-          <tbody class="bg-white">
-            <tr
-              v-for="client in clients"
-              :key="client.id"
-              :class="client.id === highlightedUserId ? 'bg-green-50 transition-all duration-300' : ''"
-            >
-              <td class="px-4 py-2 border-b border-[#E0E0E0] text-sm text-gray-800">{{ client.id }}</td>
-              <td class="px-4 py-2 border-b border-[#E0E0E0] text-sm text-gray-800">{{ client.first_name }}</td>
-              <td class="px-4 py-2 border-b border-[#E0E0E0] text-sm text-gray-800">{{ client.last_name }}</td>
-              <td class="px-4 py-2 border-b border-[#E0E0E0] text-sm text-gray-800">{{ client.email }}</td>
-              <td class="px-4 py-2 border-b border-[#E0E0E0] text-sm text-gray-800">{{ client.order_id || '—' }}</td>
-              <td class="px-4 py-2 border-b border-[#E0E0E0] text-sm text-gray-800">{{ client.date }}</td>
-              <td class="px-4 py-2 border-b border-[#E0E0E0] text-sm">
-                <span :class="client.is_banned ? 'text-red-600 font-semibold' : 'text-green-600 font-semibold'">
-                  {{ client.is_banned ? $t('admin.clients.banned') : $t('admin.clients.active') }}
-                </span>
-              </td>
-              <td class="px-4 py-2 border-b border-[#E0E0E0] flex gap-2">
-                <button @click="openUpdateModal(client)" class="p-1 hover:bg-gray-100 rounded">
-                  <img src="@/assets/icons/edit.svg" class="w-5 h-5" alt="Edit" />
-                </button>
-                <button @click="deleteUser(client.id)" class="p-1 hover:bg-gray-100 rounded">
-                  <img src="@/assets/icons/delete.svg" class="w-5 h-5" alt="Delete" />
-                </button>
-                <button
-                  @click="client.is_banned ? unbanUser(client.id) : banUser(client.id)"
-                  class="p-1 hover:bg-gray-100 rounded"
-                  :title="client.is_banned ? 'Розбанити' : 'Забанити'"
-                >
-                  <img
-                    :src="client.is_banned ? require('@/assets/icons/unban.svg') : require('@/assets/icons/ban.svg')"
-                    class="w-5 h-5"
-                    alt="Ban"
-                  />
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+          <div class="inline-flex items-center gap-2">
+            {{ col.label }}
+            <img
+              v-if="col.sortable"
+              :src="getSortIcon(sortState[col.key])"
+              class="w-4 h-4 invert dark:invert-0"
+              alt=""
+            />
+          </div>
+        </th>
+        <th class="px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 text-left">
+          {{ $t('admin.clients.status') }}
+        </th>
+        <th class="px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 text-left">
+          {{ $t('admin.clients.actions') }}
+        </th>
+      </tr>
+    </thead>
+
+    <tbody class="bg-white dark:bg-[#17223B]">
+      <tr
+        v-for="client in clients"
+
+        
+        :key="client.id"
+        :class="client.id === highlightedUserId ?   'border-b border-[#E0E0E0] dark:border-[#303b59]' : ''"
+      >
+        <td class="px-4 py-2 border-b border-[#E0E0E0] dark:border-gray-700 text-sm text-gray-800 dark:text-white">
+          {{ client.id }}
+        </td>
+        <td class="px-4 py-2 border-b border-[#E0E0E0] dark:border-gray-700 text-sm text-gray-800 dark:text-white">
+          {{ client.first_name }}
+        </td>
+        <td class="px-4 py-2 border-b border-[#E0E0E0] dark:border-gray-700 text-sm text-gray-800 dark:text-white">
+          {{ client.last_name }}
+        </td>
+        <td class="px-4 py-2 border-b border-[#E0E0E0] dark:border-gray-700 text-sm text-gray-800 dark:text-white">
+          {{ client.email }}
+        </td>
+        <td class="px-4 py-2 border-b border-[#E0E0E0] dark:border-gray-700 text-sm text-gray-800 dark:text-white">
+          {{ client.order_id || '—' }}
+        </td>
+        <td class="px-4 py-2 border-b border-[#E0E0E0] dark:border-gray-700 text-sm text-gray-800 dark:text-white">
+          {{ client.date }}
+        </td>
+        <td class="px-4 py-2 border-b border-[#E0E0E0] dark:border-gray-700 text-sm">
+          <span :class="client.is_banned ? 'text-red-600 dark:text-red-400 font-semibold' : 'text-green-600 dark:text-green-400 font-semibold'">
+            {{ client.is_banned ? $t('admin.clients.banned') : $t('admin.clients.active') }}
+          </span>
+        </td>
+        <td class="px-4 py-2 border-b border-[#E0E0E0] dark:border-gray-700 flex gap-2">
+          <button @click="openUpdateModal(user)" class="p-1 hover:bg-gray-100 dark:hover:bg-[#2a354e] rounded">
+  <img src="@/assets/icons/edit.svg" class="w-5 h-5 dark:invert" alt="Edit" />
+</button>
+<button @click="deleteUser(user.id)" class="p-1 hover:bg-gray-100 dark:hover:bg-[#2a354e] rounded">
+  <img src="@/assets/icons/delete.svg" class="w-5 h-5 dark:invert" alt="Delete" />
+</button>
+
+          <button
+            @click="client.is_banned ? unbanUser(client.id) : banUser(client.id)"
+            class="p-1 hover:bg-gray-100 dark:hover:bg-[#333] rounded"
+            :title="client.is_banned ? 'Розбанити' : 'Забанити'"
+          >
+            <img
+              :src="client.is_banned ? require('@/assets/icons/unban.svg') : require('@/assets/icons/ban.svg')"
+              class="w-5 h-5 invert dark:invert-0"
+              alt="Ban"
+            />
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
     </div>
 
     <!-- Пустий стан -->
-    <div v-else class="py-20 text-center text-gray-500">
+<div v-else class="py-20 text-center text-gray-500 dark:text-gray-400">
       <p v-if="!searchQuery">{{ $t('admin.clients.noUsers') }}</p>
       <p v-else>{{ $t('admin.clients.noResults', { query: searchQuery }) }}</p>
     </div>
@@ -110,7 +130,7 @@
       <button
         @click="goToPageFromUrl(meta.prev)"
         :disabled="!meta.prev"
-        class="px-3 py-1 rounded bg-white border border-[#E0E0E0] hover:bg-gray-100 disabled:opacity-50"
+  class="px-3 py-1 rounded bg-white dark:bg-[#1e273e] border border-[#E0E0E0] dark:border-[#303b59] hover:bg-gray-100 dark:hover:bg-[#2a354e] disabled:opacity-50"
       >&lt;</button>
 
       <button

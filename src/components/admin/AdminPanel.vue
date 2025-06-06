@@ -1,11 +1,16 @@
 <template>
   <div class="flex flex-col h-screen font-['Montserrat',sans-serif]">
     <!-- Міні-хедер -->
-<header class="fixed top-0 left-0 right-0 h-12 bg-white border-b border-gray-200 z-50 flex justify-end items-center px-4 shadow-sm">
+<header
+  class="fixed top-0 left-0 right-0 h-12 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 z-50 flex justify-end items-center px-4 shadow-sm"
+>
   <div class="flex items-center space-x-6">
     <div @click="showProfile = true" class="cursor-pointer">
-      <img src="@/assets/icons/user_icon.svg" alt="User Icon" class="w-5 h-5" />
-    </div>
+<img
+  src="@/assets/icons/user_icon.svg"
+  alt="User Icon"
+  class="w-5 h-5 dark:invert"
+/>    </div>
       <div class="flex items-center space-x-2">
     <img
       :src="currentFlag"
@@ -34,54 +39,68 @@
     <main :class="['flex flex-1 relative pt-12', showProfile ? 'filter blur-sm' : '']">
 
       <aside
-        :class="[
-          'bg-[#F6E7E7] flex flex-col justify-between transition-all duration-300 ease-in-out',
-          sidebarCollapsed ? 'w-16' : 'w-64'
-        ]"
-      >
+  :class="[
+    'bg-[#F6E7E7] dark:bg-[#17223b] text-black dark:text-white flex flex-col justify-between transition-all duration-300 ease-in-out',
+    sidebarCollapsed ? 'w-16' : 'w-64'
+  ]"
+>
+
         <div>
           <div class="flex items-center justify-between mt-5 px-4">
             <div class="flex items-center" v-if="!sidebarCollapsed">
               <img :src="siteSettings.site_logo" alt="Logo" class="w-12 h-11" />
               <span
-                class="text-sm font-black ml-2"
-                style="font-family:'KyivType Titling Black2';"
-              >{{ $t('admin.panel.siteName') }}</span>
+  class="text-sm font-black ml-2 text-black dark:text-white"
+  style="font-family:'KyivType Titling Black2';"
+>
+
+              {{ $t('admin.panel.siteName') }}</span>
             </div>
             <button @click="sidebarCollapsed = !sidebarCollapsed" class="p-1 ml-auto">
-              <img
-                :src="sidebarCollapsed ? require('@/assets/icons/arrow_right.svg') : require('@/assets/icons/arrow_left.svg')"
-                class="w-5 h-5"
-              />
+             <img
+  :src="sidebarCollapsed ? require('@/assets/icons/arrow_right.svg') : require('@/assets/icons/arrow_left.svg')"
+  class="w-5 h-5 dark:invert"
+/>
+
             </button>
           </div>
 
-          <div class="mt-2 mb-4 h-5 ml-6 text-sm font-bold transition-opacity duration-200"
+<div
+  class="mt-2 mb-4 h-5 ml-6 text-sm font-bold text-gray-700 dark:text-gray-300 transition-opacity duration-200"
                :class="{ 'opacity-0': sidebarCollapsed, 'opacity-100': !sidebarCollapsed }">
             {{ panelSubtitle }}
           </div>
 
-          <ul class="space-y-2 sticky top-0 px-2">
+<ul class="space-y-2 sticky top-0 px-2 text-black dark:text-white">
             <li
               v-for="(menuItem, index) in computedMenuItems"
               :key="index"
               @click="selectTab(index)"
               :class="[
-                'flex items-center h-9 rounded-[4px] cursor-pointer px-2',
-                activeTab === index
-                  ? 'bg-[#F2D8D8] border-l-4 border-[#6B1F1F]'
-                  : 'hover:bg-[#D1ABAB]'
-              ]"
-            >
-              <img :src="menuItem.icon" alt="" class="w-5 h-5 mr-2" />
+  'flex items-center h-9 rounded-[4px] cursor-pointer px-2 transition',
+  activeTab === index
+    ? 'bg-[#F2D8D8] dark:bg-[#303b59] border-l-4 border-[#6B1F1F]'
+    : 'hover:bg-[#D1ABAB] dark:hover:bg-[#303b59]'
+]">
+
+<img
+  :src="menuItem.icon"
+  alt=""
+  class="w-5 h-5 mr-2 dark:invert"
+/>
               <span v-if="!sidebarCollapsed">{{ $t('admin.menu.' + menuItem.title) }}</span>
             </li>
           </ul>
         </div>
 
         <div @click="$router.push({ name: 'Home' })" class="px-2 mb-2">
-          <div class="flex items-center h-9 px-3 rounded-[4px] cursor-pointer hover:bg-[#D1ABAB] transition">
-            <img src="@/assets/icons/home.svg" alt="Home Icon" class="w-5 h-5 mr-2" />
+  <div class="flex items-center h-9 px-3 rounded-[4px] cursor-pointer hover:bg-[#D1ABAB] dark:hover:bg-[#303b59] transition">
+
+<img
+  src="@/assets/icons/home.svg"
+  alt="Home Icon"
+  class="w-5 h-5 mr-2 dark:invert"
+/>
             <span v-if="!sidebarCollapsed">{{ $t('admin.menu.goHome') }}</span>
           </div>
         </div>
@@ -91,7 +110,11 @@
             @click="logout"
             class="flex items-center h-9 px-3 rounded-[4px] cursor-pointer hover:bg-[#D1ABAB] transition"
           >
-            <img src="@/assets/exit.png" alt="Exit Icon" class="w-5 h-5 mr-2" />
+<img
+  src="@/assets/exit.png"
+  alt="Exit Icon"
+  class="w-5 h-5 mr-2 dark:invert"
+/>
             <span v-if="!sidebarCollapsed">{{ $t('admin.menu.logout') }}</span>
           </div>
         </div>

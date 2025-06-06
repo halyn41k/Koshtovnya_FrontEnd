@@ -59,7 +59,8 @@ orderDetails: "Order Details",
 wishlistTitle: "Wishlist",
 wishlistEmpty: "Your wishlist is empty :(",
 buy: "Buy",
-notAvailable: "Not available"
+notAvailable: "Not available",
+clearWishlist: "Clear wishlist",
 
 
 }

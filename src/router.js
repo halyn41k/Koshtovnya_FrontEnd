@@ -12,11 +12,7 @@ const routes = [
     name: 'Home',
     component: () => import('@/components/home/HomePage.vue')
   },
-  {
-  path: '/:pathMatch(.*)*',
-  name: 'NotFound',
-  component: () => import('@/components/home/NotFound.vue') // або '@/components/NotFound.vue'
-},
+
 
   {
     path: '/category/:categoryId',
@@ -179,6 +175,11 @@ const routes = [
       requiresAdmin: true,
     },
   },
+    {
+  path: '/:pathMatch(.*)*',
+  name: 'NotFound',
+  component: () => import('@/components/home/NotFound.vue') // або '@/components/NotFound.vue'
+},
  
 ];
 

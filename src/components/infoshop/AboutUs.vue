@@ -2,18 +2,21 @@
   <div class="relative overflow-hidden">
     <!-- Паралакс-фон -->
     <div
-      ref="parallaxBg"
-      class="parallax-bg absolute inset-0 pointer-events-none"
-    ></div>
+  ref="parallaxBg"
+  class="absolute inset-0 pointer-events-none z-0"
+>
+  <div class="w-full h-full backdrop-blur-sm bg-[rgba(255,255,255,0.5)] dark:bg-[rgba(23,34,59,0.4)]"></div>
+</div>
 
-    <div class="relative z-10 w-full bg-[#fdf5f4] pt-32 pb-20 px-4 max-w-[1000px] mx-auto">
+
+    <div class="relative z-10 w-full bg-[#fdf5f4] dark:bg-[#17223b] pt-32 pb-20 px-4 max-w-[1000px] mx-auto transition-colors duration-300">
       <!-- Заголовок -->
-      <h2 v-fade class="text-3xl font-kyivBlack2 text-center mb-12">
+      <h2 v-fade class="text-3xl font-kyivBlack2 text-center mb-12 text-[#6B1F1F] dark:text-white transition-colors">
         {{ $t('infoshop.title') }}
       </h2>
 
       <!-- Таймлайн -->
-      <div class="relative before:absolute before:top-0 before:bottom-0 before:left-1/2 before:w-1 before:bg-gray-300">
+      <div class="relative before:absolute before:top-0 before:bottom-0 before:left-1/2 before:w-1 before:bg-gray-300 dark:before:bg-[#303b59] transition-colors">
         <div
           v-for="(item, i) in timeline"
           :key="i"
@@ -21,17 +24,17 @@
           :class="['mb-16 flex flex-col lg:flex-row items-center', i % 2 === 0 ? 'lg:flex-row-reverse' : '']"
         >
           <div class="hidden lg:block lg:w-1/2"></div>
-          <div class="w-full lg:w-1/2 p-6 bg-white dark:bg-gray-900 rounded-2xl shadow-lg">
-            <span class="text-sm text-gray-500">{{ $t(`infoshop.timeline[${i}].date`) }}</span>
-            <h3 class="font-kyivBlack2 text-xl mt-2 mb-4">{{ $t(`infoshop.timeline[${i}].title`) }}</h3>
-            <p class="text-base text-gray-700">{{ $t(`infoshop.timeline[${i}].content`) }}</p>
+          <div class="w-full lg:w-1/2 p-6 bg-white dark:bg-gray-900 rounded-2xl shadow-lg transition-colors duration-300">
+            <span class="text-sm text-gray-500 dark:text-gray-300">{{ $t(`infoshop.timeline[${i}].date`) }}</span>
+            <h3 class="font-kyivBlack2 text-xl mt-2 mb-4 text-gray-900 dark:text-white">{{ $t(`infoshop.timeline[${i}].title`) }}</h3>
+            <p class="text-base text-gray-700 dark:text-gray-300">{{ $t(`infoshop.timeline[${i}].content`) }}</p>
           </div>
         </div>
       </div>
 
       <!-- FAQ -->
-      <section v-fade class="bg-[#faf4f4] p-8 rounded-lg mb-16">
-        <h2 class="flex items-center justify-center mb-6 text-2xl font-kyivBlack2">
+      <section v-fade class="bg-[#faf4f4] dark:bg-[#1e263b] p-8 rounded-lg mb-16 transition-colors duration-300">
+        <h2 class="flex items-center justify-center mb-6 text-2xl font-kyivBlack2 text-gray-800 dark:text-white">
           <div class="flex-1 h-[2px] bg-gray-400 mx-3"></div>
           {{ $t('infoshop.faqTitle') }}
           <div class="flex-1 h-[2px] bg-gray-400 mx-3"></div>
@@ -40,20 +43,20 @@
         <div v-for="(open, i) in faqOpen" :key="i" class="mb-4">
           <button
             @click="toggleFAQ(i)"
-            class="w-full flex justify-between items-center text-lg font-medium text-[#6B1F1F] py-2"
+            class="w-full flex justify-between items-center text-lg font-medium text-[#6B1F1F] dark:text-[#fca5a5] py-2 transition-colors"
           >
             <span>{{ $t(`infoshop.faqQuestions[${i}]`) }}</span>
             <span :class="{ 'rotate-180': faqOpen[i] }" class="transform transition-transform duration-300">▼</span>
           </button>
-          <div v-if="faqOpen[i]" class="mt-2 pl-4 border-l-4 border-[#6B1F1F] text-base leading-relaxed">
+          <div v-if="faqOpen[i]" class="mt-2 pl-4 border-l-4 border-[#6B1F1F] dark:border-red-400 text-base text-gray-700 dark:text-gray-200 leading-relaxed">
             {{ $t(`infoshop.faqAnswers[${i}]`) }}
           </div>
         </div>
       </section>
 
       <!-- Contact Form -->
-      <section v-fade class="bg-[#faf4f4] p-8 rounded-lg mb-16">
-        <h2 class="flex items-center justify-center mb-6 text-2xl font-kyivBlack2">
+      <section v-fade class="bg-[#faf4f4] dark:bg-[#1e263b] p-8 rounded-lg mb-16 transition-colors duration-300">
+        <h2 class="flex items-center justify-center mb-6 text-2xl font-kyivBlack2 text-gray-800 dark:text-white">
           <div class="flex-1 h-[2px] bg-gray-400 mx-3"></div>
           {{ $t('infoshop.contactTitle') }}
           <div class="flex-1 h-[2px] bg-gray-400 mx-3"></div>
@@ -61,26 +64,28 @@
 
         <form @submit.prevent="handleSubmit" class="space-y-4">
           <div>
-            <label for="email" class="block text-base font-medium mb-1">{{ $t('infoshop.emailLabel') }}</label>
+            <label for="email" class="block text-base font-medium mb-1 text-gray-800 dark:text-gray-200">{{ $t('infoshop.emailLabel') }}</label>
             <input
               id="email"
               v-model="form.email"
               type="email"
               required
               :placeholder="$t('infoshop.emailPlaceholder')"
-              class="w-full bg-[#fafafa] border border-gray-300 dark:border-gray-600 rounded p-2 focus:outline-none focus:ring-2 focus:ring-[#6B1F1F]"
+              class="w-full bg-[#fafafa] dark:bg-[#303b59] text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded p-2 focus:outline-none focus:ring-2 focus:ring-[#6B1F1F]"
             />
           </div>
           <div>
-            <label for="message" class="block text-base font-medium mb-1">{{ $t('infoshop.messageLabel') }}</label>
+            <label for="message" class="block text-base font-medium mb-1 text-gray-800 dark:text-gray-200">{{ $t('infoshop.messageLabel') }}</label>
             <textarea
               id="message"
               v-model="form.message"
               required
               :placeholder="$t('infoshop.messagePlaceholder')"
-              class="w-full bg-[#fafafa] border border-gray-300 dark:border-gray-600 rounded p-2 h-[120px] resize-y focus:outline-none focus:ring-2 focus:ring-[#6B1F1F]"
+              class="w-full bg-[#fafafa] dark:bg-[#303b59] text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded p-2 h-[120px] resize-y focus:outline-none focus:ring-2 focus:ring-[#6B1F1F]"
             ></textarea>
-            <p v-if="errorMessage" class="text-red-600 dark:text-gray-100 text-sm mt-1">{{ $t('infoshop.errorMessageShort') }}</p>
+            <p v-if="errorMessage" class="text-red-600 dark:text-red-300 text-sm mt-1">
+              {{ $t('infoshop.errorMessageShort') }}
+            </p>
           </div>
           <button
             type="submit"

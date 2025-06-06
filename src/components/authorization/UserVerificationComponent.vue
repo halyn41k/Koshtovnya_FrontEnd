@@ -4,9 +4,11 @@
       <div class="absolute inset-0 bg-[url('@/assets/logins.png')] bg-cover bg-center -z-10"></div>
   
       <!-- Заголовок з лініями -->
-      <header class="relative z-10 flex items-center justify-center mb-10 w-full">
-        <div class="hidden md:flex flex-1 h-[2px] bg-gray-300"></div>
+    <header class="relative z-10 flex items-center justify-center mb-10 w-full">
+      <div class="hidden md:flex flex-1 h-[2px] bg-gray-300 dark:bg-gray-600"></div>
+      <h1 class="px-4 title-kyiv dark:text-white">
         {{ $t('authorization.verification.title') }}
+        </h1>
         <div class="hidden md:flex flex-1 h-[2px] bg-gray-300"></div>
       </header>
   
