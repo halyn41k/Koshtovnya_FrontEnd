@@ -1,96 +1,106 @@
 <template>
-  <div class="font-sans p-5 rounded-lg">
-<h2 class="text-2xl font-bold text-gray-800 mb-5">{{ $t('user.personalInfoTitle') }}</h2>
+  <div class="font-sans p-5 rounded-lg text-black dark:text-white transition-colors duration-300">
+    <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-5">
+      {{ $t('user.personalInfoTitle') }}
+    </h2>
 
+    <!-- Ім’я -->
     <div class="mb-5 flex flex-col sm:flex-row sm:items-center">
-  <label for="first_name" class="w-full sm:w-[150px] font-bold mb-2 sm:mb-0 sm:mr-3">{{ $t('user.firstName') }}:</label>
-  <input
-    id="first_name"
-    type="text"
-    v-model="localFirstName"
-    class="w-full sm:w-[487px] h-8 bg-[#EBDBDA] border border-black rounded-lg px-3 text-base"
-  />
-</div>
+      <label for="first_name" class="w-full sm:w-[150px] font-bold mb-2 sm:mb-0 sm:mr-3">
+        {{ $t('user.firstName') }}:
+      </label>
+      <input
+        id="first_name"
+        type="text"
+        v-model="localFirstName"
+        class="w-full sm:w-[487px] h-8 bg-[#EBDBDA] dark:bg-[#2e3a52] border border-black dark:border-gray-600 rounded-lg px-3 text-base text-black dark:text-white"
+      />
+    </div>
 
-<div class="mb-5 flex flex-col sm:flex-row sm:items-center">
-  <label for="last_name" class="w-full sm:w-[150px] font-bold mb-2 sm:mb-0 sm:mr-3">{{ $t('user.lastName') }}:</label>
-  <input
-    id="last_name"
-    type="text"
-    v-model="localLastName"
-    class="w-full sm:w-[487px] h-8 bg-[#EBDBDA] border border-black rounded-lg px-3 text-base"
-  />
-</div>
+    <!-- Прізвище -->
+    <div class="mb-5 flex flex-col sm:flex-row sm:items-center">
+      <label for="last_name" class="w-full sm:w-[150px] font-bold mb-2 sm:mb-0 sm:mr-3">
+        {{ $t('user.lastName') }}:
+      </label>
+      <input
+        id="last_name"
+        type="text"
+        v-model="localLastName"
+        class="w-full sm:w-[487px] h-8 bg-[#EBDBDA] dark:bg-[#2e3a52] border border-black dark:border-gray-600 rounded-lg px-3 text-base text-black dark:text-white"
+      />
+    </div>
 
-<div class="mb-5 flex flex-col sm:flex-row sm:items-center">
-  <label for="second_name" class="w-full sm:w-[150px] font-bold mb-2 sm:mb-0 sm:mr-3">{{ $t('user.patronymic') }}:</label>
-  <input
-    id="second_name"
-    type="text"
-    v-model="localSecondName"
-    class="w-full sm:w-[487px] h-8 bg-[#EBDBDA] border border-black rounded-lg px-3 text-base"
-  />
-</div>
+    <!-- По батькові -->
+    <div class="mb-5 flex flex-col sm:flex-row sm:items-center">
+      <label for="second_name" class="w-full sm:w-[150px] font-bold mb-2 sm:mb-0 sm:mr-3">
+        {{ $t('user.patronymic') }}:
+      </label>
+      <input
+        id="second_name"
+        type="text"
+        v-model="localSecondName"
+        class="w-full sm:w-[487px] h-8 bg-[#EBDBDA] dark:bg-[#2e3a52] border border-black dark:border-gray-600 rounded-lg px-3 text-base text-black dark:text-white"
+      />
+    </div>
 
-<div class="mb-5 flex flex-col sm:flex-row sm:items-center">
-  <label for="email" class="w-full sm:w-[150px] font-bold mb-2 sm:mb-0 sm:mr-3">{{ $t('user.email') }}:</label>
-  <input
-    id="email"
-    type="email"
-    v-model="localEmail"
-    readonly
-    class="w-full sm:w-[487px] h-8 bg-[#EBDBDA] border border-black rounded-lg px-3 text-base cursor-not-allowed"
-  />
-</div>
+    <!-- Email -->
+    <div class="mb-5 flex flex-col sm:flex-row sm:items-center">
+      <label for="email" class="w-full sm:w-[150px] font-bold mb-2 sm:mb-0 sm:mr-3">
+        {{ $t('user.email') }}:
+      </label>
+      <input
+        id="email"
+        type="email"
+        v-model="localEmail"
+        readonly
+        class="w-full sm:w-[487px] h-8 bg-[#EBDBDA] dark:bg-[#2e3a52] border border-black dark:border-gray-600 rounded-lg px-3 text-base cursor-not-allowed text-black dark:text-white"
+      />
+    </div>
 
-
+    <!-- Кнопки -->
     <div class="flex flex-col sm:flex-row gap-4 sm:gap-5 mt-6">
+      <!-- Оновити -->
       <div class="relative group">
-  <button
-    @click="updateUser"
-    :disabled="isDisabled"
-    class="w-full sm:w-[200px] h-[40px] text-sm sm:text-base font-medium rounded-lg transition-colors
-           text-white bg-[#6B1F1F] hover:bg-[#A01212]
-           disabled:bg-gray-300 disabled:text-gray-600 disabled:cursor-not-allowed"
-  >
-    {{ $t('user.updateInfo') }}
+        <button
+          @click="updateUser"
+          :disabled="isDisabled"
+          class="w-full sm:w-[200px] h-[40px] text-sm sm:text-base font-medium rounded-lg transition-colors
+                 text-white bg-[#6B1F1F] hover:bg-[#A01212]
+                 disabled:bg-gray-300 dark:disabled:bg-gray-600 disabled:text-gray-600 dark:disabled:text-gray-300 disabled:cursor-not-allowed"
+        >
+          {{ $t('user.updateInfo') }}
+        </button>
 
-  </button>
+        <!-- Tooltip -->
+        <div
+          v-if="isDisabled"
+          class="absolute top-full left-0 mt-1 w-max max-w-[250px] text-xs text-white bg-gray-800 px-3 py-2 rounded shadow-lg
+                 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10"
+        >
+          {{ $t('user.fillRequiredFields') }}
+        </div>
+      </div>
 
-  <!-- Tooltip -->
-  <div
-    v-if="isDisabled"
-    class="absolute top-full left-0 mt-1 w-max max-w-[250px] text-xs text-white bg-gray-800 px-3 py-2 rounded shadow-lg
-           opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10"
-  >
-{{ $t('user.fillRequiredFields') }}
-  </div>
-</div>
+      <!-- Змінити пароль -->
+      <button
+        @click="changePassword"
+        class="w-full sm:w-[200px] h-[40px] bg-[#6B1F1F] text-white text-sm sm:text-base font-medium rounded-lg hover:bg-[#A01212] transition-colors"
+      >
+        {{ $t('user.changePassword') }}
+      </button>
 
-
-
-  <button
-    @click="changePassword"
-    class="w-full sm:w-[200px] h-[40px] bg-[#6B1F1F] text-white text-sm sm:text-base font-medium rounded-lg hover:bg-[#A01212] transition-colors"
-  >
-    {{ $t('user.changePassword') }}
-  </button>
-
-  <router-link
-    v-if="isAdminOrManager"
-    to="/admin"
-    class="w-full sm:w-[240px] h-[40px] border border-[#6B1F1F] text-black dark:text-white text-sm sm:text-base font-semibold rounded-lg flex items-center justify-center hover:bg-[#f9eaea] transition-colors"
-  >
-    {{ $t(role === 'manager' ? 'user.goToManagerPanel' : 'user.goToAdminPanel') }}
-
-  </router-link>
-</div>
-
-
-
-
+      <!-- Перейти в адмінку -->
+      <router-link
+        v-if="isAdminOrManager"
+        to="/admin"
+        class="w-full sm:w-[240px] h-[40px] border border-[#6B1F1F] text-black dark:text-white text-sm sm:text-base font-semibold rounded-lg flex items-center justify-center hover:bg-[#f9eaea] dark:hover:bg-[#2e3a52] transition-colors"
+      >
+        {{ $t(role === 'manager' ? 'user.goToManagerPanel' : 'user.goToAdminPanel') }}
+      </router-link>
+    </div>
   </div>
 </template>
+
 
 <script>
 import api from '@/services/api';

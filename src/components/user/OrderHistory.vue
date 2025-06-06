@@ -1,12 +1,12 @@
 <template>
   <div class="max-w-3xl p-4 sm:p-6 overflow-y-auto h-[90vh] font-sans">
-    <h2 class="text-2xl font-bold text-gray-800 mb-5">
+    <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-5">
       {{ $t('user.orderHistory') }}
     </h2>
 
     <Loader v-if="loading" class="mx-auto my-16" />
 
-    <div v-else-if="orders.length === 0" class="text-center text-lg text-gray-500 mt-10">
+    <div v-else-if="orders.length === 0" class="text-center text-lg text-gray-500 dark:text-gray-300 mt-10">
       {{ $t('user.noOrders') }}
     </div>
 
@@ -14,20 +14,22 @@
       <div
         v-for="order in orders"
         :key="order.id"
-        class="relative bg-white dark:bg-gray-900 p-4 sm:p-6 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-200 flex flex-col gap-4"
+        class="relative bg-white dark:bg-[#17223b] border border-gray-200 dark:border-[#303b59] p-4 sm:p-6 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-200 flex flex-col gap-4"
       >
+        <!-- Заголовок -->
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
           <div class="flex items-center gap-2">
-            <span class="text-lg sm:text-xl font-semibold text-gray-900 truncate">
+            <span class="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white truncate">
               {{ $t('user.orderNumber') }} №{{ order.id }}
             </span>
-            <span class="text-sm text-gray-600 whitespace-nowrap">{{ order.order_date }}</span>
+            <span class="text-sm text-gray-600 dark:text-gray-300 whitespace-nowrap">{{ order.order_date }}</span>
           </div>
-          <span class="text-sm sm:text-base font-medium text-gray-700 whitespace-nowrap">
+          <span class="text-sm sm:text-base font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">
             {{ $t('user.status') }}: {{ order.status }}
           </span>
         </div>
 
+        <!-- Продукти в замовленні -->
         <div class="space-y-4">
           <div
             v-for="(item, i) in order.items"
@@ -40,24 +42,25 @@
               class="w-full sm:w-24 h-48 sm:h-24 object-cover rounded-lg flex-shrink-0"
             />
             <div class="flex-1 flex flex-col gap-1">
-              <h3 v-if="!item.is_deleted" class="text-base sm:text-lg font-medium text-gray-800 truncate">
+              <h3 v-if="!item.is_deleted" class="text-base sm:text-lg font-medium text-gray-800 dark:text-white truncate">
                 {{ item.title }}
               </h3>
-              <h3 v-else class="text-base sm:text-lg text-red-600 dark:text-gray-100">
+              <h3 v-else class="text-base sm:text-lg text-red-600 dark:text-red-300">
                 {{ $t('user.productDeleted') }}
               </h3>
-              <p class="text-sm text-gray-600 whitespace-nowrap">
+              <p class="text-sm text-gray-600 dark:text-gray-300 whitespace-nowrap">
                 {{ $t('user.quantity') }}: {{ item.quantity }}
               </p>
-              <p class="text-sm text-gray-600 whitespace-nowrap">
+              <p class="text-sm text-gray-600 dark:text-gray-300 whitespace-nowrap">
                 {{ $t('user.price') }}: {{ formatCurrencyIntl(item.price, item.currency) }}
               </p>
             </div>
           </div>
         </div>
 
+        <!-- Підсумок -->
         <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
-          <span class="text-lg font-semibold text-gray-800 whitespace-nowrap">
+          <span class="text-lg font-semibold text-gray-800 dark:text-white whitespace-nowrap">
             {{ $t('user.total') }}: {{ formatCurrencyIntl(order.amount, order.currency) }}
           </span>
           <div class="flex gap-2">
@@ -70,7 +73,7 @@
             <button
               v-if="order.status === 'В очікуванні'"
               @click="cancelOrder(order.id)"
-              class="inline-flex items-center px-4 py-2 bg-gray-200 hover:bg-gray-300 text-sm text-gray-800 font-medium rounded-lg transition"
+              class="inline-flex items-center px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-sm text-gray-800 dark:text-white font-medium rounded-lg transition"
             >
               {{ $t('user.cancel') }}
             </button>
@@ -80,16 +83,19 @@
     </div>
 
     <OrderDetailModal
-      v-if="showModal"
-      :order="selectedOrder"
-      @close="closeModal"
-    />
+  v-if="showModal"
+  :order="selectedOrder"
+  :formatCurrencyIntl="formatCurrencyIntl"
+  @close="closeModal"
+/>
+
   </div>
 </template>
 
 
+
 <script>
-import axios from "axios";
+import api from '@/services/api';
 import Loader from '../home/Loader.vue';
 import OrderDetailModal from "./OrderDetailModal.vue";
 import { useToast } from 'vue-toastification';
@@ -115,9 +121,7 @@ export default {
     return;
   }
   try {
-    const { data } = await axios.get("https://koshtovnya.api-dev.bmax-edu.website/api/orders", {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const data = await api.getOrders();
     this.orders = (data.orders || []).map(order => ({
       id: order.id,
       order_date: order.order_date,
@@ -155,9 +159,7 @@ export default {
     async cancelOrder(id) {
       if (!confirm("Ви дійсно хочете скасувати це замовлення?")) return;
       try {
-        await axios.post(`https://koshtovnya.api-dev.bmax-edu.website/api/orders/${id}/cancel`, null, {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        });
+        await api.cancelOrder(id);
         toast.success("Замовлення успішно скасовано");
         this.fetchOrders();
       } catch (e) {

@@ -5,39 +5,51 @@
 
     <!-- Заголовок з лініями -->
     <header class="relative z-10 flex items-center justify-center mb-10 w-full">
-      <div class="hidden md:flex flex-1 h-[2px] bg-gray-300"></div>
-      <h1 class="px-4 title-kyiv">{{ $t('authorization.title') }}</h1>
-      <div class="hidden md:flex flex-1 h-[2px] bg-gray-300"></div>
+      <div class="hidden md:flex flex-1 h-[2px] bg-gray-300 dark:bg-gray-600"></div>
+      <h1 class="px-4 title-kyiv dark:text-white">
+        {{ $t('authorization.title') }}
+      </h1>
+      <div class="hidden md:flex flex-1 h-[1px] bg-gray-300 dark:bg-gray-600"></div>
     </header>
 
-    <!-- Основний контейнер форми -->
-    <main class="relative z-20 flex flex-col items-center justify-center w-full md:max-w-xl mx-auto px-6 py-8 bg-white dark:bg-gray-900 bg-opacity-90 backdrop-blur-md border border-gray-200 rounded-2xl shadow-md">
+    <!-- Основний контейнер -->
+    <main class="relative z-20 flex flex-col items-center justify-center w-full md:max-w-xl mx-auto px-6 py-8
+                 rounded-2xl shadow-md border border-gray-200 dark:border-gray-700
+                 bg-white/90 dark:bg-[#1f2a3a]/90 backdrop-blur-md transition-all duration-300">
+
       <!-- Крок 1 -->
-      <form v-if="step === 1" @submit.prevent="sendResetCode" class="w-full space-y-5">
+      <form v-if="step === 1" @submit.prevent="sendResetCode" class="w-full space-y-6">
         <div class="flex flex-col">
-          <label for="email" class="mb-1 text-sm font-medium text-gray-600">{{ $t('authorization.labels.email') }}</label>
+          <label for="email" class="mb-1 text-sm font-medium text-gray-600 dark:text-gray-300">
+            {{ $t('authorization.labels.email') }}
+          </label>
           <input
             id="email"
             type="email"
             v-model="email"
             :placeholder="$t('authorization.inputEmail')"
             required
-            class="w-full h-12 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-4 text-gray-800 placeholder-gray-400
-                   hover:shadow-md focus:outline-none focus:border-[#6B1F1F] focus:shadow-lg transition-all duration-200"
+            class="w-full h-12 rounded-lg border px-4 placeholder-gray-400 transition-all duration-200
+                   border-gray-300 dark:border-gray-600 dark:bg-gray-900 text-gray-800 dark:text-white
+                   hover:shadow-md focus:outline-none focus:border-[#6B1F1F] focus:shadow-lg"
           />
         </div>
-        <div class="flex justify-center">
-          <button type="submit" class="w-full h-12 flex items-center justify-center bg-[#6B1F1F] hover:bg-[#A01212] active:bg-[#A01212] text-white text-base font-semibold rounded-xl transition-colors duration-200 shadow-sm hover:shadow-md">
-           {{ $t('authorization.sendCode') }}
 
+        <div class="flex justify-center">
+          <button type="submit"
+            class="w-full h-12 flex items-center justify-center bg-[#6B1F1F] hover:bg-[#A01212] active:bg-[#A01212]
+                   text-white text-base font-semibold rounded-xl transition-colors duration-200 shadow-sm hover:shadow-md">
+            {{ $t('authorization.sendCode') }}
           </button>
         </div>
       </form>
 
       <!-- Крок 2 -->
-      <form v-if="step === 2" @submit.prevent="verifyCode" class="w-full space-y-5">
+      <form v-if="step === 2" @submit.prevent="verifyCode" class="w-full space-y-6">
         <div class="flex flex-col">
-          <label for="code" class="mb-1 text-sm font-medium text-gray-600">{{ $t('authorization.codeLabel') }}</label>
+          <label for="code" class="mb-1 text-sm font-medium text-gray-600 dark:text-gray-300">
+            {{ $t('authorization.codeLabel') }}
+          </label>
           <input
             id="code"
             type="text"
@@ -45,45 +57,59 @@
             maxlength="6"
             :placeholder="$t('authorization.codePlaceholder')"
             required
-            class="w-full h-12 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-4 text-gray-800 placeholder-gray-400
-                   hover:shadow-md focus:outline-none focus:border-[#6B1F1F] focus:shadow-lg transition-all duration-200"
+            class="w-full h-12 rounded-lg border px-4 placeholder-gray-400 transition-all duration-200
+                   border-gray-300 dark:border-gray-600 dark:bg-gray-900 text-gray-800 dark:text-white
+                   hover:shadow-md focus:outline-none focus:border-[#6B1F1F] focus:shadow-lg"
           />
         </div>
+
         <div class="flex justify-center">
-          <button type="submit" class="w-full h-12 flex items-center justify-center bg-[#6B1F1F] hover:bg-[#A01212] active:bg-[#A01212] text-white text-base font-semibold rounded-xl transition-colors duration-200 shadow-sm hover:shadow-md">
+          <button type="submit"
+            class="w-full h-12 flex items-center justify-center bg-[#6B1F1F] hover:bg-[#A01212] active:bg-[#A01212]
+                   text-white text-base font-semibold rounded-xl transition-colors duration-200 shadow-sm hover:shadow-md">
             {{ $t('authorization.verifyCode') }}
           </button>
         </div>
       </form>
 
       <!-- Крок 3 -->
-      <form v-if="step === 3" @submit.prevent="resetPassword" class="w-full space-y-5">
+      <form v-if="step === 3" @submit.prevent="resetPassword" class="w-full space-y-6">
         <div class="flex flex-col">
-          <label for="newPassword" class="mb-1 text-sm font-medium text-gray-600">{{ $t('authorization.newPassword') }}</label>
+          <label for="newPassword" class="mb-1 text-sm font-medium text-gray-600 dark:text-gray-300">
+            {{ $t('authorization.newPassword') }}
+          </label>
           <input
             id="newPassword"
             type="password"
             v-model="newPassword"
             :placeholder="$t('authorization.newPasswordPlaceholder')"
             required
-            class="w-full h-12 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-4 text-gray-800 placeholder-gray-400
-                   hover:shadow-md focus:outline-none focus:border-[#6B1F1F] focus:shadow-lg transition-all duration-200"
+            class="w-full h-12 rounded-lg border px-4 placeholder-gray-400 transition-all duration-200
+                   border-gray-300 dark:border-gray-600 dark:bg-gray-900 text-gray-800 dark:text-white
+                   hover:shadow-md focus:outline-none focus:border-[#6B1F1F] focus:shadow-lg"
           />
         </div>
+
         <div class="flex flex-col">
-          <label for="confirmPassword" class="mb-1 text-sm font-medium text-gray-600">{{ $t('authorization.confirmPassword') }}</label>
+          <label for="confirmPassword" class="mb-1 text-sm font-medium text-gray-600 dark:text-gray-300">
+            {{ $t('authorization.confirmPassword') }}
+          </label>
           <input
             id="confirmPassword"
             type="password"
             v-model="confirmPassword"
             :placeholder="$t('authorization.confirmPasswordPlaceholder')"
             required
-            class="w-full h-12 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-4 text-gray-800 placeholder-gray-400
-                   hover:shadow-md focus:outline-none focus:border-[#6B1F1F] focus:shadow-lg transition-all duration-200"
+            class="w-full h-12 rounded-lg border px-4 placeholder-gray-400 transition-all duration-200
+                   border-gray-300 dark:border-gray-600 dark:bg-gray-900 text-gray-800 dark:text-white
+                   hover:shadow-md focus:outline-none focus:border-[#6B1F1F] focus:shadow-lg"
           />
         </div>
+
         <div class="flex justify-center">
-          <button type="submit" class="w-full h-12 flex items-center justify-center bg-[#6B1F1F] hover:bg-[#A01212] active:bg-[#A01212] text-white text-base font-semibold rounded-xl transition-colors duration-200 shadow-sm hover:shadow-md">
+          <button type="submit"
+            class="w-full h-12 flex items-center justify-center bg-[#6B1F1F] hover:bg-[#A01212] active:bg-[#A01212]
+                   text-white text-base font-semibold rounded-xl transition-colors duration-200 shadow-sm hover:shadow-md">
             {{ $t('authorization.submit') }}
           </button>
         </div>
@@ -92,7 +118,9 @@
   </div>
 </template>
 
+
 <script>
+import api from '@/services/api';
 export default {
   name: 'ResetPasswordComponent',
   data() {
@@ -107,35 +135,23 @@ export default {
   methods: {
     async sendResetCode() {
       // Відправка запиту для отримання коду
-      await fetch('https://koshtovnya.api-dev.bmax-edu.website/api/send-code', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: this.email }),
-      });
+      await api.sendResetCode(this.email);
       this.step = 2;
     },
     async verifyCode() {
       // Перевірка коду
-      const response = await fetch('https://koshtovnya.api-dev.bmax-edu.website/api/verify-reset-code', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: this.email, code: this.code }),
-      });
-      if (response.ok) this.step = 3;
+      const response = await api.verifyResetCode({ email: this.email, code: this.code });
+      if (response) this.step = 3;
     },
     async resetPassword() {
       if (this.newPassword !== this.confirmPassword) {
         alert('Паролі не співпадають');
         return;
       }
-      await fetch('https://koshtovnya.api-dev.bmax-edu.website/api/reset-password', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: this.email,
-          new_password: this.newPassword,
-          new_password_confirmation: this.confirmPassword,
-        }),
+      await api.resetPassword({
+        email: this.email,
+        new_password: this.newPassword,
+        new_password_confirmation: this.confirmPassword,
       });
       alert('Пароль успішно змінено!');
       this.$router.push('/login');

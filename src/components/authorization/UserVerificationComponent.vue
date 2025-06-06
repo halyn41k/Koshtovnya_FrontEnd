@@ -4,9 +4,11 @@
       <div class="absolute inset-0 bg-[url('@/assets/logins.png')] bg-cover bg-center -z-10"></div>
   
       <!-- Заголовок з лініями -->
-      <header class="relative z-10 flex items-center justify-center mb-10 w-full">
-        <div class="hidden md:flex flex-1 h-[2px] bg-gray-300"></div>
+    <header class="relative z-10 flex items-center justify-center mb-10 w-full">
+      <div class="hidden md:flex flex-1 h-[2px] bg-gray-300 dark:bg-gray-600"></div>
+      <h1 class="px-4 title-kyiv dark:text-white">
         {{ $t('authorization.verification.title') }}
+        </h1>
         <div class="hidden md:flex flex-1 h-[2px] bg-gray-300"></div>
       </header>
   
@@ -67,6 +69,7 @@
   </template>
   
   <script>
+  import api from '@/services/api';
   export default {
     name: 'VerificationComponent',
     data() {
@@ -90,11 +93,7 @@
         this.validateCode();
         if (this.emailError || this.codeError) return;
         try {
-          await fetch('https://koshtovnya.api-dev.bmax-edu.website/api/verify', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: this.email, code: this.code }),
-          });
+          await api.verifyAccount({ email: this.email, code: this.code });
           alert('Акаунт успішно підтверджено!');
           this.$router.push('/login');
         } catch (err) {
@@ -105,10 +104,7 @@
       async resendCode() {
         if (!this.email) { this.emailError = 'Введіть email.'; return; }
         try {
-          await fetch('https://koshtovnya.api-dev.bmax-edu.website/api/resend-code', {
-            method: 'POST', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: this.email }),
-          });
+          await api.resendVerificationCode({ email: this.email });
           alert('Код надіслано ще раз.');
         } catch (err) {
           console.error('Помилка повторної відправки:', err);

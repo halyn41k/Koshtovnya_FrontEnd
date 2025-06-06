@@ -1,11 +1,11 @@
 <template>
   <div>
-    <!-- Header -->
+
     <header
       ref="headerEl"
       class="fixed top-0 w-full bg-[#fafafa] dark:bg-gray-900 dark:text-white shadow z-50 md:px-[50px] font-base text-body3 leading-[18px]"
     >
-      <!-- Top bar -->
+      <!-- Top bayr -->
       <div class="flex justify-between items-center pt-4 pb-2 px-4 md:px-0">
         <!-- Про нас / Про доставку (desktop only) -->
         <ul class="hidden md:flex space-x-6">
@@ -33,7 +33,38 @@
           </li>
         </ul>
 
+        
+
         <div class="flex items-center space-x-6">
+
+            <div class="flex items-center">
+  <div class="relative w-6 h-6">
+    <!-- Сонце -->
+    <img
+      src="@/assets/icons/sun.svg"
+      alt="sun"
+      class="absolute w-6 h-6 transition-opacity duration-500"
+      :class="{ 'opacity-0': isDarkMode, 'opacity-100': !isDarkMode }"
+    />
+    <!-- Місяць -->
+    <img
+      src="@/assets/icons/moon.svg"
+      alt="moon"
+      class="absolute w-6 h-6 transition-opacity duration-500"
+      :class="{ 'opacity-100': isDarkMode, 'opacity-0': !isDarkMode }"
+    />
+  </div>
+
+  <button
+    @click="toggleDarkMode"
+    class="mx-2 w-12 h-6 rounded-full relative bg-gray-300 dark:bg-gray-600 transition-colors duration-500"
+  >
+    <span
+      class="absolute top-0 left-0 w-6 h-6 bg-white rounded-full shadow transform transition-transform duration-500"
+      :class="isDarkMode ? 'translate-x-6' : 'translate-x-0'"
+    ></span>
+  </button>
+</div>
           <!-- Language selector -->
           <div class="relative z-50">
             <button
@@ -80,21 +111,8 @@
             </ul>
           </div>
 
-          <!-- Theme toggle -->
-          <div class="flex items-center">
-            <span class="text-xl">☀️</span>
-            <button
-              @click="toggleDarkMode"
-              class="mx-2 w-10 h-5 bg-gray-300 dark:bg-gray-600 rounded-full relative transition-colors duration-300"
-            >
-              <span
-                class="absolute left-0 top-0 w-5 h-5 bg-white dark:bg-gray-900 rounded-full shadow transform transition-transform duration-300"
+   
 
-                :class="{ 'translate-x-5': isDark }"
-              ></span>
-            </button>
-            <span class="text-xl">🌙</span>
-          </div>
 
           <!-- Currency selector -->
           <div class="relative z-50">
@@ -168,7 +186,11 @@
                    transition-all duration-200"
           />
           <button @click="startSearch" class="px-3 flex-shrink-0">
-            <img src="@/assets/magnifying-glass-svgrepo-com.svg" alt="Search" class="w-5 h-5"/>
+<img
+  src="@/assets/magnifying-glass-svgrepo-com.svg"
+  alt="Search"
+  class="w-5 h-5 dark:invert"
+/>
           </button>
 
           <!-- Search results dropdown -->
@@ -216,51 +238,55 @@
         <!-- User / Cart / Mobile Search / Burger -->
         <div class="flex items-center space-x-4">
           <router-link to="/account" class="hover:text-primary transition">
-            <img src="@/assets/icons/user_icon.svg" alt="User" class="w-6 h-6"/>
-          </router-link>
-          <button @click="toggleMobileSearch" class="md:hidden">
-            <img src="@/assets/icons/search1.svg" alt="Mobile Search" class="w-6 h-6"/>
-          </button>
-          <router-link to="/cart" class="relative hover:text-primary transition">
-            <img src="@/assets/icons/cart.svg" alt="Cart" class="w-6 h-6"/>
-            <span
-              v-if="cartCount"
-              class="absolute -top-1 -right-2 bg-[#A01212] text-white font-semibold text-[10px]
-                     rounded-full w-4 h-4 flex items-center justify-center animate-bounce"
-            >
-              {{ cartCount }}
-            </span>
-          </router-link>
+  <img
+    src="@/assets/icons/user_icon.svg"
+    alt="User"
+    class="w-6 h-6 dark:invert"
+  />
+</router-link>
+
+<router-link to="/cart" class="relative hover:text-primary transition">
+  <img
+    src="@/assets/icons/cart.svg"
+    alt="Cart"
+    class="w-6 h-6 dark:invert"
+  />
+  <span
+    v-if="cartCount"
+    class="absolute -top-1 -right-2 bg-[#A01212] text-white font-semibold text-[10px]
+           rounded-full w-4 h-4 flex items-center justify-center animate-bounce"
+  >
+    {{ cartCount }}
+  </span>
+</router-link>
+
           <button @click="toggleBurger" class="md:hidden ml-4 focus:outline-none">
-            <img src="@/assets/icons/burger.svg" alt="Menu" class="w-6 h-6"/>
+            <img src="@/assets/icons/burger.svg" alt="Menu" class="w-6 h-6 dark:invert"/>
           </button>
         </div>
       </div>
+<nav class="hidden md:block bg-[#F6E7E7] dark:bg-gray-800 md:-mx-[50px]">
+  <ul class="flex justify-center space-x-1 py-1 px-4 md:px-0 font-base">
+    <li
+      v-for="cat in categories"
+      :key="cat.link || cat.name"
+      @click="handleCategoryClick(cat.link)"
+    >
+      <span
+        :class="[ /* ⬇ Ось тут фіксимо кольори */
+          'relative inline-block px-2 py-1 cursor-pointer transition-colors duration-300',
+          $route.path === cat.link
+            ? 'text-[#6B1F1F] font-semibold before:scale-x-100'
+            : 'text-[#6B1F1F] dark:text-white hover:bg-[#fafafa] dark:hover:bg-gray-700 hover:text-[#6B1F1F] dark:hover:text-white before:scale-x-0',
+          'before:content-[\'\'] before:absolute before:left-0 before:right-0 before:bottom-0 before:h-[2px] before:bg-[#6B1F1F] dark:before:bg-white before:origin-left before:transition-transform before:duration-300'
+        ]"
+      >
+        {{ $t(cat.name) }}
+      </span>
+    </li>
+  </ul>
+</nav>
 
-      <!-- Desktop categories -->
-      <nav class="hidden md:block bg-[#F6E7E7] dark:bg-gray-800 md:-mx-[50px]">
-        <ul class="flex justify-center space-x-1 py-1 px-4 md:px-0 font-base">
-          <li
-  v-for="cat in categories"
-  :key="cat.link || cat.name"
-
-  @click="handleCategoryClick(cat.link)"
->
-  <span
-    :class="[
-      'relative inline-block px-2 py-1 cursor-pointer transition-colors duration-300',
-      $route.path === cat.link
-        ? 'text-[#6B1F1F] font-semibold before:scale-x-100'
-        : 'text-[#6B1F1F] hover:bg-[#fafafa] hover:text-[#6B1F1F] before:scale-x-0',
-      'before:content-[\'\'] before:absolute before:left-0 before:right-0 before:bottom-0 before:h-[2px] before:bg-[#6B1F1F] before:origin-left before:transition-transform before:duration-300'
-    ]"
-  >
-    {{ $t(cat.name) }}
-  </span>
-</li>
-
-        </ul>
-      </nav>
 
       <transition name="slide-fade">
   <div
@@ -374,7 +400,9 @@
                 />
                 <div class="flex-1">
                   <div class="font-semibold truncate">{{ item.name }}</div>
-                  <div class="text-sm price-color">{{ formatPrice(item.price) }}</div>
+                  <div class="text-sm price-color dark:text-white">{{ formatPrice(item.price) }}</div>
+
+
                 </div>
               </li>
             </ul>
@@ -389,16 +417,16 @@
 import { debounce } from 'lodash';
 import api from '@/services/api';
 import bus from '@/eventBus';
-import { useDarkMode } from '@/composables/useDarkMode';
+import { isDark, toggleTheme } from '@/composables/useDarkMode'
+import { computed } from 'vue'
+
 
 export default {
   name: 'HeaderComponent',
-  setup() {
-    const { isDark, toggleDarkMode } = useDarkMode();
-    return { isDark, toggleDarkMode };
-  },
+ 
   data() {
     return {
+
       categories: [],
       selectedLanguage: 'uk',
       selectedCurrency: 'UAH',
@@ -417,12 +445,15 @@ export default {
     };
   },
   computed: {
-    currentFlag() {
-      return this.selectedLanguage === 'uk'
-        ? 'https://flagcdn.com/w320/ua.png'
-        : 'https://flagcdn.com/w320/gb.png';
-    },
+  currentFlag() {
+    return this.selectedLanguage === 'uk'
+      ? 'https://flagcdn.com/w320/ua.png'
+      : 'https://flagcdn.com/w320/gb.png';
   },
+  isDarkMode() {
+    return isDark.value;
+  }
+},
   watch: {
     '$route'(to, from) {
     // перевірка, чи змінилась категорія
@@ -460,10 +491,15 @@ export default {
     this.isBurgerOpen = false;
   }
 },
+  toggleDarkMode() {
+    toggleTheme()
+  },
 navigateToCategory(link) {
     this.isBurgerOpen = false;
     this.$router.push(link);
   },
+
+
 
     toggleLanguageDropdown() { this.isLanguageDropdownOpen = !this.isLanguageDropdownOpen; },
 changeLanguage(lang) {
@@ -519,6 +555,8 @@ changeCurrency(curr) {
     handleOutsideClick(e) { if (!this.$el.contains(e.target)) this.resetResults(); }
   },
   mounted() {
+
+
   this.$nextTick(() => this.headerHeight = this.$refs.headerEl?.offsetHeight || 64);
   document.addEventListener('mousedown', this.handleOutsideClick);
   this.fetchCartCount();
@@ -563,7 +601,7 @@ changeCurrency(curr) {
 </script>
 
 
-<style scoped>
+<style>
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');
 @font-face {
   font-family: 'KyivType Titling Black2';
@@ -606,5 +644,12 @@ changeCurrency(curr) {
   max-height: 600px; /* або що завгодно досить велике */
 }
 
+.price-color {
+  color: #6B1F1F;
+}
+
+.dark .price-color {
+  color: #ffffff;
+}
 
 </style>

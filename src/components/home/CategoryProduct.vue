@@ -1,8 +1,8 @@
 <template>
-  <section class="flex flex-col items-center bg-[#fff7f6] py-12">
+  <section class="flex flex-col items-center bg-[#fff7f6] dark:bg-[#17223b] py-12">
     <!-- Section title -->
     <h2
-      class="text-[#333] text-[32px] font-black font-kyivtype text-center mb-12"
+      class="text-[#333] dark:text-white text-[32px] font-black font-kyivtype text-center mb-12"
     >
       {{ $t('home.shopByCategory') }}
     </h2>
@@ -20,13 +20,13 @@
           <div class="relative w-72 h-72 mt-5 mx-auto">
             <!-- Світлий квадрат -->
             <div
-              class="absolute -left-4 -top-4 w-72 h-72 bg-[#EADCDB]
+              class="absolute -left-4 -top-4 w-72 h-72 bg-[#EADCDB] dark:bg-[#1f2b48]
                      transform transition-transform duration-500 ease-out
                      group-hover:-translate-x-2 group-hover:-translate-y-2 z-0"
             ></div>
             <!-- Темний квадрат -->
             <div
-              class="absolute -right-3 top-3 w-72 h-72 bg-[#C4AEAC]
+              class="absolute -right-3 top-3 w-72 h-72 bg-[#C4AEAC] dark:bg-[#2c3757]
                      transform transition-transform duration-500 ease-out
                      group-hover:translate-x-2 group-hover:translate-y-2 z-0"
             ></div>
@@ -41,7 +41,7 @@
 
           <!-- Підпис категорії трохи нижче -->
           <div
-            class="mt-12 flex items-center justify-center text-[1.5rem] font-black text-[#6B1F1F] font-kyivtype letter-tight"
+            class="mt-12 flex items-center justify-center text-[1.5rem] font-black text-[#6B1F1F] dark:text-[#e0e8ff] font-kyivtype letter-tight"
           >
             <h3>{{ $t(category.name) }}</h3>
             <span
@@ -55,6 +55,8 @@
     </div>
   </section>
 </template>
+
+
 
 <script>
 import api from '@/services/api';

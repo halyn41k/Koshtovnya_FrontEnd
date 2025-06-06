@@ -19,10 +19,10 @@
       </div>
 
       <!-- INFO CARD -->
-      <div class="lg:w-1/2 bg-[#FFF7F6] p-6 rounded-2xl shadow-lg flex flex-col space-y-4">
+<div class="lg:w-1/2 bg-[#fff7f6] dark:bg-[#17223b] border-2 border-gray-200 dark:border-[#303b59] p-6 rounded-2xl shadow-md hover:shadow-lg transition-all duration-500 ease-in-out flex flex-col space-y-4">
         <!-- TITLE & PRICE -->
         <div class="text-center space-y-2">
-          <h1 class="text-2xl font-bold text-gray-900">{{ product.name }}</h1>
+<h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ product.name }}</h1>
           <hr class="border-gray-300 dark:border-gray-600 mx-auto w-24" />
 <p
   v-if="product.price && product.currency"
@@ -63,10 +63,11 @@
         <div class="space-y-1">
           <label for="size-select" class="block text-base font-medium text-gray-700">Розмір</label>
           <select
-            id="size-select"
-            v-model="selectedSize"
-            class="w-full h-10 bg-[#F6E7E7] rounded-md px-3 focus:outline-none"
-          >
+  id="size-select"
+  v-model="selectedSize"
+  class="w-full h-10 bg-[#F6E7E7] dark:bg-[#3c465f] dark:text-white rounded-md px-3 focus:outline-none"
+>
+
             <option
               v-for="v in product.variants"
               :key="v.size"
@@ -95,7 +96,8 @@
               v-if="isAvailable"
               @click="addToCart"
               :disabled="!selectedVariant"
-              class="flex-1 flex items-center justify-center space-x-2 bg-[#6B1F1F] text-white py-2 rounded-lg shadow hover:bg-[#A01212] disabled:opacity-50"
+class="flex-1 flex items-center justify-center space-x-2 bg-[#6B1F1F] hover:bg-[#861818] dark:bg-[#A01212] dark:hover:bg-[#c42e2e] 
+text-white font-montserrat font-semibold py-2 rounded-lg shadow-md transition-all duration-300 ease-in-out disabled:opacity-50"
             >
               <span>Купити</span>
               <img src="@/assets/miniarrow.png" alt="" class="w-4 h-3" />
@@ -103,7 +105,7 @@
             <button
               v-else
               @click="notifyWhenAvailable"
-              class="flex-1 bg-red-600 text-white py-2 rounded-lg shadow hover:bg-red-700"
+class="flex-1 bg-gray-300 text-gray-700 dark:bg-[#3c465f] dark:text-gray-200 font-montserrat font-semibold py-2 rounded-lg shadow-md hover:bg-red-700 transition-all duration-300"
             >
               Повідомити про наявність
             </button>
@@ -113,7 +115,7 @@
             <svg
               v-if="product.is_in_wishlist"
               xmlns="http://www.w3.org/2000/svg"
-              class="w-6 h-6 text-red-600 dark:text-gray-100"
+class="w-6 h-6 text-gray-500 dark:text-gray-300"
               viewBox="0 0 24 24"
               fill="currentColor"
             >
@@ -146,10 +148,10 @@
     <section>
       <div class="hidden md:flex items-center mb-4">
         <hr class="flex-grow border-t-2 border-gray-300 dark:border-gray-600" />
-      <h2 class="mx-4 text-2xl font-bold text-gray-900">Характеристики</h2>
+      <h2 class="mx-4 text-2xl font-bold text-gray-900 dark:invert">Характеристики</h2>
       <hr class="flex-grow border-t-2 border-gray-300 dark:border-gray-600" />
       </div>
-      <h2 class="md:hidden text-2xl font-bold text-gray-900 text-center mb-4">Характеристики</h2>
+      <h2 class="md:hidden text-2xl font-bold text-gray-900 text-center mb-4 dark:invert">Характеристики</h2>
       <div class="w-full">
         <div
           v-for="(val, key) in formattedCharacteristics"
@@ -157,7 +159,7 @@
           class="grid grid-cols-2 gap-4 py-2 border-b border-gray-200"
         >
           <dt class="font-medium">{{ key }}</dt>
-          <dd class="text-gray-700">{{ val }}</dd>
+<dd class="text-gray-700 dark:text-gray-300">{{ val }}</dd>
         </div>
       </div>
     </section>
