@@ -1,15 +1,8 @@
 <template>
   <div class="personal-info">
     <div class="flex flex-col gap-4 w-[400px]">
-      <div
-        v-for="(field, key) in fields"
-        :key="key"
-        class="flex flex-col gap-1"
-      >
-        <label
-          :for="key"
-          class="text-sm text-gray-700 dark:text-gray-300 font-medium"
-        >
+      <div v-for="(field, key) in fields" :key="key" class="flex flex-col gap-1">
+        <label :for="key" class="text-sm text-gray-700 font-medium">
           {{ getLabel(key) }}
         </label>
         <input
@@ -18,22 +11,15 @@
           v-model="localData[key]"
           :placeholder="field.placeholder"
           @input="updateData"
-          class="border border-gray-400 dark:border-gray-600 p-2 rounded
-                 text-black dark:text-white bg-white dark:bg-gray-800
-                 placeholder-gray-500 dark:placeholder-gray-400
-                 text-[14px] w-full montserrat focus:outline-none focus:ring-2 focus:ring-red-500"
+          class="border border-gray-400 p-2 rounded text-black dark:text-white text-[14px] w-full montserrat"
         />
-        <span
-          v-if="errors[key]"
-          class="text-red-500 dark:text-gray-100 text-xs"
-        >
+        <span v-if="errors[key]" class="text-red-500 dark:text-gray-100 text-xs">
           {{ errors[key] }}
         </span>
       </div>
     </div>
   </div>
 </template>
-
 
 
 <script>

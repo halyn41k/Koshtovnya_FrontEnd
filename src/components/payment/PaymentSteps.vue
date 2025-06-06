@@ -1,27 +1,28 @@
 <template>
-  <div class="flex flex-col font-montserrat text-[14px] bg-white/80 dark:bg-gray-800/80 text-black dark:text-white rounded-lg shadow-md p-6 transition-all">
+  <div class="flex flex-col font-montserrat text-[14px] bg-white dark:bg-gray-900/80 rounded-lg shadow-md p-6 transition-all">
     <!-- Кроки оформлення -->
     <section class="mb-5">
-      <div class="font-bold text-[20px] leading-[1.3] text-gray-400 dark:text-gray-300">
+      <div class="font-bold text-[20px] leading-[1.3] text-gray-400">
         <div
           v-for="(step, index) in steps"
           :key="index"
           class="flex flex-col gap-3 mt-4"
         >
-          <!-- Розділювач -->
-          <div v-if="index !== 0" class="w-full h-px bg-gray-300 dark:bg-gray-600 my-2"></div>
+          <div v-if="index !== 0" class="w-full h-px bg-gray-300 my-2"></div>
 
-          <!-- Заголовок кроку -->
           <div
-            class="flex items-center gap-3 cursor-pointer p-3 rounded-md transition hover:bg-gray-100 dark:hover:bg-gray-700"
+            class="flex items-center gap-3 cursor-pointer p-3 rounded-md transition hover:bg-gray-100"
             :class="{
-              'bg-[#FFF0F0] dark:bg-[#301c1c] border-l-4 border-[#6B1F1F]': index === currentStep,
-              'bg-[#F8F8F8] dark:bg-[#2a2a2a]': step.completed && index !== currentStep
+              'bg-[#FFF0F0] border-l-4 border-[#6B1F1F]': index === currentStep,
+              'bg-[#F8F8F8]': step.completed && index !== currentStep
             }"
             @click="toggleStep(index)"
           >
             <span
-              :class="[step.completed ? 'text-gray-400 dark:text-gray-500' : 'text-gray-900 dark:text-white', 'font-bold']"
+              :class="[
+                step.completed ? 'text-gray-400' : 'text-gray-900',
+                'font-bold'
+              ]"
             >
               {{ index + 1 }}. {{ step.title }}
             </span>
@@ -41,7 +42,6 @@
             />
           </div>
 
-          <!-- Контент кроку -->
           <div
             v-if="index === currentStep && step.isExpanded"
             class="mt-3 transition-all duration-300 ease-in-out"
@@ -74,13 +74,13 @@
         </div>
       </div>
     </section>
+
   </div>
 </template>
 
 
-
 <script>
-import api from '@/services/api';
+import axios from "axios";
 import { mapActions } from "vuex";
 import DeliveryAddress from "./DeliveryAddress.vue";
 import PersonalInfo from "./PersonalInfo.vue";
@@ -188,14 +188,14 @@ export default {
     updateDeliveryOptions() {
   const deliveryData = {
     courier: [
-      { id: 5, name: "Кур'єр Нової Пошти", value: 'courier', label: 'Курʼєр' },
-      { id: 6, name: "Кур'єр УКРПОШТИ", value: 'courier', label: 'Курʼєр' }
+      { id: 5, name: "Кур'єр Нової Пошти", value: 'courier', label: 'Курʼєр', delivery_type: 'courier' },
+      { id: 6, name: "Кур'єр УКРПОШТИ", value: 'courier', label: 'Курʼєр', delivery_type: 'courier' }
     ],
     pickup: [
-      { id: 1, name: "Самовивіз з наших магазинів", value: 'pickup', label: 'Самовивіз' },
-      { id: 2, name: "Самовивіз з поштоматів Нової Пошти", value: 'pickup', label: 'Самовивіз' },
-      { id: 3, name: "Самовивіз з Нової Пошти", value: 'pickup', label: 'Самовивіз' },
-      { id: 4, name: "Самовивіз з УКРПОШТИ", value: 'pickup', label: 'Самовивіз' }
+      { id: 1, name: "Самовивіз з наших магазинів", value: 'pickup', label: 'Самовивіз', delivery_type: 'pickup' },
+      { id: 2, name: "Самовивіз з поштоматів Нової Пошти", value: 'pickup', label: 'Самовивіз', delivery_type: 'pickup' },
+      { id: 3, name: "Самовивіз з Нової Пошти", value: 'pickup', label: 'Самовивіз', delivery_type: 'pickup' },
+      { id: 4, name: "Самовивіз з УКРПОШТИ", value: 'pickup', label: 'Самовивіз', delivery_type: 'pickup' }
     ]
   };
 
@@ -291,7 +291,10 @@ validateCurrentStep() {
         return;
       }
       try {
-        await api.getDeliveryTypes();
+        await axios.get(
+          "https://koshtovnya.api-dev.bmax-edu.website/api/delivery-types",
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
       } catch (error) {
         console.error("Помилка отримання типів доставки", error);
         alert("Помилка отримання типів доставки");
@@ -305,8 +308,11 @@ validateCurrentStep() {
         return [];
       }
       try {
-        const data = await api.getCart();
-        const cartData = data.data || [];
+        const response = await axios.get(
+          "https://koshtovnya.api-dev.bmax-edu.website/api/cart",
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        const cartData = response.data.data || [];
         this.cartItems = JSON.parse(JSON.stringify(cartData));
         this.updateCartItems(this.cartItems);
         return this.cartItems;
@@ -319,8 +325,11 @@ validateCurrentStep() {
       const token = localStorage.getItem("token");
       if (!token) return;
       try {
-        const response = await api.getProfile();
-        const user = response.user;
+        const response = await axios.get(
+          "https://koshtovnya.api-dev.bmax-edu.website/api/profile",
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        const user = response.data.user;
         this.formData.firstName = user.first_name || "";
         this.formData.lastName = user.last_name || "";
         this.formData.secondName = user.second_name || "";
@@ -333,8 +342,12 @@ validateCurrentStep() {
   if (!token) return;
 
   try {
-    const response = await api.getUserAddress();
-    const addressData = response.data;
+    const response = await axios.get(
+      "https://koshtovnya.api-dev.bmax-edu.website/api/user-address",
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+
+    const addressData = response.data.data;
     if (addressData) {
       this.formData.phone = addressData.phone_number || "";
       this.formData.city = addressData.city || "";
@@ -421,13 +434,19 @@ async fetchWarehouses(city, cityRef, deliveryName) {
   if (!token || !city || !cityRef) return [];
 
   try {
-    const data = await api.getNPtwarehouses({
-      city,
-      Ref: cityRef,
-      delivery_type: deliveryName || ''
-    });
-    return Array.isArray(data)
-      ? data.map((item, i) => ({ id: i + 1, name: item.warehouse }))
+    const response = await axios.get(
+      "https://koshtovnya.api-dev.bmax-edu.website/api/nova-poshta/ware-houses",
+      {
+        headers: { Authorization: `Bearer ${token}` },
+        params: {
+          city,
+          city_ref: cityRef,
+          delivery_type: deliveryName || '',
+        }
+      }
+    );
+    return Array.isArray(response.data.data)
+      ? response.data.data.map((item, i) => ({ id: i + 1, name: item.warehouse }))
       : [];
   } catch (e) {
     console.error("Помилка отримання відділень", e);
@@ -516,7 +535,27 @@ async fetchWarehouses(city, cityRef, deliveryName) {
   'formData.phone'(val) {
     this.revalidateSteps();
   },
-   currentStep() {
+  'formData.deliveryType'(val) {
+    this.selectedDeliveryCategory = val?.delivery_type || val?.value || ''
+    this.revalidateSteps()
+  },
+  'formData.cityRef'(val) {
+    if (
+      val &&
+      this.selectedDeliveryCategory === 'pickup' &&
+      !this.isStorePickupSelected &&
+      this.formData.city
+    ) {
+      this.fetchWarehouses(
+        this.formData.city,
+        this.formData.cityRef,
+        this.formData.deliveryType?.name
+      ).then(ws => {
+        this.warehouses = ws
+      })
+    }
+  },
+  currentStep() {
     this.revalidateSteps(); // це обовʼязково! перевіряє при перемиканні кроку
   },
 },

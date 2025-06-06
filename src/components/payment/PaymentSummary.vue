@@ -4,8 +4,9 @@
   class="
     w-full
     p-4 lg:p-5
-    bg-[#FFF7F6] dark:bg-gray-800 border border-[#E6E6E6] dark:border-gray-600 rounded-lg
-    transition-all duration-300 text-black dark:text-white"
+    bg-[#FFF7F6] border border-[#E6E6E6] rounded-lg
+    transition-all duration-300
+      "
       style="font-family: 'Montserrat', sans-serif;"
     >
      
@@ -80,7 +81,7 @@
 </template>
 
 <script>
-import api from '@/services/api';
+import axios from "axios";
 import { mapGetters, mapActions } from "vuex";
 
 export default {
@@ -154,8 +155,12 @@ export default {
       if (!token) return;
       try {
         const currency = localStorage.getItem('currency')?.toLowerCase() || 'uah';
-const data = await api.getCart();
-        this.updateCartItems(data.products || []);
+const response = await axios.get("https://koshtovnya.api-dev.bmax-edu.website/api/cart", {
+  headers: { Authorization: `Bearer ${token}` },
+  params: { currency }
+});
+
+        this.updateCartItems(response.data.products || []);
       } catch (error) {
         console.error("[fetchCartItems] Помилка:", error);
       }
@@ -170,13 +175,16 @@ const data = await api.getCart();
       try {
         const currency = localStorage.getItem('currency')?.toLowerCase() || 'uah';
 
-const data = await api.getNPtdeliveryCost({
-  CityRecipient: this.effectiveCityRef,
-  ServiceType: serviceType,
-  product_ids: productIds,
-  currency
+const response = await axios.get("https://koshtovnya.api-dev.bmax-edu.website/api/nova-poshta/delivery/cost", {
+  headers: { Authorization: `Bearer ${token}` },
+  params: {
+    CityRecipient: this.effectiveCityRef,
+    ServiceType: serviceType,
+    product_ids: productIds,
+    currency // ← передати валюту
+  }
 });
-        const cost = data?.data?.cost || 0;
+        const cost = response.data?.data?.cost || 0;
         this.updateDeliveryCost(cost);
         return cost;
       } catch (error) {
@@ -211,20 +219,24 @@ const data = await api.getNPtdeliveryCost({
         
       };
       try {
-        const orderRes = await api.createOrder(orderData);
-        const orderId = orderRes?.data?.order?.id;
+        const orderResponse = await axios.post("https://koshtovnya.api-dev.bmax-edu.website/api/orders", orderData, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const orderId = orderResponse.data?.data?.order?.id;
         if (!orderId) return;
         if (customer.paymentMethod === "Післяоплата") {
           this.$router.push("/payment-confirmed");
         } else if (customer.paymentMethod === "Оплата картою") {
           const amount = this.cartTotalAmount + currentDeliveryCost;
-          const paymentResponse = await api.createPayment({
+          const paymentResponse = await axios.post("https://koshtovnya.api-dev.bmax-edu.website/api/payment", {
             amount,
             order_id: orderId,
             description: "Оплата замовлення",
             currency,
+          }, {
+            headers: { Authorization: `Bearer ${token}` }
           });
-          const liqpayFormHtml = paymentResponse.form;
+          const liqpayFormHtml = paymentResponse.data.form;
           if (!liqpayFormHtml) return;
           const container = document.createElement("div");
           container.innerHTML = liqpayFormHtml;

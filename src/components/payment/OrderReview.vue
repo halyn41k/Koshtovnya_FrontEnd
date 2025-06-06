@@ -1,48 +1,32 @@
 <template>
   <div class="order-review font-montserrat text-[14px]">
-    <p class="text-gray-700 dark:text-gray-200 font-semibold mb-4">
+    <p class="text-gray-700 font-semibold mb-4">
       Будь ласка, перевірте своє замовлення перед оплатою.
     </p>
 
-    <section
-      ref="orderItems"
-      class="overflow-y-auto max-h-[400px] mb-6 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-700 scrollbar-track-gray-100 dark:scrollbar-track-gray-800"
-    >
+    <section ref="orderItems" class="overflow-y-auto max-h-[400px] mb-6 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
       <div v-if="localCartItems.length > 0" class="flex flex-col space-y-4">
-        <div
-          v-for="item in localCartItems"
-          :key="item.id"
-          class="flex items-center bg-white dark:bg-[#1e293b] rounded-lg shadow p-4"
-        >
-          <img
-            :src="item.image"
-            alt="Product Image"
-            class="w-20 h-20 object-cover rounded-md mr-4"
-          />
+        <div v-for="item in localCartItems" :key="item.id" class="flex items-center bg-white dark:bg-gray-900 rounded-lg shadow p-4">
+          <img :src="item.image" alt="Product Image" class="w-20 h-20 object-cover rounded-md mr-4" />
           <div class="flex-1">
-            <h3 class="text-gray-900 dark:text-white font-medium text-lg mb-1">
-              {{ item.title }}
-            </h3>
-            <p class="text-gray-600 dark:text-gray-300">
-              <span class="font-semibold">{{ formatCurrencyIntl(item.price, item.currency) }}</span> за штуку
-            </p>
-            <p class="text-gray-600 dark:text-gray-300">
-              Кількість: {{ item.quantity }}
-            </p>
+            <h3 class="text-gray-900 font-medium text-lg mb-1">{{ item.title }}</h3>
+            <p class="text-gray-600">
+  <span class="font-semibold">{{ formatCurrencyIntl(item.price, item.currency) }}</span> за штуку
+</p>
+            <p class="text-gray-600">Кількість: {{ item.quantity }}</p>
           </div>
         </div>
       </div>
-      <div v-else class="text-center text-gray-500 dark:text-gray-400 py-10">
+      <div v-else class="text-center text-gray-500 py-10">
         Ваш кошик порожній.
       </div>
     </section>
+
   </div>
 </template>
 
-
-
 <script>
-import api from '@/services/api';
+import axios from 'axios';
 
 export default {
   name: 'OrderReview',
@@ -73,7 +57,13 @@ export default {
       this.loading = true;
       try {
         const currency = localStorage.getItem('currency')?.toLowerCase() || 'uah';
-const data = await api.getCart();
+const { data } = await axios.get(
+  'https://koshtovnya.api-dev.bmax-edu.website/api/cart',
+  {
+    headers: { Authorization: `Bearer ${token}` },
+    params: { currency }
+  }
+);
 
         this.localCartItems = data.products.map(item => ({
         id: item.id,

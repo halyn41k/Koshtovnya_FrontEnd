@@ -1,9 +1,9 @@
 <template>
-  <div class="w-full bg-[#FFF7F6] dark:bg-[#17223b] transition-colors duration-300">
-    <article class="relative text-black dark:text-white font-montserrat py-[170px] px-[30px] w-full max-w-[1450px] mx-auto rounded-lg overflow-hidden shadow-[0_4px_15px_rgba(0,0,0,0.1)] transition-colors">
+  <div class="w-full bg-[#FFF7F6]">
+    <article class="relative text-black dark:text-white font-montserrat py-[170px] px-[30px] w-full max-w-[1450px] mx-auto rounded-lg overflow-hidden shadow-[0_4px_15px_rgba(0,0,0,0.1)]">
       <!-- Title -->
       <header class="mb-8">
-        <h1 class="flex items-center justify-center mt-[40px] font-kyivBlack2 text-[34px] font-black tracking-[-1.2px] text-center text-[#6B1F1F] dark:text-white transition-colors">
+        <h1 class="flex items-center justify-center mt-[40px] font-kyivBlack2 text-[34px] font-black tracking-[-1.2px] text-center">
           <div class="flex-1 h-[2px] bg-gray-400 mx-2"></div>
           {{ $t('infoshop.aboutDelivery.title') }}
           <div class="flex-1 h-[2px] bg-gray-400 mx-2"></div>
@@ -14,14 +14,14 @@
         <!-- Delivery Section -->
         <section class="flex flex-col lg:flex-row items-start gap-5">
           <div class="flex-1 pr-5">
-            <h3 class="mb-3 text-xl font-medium dark:text-white">{{ $t('infoshop.aboutDelivery.deliveryTitle') }}</h3>
+            <h3 class="mb-3 text-xl font-medium">{{ $t('infoshop.aboutDelivery.deliveryTitle') }}</h3>
             <ul class="space-y-4">
               <li
                 v-for="(option, index) in deliveryOptions"
                 :key="index"
-                class="bg-white dark:bg-[#1e263b] bg-opacity-50 dark:bg-opacity-100 p-4 shadow-sm rounded-lg transition-colors"
+                class="bg-white dark:bg-gray-900 bg-opacity-50 p-4 shadow-sm rounded-lg"
               >
-                <h4 class="text-[#6B1F1F] dark:text-[#fca5a5] font-medium mb-2 flex items-center">
+                <h4 class="text-[#6B1F1F] font-medium mb-2 flex items-center">
                   • {{ option.carrier }}
                   <img
                     :src="getImage(option.logo)"
@@ -30,14 +30,14 @@
                   />
                 </h4>
                 <p
-                  class="text-base leading-relaxed text-gray-700 dark:text-gray-300"
+                  class="text-base leading-relaxed"
                   v-html="getSafeText(option.text)"
                 />
               </li>
             </ul>
           </div>
           <div class="w-full lg:w-2/5 relative overflow-hidden">
-            <div class="absolute inset-0 bg-gradient-to-r from-white dark:from-[#17223b] to-transparent transition-colors"></div>
+            <div class="absolute inset-0 bg-gradient-to-r from-white to-transparent"></div>
             <img
               src="@/assets/delivery.png"
               alt="Доставка"
@@ -48,30 +48,28 @@
 
         <!-- Payment Section -->
         <section>
-          <h2 class="mb-4 text-xl font-medium dark:text-white">{{ $t('infoshop.aboutDelivery.paymentTitle') }}</h2>
-          <p class="pl-4 border-l-4 border-[#6B1F1F] dark:border-[#fca5a5] mb-4 text-gray-800 dark:text-gray-200">
-            {{ $t('infoshop.aboutDelivery.paymentIntro') }}
-          </p>
+          <h2 class="mb-4 text-xl font-medium">{{ $t('infoshop.aboutDelivery.paymentTitle') }}</h2>
+          <p class="pl-4 border-l-4 border-[#6B1F1F] mb-4">{{ $t('infoshop.aboutDelivery.paymentIntro') }}</p>
           <ul class="space-y-4">
             <li
               v-for="(method, index) in paymentMethods"
               :key="index"
-              class="bg-white dark:bg-[#1e263b] bg-opacity-50 dark:bg-opacity-100 p-4 shadow-sm rounded-lg transition-colors"
+              class="bg-white dark:bg-gray-900 bg-opacity-50 p-4 shadow-sm rounded-lg"
             >
-              <h4 class="text-[#6B1F1F] dark:text-[#fca5a5] font-medium mb-2">• {{ method.title }}</h4>
-              <p class="text-base leading-relaxed text-gray-700 dark:text-gray-300">{{ method.text }}</p>
+              <h4 class="text-[#6B1F1F] font-medium mb-2">• {{ method.title }}</h4>
+              <p class="text-base leading-relaxed">{{ method.text }}</p>
             </li>
           </ul>
         </section>
 
         <!-- Additional Conditions -->
         <section>
-          <h3 class="mb-3 text-lg font-medium dark:text-white">{{ $t('infoshop.aboutDelivery.additionalTitle') }}</h3>
+          <h3 class="mb-3 text-lg font-medium">{{ $t('infoshop.aboutDelivery.additionalTitle') }}</h3>
           <ul class="space-y-3">
             <li
               v-for="(item, i) in additional"
               :key="i"
-              class="text-base text-gray-800 dark:text-gray-200"
+              class="text-base"
             >
               • {{ item }}
             </li>
@@ -81,7 +79,7 @@
 
       <!-- Footer -->
       <footer class="mt-16">
-        <p class="text-center text-2xl font-bold text-[#6B1F1F] dark:text-[#fca5a5] mb-10">
+        <p class="text-center text-2xl font-bold text-[#6B1F1F] mb-10">
           {{ $t('infoshop.aboutDelivery.thankYou') }}
         </p>
       </footer>
@@ -91,7 +89,6 @@
     </article>
   </div>
 </template>
-
 
 <script>
 export default {
