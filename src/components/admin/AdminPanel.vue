@@ -11,20 +11,126 @@
   alt="User Icon"
   class="w-5 h-5 dark:invert"
 />    </div>
-      <div class="flex items-center space-x-2">
+      
+        <div class="flex items-center space-x-6">
+
+            <div class="flex items-center">
+  <div class="relative w-6 h-6">
+    <!-- Сонце -->
     <img
-      :src="currentFlag"
-      :alt="selectedLanguage + ' Flag'"
-      class="w-5 h-4 rounded-sm object-cover"
+      src="@/assets/icons/sun.svg"
+      alt="sun"
+      class="absolute w-6 h-6 transition-opacity duration-500"
+      :class="{ 'opacity-0': isDarkMode, 'opacity-100': !isDarkMode }"
     />
-    <Multiselect
-      v-model="selectedLanguage"
-      :options="languageOptions"
-      :custom-label="opt => opt.name"
-      :track-by="'code'"
-      :placeholder="$t('admin.panel.chooseLanguage')"
-      class="w-36 custom-multiselect"
+    <!-- Місяць -->
+    <img
+      src="@/assets/icons/moon.svg"
+      alt="moon"
+      class="absolute w-6 h-6 transition-opacity duration-500"
+      :class="{ 'opacity-100': isDarkMode, 'opacity-0': !isDarkMode }"
     />
+  </div>
+
+  <button
+    @click="toggleDarkMode"
+    class="mx-2 w-12 h-6 rounded-full relative bg-gray-300 dark:bg-gray-600 transition-colors duration-500"
+  >
+    <span
+      class="absolute top-0 left-0 w-6 h-6 bg-white rounded-full shadow transform transition-transform duration-500"
+      :class="isDarkMode ? 'translate-x-6' : 'translate-x-0'"
+    ></span>
+  </button>
+</div>
+          <!-- Language selector -->
+          <div class="relative z-50">
+            <button
+              @click="toggleLanguageDropdown"
+              class="flex items-center space-x-2 p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-all duration-200"
+            >
+              <img
+                :src="currentFlag"
+                :alt="selectedLanguage + ' flag'"
+                class="w-5 h-4 rounded-sm shadow-sm"
+              />
+              <span>{{ selectedLanguage === 'uk' ? 'Українська' : 'English' }}</span>
+              <svg
+                :class="{ 'rotate-180': isLanguageDropdownOpen }"
+                class="w-4 h-4 transform transition-transform"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            <ul
+              v-if="isLanguageDropdownOpen"
+              class="absolute right-0 mt-2 w-40 bg-white dark:bg-gray-800 border border-stroke dark:border-gray-600 rounded-lg shadow-lg overflow-hidden z-50"
+            >
+              <li>
+                <button
+                  @click="changeLanguage('uk')"
+                  class="w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 rounded-lg"
+                >
+                  Українська
+                </button>
+              </li>
+              <li>
+                <button
+                  @click="changeLanguage('en')"
+                  class="w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 rounded-lg"
+                >
+                  English
+                </button>
+              </li>
+            </ul>
+          </div>
+
+   
+
+
+          <!-- Currency selector -->
+          <div class="relative z-50">
+            <button
+              @click="toggleCurrencyDropdown"
+              class="flex items-center space-x-1 p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-all duration-200"
+            >
+              <span>{{ selectedCurrency }}</span>
+              <svg
+                :class="{ 'rotate-180': isCurrencyDropdownOpen }"
+                class="w-4 h-4 transform transition-transform"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            <ul
+              v-if="isCurrencyDropdownOpen"
+              class="absolute right-0 mt-2 w-32 bg-white dark:bg-gray-800 border border-stroke dark:border-gray-600 rounded-lg shadow-lg overflow-hidden z-50"
+            >
+              <li>
+                <button
+                  @click="changeCurrency('UAH')"
+                  class="w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 rounded-lg"
+                >
+                  UAH ₴
+                </button>
+              </li>
+              <li>
+                <button
+                  @click="changeCurrency('USD')"
+                  class="w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 rounded-lg"
+                >
+                  USD $
+                </button>
+              </li>
+            </ul>
+          </div>
 
 
   </div>
@@ -141,6 +247,9 @@ import Reports from './Reports.vue';
 import Settings from './Settings.vue';
 import DashboardView from './dashboard/Dashboard.vue';
 import Multiselect from 'vue-multiselect'
+import { mapState, mapActions } from 'vuex';
+import api from '@/services/api';
+
 
 export default {
   name: 'AdminPanel',
@@ -154,7 +263,8 @@ export default {
     Reports,
     Settings,
     DashboardView,
-    Multiselect
+    Multiselect,
+
   },
   data() {
     return {
@@ -162,10 +272,7 @@ export default {
       activeTab: -1,
       user: null,
          selectedLanguage: { code: 'uk', name: 'Українська', flag: 'https://flagcdn.com/w320/ua.png' },
-    languageOptions: [
-      { code: 'uk', name: 'Українська', flag: 'https://flagcdn.com/w320/ua.png' },
-      { code: 'en', name: 'English', flag: 'https://flagcdn.com/w320/gb.png' }
-    ],
+    
       siteSettings: { site_logo: '' },
       sidebarCollapsed: false
     }
@@ -179,6 +286,17 @@ export default {
     currentFlag() {
   return this.selectedLanguage?.flag || 'https://flagcdn.com/w320/ua.png';
 },
+...mapState('settings', ['lang']),
+    languageOptions() {
+      return [
+        { code: 'uk', name: 'Українська', flag: 'https://flagcdn.com/w320/ua.png' },
+        { code: 'en', name: 'English',    flag: 'https://flagcdn.com/w320/gb.png' }
+      ];
+    },
+    selectedLangObj() {
+      return this.languageOptions.find(o => o.code === this.lang);
+    },
+  
 
     panelSubtitle() {
       if (!this.user) return '';
@@ -225,6 +343,10 @@ export default {
     }
   },
   methods: {
+    ...mapActions('settings', ['changeLang']),
+    onLanguageSelect(option) {
+      this.changeLang(option.code);
+    },
     selectTab(idx) {
       this.activeTab = idx;
     },
@@ -237,17 +359,21 @@ export default {
       this.$i18n.locale = this.selectedLanguage;
     },
     async fetchSiteSettings() {
-      try {
-        const { data } = await this.$axios.get('https://koshtovnya.api-dev.bmax-edu.website/api/site-settings');
-        data.data.forEach(s => {
-          if (s.setting_key === 'site_logo') {
-            this.siteSettings.site_logo = s.setting_value;
-          }
-        });
-      } catch (err) {
-        console.error('Помилка завантаження логотипу:', err);
-      }
+    try {
+      // робимо запит і чекаємо на відповідь
+      const response = await api.getSiteSettings()
+      // припустимо, що у вас у відповіді лежить { data: [ { setting_key, setting_value }, … ] }
+      const settingsArray = response.data.data || response.data
+
+      settingsArray.forEach(s => {
+        if (s.setting_key === 'site_logo') {
+          this.siteSettings.site_logo = s.setting_value
+        }
+      })
+    } catch (err) {
+      console.error('Помилка завантаження логотипу:', err)
     }
+  },
   },
   mounted() {
     const user = JSON.parse(localStorage.getItem('user'));
@@ -257,6 +383,8 @@ export default {
       this.user = user;
     }
     this.fetchSiteSettings();
+        this.$i18n.locale = this.lang;
+
   }
 }
 </script>

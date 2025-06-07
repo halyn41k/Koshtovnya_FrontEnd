@@ -1,7 +1,7 @@
-import axios from 'axios'; 
+// services/api.js
+import axios from 'axios';
 import router from '@/router';
-
-
+import i18n from '@/i18n';              // експорт вашого Vue I18n-екземпляру
 import { createToastInterface } from 'vue-toastification';
 import 'vue-toastification/dist/index.css';
 
@@ -13,123 +13,125 @@ const toast = createToastInterface({
 
 let hasShownAuthToast = false;
 
-
 const apiClient = axios.create({
   baseURL: 'https://koshtovnya.api-dev.bmax-edu.website',
   headers: {
     'Content-Type': 'application/json'
   },
   timeout: 10000,
-
 });
 
-apiClient.interceptors.request.use(
-  config => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
+apiClient.interceptors.request.use(config => {
+  // --- Auth token ---
+  const token = localStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
 
-    const currency = (localStorage.getItem('currency') || 'uah').toLowerCase();
+  // --- Поточна мова та валюта ---
+  const lang = i18n.global.locale.value || localStorage.getItem('language') || 'uk';
+  const currency = (localStorage.getItem('currency') || 'uah').toLowerCase();
 
-    // Додаємо currency до всіх запитів
-    if (config.method === 'get') {
-      config.params = { ...(config.params || {}), currency };
-    } else if (config.data instanceof FormData) {
+  // Для GET: додаємо у params
+  if (config.method === 'get') {
+    config.params = {
+      ...(config.params || {}),
+      lang,
+      currency,
+    };
+  } else {
+    // Для інших: у body
+    if (config.data instanceof FormData) {
+      config.data.append('lang', lang);
       config.data.append('currency', currency);
     } else if (config.data) {
-      config.data.currency = currency;
-    } else if (!config.data) {
-      config.data = { currency }; // якщо POST без payload
+      config.data = {
+        ...config.data,
+        lang,
+        currency,
+      };
+    } else {
+      config.data = { lang, currency };
     }
+  }
 
-    return config;
-  },
-  error => Promise.reject(error)
-);
-
+  return config;
+}, error => Promise.reject(error));
 
 apiClient.interceptors.response.use(
   response => response,
- error => {
-  const response = error.response;
+  error => {
+    const response = error.response;
 
-if (response?.status === 401) {
-  localStorage.removeItem('token');
+    // Якщо зовсім немає відповіді
+    if (!response) {
+      toast.error('Немає зв’язку із сервером. Спробуйте ще раз.');
+      return Promise.reject({ message: 'Network error or timeout' });
+    }
 
-  const currentPath = window.location.pathname;
-  if (currentPath !== '/login') {
-    window.location.href = '/login';
-  }
-}
-
-
-  if (!response) {
-    toast.error('Немає зв’язку із сервером. Спробуйте ще раз.');
-    return Promise.reject({ message: 'Network error or timeout' });
-  }
-
-  const message = response.data?.message || '';
-  const normalizedMessage = message.toLowerCase().trim();
-
-  if (normalizedMessage.includes('banned')) {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    window.location.href = '/login?error=user_is_banned';
-    return Promise.reject(response.data);
-  }
-
-  // інші повідомлення
-  if (normalizedMessage.includes('you are already subscribed for notifications')) {
-    toast.error('Ви вже підписані на сповіщення для цього товару 😢');
-    return Promise.reject(response.data);
-  }
-
-  if (normalizedMessage.includes('not enough stock available')) {
-    toast.error('Немає достатньо товару в наявності 😢');
-    return Promise.reject(response.data);
-  }
-
-  switch (response.status) {
-    case 400:
-      toast.error(message || 'Неправильні дані запиту');
-      break;
-    case 401:
+    // 401 Unauthorized
+    if (response.status === 401) {
+      localStorage.removeItem('token');
+      const currentPath = window.location.pathname;
+      if (currentPath !== '/login') {
+        window.location.href = '/login';
+      }
+      // Одноразово показуємо toast
       if (!hasShownAuthToast) {
         toast.warning('Будь ласка, увійдіть у систему');
         hasShownAuthToast = true;
-        setTimeout(() => {
-          hasShownAuthToast = false;
-        }, 10000);
+        setTimeout(() => { hasShownAuthToast = false; }, 10000);
       }
-      break;
-    case 403:
-      toast.error('У вас недостатньо прав для цієї дії');
-      break;
-    case 404:
-  toast.info('Сторінку не знайдено');
-  router.push({ name: 'NotFound' }); // 🔁 редірект на сторінку 404
-  break;
-
-    case 422: {
-      const errors = response.data.errors || {};
-      Object.values(errors).flat().forEach(msg => toast.error(msg));
-      break;
+      return Promise.reject(response.data);
     }
-    case 500:
-      if (normalizedMessage.includes('out of range value for column')) {
-        toast.error('Цей товар більше не в наявності 😢');
-      } else {
-        toast.error('Сталася помилка на сервері. Спробуйте пізніше');
-      }
-      break;
-    default:
-      toast.error(message || `Сталася помилка: ${response.status}`);
+
+    // Інші кастомні помилки з message
+    const msg = (response.data?.message || '').toLowerCase();
+    if (msg.includes('banned')) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = '/login?error=user_is_banned';
+      return Promise.reject(response.data);
+    }
+    if (msg.includes('you are already subscribed for notifications')) {
+      toast.error('Ви вже підписані на сповіщення для цього товару 😢');
+      return Promise.reject(response.data);
+    }
+    if (msg.includes('not enough stock available')) {
+      toast.error('Немає достатньо товару в наявності 😢');
+      return Promise.reject(response.data);
+    }
+
+    // HTTP-статуси
+    switch (response.status) {
+      case 400:
+        toast.error(response.data.message || 'Неправильні дані запиту');
+        break;
+      case 403:
+        toast.error('У вас недостатньо прав для цієї дії');
+        break;
+      case 404:
+        toast.info('Сторінку не знайдено');
+        router.push({ name: 'NotFound' });
+        break;
+      case 422:
+        Object.values(response.data.errors || {})
+          .flat()
+          .forEach(m => toast.error(m));
+        break;
+      case 500:
+        if (msg.includes('out of range value for column')) {
+          toast.error('Цей товар більше не в наявності 😢');
+        } else {
+          toast.error('Сталася помилка на сервері. Спробуйте пізніше');
+        }
+        break;
+      default:
+        toast.error(response.data.message || `Сталася помилка: ${response.status}`);
+    }
+
+    return Promise.reject(response.data);
   }
-
-  return Promise.reject(response.data);
-}
-
 );
 
 
@@ -475,10 +477,7 @@ getAdminFilter: async (config = {}) => {
     const { data } = await apiClient.get("/api/admin/stats/summary", { params });
     return data;
   },
-  getAdminStatsOrderDynamics: async params => {
-    const { data } = await apiClient.get("/api/admin/stats/order-dynamics", { params });
-    return data;
-  },
+
   getAdminStatsPopularProducts: async params => {
     const { data } = await apiClient.get("/api/admin/stats/popular-products", { params });
     return data;
@@ -489,9 +488,48 @@ getAdminFilter: async (config = {}) => {
   },
 
 
+
+   getUsers: async ({ role, sort_by, sort_order } = {}, url = null) => {
+    const endpoint = url || '/api/admin/users';
+    return apiClient.get(endpoint, { params: { role, sort_by, sort_order } });
+  },
+  searchUsers: async (query, params = {}) => {
+    return apiClient.get(`/api/admin/users/search/${encodeURIComponent(query)}`, { params });
+  },
+  banUser: async id => {
+    return apiClient.post(`/api/admin/users/${id}/ban`);
+  },
+  unbanUser: async id => {
+    return apiClient.post(`/api/admin/users/${id}/unban`);
+  },
+  createUser: async data => {
+    return apiClient.post('/api/admin/user', data);
+  },
+  updateAdminUser: async (id, data) => {
+    return apiClient.patch(`/api/admin/user/${id}`, data);
+  },
+  deleteAdminUser: async id => {
+    return apiClient.delete(`/api/admin/users/${id}`);
+  },
+
+  // Site settings
+  getAdminSiteSettings: async () => {
+    const { data } = await apiClient.get('/api/site-settings');
+    return data;
+  },
+
+  // Statistics
+  getAdminStatsOrderDynamics: async params => {
+    const { data } = await apiClient.get('/api/admin/stats/order-dynamics', { params });
+    return data;
+  },
+
+
   // Categories
   getCategories: async () => {
     const { data } = await apiClient.get('/api/categories');
     return data;
-  }
+  },
+
+  
 };

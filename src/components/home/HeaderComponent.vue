@@ -414,11 +414,11 @@
 </template>
 
 <script>
+import { mapState, mapActions } from 'vuex';
 import { debounce } from 'lodash';
 import api from '@/services/api';
 import bus from '@/eventBus';
-import { isDark, toggleTheme } from '@/composables/useDarkMode'
-import { computed } from 'vue'
+import { isDark, toggleTheme } from '@/composables/useDarkMode';
 
 
 export default {
@@ -508,6 +508,7 @@ changeLanguage(lang) {
   localStorage.setItem('language', lang);
   this.isLanguageDropdownOpen = false;
   this.isBurgerOpen = false;
+  window.location.reload();
 },
     toggleCurrencyDropdown() { this.isCurrencyDropdownOpen = !this.isCurrencyDropdownOpen; },
 changeCurrency(curr) {

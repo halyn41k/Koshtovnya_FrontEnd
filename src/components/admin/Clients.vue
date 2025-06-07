@@ -176,6 +176,8 @@
 import axios from 'axios'
 import UserModal from './UserModal.vue'
 import { createToastInterface } from 'vue-toastification'
+import api from '@/services/api';
+
 const toast = createToastInterface()
 
 export default {
