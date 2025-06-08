@@ -1,8 +1,8 @@
 <template>
-  <main class="w-full p-4 space-y-6 relative">
+  <main class="w-full p-4 space-y-6 relative dark:text-white">
     <!-- Заголовок і фільтри -->
     <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
-      <h1 class="text-2xl font-extrabold text-gray-900 whitespace-nowrap">{{ $t('admin.dashboard.title') }}</h1>
+      <h1 class="text-2xl font-extrabold text-gray-900 whitespace-nowrap  dark:invert">{{ $t('admin.dashboard.title') }}</h1>
 
       <div class="flex items-center gap-3 flex-wrap">
         <div class="flex flex-col">
@@ -27,28 +27,27 @@
             :placeholder="$t('admin.dashboard.selectPeriod')"
             @update:model-value="loadData"
             input-class-name="custom-datepicker-input"
-            :locale="uk"
+            locale="uk"
           />
         </div>
       </div>
     </div>
 
     <!-- Картки статистики -->
-    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 ">
       <div
         v-for="(card, i) in cards"
         :key="card.label"
-        class="flex flex-col justify-center items-center bg-white border border-gray-200 rounded-lg shadow-sm px-6 py-5 text-center h-[120px] animate-fade-in-up"
-        :style="{ animationDelay: `${i * 80}ms` }"
+class="flex flex-col justify-center items-center bg-white dark:bg-[#1f2a42] border border-gray-200 dark:border-[#303b59] rounded-lg shadow-sm px-6 py-5 text-center h-[120px] animate-fade-in-up"        :style="{ animationDelay: `${i * 80}ms` }"
       >
-        <p class="text-sm text-gray-500 mb-1">{{ card.label }}</p>
-        <p class="text-3xl font-black text-gray-800">{{ card.value }}</p>
+        <p class="text-sm text-gray-500 dark:text-gray-300 mb-1">{{ card.label }}</p>
+        <p class="text-3xl font-black text-gray-800 dark:text-white">{{ card.value }}</p>
       </div>
     </section>
 
     <!-- Графік замовлень -->
-    <section class="bg-white p-6 rounded-lg shadow-sm">
-      <h2 class="text-xl font-semibold mb-4">{{ $t('admin.dashboard.orderDynamics') }}</h2>
+    <section class="bg-white dark:bg-[#1f2a42]  p-6 rounded-lg shadow-sm">
+      <h2 class="text-xl font-semibold mb-4 dark:text-white">{{ $t('admin.dashboard.orderDynamics') }}</h2>
       <OrderChart :labels="orderChart.labels" :values="orderChart.values" :type="orderChart.type" />
     </section>
 
@@ -59,7 +58,7 @@
         <div
           v-for="(item, index) in popular"
           :key="item.id"
-          class="flex gap-4 border border-gray-300 rounded-md p-4 bg-white shadow-sm hover:shadow-md transition-transform duration-300 hover:scale-[1.01] animate-fade-in-up"
+          class="flex gap-4 border border-gray-300  rounded-md p-4 bg-white dark:bg-[#1f2a42] shadow-sm hover:shadow-md transition-transform duration-300 hover:scale-[1.01] animate-fade-in-up"
           :style="{ animationDelay: `${index * 100}ms` }"
         >
           <img
@@ -89,7 +88,7 @@
         <li
           v-for="(order, i) in latest"
           :key="order.id"
-          class="border border-gray-300 rounded-md p-4 bg-white shadow-sm transition hover:shadow-md animate-fade-in-up"
+          class="dark:bg-[#1f2a42] border border-gray-300 rounded-md p-4 bg-white shadow-sm transition hover:shadow-md animate-fade-in-up"
           :style="{ animationDelay: `${i * 100}ms` }"
         >
           <p class="font-semibold text-base mb-2">#{{ order.id }}</p>
@@ -175,30 +174,56 @@ const getParams = () => {
 
 const loadData = async () => {
   try {
-    const params = getParams()
-
+    const params = getParams();
     const [summaryRes, chartRes, popRes, latestRes] = await Promise.all([
       api.getAdminStatsSummary(params),
       api.getAdminStatsOrderDynamics(params),
       api.getAdminStatsPopularProducts(params),
       api.getAdminStatsLatestOrders()
-    ])
+    ]);
 
+    // 1) Summary
+    const rawSummary  = summaryRes.data      ?? {};
+    const sumPayload  = rawSummary.data      ?? rawSummary;
+    const {
+      orders_count        = 0,
+      reviews_count       = 0,
+      users_count         = 0,
+      sold_products_count = 0,
+      avg_order_value     = 0
+    } = sumPayload;
     summary.value = {
-      orders: summaryRes.data.orders_count || 0,
-      comments: summaryRes.data.reviews_count || 0,
-      users_count: summaryRes.data.users_count || 0,
-      sold_products_count: summaryRes.data.sold_products_count || 0,
-      avg_order_value: summaryRes.data.avg_order_value || 0
-    }
+      orders: orders_count,
+      comments: reviews_count,
+      users_count,
+      sold_products_count,
+      avg_order_value
+    };
 
-    orderChart.value = chartRes.data
-    popular.value = popRes.data.products || []
-    latest.value = latestRes.data.data || []
+    // 2) Chart
+    orderChart.value = chartRes.data ?? { labels: [], values: [], type: 'day' };
+
+    // 3) Popular products
+    const rawPopular = popRes.data      ?? {};
+    // якщо повертають { products: [...] } або [...] — обидва варіанти
+    popular.value = Array.isArray(rawPopular.products)
+      ? rawPopular.products
+      : Array.isArray(rawPopular)
+        ? rawPopular
+        : [];
+
+    // 4) Latest orders
+    const rawLatest  = latestRes.data      ?? {};
+    const latPayload = rawLatest.data     ?? rawLatest;
+    latest.value     = Array.isArray(latPayload) ? latPayload : [];
+
   } catch (e) {
-    console.error('Помилка завантаження статистики:', e)
+    console.error('Помилка завантаження статистики:', e);
   }
-}
+};
+
+
+
 
 watch(dateRange, loadData)
 onMounted(loadData)

@@ -168,29 +168,19 @@
   </main>
 </template>
 
-
 <script>
-import axios from "axios";
-import api from '@/services/api';
 import { useToast } from 'vue-toastification';
-const toast = useToast();
+import api from '@/services/api';
 
 export default {
-  name: "SettingsView",
+  name: 'SettingsView',
   data() {
     return {
-      settings: {
-  address: "",
-  phone: "",
-  email: "",
-  logo: null
-},
+      settings: { address: '', phone: '', email: '', logo: null },
       logoPreview: null,
-      newCategory: { name: "", image: null },
+      newCategory: { name: '', image: null },
       showAddModal: false,
-      categories: [],
-      apiUrl: "https://koshtovnya.api-dev.bmax-edu.website/api/admin/site-settings",
-      categoriesUrl: "https://koshtovnya.api-dev.bmax-edu.website/api/admin/categories",
+      categories: []
     };
   },
   methods: {
@@ -198,12 +188,10 @@ export default {
       this.$refs.fileInput.click();
     },
     handleDrop(e) {
-      const file = e.dataTransfer.files[0];
-      this.processFile(file);
+      this.processFile(e.dataTransfer.files[0]);
     },
     handleFileUpload(e) {
-      const file = e.target.files[0];
-      this.processFile(file);
+      this.processFile(e.target.files[0]);
     },
     processFile(file) {
       if (file && file.type.startsWith('image/')) {
@@ -211,118 +199,114 @@ export default {
         this.logoPreview = URL.createObjectURL(file);
       }
     },
-   async fetchSettings() {
-  try {
-    const res = await axios.get(this.apiUrl, this.authHeader());
-    const map = res.data.data.reduce((acc, setting) => {
-      acc[setting.setting_key] = setting.setting_value;
-      return acc;
-    }, {});
+    async fetchSettings() {
+      const toast = useToast();
+      try {
+        // Виклик методу з services/api для отримання налаштувань
+        const response = await api.getAdminSiteSettings();
+        // Якщо бекенд підтримує лише PATCH, тоді в сервісі цей метод використовує POST+_method=GET
+        const data = response.data.data || response.data;
+        // Припустимо, дані надходять як масив налаштувань
+        const map = data.reduce((acc, { setting_key, setting_value }) => {
+          acc[setting_key] = setting_value;
+          return acc;
+        }, {});
 
-    // Замість переписування всього об'єкта — оновлюємо ключі
-    this.settings.address = map.footer_address_info || "";
-    this.settings.phone = map.footer_phone_number || "";
-    this.settings.email = map.footer_email_info || "";
-    this.settings.logo = null;
-
-    // Превʼю логотипа
-    if (map.site_logo) {
-      this.logoPreview = map.site_logo;
-    }
-
-  } catch (error) {
-    console.error("❌ Помилка при отриманні налаштувань:", error);
-  }
-},
+        this.settings.address   = map.footer_address_info || '';
+        this.settings.phone     = map.footer_phone_number || '';
+        this.settings.email     = map.footer_email_info || '';
+        this.settings.logo      = null;
+        this.logoPreview        = map.site_logo || null;
+      } catch (e) {
+        console.error('❌ Помилка при отриманні налаштувань:', e);
+        toast.error('Не вдалося завантажити налаштування');
+      }
+    },
     async saveSettings() {
+      const toast = useToast();
       try {
         const fd = new FormData();
-        fd.append("footer_address_info", this.settings.address);
-        fd.append("footer_phone_number", this.settings.phone);
-        fd.append("footer_email_info", this.settings.email);
+        fd.append('footer_address_info', this.settings.address);
+        fd.append('footer_phone_number', this.settings.phone);
+        fd.append('footer_email_info', this.settings.email);
         if (this.settings.logo instanceof File) {
-          fd.append("site_logo", this.settings.logo);
+          fd.append('site_logo', this.settings.logo);
         }
-        fd.append("_method", "PATCH");
-        await axios.post(this.apiUrl, fd, this.authHeader());
-        toast.success("Налаштування збережено");
+        // Виклик методу для збереження через PATCH
+        await api.postAdminSiteSettings(fd);
+        toast.success('Налаштування збережено');
       } catch (e) {
-        console.error(e);
-        toast.error("Помилка при збереженні налаштувань");
+        console.error('❌ Помилка при збереженні налаштувань:', e);
+        toast.error('Не вдалося зберегти налаштування');
       }
     },
     async fetchCategories() {
+      const toast = useToast();
       try {
-        const res = await axios.get("https://koshtovnya.api-dev.bmax-edu.website/api/categories");
-        this.categories = res.data.data;
+        const response = await api.getCategories();
+        this.categories = response.data;
       } catch (e) {
-        console.error("Помилка при завантаженні категорій:", e);
-        toast.error("Не вдалося завантажити категорії");
+        console.error('❌ Помилка при завантаженні категорій:', e);
+        toast.error('Не вдалося завантажити категорії');
       }
     },
     async createCategory() {
+      const toast = useToast();
       if (!this.newCategory.name || !this.newCategory.image) {
-        toast.warning("Заповніть назву та оберіть зображення");
+        toast.warning('Заповніть назву та оберіть зображення');
         return;
       }
       try {
         const fd = new FormData();
-        fd.append("name", this.newCategory.name);
-        fd.append("image", this.newCategory.image);
-        await axios.post(this.categoriesUrl, fd, this.authHeader());
-        toast.success("Категорію додано");
-        this.newCategory = { name: "", image: null };
+        fd.append('name', this.newCategory.name);
+        fd.append('image', this.newCategory.image);
+        await api.createCategory(fd);
+        toast.success('Категорію додано');
+        this.newCategory = { name: '', image: null };
         this.showAddModal = false;
-        this.fetchCategories();
+        await this.fetchCategories();
       } catch (e) {
-        console.error(e);
-        toast.error("Не вдалося створити категорію");
+        console.error('❌ Помилка при створенні категорії:', e);
+        toast.error('Не вдалося створити категорію');
       }
     },
     async updateCategory(category) {
+      const toast = useToast();
       try {
         const fd = new FormData();
-        fd.append("name", category.name);
-        fd.append("_method", "PATCH");
-        await axios.post(`${this.categoriesUrl}/${category.id}`, fd, this.authHeader());
-        toast.info("Категорію оновлено");
+        fd.append('name', category.name);
+        fd.append('_method', 'PATCH');
+        await api.updateCategory(category.id, fd);
+        toast.info('Категорію оновлено');
       } catch (e) {
-        console.error(e);
-        toast.error("Не вдалося оновити категорію");
+        console.error('❌ Помилка при оновленні категорії:', e);
+        toast.error('Не вдалося оновити категорію');
       }
     },
     async deleteCategory(id) {
-      if (!confirm("Ви впевнені, що хочете видалити категорію?")) return;
+      const toast = useToast();
+      if (!confirm('Ви впевнені, що хочете видалити категорію?')) return;
       try {
-        await axios.delete(`${this.categoriesUrl}/${id}`, this.authHeader());
-        toast.warning("Категорію видалено");
-        this.fetchCategories();
+        await api.deleteCategory(id);
+        toast.warning('Категорію видалено');
+        await this.fetchCategories();
       } catch (e) {
-        console.error(e);
-        toast.error("Не вдалося видалити категорію");
+        console.error('❌ Помилка при видаленні категорії:', e);
+        toast.error('Не вдалося видалити категорію');
       }
-    },
-    authHeader() {
-      return {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      };
     }
   },
-  created() {
-    this.fetchSettings();
-    this.fetchCategories();
+  async created() {
+    await this.fetchSettings();
+    await this.fetchCategories();
   },
-
-  async mounted() {
-  document.title = "Налаштування";
-  await this.fetchSettings();
-  await this.fetchCategories();
-}
-
+  mounted() {
+    document.title = 'Налаштування';
+  }
 };
 </script>
+
+
 
 <style>
 .fade-enter-active,

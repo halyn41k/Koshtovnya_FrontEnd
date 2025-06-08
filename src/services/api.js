@@ -532,11 +532,31 @@ getAdminFilter: async (config = {}) => {
   },
 
 
-  // Categories
-  getCategories: async () => {
-    const { data } = await apiClient.get('/api/categories');
+  getSettings: async () => {
+    const form = new FormData();
+    form.append('_method', 'GET');
+    const { data } = await apiClient.post("/api/admin/site-settings", form);
     return data;
   },
+  updateSettings: async formData => {
+    const { data } = await apiClient.post("/api/admin/site-settings", formData);
+    return data;
+  },
+  getCategories: async () => {
+    const { data } = await apiClient.get("/api/categories");
+    return data;
+  },
+  createCategory: async formData => {
+    const { data } = await apiClient.post("/api/admin/categories", formData);
+    return data;
+  },
+  updateCategory: async (id, formData) => {
+    const { data } = await apiClient.post(`/api/admin/categories/${id}`, formData);
+    return data;
+  },
+  deleteCategory: async id => {
+    const { data } = await apiClient.delete(`/api/admin/categories/${id}`);
+    return data;
+  }
 
-  
 };

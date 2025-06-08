@@ -73,10 +73,10 @@
             >
               <img
                 :src="currentFlag"
-                :alt="selectedLanguage + ' flag'"
+                :alt="state.language + ' flag'"
                 class="w-5 h-4 rounded-sm shadow-sm"
               />
-              <span>{{ selectedLanguage === 'uk' ? 'Українська' : 'English' }}</span>
+              <span>{{ state.language === 'uk' ? 'Українська' : 'English' }}</span>
               <svg
                 :class="{ 'rotate-180': isLanguageDropdownOpen }"
                 class="w-4 h-4 transform transition-transform"
@@ -120,7 +120,7 @@
               @click="toggleCurrencyDropdown"
               class="flex items-center space-x-1 p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-all duration-200"
             >
-              <span>{{ selectedCurrency }}</span>
+              <span>{{ state.currency }}</span>
               <svg
                 :class="{ 'rotate-180': isCurrencyDropdownOpen }"
                 class="w-4 h-4 transform transition-transform"
@@ -419,11 +419,11 @@
 </template>
 
 <script>
-import { mapState, mapActions } from 'vuex';
 import { debounce } from 'lodash';
 import api from '@/services/api';
 import bus from '@/eventBus';
-import { isDark, toggleTheme } from '@/composables/useDarkMode';
+import { toggleTheme } from '@/composables/useDarkMode';
+import { useHeaderStore } from '@/store/modules/headerStore';
 
 
 export default {
@@ -449,15 +449,14 @@ export default {
       siteSettings: { site_logo: '' },
     };
   },
-  computed: {
-  currentFlag() {
-    return this.selectedLanguage === 'uk'
-      ? 'https://flagcdn.com/w320/ua.png'
-      : 'https://flagcdn.com/w320/gb.png';
+  setup() {
+    const state = useHeaderStore(); // { language: 'uk', currency: 'UAH', isDarkMode: false }
+    return { state };
   },
-  isDarkMode() {
-    return isDark.value;
-  }
+  computed: {
+  currentFlag() { return this.state.language === 'uk' ? 'https://flagcdn.com/w320/ua.png' : 'https://flagcdn.com/w320/gb.png'; },
+
+  isDarkMode() { return this.state.isDarkMode; }
 },
   watch: {
     '$route'(to, from) {
@@ -497,8 +496,9 @@ export default {
   }
 },
   toggleDarkMode() {
-    toggleTheme()
-  },
+      toggleTheme();
+      this.state.isDarkMode = !this.state.isDarkMode;
+    },
 navigateToCategory(link) {
     this.isBurgerOpen = false;
     this.$router.push(link);
@@ -508,8 +508,8 @@ navigateToCategory(link) {
 
     toggleLanguageDropdown() { this.isLanguageDropdownOpen = !this.isLanguageDropdownOpen; },
 changeLanguage(lang) {
-  this.selectedLanguage = lang;
-  this.$i18n.locale = lang;
+     this.state.language = lang;
+      this.$i18n.locale = lang;
   localStorage.setItem('language', lang);
   this.isLanguageDropdownOpen = false;
   this.isBurgerOpen = false;
@@ -517,7 +517,7 @@ changeLanguage(lang) {
 },
     toggleCurrencyDropdown() { this.isCurrencyDropdownOpen = !this.isCurrencyDropdownOpen; },
 changeCurrency(curr) {
-  this.selectedCurrency = curr;
+  this.state.currency = curr;
   localStorage.setItem('currency', curr.toLowerCase());
   this.isCurrencyDropdownOpen = false;
   this.isBurgerOpen = false;

@@ -50,10 +50,10 @@
             >
               <img
                 :src="currentFlag"
-                :alt="selectedLanguage + ' flag'"
+                :alt="state.language + ' flag'"
                 class="w-5 h-4 rounded-sm shadow-sm"
               />
-              <span>{{ selectedLanguage === 'uk' ? 'Українська' : 'English' }}</span>
+              <span>{{ state.language === 'uk' ? 'Українська' : 'English' }}</span>
               <svg
                 :class="{ 'rotate-180': isLanguageDropdownOpen }"
                 class="w-4 h-4 transform transition-transform"
@@ -97,7 +97,7 @@
               @click="toggleCurrencyDropdown"
               class="flex items-center space-x-1 p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-all duration-200"
             >
-              <span>{{ selectedCurrency }}</span>
+              <span>{{ state.currency }}</span>
               <svg
                 :class="{ 'rotate-180': isCurrencyDropdownOpen }"
                 class="w-4 h-4 transform transition-transform"
@@ -235,7 +235,6 @@
     </main>
   </div>
 </template>
-
 <script>
 import AdminProfileCard from './AdminProfile.vue';
 import WelcomeAdmin from './WelcomeAdmin.vue';
@@ -246,10 +245,10 @@ import Orders from './Orders.vue';
 import Reports from './Reports.vue';
 import Settings from './Settings.vue';
 import DashboardView from './dashboard/Dashboard.vue';
-import Multiselect from 'vue-multiselect'
-import { mapState, mapActions } from 'vuex';
+import Multiselect from 'vue-multiselect';
+import { useHeaderStore } from '@/store/modules/headerStore';
 import api from '@/services/api';
-
+import { toggleTheme } from '@/composables/useDarkMode';
 
 export default {
   name: 'AdminPanel',
@@ -264,46 +263,43 @@ export default {
     Settings,
     DashboardView,
     Multiselect,
-
+  },
+  setup() {
+    const state = useHeaderStore();
+    return { state };
   },
   data() {
     return {
       showProfile: false,
       activeTab: -1,
       user: null,
-         selectedLanguage: { code: 'uk', name: 'Українська', flag: 'https://flagcdn.com/w320/ua.png' },
-    
+      isLanguageDropdownOpen: false,
+      isCurrencyDropdownOpen: false,
       siteSettings: { site_logo: '' },
-      sidebarCollapsed: false
-    }
+      sidebarCollapsed: false,
+    };
   },
   computed: {
+    // лише геттери, без сайд-ефектів
     activeComponent() {
       if (this.activeTab === -1) return 'WelcomeAdmin';
       const item = this.computedMenuItems[this.activeTab];
       return item ? item.component : 'WelcomeAdmin';
     },
     currentFlag() {
-  return this.selectedLanguage?.flag || 'https://flagcdn.com/w320/ua.png';
-},
-...mapState('settings', ['lang']),
-    languageOptions() {
-      return [
-        { code: 'uk', name: 'Українська', flag: 'https://flagcdn.com/w320/ua.png' },
-        { code: 'en', name: 'English',    flag: 'https://flagcdn.com/w320/gb.png' }
-      ];
+      return this.state.language === 'uk'
+        ? 'https://flagcdn.com/w320/ua.png'
+        : 'https://flagcdn.com/w320/gb.png';
     },
-    selectedLangObj() {
-      return this.languageOptions.find(o => o.code === this.lang);
+    isDarkMode() {
+      return this.state.isDarkMode;
     },
-  
-
     panelSubtitle() {
       if (!this.user) return '';
       const map = {
         superadmin: 'SUPER ADMIN PANEL',
         admin: 'ADMIN PANEL',
-        manager: 'MANAGER PANEL'
+        manager: 'MANAGER PANEL',
       };
       return map[this.user.role] || '';
     },
@@ -317,7 +313,7 @@ export default {
           ['products', ProductList, 'goods'],
           ['orders', Orders, 'orders'],
           ['reports', Reports, 'reports'],
-          ['settings', Settings, 'settings']
+          ['settings', Settings, 'settings'],
         ],
         admin: [
           ['statistics', 'DashboardView', 'stats'],
@@ -326,26 +322,32 @@ export default {
           ['products', ProductList, 'goods'],
           ['orders', Orders, 'orders'],
           ['accessRights', Settings, 'settings'],
-          ['siteSettings', Settings, 'settings']
+          ['siteSettings', Settings, 'settings'],
         ],
         manager: [
           ['statistics', 'DashboardView', 'stats'],
           ['users', Clients, 'people'],
           ['products', ProductList, 'goods'],
-          ['orders', Orders, 'orders']
-        ]
-      }
+          ['orders', Orders, 'orders'],
+        ],
+      };
       return items[this.user.role].map(([title, comp, icon]) => ({
         title,
         component: comp,
-        icon: require(`@/assets/icons/${icon}.svg`)
-      }))
-    }
+        icon: require(`@/assets/icons/${icon}.svg`),
+      }));
+    },
   },
   methods: {
-    ...mapActions('settings', ['changeLang']),
-    onLanguageSelect(option) {
-      this.changeLang(option.code);
+    toggleDarkMode() {
+      toggleTheme();
+      this.state.isDarkMode = !this.state.isDarkMode;
+    },
+    toggleLanguageDropdown() {
+      this.isLanguageDropdownOpen = !this.isLanguageDropdownOpen;
+    },
+    toggleCurrencyDropdown() {
+      this.isCurrencyDropdownOpen = !this.isCurrencyDropdownOpen;
     },
     selectTab(idx) {
       this.activeTab = idx;
@@ -355,25 +357,28 @@ export default {
       localStorage.removeItem('token');
       this.$router.push({ name: 'Login' });
     },
-    changeLanguage() {
-      this.$i18n.locale = this.selectedLanguage;
+    changeLanguage(lang) {
+      this.state.language = lang;
+      this.$i18n.locale = lang;
+      window.location.reload();
+    },
+    changeCurrency(curr) {
+      this.state.currency = curr;
+      window.location.reload();
     },
     async fetchSiteSettings() {
-    try {
-      // робимо запит і чекаємо на відповідь
-      const response = await api.getSiteSettings()
-      // припустимо, що у вас у відповіді лежить { data: [ { setting_key, setting_value }, … ] }
-      const settingsArray = response.data.data || response.data
-
-      settingsArray.forEach(s => {
-        if (s.setting_key === 'site_logo') {
-          this.siteSettings.site_logo = s.setting_value
-        }
-      })
-    } catch (err) {
-      console.error('Помилка завантаження логотипу:', err)
-    }
-  },
+      try {
+        const response = await api.getSiteSettings();
+        const settingsArray = response.data.data || response.data;
+        settingsArray.forEach(s => {
+          if (s.setting_key === 'site_logo') {
+            this.siteSettings.site_logo = s.setting_value;
+          }
+        });
+      } catch (err) {
+        console.error('Помилка завантаження логотипу:', err);
+      }
+    },
   },
   mounted() {
     const user = JSON.parse(localStorage.getItem('user'));
@@ -383,10 +388,9 @@ export default {
       this.user = user;
     }
     this.fetchSiteSettings();
-        this.$i18n.locale = this.lang;
-
-  }
-}
+    this.$i18n.locale = this.state.language;
+  },
+};
 </script>
 
 <style scoped>
