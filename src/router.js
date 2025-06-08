@@ -180,6 +180,7 @@ const routes = [
   name: 'NotFound',
   component: () => import('@/components/home/NotFound.vue') // або '@/components/NotFound.vue'
 },
+
  
 ];
 

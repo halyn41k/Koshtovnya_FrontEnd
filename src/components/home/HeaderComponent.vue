@@ -237,6 +237,11 @@
 
         <!-- User / Cart / Mobile Search / Burger -->
         <div class="flex items-center space-x-4">
+
+        
+ <button @click="toggleMobileSearch" class="md:hidden">
+   <img src="@/assets/icons/search1.svg" alt="Mobile Search" class="w-6 h-6 dark:invert"/>
+ </button>
           <router-link to="/account" class="hover:text-primary transition">
   <img
     src="@/assets/icons/user_icon.svg"

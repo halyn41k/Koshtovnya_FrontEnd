@@ -110,10 +110,17 @@ apiClient.interceptors.response.use(
       case 403:
         toast.error('У вас недостатньо прав для цієї дії');
         break;
-      case 404:
-        toast.info('Сторінку не знайдено');
-        router.push({ name: 'NotFound' });
-        break;
+        case 404:
+      // якщо це API-запит, просто відхиляємо проміс
+      if (response.config.url.startsWith('/api/')) {
+        return Promise.reject(response.data);
+      }
+      // інакше — редіректимо на сторінку 404
+      toast.info('Сторінку не знайдено');
+      router.push({ name: 'NotFound' });
+      return Promise.reject(response.data);
+
+
       case 422:
         Object.values(response.data.errors || {})
           .flat()

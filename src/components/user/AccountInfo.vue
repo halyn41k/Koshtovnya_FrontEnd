@@ -1,7 +1,7 @@
 <template>
   <div class="font-sans min-h-screen bg-gray-50 dark:bg-[#121212] text-black dark:text-white transition-colors duration-300">
     <!-- Header -->
-    <header class="mt-[200px] mb-8">
+    <header class="mb-8">
       <h1 class="flex items-center justify-center mt-[80px] font-kyivBlack2 text-[34px] font-black tracking-[-1.2px] text-center">
         <div class="flex-1 h-[2px] bg-gray-400 mx-2"></div>
         {{ $t('user.title') }}
@@ -9,9 +9,10 @@
       </h1>
     </header>
 
-    <main
-      class="flex flex-col lg:flex-row mx-auto max-w-[1300px] min-h-[500px]
-             bg-[#FFF7F6] dark:bg-[#17223b] rounded-lg shadow-md bg-no-repeat bg-right bg-[length:50%] overflow-hidden transition-all duration-300"
+ <main
+   class="flex flex-col lg:flex-row mx-auto max-w-[1300px] min-h-[500px]
+          bg-[#FFF7F6] dark:bg-[#17223b] rounded-lg shadow-md bg-no-repeat bg-right
+          bg-[length:50%] overflow-hidden transition-all duration-300 mt-[100px]"
       style="background-image: url('@/assets/accountpattern.png')"
     >
       <!-- Sidebar -->
