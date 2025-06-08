@@ -160,17 +160,18 @@ const cards = computed(() => [
 ])
 
 const getParams = () => {
-  if (dateRange.value && dateRange.value.length === 2) {
+  if (Array.isArray(dateRange.value) && dateRange.value.length === 2) {
     return {
       start_date: dateRange.value[0],
-      end_date: dateRange.value[1]
-    }
-  } else {
-    return {
-      period: selectedPeriod.value
-    }
+      end_date:   dateRange.value[1]
+    };
   }
-}
+  return {
+    period: selectedPeriod.value
+  };
+};
+
+
 
 const loadData = async () => {
   try {
@@ -183,46 +184,38 @@ const loadData = async () => {
     ]);
 
     // 1) Summary
-    const rawSummary  = summaryRes.data      ?? {};
-    const sumPayload  = rawSummary.data      ?? rawSummary;
-    const {
-      orders_count        = 0,
-      reviews_count       = 0,
-      users_count         = 0,
-      sold_products_count = 0,
-      avg_order_value     = 0
-    } = sumPayload;
+    const summaryData = summaryRes || {};
     summary.value = {
-      orders: orders_count,
-      comments: reviews_count,
-      users_count,
-      sold_products_count,
-      avg_order_value
+      orders: summaryData.orders_count || 0,
+      comments: summaryData.reviews_count || 0,
+      users_count: summaryData.users_count || 0,
+      sold_products_count: summaryData.sold_products_count || 0,
+      avg_order_value: summaryData.avg_order_value || 0
     };
 
     // 2) Chart
-    orderChart.value = chartRes.data ?? { labels: [], values: [], type: 'day' };
+    orderChart.value = chartRes || { labels: [], values: [], type: 'day' };
 
     // 3) Popular products
-    const rawPopular = popRes.data      ?? {};
-    // якщо повертають { products: [...] } або [...] — обидва варіанти
-    popular.value = Array.isArray(rawPopular.products)
-      ? rawPopular.products
-      : Array.isArray(rawPopular)
-        ? rawPopular
-        : [];
+    popular.value = Array.isArray(popRes.products) ? popRes.products : [];
 
     // 4) Latest orders
-    const rawLatest  = latestRes.data      ?? {};
-    const latPayload = rawLatest.data     ?? rawLatest;
-    latest.value     = Array.isArray(latPayload) ? latPayload : [];
-
+    latest.value = Array.isArray(latestRes.data) ? latestRes.data : [];
   } catch (e) {
     console.error('Помилка завантаження статистики:', e);
   }
 };
 
 
+watch(selectedPeriod, (newPeriod) => {
+  dateRange.value = null;
+  loadData();
+});
+watch(dateRange, () => {
+  // при виборі кастомного діапазону скидаємо період
+  selectedPeriod.value = null;
+  loadData();
+});
 
 
 watch(dateRange, loadData)

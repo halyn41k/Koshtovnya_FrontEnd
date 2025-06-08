@@ -381,6 +381,8 @@ export default {
     },
   },
   mounted() {
+      this.state.isDarkMode = document.documentElement.classList.contains('dark');
+
     const user = JSON.parse(localStorage.getItem('user'));
     if (!user || !['superadmin', 'admin', 'manager'].includes(user.role)) {
       this.$router.push({ name: 'Home' });
