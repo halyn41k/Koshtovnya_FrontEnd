@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col h-screen font-['Montserrat',sans-serif]">
+<div class="flex flex-col min-h-screen font-['Montserrat',sans-serif] bg-white dark:bg-gray-900">
     <!-- Міні-хедер -->
 <header
   class="fixed top-0 left-0 right-0 h-12 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 z-50 flex justify-end items-center px-4 shadow-sm"

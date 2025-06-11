@@ -7,67 +7,77 @@
         <img
           loading="lazy"
           :src="product.image_url"
-          alt="Фото товару"
+          :alt="$t('product.photoAlt')"
           class="w-full h-80 object-cover rounded-md shadow-lg"
         />
         <button
           @click="openModal"
           class="absolute top-4 right-4 bg-white dark:bg-gray-900/90 p-2 rounded-full shadow-md hover:bg-white dark:bg-gray-900/100 transition-colors duration-200"
-          >
-          <img src="@/assets/size_change.png" alt="Змінити розмір" class="w-6 h-6" />
+        >
+          <img
+            src="@/assets/size_change.png"
+            :alt="$t('product.changeSize')"
+            class="w-6 h-6"
+          />
         </button>
       </div>
 
       <!-- INFO CARD -->
-<div class="lg:w-1/2 bg-[#fff7f6] dark:bg-[#17223b] border-2 border-gray-200 dark:border-[#303b59] p-6 rounded-2xl shadow-md hover:shadow-lg transition-all duration-500 ease-in-out flex flex-col space-y-4">
+      <div class="lg:w-1/2 bg-[#fff7f6] dark:bg-[#17223b] border-2 border-gray-200 dark:border-[#303b59] p-6 rounded-2xl shadow-md hover:shadow-lg transition-all duration-500 ease-in-out flex flex-col space-y-4">
         <!-- TITLE & PRICE -->
         <div class="text-center space-y-2">
-<h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ product.name }}</h1>
+          <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100">
+            {{ product.name }}
+          </h1>
           <hr class="border-gray-300 dark:border-gray-600 mx-auto w-24" />
-<p
-  v-if="product.price && product.currency"
-  class="text-2xl font-semibold text-red-700 dark:text-gray-100"
->
-  {{ formatCurrencyIntl(product.price, product.currency) }}
-</p>
-<p
-  v-else
-  class="text-2xl font-semibold text-red-700 dark:text-gray-100"
->
-  Ціна не вказана
-</p>
+          <p
+            v-if="product.price && product.currency"
+            class="text-2xl font-semibold text-red-700 dark:text-gray-100"
+          >
+            {{ formatCurrencyIntl(product.price, product.currency) }}
+          </p>
+          <p
+            v-else
+            class="text-2xl font-semibold text-red-700 dark:text-gray-100"
+          >
+            {{ $t('product.priceNotSpecified') }}
+          </p>
           <span
             class="inline-block px-4 py-1 rounded-md text-sm text-white"
             :class="isAvailable ? 'bg-green-600' : 'bg-red-700'"
-          >{{ isAvailable ? 'В наявності' : 'Немає в наявності' }}</span>
+          >
+            {{ isAvailable ? $t('product.inStock') : $t('product.outOfStock') }}
+          </span>
         </div>
 
         <!-- RATING -->
         <div class="flex items-center justify-center space-x-2">
           <div class="flex space-x-1">
             <template v-for="i in 5" :key="i">
-  <span
-    class="text-xl not-italic"
-    :class="i <= Math.round(product.average_rating) ? 'text-yellow-400' : 'text-gray-300'"
-  >★</span>
-</template>
-
-          </div>
+              <span
+                class="text-xl not-italic"
+                :class="i <= Math.round(product.average_rating) ? 'text-yellow-400' : 'text-gray-300'"
+              >★</span>
+            </template>
+         </div>
           <span class="text-sm text-gray-600">({{ product.review_count }})</span>
         </div>
 
-        <hr class="border-gray-200" />
-        <p class="text-center text-sm text-gray-500">Приблизний час доставки: 1–7 днів</p>
+        <hr class="border-gray-200 dark:border-gray-600" />
+        <p class="text-center text-sm text-gray-500 dark:text-gray-300">
+          {{ $t('product.approxDelivery') }}
+        </p>
 
         <!-- SIZE SELECTOR -->
         <div class="space-y-1">
-          <label for="size-select" class="block text-base font-medium text-gray-700">Розмір</label>
+          <label for="size-select" class="block text-base font-medium text-gray-700 dark:text-gray-300">
+            {{ $t('product.sizeLabel') }}
+          </label>
           <select
-  id="size-select"
-  v-model="selectedSize"
-  class="w-full h-10 bg-[#F6E7E7] dark:bg-[#3c465f] dark:text-white rounded-md px-3 focus:outline-none"
->
-
+            id="size-select"
+            v-model="selectedSize"
+            class="w-full h-10 bg-[#F6E7E7] dark:bg-[#3c465f] dark:text-white rounded-md px-3 focus:outline-none"
+          >
             <option
               v-for="v in product.variants"
               :key="v.size"
@@ -80,42 +90,43 @@
         </div>
 
         <!-- QUANTITY & ACTIONS -->
-<div class="flex items-center space-x-4 pt-4">
-  <div class="min-w-[120px] flex items-center border border-gray-300 dark:border-gray-600 rounded-md">
-    <button @click="decreaseQuantity" :disabled="quantity <= 1" class="px-3 disabled:opacity-50">-</button>
-    <span class="px-4">{{ quantity }}</span>
-    <button
-      @click="increaseQuantity"
-      :disabled="!selectedVariant || quantity >= selectedVariant.quantity"
-      class="px-3 disabled:opacity-50"
-    >+</button>
-  </div>
-
+        <div class="flex items-center space-x-4 pt-4">
+          <div class="min-w-[120px] flex items-center border border-gray-300 dark:border-gray-600 rounded-md">
+            <button @click="decreaseQuantity" :disabled="quantity <= 1" class="px-3 disabled:opacity-50">
+              -
+            </button>
+            <span class="px-4">{{ quantity }}</span>
+            <button
+              @click="increaseQuantity"
+              :disabled="!selectedVariant || quantity >= selectedVariant.quantity"
+              class="px-3 disabled:opacity-50"
+            >
+              +
+            </button>
+          </div>
 
           <button
-              v-if="isAvailable"
-              @click="addToCart"
-              :disabled="!selectedVariant"
-class="flex-1 flex items-center justify-center space-x-2 bg-[#6B1F1F] hover:bg-[#861818] dark:bg-[#A01212] dark:hover:bg-[#c42e2e] 
-text-white font-montserrat font-semibold py-2 rounded-lg shadow-md transition-all duration-300 ease-in-out disabled:opacity-50"
-            >
-              <span>Купити</span>
-              <img src="@/assets/miniarrow.png" alt="" class="w-4 h-3" />
-            </button>
-            <button
-              v-else
-              @click="notifyWhenAvailable"
-class="flex-1 bg-gray-300 text-gray-700 dark:bg-[#3c465f] dark:text-gray-200 font-montserrat font-semibold py-2 rounded-lg shadow-md hover:bg-red-700 transition-all duration-300"
-            >
-              Повідомити про наявність
-            </button>
-
+            v-if="isAvailable"
+            @click="addToCart"
+            :disabled="!selectedVariant"
+            class="flex-1 flex items-center justify-center space-x-2 bg-[#6B1F1F] hover:bg-[#861818] dark:bg-[#A01212] dark:hover:bg-[#c42e2e] text-white font-montserrat font-semibold py-2 rounded-lg shadow-md transition-all duration-300 ease-in-out disabled:opacity-50"
+          >
+            <span>{{ $t('product.buy') }}</span>
+            <img src="@/assets/miniarrow.png" alt="" class="w-4 h-3" />
+          </button>
+          <button
+            v-else
+            @click="notifyWhenAvailable"
+            class="flex-1 bg-gray-300 text-gray-700 dark:bg-[#3c465f] dark:text-gray-200 font-montserrat font-semibold py-2 rounded-lg shadow-md hover:bg-red-700 transition-all duration-300"
+          >
+            {{ $t('product.notifyAvailability') }}
+          </button>
 
           <button @click="toggleWishlist(product)" class="p-2">
             <svg
               v-if="product.is_in_wishlist"
               xmlns="http://www.w3.org/2000/svg"
-class="w-6 h-6 text-gray-500 dark:text-gray-300"
+              class="w-6 h-6 text-gray-500 dark:text-gray-300"
               viewBox="0 0 24 24"
               fill="currentColor"
             >
@@ -128,7 +139,7 @@ class="w-6 h-6 text-gray-500 dark:text-gray-300"
             <svg
               v-else
               xmlns="http://www.w3.org/2000/svg"
-              class="w-6 h-6 text-gray-500"
+              class="w-6 h-6 text-gray-500 dark:text-gray-300"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -148,18 +159,22 @@ class="w-6 h-6 text-gray-500 dark:text-gray-300"
     <section>
       <div class="hidden md:flex items-center mb-4">
         <hr class="flex-grow border-t-2 border-gray-300 dark:border-gray-600" />
-      <h2 class="mx-4 text-2xl font-bold text-gray-900 dark:invert">Характеристики</h2>
-      <hr class="flex-grow border-t-2 border-gray-300 dark:border-gray-600" />
+        <h2 class="mx-4 text-2xl font-bold text-gray-900 dark:invert">
+          {{ $t('product.specifications') }}
+        </h2>
+        <hr class="flex-grow border-t-2 border-gray-300 dark:border-gray-600" />
       </div>
-      <h2 class="md:hidden text-2xl font-bold text-gray-900 text-center mb-4 dark:invert">Характеристики</h2>
+      <h2 class="md:hidden text-2xl font-bold text-gray-900 text-center mb-4 dark:invert">
+        {{ $t('product.specifications') }}
+      </h2>
       <div class="w-full">
         <div
           v-for="(val, key) in formattedCharacteristics"
           :key="key"
-          class="grid grid-cols-2 gap-4 py-2 border-b border-gray-200"
+          class="grid grid-cols-2 gap-4 py-2 border-b border-gray-200 dark:border-gray-600"
         >
-          <dt class="font-medium">{{ key }}</dt>
-<dd class="text-gray-700 dark:text-gray-300">{{ val }}</dd>
+          <dt class="font-medium text-gray-900 dark:text-gray-100">{{ key }}</dt>
+          <dd class="text-gray-700 dark:text-gray-300">{{ val }}</dd>
         </div>
       </div>
     </section>
@@ -170,7 +185,9 @@ class="w-6 h-6 text-gray-500 dark:text-gray-300"
         <ProductReviews v-if="productId" :productId="productId" />
       </template>
       <template #fallback>
-        <div class="text-center text-gray-500">Завантаження відгуків…</div>
+        <div class="text-center text-gray-500 dark:text-gray-300">
+          {{ $t('product.loadingReviews') }}
+        </div>
       </template>
     </Suspense>
     <Suspense>
@@ -178,7 +195,9 @@ class="w-6 h-6 text-gray-500 dark:text-gray-300"
         <ViewOtherProduct />
       </template>
       <template #fallback>
-        <div class="text-center text-gray-500">Завантаження схожих товарів…</div>
+        <div class="text-center text-gray-500 dark:text-gray-300">
+          {{ $t('product.loadingRelated') }}
+        </div>
       </template>
     </Suspense>
 
@@ -190,21 +209,22 @@ class="w-6 h-6 text-gray-500 dark:text-gray-300"
     >
       <img
         :src="product.image_url"
-        alt="Збільшене фото"
+        :alt="$t('product.photoAlt')"
         class="max-w-full max-h-full object-contain"
         @click.stop
       />
     </div>
 
     <Suspense>
-  <template #default>
-    <RecentlyViewed />
-  </template>
-  <template #fallback>
-    <div class="text-center text-gray-500">Завантаження останніх товарів…</div>
-  </template>
-</Suspense>
-
+      <template #default>
+        <RecentlyViewed />
+      </template>
+      <template #fallback>
+        <div class="text-center text-gray-500 dark:text-gray-300">
+          {{ $t('product.loadingRecentlyViewed') }}
+        </div>
+      </template>
+    </Suspense>
   </main>
 </template>
 

@@ -5,7 +5,7 @@
     @click.self="close"
   >
     <div
-      class="bg-white rounded-lg w-full max-w-2xl p-6 overflow-y-auto max-h-[90vh] shadow-lg"
+  class="bg-white dark:bg-[#1f2a42] rounded-lg w-full max-w-2xl p-6 overflow-y-auto max-h-[90vh] shadow-lg"
     >
       <h2 class="text-2xl font-semibold text-center mb-6">{{ $t('admin.addProduct.title') }}</h2>
 
@@ -13,7 +13,7 @@
         <!-- Назва та Ціна -->
         <div class="grid grid-cols-2 gap-4">
           <div class="flex flex-col">
-            <label for="name" class="mb-1 text-sm font-medium text-gray-700">{{ $t('admin.addProduct.name') }}</label>
+            <label for="name" class="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('admin.addProduct.name') }}</label>
             <input
               id="name"
               type="text"
@@ -23,7 +23,7 @@
             />
           </div>
           <div class="flex flex-col">
-            <label for="price" class="mb-1 text-sm font-medium text-gray-700">{{ $t('admin.addProduct.price') }}</label>
+            <label for="price" class="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('admin.addProduct.price') }}</label>
             <input
               id="price"
               type="number"
@@ -35,7 +35,7 @@
 
        <div class="grid grid-cols-2 gap-4">
   <div class="flex flex-col">
-    <label class="mb-1 text-sm font-medium text-gray-700">{{ $t('admin.addProduct.category') }}</label>
+    <label class="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('admin.addProduct.category') }}</label>
     <Multiselect
       v-model="form.category"
       :options="formData.categories"
@@ -45,7 +45,7 @@
   </div>
 
   <div class="flex flex-col">
-    <label class="mb-1 text-sm font-medium text-gray-700">{{ $t('admin.addProduct.beadProducer') }}</label>
+    <label class="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('admin.addProduct.beadProducer') }}</label>
     <Multiselect
       v-model="form.bead_producer"
       :options="formData.bead_producers"
@@ -55,7 +55,7 @@
   </div>
 
   <div class="flex flex-col">
-    <label class="mb-1 text-sm font-medium text-gray-700">{{ $t('admin.addProduct.countryOfManufacture') }}</label>
+    <label class="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('admin.addProduct.countryOfManufacture') }}</label>
     <Multiselect
       v-model="form.country_of_manufacture"
       :options="formData.countries_of_manufacture"
@@ -65,7 +65,7 @@
   </div>
 
   <div class="flex flex-col">
-    <label class="mb-1 text-sm font-medium text-gray-700">{{ $t('admin.addProduct.beadType') }}</label>
+    <label class="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('admin.addProduct.beadType') }}</label>
     <Multiselect
       v-model="form.type_of_bead"
       :options="formData.type_of_bead"
@@ -78,7 +78,7 @@
         <!-- Вага та Кольори -->
         <div class="grid grid-cols-2 gap-4">
           <div class="flex flex-col">
-            <label for="weight" class="mb-1 text-sm font-medium text-gray-700">{{ $t('admin.addProduct.weight') }}</label>
+            <label for="weight" cclass="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('admin.addProduct.weight') }}</label>
             <input
               id="weight"
               type="number"
@@ -89,7 +89,7 @@
             />
           </div>
           <div class="flex flex-col">
-            <label class="mb-2 text-sm font-medium text-gray-700">{{ $t('admin.addProduct.colors') }}</label>
+            <label class="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('admin.addProduct.colors') }}</label>
             <div class="flex flex-wrap gap-2">
               <button
                 v-for="color in formData.colors"
@@ -115,12 +115,12 @@
         </div>
 
        <div class="flex flex-col space-y-3">
-  <label class="text-sm font-medium text-gray-700">{{ $t('admin.addProduct.sizes') }}</label>
+  <label class="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('admin.addProduct.sizes') }}</label>
 
   <div v-for="(sizeItem, index) in form.sizes" :key="index" class="grid grid-cols-12 gap-2 items-end">
     <!-- Поле розміру -->
     <div class="col-span-6">
-      <label class="text-sm font-medium text-gray-700">{{ $t('admin.addProduct.size') }}</label>
+      <label class="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('admin.addProduct.size') }}</label>
       <input
   v-model.number="sizeItem.size"
   type="number"
@@ -135,7 +135,7 @@
 
     <!-- Поле кількості -->
     <div class="col-span-3">
-            <label class="text-sm font-medium text-gray-700">{{ $t('admin.addProduct.quantityShort') }}</label>
+            <label class="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('admin.addProduct.quantityShort') }}</label>
       <input
         v-model.number="sizeItem.quantity"
         type="number"
@@ -170,7 +170,7 @@
         <!-- Фурнітура -->
 <!-- Фурнітура -->
 <div class="flex flex-col space-y-3">
-  <label class="text-sm font-medium text-gray-700">{{ $t('admin.addProduct.fittings') }}</label>
+  <label class="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('admin.addProduct.fittings') }}</label>
 
   <div
     v-for="(fitItem, index) in form.fittings"
@@ -179,7 +179,7 @@
   >
     <!-- Фурнітура -->
     <div class="col-span-4">
-      <label class="text-sm font-medium text-gray-700">{{ $t('admin.addProduct.fittings') }}</label>
+      <label class="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('admin.addProduct.fittings') }}</label>
       <Multiselect
         v-model="fitItem.fitting"
         :options="formData.fittings"
@@ -190,7 +190,7 @@
 
     <!-- Матеріал -->
     <div class="col-span-4">
-      <label class="text-sm font-medium text-gray-700">{{ $t('admin.addProduct.material') }}</label>
+      <label class="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('admin.addProduct.material') }}</label>
       <Multiselect
         v-model="fitItem.material"
         :options="formData.materials"
@@ -201,7 +201,7 @@
 
     <!-- Кількість -->
     <div class="col-span-2">
-      <label class="text-sm font-medium text-gray-700">{{ $t('admin.addProduct.quantityShort') }}</label>
+      <label class="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('admin.addProduct.quantityShort') }}</label>
       <input
         v-model.number="fitItem.quantity"
         type="number"
@@ -235,7 +235,7 @@
 
 <!-- Зображення -->
 <div class="flex flex-col">
-  <label class="mb-1 text-sm font-medium text-gray-700">{{ $t('admin.addProduct.image') }}</label>
+  <label class="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('admin.addProduct.image') }}</label>
 
   <!-- Кнопка вибору файлу -->
   <label

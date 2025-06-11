@@ -2,30 +2,39 @@
   <main class="w-full p-4 space-y-6 relative dark:text-white">
     <!-- Заголовок і фільтри -->
     <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
-      <h1 class="text-2xl font-extrabold text-gray-900 whitespace-nowrap  dark:invert">{{ $t('admin.dashboard.title') }}</h1>
+      <h1 class="text-2xl font-extrabold text-gray-900 whitespace-nowrap dark:invert">
+        {{ $t('admin.dashboard.title') }}
+      </h1>
 
       <div class="flex items-center gap-3 flex-wrap">
         <div class="flex flex-col">
-          <label class="text-sm text-gray-600 mb-1 ml-1">{{ $t('admin.dashboard.period') }}</label>
+          <label class="text-sm text-gray-600 mb-1 ml-1">
+            {{ $t('admin.dashboard.period') }}
+          </label>
           <Multiselect
             v-model="selectedPeriod"
             :options="periodOptions"
-            :reduce="opt => opt.value"
+            track-by="value"
             label="label"
+            :reduce="opt => opt.value"
             class="custom-multiselect w-40"
-            @input="loadData"
+            @input="onPeriodChange"
+            placeholder=" " 
+            :allow-empty="false"
           />
         </div>
 
         <div class="flex flex-col">
-          <label class="text-sm text-gray-600 mb-1 ml-1">{{ $t('admin.dashboard.customPeriod') }}</label>
+          <label class="text-sm text-gray-600 mb-1 ml-1">
+            {{ $t('admin.dashboard.customPeriod') }}
+          </label>
           <VueDatePicker
             v-model="dateRange"
             range
             format="yyyy-MM-dd"
             :enable-time-picker="false"
             :placeholder="$t('admin.dashboard.selectPeriod')"
-            @update:model-value="loadData"
+            @update:model-value="onDateRangeChange"
             input-class-name="custom-datepicker-input"
             locale="uk"
           />
@@ -118,17 +127,29 @@ class="flex flex-col justify-center items-center bg-white dark:bg-[#1f2a42] bord
 
 
 <script setup>
-import { ref, onMounted, watch, computed } from 'vue'
+import { ref, onMounted, watch, computed, toRaw } from 'vue'
 import api from '@/services/api'
 import OrderChart from '@/components/admin/dashboard/OrderChart.vue'
 import VueDatePicker from '@vuepic/vue-datepicker'
 import '@vuepic/vue-datepicker/dist/main.css'
 import { uk } from 'date-fns/locale'
+import {
+  format,
+  startOfDay,
+  endOfDay,
+  startOfWeek,
+  endOfWeek,
+  startOfMonth,
+  endOfMonth,
+  startOfYear,
+  endOfYear
+} from 'date-fns'
 import Multiselect from 'vue-multiselect'
 import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
 
+// Опції для вибору періоду
 const periodOptions = computed(() => [
   { value: 'day', label: t('admin.dashboard.today') },
   { value: 'week', label: t('admin.dashboard.week') },
@@ -136,10 +157,11 @@ const periodOptions = computed(() => [
   { value: 'year', label: t('admin.dashboard.year') }
 ])
 
-
+// Вибір періоду або кастомного діапазону дат
 const selectedPeriod = ref('month')
-const dateRange = ref(null)
+const dateRange = ref(null) // [Date, Date] або null
 
+// Стан для статистики
 const summary = ref({
   orders: 0,
   views: 0,
@@ -152,6 +174,14 @@ const orderChart = ref({ labels: [], values: [], type: 'day' })
 const latest = ref([])
 const popular = ref([])
 
+// Стан для звіту про прибуток
+const incomeRecords = ref([])
+const incomeSummary = ref({
+  total_income: 0,
+  total_expenses: 0,
+  total_net_income: 0
+})
+
 const cards = computed(() => [
   { label: t('admin.dashboard.ordersCount'), value: summary.value.orders },
   { label: t('admin.dashboard.commentsCount'), value: summary.value.comments },
@@ -159,68 +189,200 @@ const cards = computed(() => [
   { label: t('admin.dashboard.soldCount'), value: summary.value.sold_products_count }
 ])
 
+// Допоміжна: отримати примітивне значення period
+const getPeriodValue = () => {
+  const p = selectedPeriod.value
+  // Якщо Vue Proxy-об’єкт, можливо має поле .value
+  if (p && typeof p === 'object') {
+    // якщо об’єкт виду { value: 'week', label: 'Week' }
+    if ('value' in p && typeof p.value === 'string') {
+      return p.value
+    }
+    // інакше, спробуємо raw:
+    try {
+      const raw = toRaw(p)
+      if (raw && typeof raw.value === 'string') {
+        return raw.value
+      }
+    } catch {
+        console.error('Помилка ...')
+
+    }
+    console.warn('selectedPeriod має нетипове значення:', p)
+    return null
+  }
+  // простий рядок або null
+  return p
+}
+
+// Формуємо параметри: або { start_date, end_date }, або { period }
 const getParams = () => {
   if (Array.isArray(dateRange.value) && dateRange.value.length === 2) {
-    return {
-      start_date: dateRange.value[0],
-      end_date:   dateRange.value[1]
-    };
+    const [start, end] = dateRange.value
+    if (start && end) {
+      const startStr = start instanceof Date
+        ? format(start, 'yyyy-MM-dd')
+        : String(start)
+      const endStr = end instanceof Date
+        ? format(end, 'yyyy-MM-dd')
+        : String(end)
+      return { start_date: startStr, end_date: endStr }
+    }
+  }
+  const periodVal = getPeriodValue()
+  if (periodVal) {
+    return { period: periodVal }
+  }
+  return null
+}
+
+// Обчислити ручний діапазон для даного period
+const computeDateRangeForPeriod = (period) => {
+  const now = new Date()
+  let start, end
+  switch (period) {
+    case 'day':
+      start = startOfDay(now)
+      end = endOfDay(now)
+      break
+    case 'week':
+      start = startOfWeek(now, { weekStartsOn: 1 })
+      end = endOfWeek(now, { weekStartsOn: 1 })
+      break
+    case 'month':
+      start = startOfMonth(now)
+      end = endOfMonth(now)
+      break
+    case 'year':
+      start = startOfYear(now)
+      end = endOfYear(now)
+      break
+    default:
+      return null
   }
   return {
-    period: selectedPeriod.value
-  };
-};
-
-
+    start_date: format(start, 'yyyy-MM-dd'),
+    end_date: format(end, 'yyyy-MM-dd')
+  }
+}
 
 const loadData = async () => {
   try {
-    const params = getParams();
+    const params = getParams()
+    console.log('loadData params:', params)
+    if (!params) {
+      console.warn('Немає валідного періоду або діапазону дат для завантаження.')
+      return
+    }
+
+    // Основні запити
     const [summaryRes, chartRes, popRes, latestRes] = await Promise.all([
       api.getAdminStatsSummary(params),
       api.getAdminStatsOrderDynamics(params),
       api.getAdminStatsPopularProducts(params),
       api.getAdminStatsLatestOrders()
-    ]);
+    ])
 
     // 1) Summary
-    const summaryData = summaryRes || {};
+    const summaryData = summaryRes || {}
     summary.value = {
       orders: summaryData.orders_count || 0,
       comments: summaryData.reviews_count || 0,
       users_count: summaryData.users_count || 0,
       sold_products_count: summaryData.sold_products_count || 0,
       avg_order_value: summaryData.avg_order_value || 0
-    };
+    }
 
     // 2) Chart
-    orderChart.value = chartRes || { labels: [], values: [], type: 'day' };
+    orderChart.value = chartRes || { labels: [], values: [], type: 'day' }
 
     // 3) Popular products
-    popular.value = Array.isArray(popRes.products) ? popRes.products : [];
+    popular.value = Array.isArray(popRes?.products) ? popRes.products : []
 
     // 4) Latest orders
-    latest.value = Array.isArray(latestRes.data) ? latestRes.data : [];
-  } catch (e) {
-    console.error('Помилка завантаження статистики:', e);
-  }
-};
+    latest.value = Array.isArray(latestRes?.data) ? latestRes.data : []
 
+    // 5) Income: спочатку пробуємо з тими ж params
+    if (api.getAdminStatsIncome) {
+      try {
+        console.log('Запит income з params:', params)
+        const incomeRes = await api.getAdminStatsIncome(params)
+        incomeRecords.value = Array.isArray(incomeRes.data) ? incomeRes.data : []
+        const s = incomeRes.summary || {}
+        incomeSummary.value = {
+          total_income: s.total_income || 0,
+          total_expenses: s.total_expenses || 0,
+          total_net_income: s.total_net_income || 0
+        }
+      } catch (errIncome) {
+        const resp = errIncome.response?.data
+        const isInvalidPeriod = resp?.errors?.period
+        console.warn('Income request помилка:', resp)
+        if (isInvalidPeriod && params.period) {
+          const fallback = computeDateRangeForPeriod(params.period)
+          if (fallback) {
+            try {
+              console.log('Фолбек income: використовую dateRange', fallback)
+              const incomeRes2 = await api.getAdminStatsIncome(fallback)
+              incomeRecords.value = Array.isArray(incomeRes2.data) ? incomeRes2.data : []
+              const s2 = incomeRes2.summary || {}
+              incomeSummary.value = {
+                total_income: s2.total_income || 0,
+                total_expenses: s2.total_expenses || 0,
+                total_net_income: s2.total_net_income || 0
+              }
+            } catch (err2) {
+              console.error('Навіть із фолбеком неможливо отримати income:', err2)
+            }
+          }
+        } else {
+          console.error('Помилка отримання income:', errIncome)
+        }
+      }
+    }
+
+  } catch (e) {
+    console.error('Помилка завантаження статистики:', e)
+    const resp = e.response?.data
+    if (resp?.errors?.period) {
+      console.error('Невалідний період:', resp.errors.period)
+      // тут можна показати користувачу повідомлення
+    }
+  }
+}
 
 watch(selectedPeriod, (newPeriod) => {
-  dateRange.value = null;
-  loadData();
-});
-watch(dateRange, () => {
-  // при виборі кастомного діапазону скидаємо період
-  selectedPeriod.value = null;
-  loadData();
-});
+  // Впевнитися, що selectedPeriod тепер рядок або null
+  const val = getPeriodValue()
+  console.log('selectedPeriod змінився, значення:', val)
+  if (val) {
+    if (dateRange.value) {
+      dateRange.value = null
+    }
+    loadData()
+  }
+})
 
+watch(dateRange, (newRange) => {
+  if (Array.isArray(newRange) && newRange.length === 2) {
+    const [start, end] = newRange
+    if (start && end) {
+      selectedPeriod.value = null
+      loadData()
+      return
+    }
+  }
+  if (newRange == null) {
+    selectedPeriod.value = 'month'
+    loadData()
+  }
+})
 
-watch(dateRange, loadData)
 onMounted(loadData)
 </script>
+
+
+
 
 <style scoped>
 .font-montserrat {

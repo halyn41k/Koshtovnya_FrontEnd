@@ -562,6 +562,7 @@ changeCurrency(curr) {
   },
   mounted() {
 
+      this.state.isDarkMode = document.documentElement.classList.contains('dark');
 
   this.$nextTick(() => this.headerHeight = this.$refs.headerEl?.offsetHeight || 64);
   document.addEventListener('mousedown', this.handleOutsideClick);

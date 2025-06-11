@@ -1,7 +1,7 @@
 <template>
 
 <div class="fixed inset-0 bg-[rgba(0,0,0,0.5)] flex items-center justify-center z-50" @click.self="close">
-  <div class="bg-white rounded-lg w-full max-w-2xl p-6 overflow-y-auto max-h-[90vh] shadow-lg">
+  <div   class="bg-white dark:bg-[#1f2a42] rounded-lg w-full max-w-2xl p-6 overflow-y-auto max-h-[90vh] shadow-lg">
     <h2 class="text-2xl font-semibold text-center mb-6">{{ $t('admin.editProduct.title') }}</h2>
     <form @submit.prevent="submitForm" class="space-y-6">
       <!-- Назва та Ціна -->

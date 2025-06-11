@@ -35,22 +35,23 @@
       <div class="inline-block min-w-full border border-[#E0E0E0] dark:border-[#303b59] rounded-md overflow-hidden">
         <table class="min-w-full bg-white dark:bg-[#17223b] divide-y divide-[#E0E0E0] dark:divide-[#303b59]">
           <thead class="bg-[#F6E7E7] dark:bg-[#1f2a42]">
-            <tr>
-              <th
-                v-for="col in columns"
-                :key="col.key"
-                class="px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 text-left cursor-pointer select-none"
-              >
-                <div class="inline-flex items-center gap-2">
-                  {{ col.label }}
-                  <img
-                    v-if="col.sortable"
-                    :src="getSortIcon(sortState[col.key])"
-                    class="w-4 h-4"
-                    alt=""
-                  />
-                </div>
-              </th>
+  <tr>
+    <th
+      v-for="col in columns"
+      :key="col.key"
+      class="px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 text-left cursor-pointer select-none"
+      @click="cycleSort(col.key)"
+    >
+      <div class="inline-flex items-center gap-2">
+        {{ col.label }}
+        <img
+          v-if="col.sortable"
+          :src="getSortIcon(sortState[col.key])"
+          class="w-4 h-4 invert dark:invert-0"
+          alt=""
+        />
+      </div>
+    </th>
               <th class="px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 text-left">Керування</th>
             </tr>
           </thead>

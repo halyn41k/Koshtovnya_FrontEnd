@@ -1,14 +1,13 @@
 <template>
-<div class="filter-container w-[350px] min-h-[550px] p-6 bg-[#fff7f6] dark:bg-[#17223b] border-2 border-gray-200 dark:border-[#303b59] shadow-xl rounded-2xl font-montserrat transition-all duration-300 ease-in-out"
-
-  @keydown.escape="$emit('close')"
->
-
+  <div
+    class="filter-container w-[350px] min-h-[550px] p-6 bg-[#fff7f6] dark:bg-[#17223b] border-2 border-gray-200 dark:border-[#303b59] shadow-xl rounded-2xl font-montserrat transition-all duration-300 ease-in-out"
+    @keydown.escape="$emit('close')"
+  >
     <section v-if="!loading" class="space-y-8">
       <!-- Доступність -->
       <div class="section bg-white dark:bg-gray-900 p-4 rounded-lg shadow-sm">
-<h2 class="section-title text-center text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">
-          Доступність
+        <h2 class="section-title text-center text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">
+          {{ $t('product.availabilityTitle') }}
         </h2>
         <div class="space-y-3">
           <label
@@ -31,26 +30,29 @@
 
       <!-- Рейтинг -->
       <div class="section bg-white dark:bg-gray-900 p-4 rounded-lg shadow-sm">
-<h3 class="subsection-title mb-3 text-lg font-semibold text-gray-800 dark:text-gray-100">
-          Рейтинг
+        <h3 class="subsection-title mb-3 text-lg font-semibold text-gray-800 dark:text-gray-100">
+          {{ $t('product.ratingTitle') }}
         </h3>
         <div class="space-y-3">
-          <label v-for="star in [5, 4, 3, 2, 1]" :key="star" class="flex items-center space-x-2">
+          <label v-for="star in [5,4,3,2,1]" :key="star" class="flex items-center space-x-2">
             <input
               type="checkbox"
               :value="star"
               v-model="filters.rating"
               class="custom-checkbox"
             />
-            <span class="text-base text-gray-700 dark:text-gray-100">{{ star }} зірки</span>
+            <span class="text-base text-gray-700 dark:text-gray-100">
+              {{ star }} {{ $t('product.starsLabel', { count: star }) || 'зірки' }}
+              <!-- Якщо є окремий ключ для "зірки", можна додати в локалізації -->
+            </span>
           </label>
         </div>
       </div>
 
       <!-- Розмір -->
       <div class="section bg-white dark:bg-gray-900 p-4 rounded-lg shadow-sm">
-<h3 class="subsection-title mb-3 text-lg font-semibold text-gray-800 dark:text-gray-100">
-          Розмір (см)
+        <h3 class="subsection-title mb-3 text-lg font-semibold text-gray-800 dark:text-gray-100">
+          {{ $t('product.sizeTitle') }}
         </h3>
         <Slider
           class="w-full"
@@ -64,8 +66,8 @@
 
       <!-- Вага -->
       <div class="section bg-white dark:bg-gray-900 p-4 rounded-lg shadow-sm">
-<h3 class="subsection-title mb-3 text-lg font-semibold text-gray-800 dark:text-gray-100">
-          Вага (г)
+        <h3 class="subsection-title mb-3 text-lg font-semibold text-gray-800 dark:text-gray-100">
+          {{ $t('product.weightTitle') }}
         </h3>
         <Slider
           class="w-full"
@@ -79,11 +81,10 @@
 
       <!-- Ціна -->
       <div class="section bg-white dark:bg-gray-900 p-4 rounded-lg shadow-sm">
-<h3 class="subsection-title mb-3 text-lg font-semibold text-gray-800 dark:text-gray-100">
-  Ціна ({{ selectedCurrency === 'USD' ? '$' : '₴' }})
-</h3>
-
-
+        <h3 class="subsection-title mb-3 text-lg font-semibold text-gray-800 dark:text-gray-100">
+          <!-- Використовуємо окремий ключ з плейсхолдером {{symbol}} -->
+          {{ $t('product.priceCurrency', { symbol: selectedCurrency === 'USD' ? '$' : '₴' }) }}
+        </h3>
         <Slider
           class="w-full"
           v-model="filters.price"
@@ -96,14 +97,14 @@
 
       <!-- Колір -->
       <div class="section bg-white dark:bg-gray-900 p-4 rounded-lg shadow-sm">
-<h3 class="subsection-title mb-3 text-lg font-semibold text-gray-800 dark:text-gray-100">
-          Колір
+        <h3 class="subsection-title mb-3 text-lg font-semibold text-gray-800 dark:text-gray-100">
+          {{ $t('product.colorTitle') }}
         </h3>
         <select
           v-model="filters.color"
-  class="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#1e293b] dark:text-white rounded focus:outline-none focus:ring-2 focus:ring-[#6B1F1F]"
+          class="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#1e293b] dark:text-white rounded focus:outline-none focus:ring-2 focus:ring-[#6B1F1F]"
         >
-          <option value="">(без фільтра)</option>
+          <option value="">{{ $t('product.noFilterOption') }}</option>
           <option v-for="color in sortedColorOptions" :key="color" :value="color">
             {{ color }}
           </option>
@@ -112,8 +113,8 @@
 
       <!-- Тип бісеру -->
       <div class="section bg-white dark:bg-gray-900 p-4 rounded-lg shadow-sm">
-<h3 class="subsection-title mb-3 text-lg font-semibold text-gray-800 dark:text-gray-100">
-          Тип бісеру
+        <h3 class="subsection-title mb-3 text-lg font-semibold text-gray-800 dark:text-gray-100">
+          {{ $t('product.beadTypeTitle') }}
         </h3>
         <div class="space-y-3">
           <label
@@ -127,7 +128,7 @@
               v-model="filters.beadTypes"
               class="custom-checkbox"
             />
-<span class="text-base text-gray-700 dark:text-gray-300">
+            <span class="text-base text-gray-700 dark:text-gray-300">
               {{ item.name }} ({{ item.count }})
             </span>
           </label>
@@ -136,8 +137,8 @@
 
       <!-- Виробник бісеру -->
       <div class="section bg-white dark:bg-gray-900 p-4 rounded-lg shadow-sm">
-<h3 class="subsection-title mb-3 text-lg font-semibold text-gray-800 dark:text-gray-100">
-          Виробник бісеру
+        <h3 class="subsection-title mb-3 text-lg font-semibold text-gray-800 dark:text-gray-100">
+          {{ $t('product.beadProducerTitle') }}
         </h3>
         <div class="space-y-3">
           <label
@@ -151,7 +152,7 @@
               v-model="filters.producers"
               class="custom-checkbox"
             />
-<span class="text-base text-gray-700 dark:text-gray-300">
+            <span class="text-base text-gray-700 dark:text-gray-300">
               {{ item.origin_country }} ({{ item.count }})
             </span>
           </label>
@@ -159,52 +160,50 @@
       </div>
 
       <!-- Категорія -->
-      <!-- Категорія -->
-<div
-  v-if="!hideCategory"
-  class="section bg-white dark:bg-gray-900 p-4 rounded-lg shadow-sm"
->
-<h3 class="subsection-title mb-3 text-lg font-semibold text-gray-800 dark:text-gray-100">
-    Категорія
-  </h3>
-  <div class="space-y-3">
-    <label
-      v-for="cat in categoryOptions"
-      :key="cat"
-      class="flex items-center space-x-3"
-    >
-      <input
-        type="checkbox"
-        :value="cat"
-        v-model="filters.category"
-        class="custom-checkbox"
-      />
-<span class="text-base text-gray-700 dark:text-gray-300">
-        {{ cat }}
-      </span>
-    </label>
-  </div>
-</div>
-
+      <div
+        v-if="!hideCategory"
+        class="section bg-white dark:bg-gray-900 p-4 rounded-lg shadow-sm"
+      >
+        <h3 class="subsection-title mb-3 text-lg font-semibold text-gray-800 dark:text-gray-100">
+          {{ $t('product.categoryTitle') }}
+        </h3>
+        <div class="space-y-3">
+          <label
+            v-for="cat in categoryOptions"
+            :key="cat"
+            class="flex items-center space-x-3"
+          >
+            <input
+              type="checkbox"
+              :value="cat"
+              v-model="filters.category"
+              class="custom-checkbox"
+            />
+            <span class="text-base text-gray-700 dark:text-gray-300">
+              {{ cat }}
+            </span>
+          </label>
+        </div>
+      </div>
 
       <!-- Кнопка застосувати -->
       <div class="flex justify-center">
         <button
-  @click="applyFilters"
-  class="w-full max-w-xs px-6 py-3 bg-[#6B1F1F] hover:bg-[#861818] dark:bg-[#A01212] dark:hover:bg-[#c42e2e]
-         text-white font-montserrat font-semibold rounded-lg transition-all duration-300 shadow-sm hover:shadow-md"
->
-
-          Застосувати фільтри
+          @click="applyFilters"
+          class="w-full max-w-xs px-6 py-3 bg-[#6B1F1F] hover:bg-[#861818] dark:bg-[#A01212] dark:hover:bg-[#c42e2e]
+                 text-white font-montserrat font-semibold rounded-lg transition-all duration-300 shadow-sm hover:shadow-md"
+        >
+          {{ $t('product.applyFilters') }}
         </button>
       </div>
     </section>
 
-<div v-else class="text-center text-gray-500 dark:text-gray-300 py-8">
-      Завантаження фільтрів...
+    <div v-else class="text-center text-gray-500 dark:text-gray-300 py-8">
+      {{ $t('product.loadingFilters') }}
     </div>
   </div>
 </template>
+
 
 <script>
 import { ref, reactive, watch, onMounted, computed, watchEffect} from 'vue'

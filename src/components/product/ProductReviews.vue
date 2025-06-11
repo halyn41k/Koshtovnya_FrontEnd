@@ -3,7 +3,9 @@
     <!-- Заголовок -->
     <div class="flex items-center my-6">
       <hr class="flex-grow border-t-2 border-gray-300 dark:border-gray-600" />
-      <h2 class="mx-4 text-2xl font-bold text-gray-900 dark:invert">Відгуки</h2>
+      <h2 class="mx-4 text-2xl font-bold text-gray-900 dark:invert">
+        {{ $t('product.reviewsTitle') }}
+      </h2>
       <hr class="flex-grow border-t-2 border-gray-300 dark:border-gray-600" />
     </div>
 
@@ -34,7 +36,9 @@
               <span v-else class="text-gray-300">★</span>
             </template>
           </div>
-          <span class="text-lg text-gray-700">{{ rating.toFixed(1) }} / 5 ({{ reviewCount }} відгуків)</span>
+          <span class="text-lg text-gray-700">
+            {{ rating.toFixed(1) }} / 5 ({{ reviewCount }} відгуків)
+          </span>
         </div>
         <div class="mt-4 space-y-2">
           <div v-for="i in [5,4,3,2,1]" :key="i" class="flex items-center gap-3">
@@ -50,34 +54,38 @@
 
     <!-- Якщо відгуків немає — повідомлення зліва, кнопка справа -->
     <div v-if="!loading && !reviews.length" class="flex justify-between w-full mb-6 px-4 sm:px-0 max-w-3xl mx-auto">
-      <p class="text-gray-600">Немає відгуків для цього товару.</p>
+      <p class="text-gray-600">{{ $t('product.noReviews') }}</p>
       <button
         @click="toggleReviewForm"
         class="bg-red-800 text-white py-2 px-4 rounded-lg text-lg hover:bg-red-700 font-montserrat disabled:opacity-50"
       >
-        {{ showReviewForm ? 'Сховати форму' : 'Додати відгук' }}
+        {{ showReviewForm ? $t('product.hideForm') : $t('product.addReview') }}
       </button>
     </div>
 
     <!-- КНОПКА + ФОРМА ВГОРІ -->
     <div v-if="reviews.length" class="flex justify-between items-center w-full mb-6 px-4 sm:px-0 max-w-3xl mx-auto">
-      <h3 class="text-xl font-bold text-gray-800 dark:invert">Додайте свій відгук</h3>
+      <h3 class="text-xl font-bold text-gray-800 dark:invert">{{ $t('product.writeReviewTitle') }}</h3>
       <button
         @click="toggleReviewForm"
         class="bg-red-800 text-white py-2 px-4 rounded-lg text-lg hover:bg-red-700 font-montserrat disabled:opacity-50"
       >
-        {{ showReviewForm ? 'Сховати форму' : 'Додати відгук' }}
+        {{ showReviewForm ? $t('product.hideForm') : $t('product.addReview') }}
       </button>
     </div>
 
     <!-- Форма для нового відгуку -->
     <div
       v-if="showReviewForm"
-  class="bg-[#fff7f6] dark:bg-[#17223b] border-2 border-gray-200 dark:border-[#303b59] p-6 rounded-2xl shadow-md transition-all duration-300 ease-in-out max-w-3xl mx-auto space-y-4 mb-8"
+      class="bg-[#fff7f6] dark:bg-[#17223b] border-2 border-gray-200 dark:border-[#303b59] p-6 rounded-2xl shadow-md transition-all duration-300 ease-in-out max-w-3xl mx-auto space-y-4 mb-8"
     >
-<h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100">Напишіть відгук</h3>
+      <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100">
+        {{ $t('product.writeReviewTitle') }}
+      </h3>
       <div class="flex items-center gap-2">
-<label class="text-gray-700 dark:text-gray-300 font-montserrat">Рейтинг:</label>
+        <label class="text-gray-700 dark:text-gray-300 font-montserrat">
+          {{ $t('product.ratingLabel') }}
+        </label>
         <div class="flex gap-1">
           <span
             v-for="n in 5"
@@ -93,31 +101,30 @@
         </div>
       </div>
 
-<textarea
-  v-model="newReview.comment"
-  placeholder="Напишіть відгук..."
-  required
-  class="w-full h-32 p-2 border border-gray-300 dark:border-[#303b59] dark:bg-[#1e293b] dark:text-white rounded focus:outline-none focus:ring font-montserrat"
-></textarea>
+      <textarea
+        v-model="newReview.comment"
+        :placeholder="$t('product.reviewPlaceholder')"
+        required
+        class="w-full h-32 p-2 border border-gray-300 dark:border-[#303b59] dark:bg-[#1e293b] dark:text-white rounded focus:outline-none focus:ring font-montserrat"
+      ></textarea>
 
       <button
         @click="submitReview"
         :disabled="loading"
         class="bg-red-800 text-white py-2 px-4 rounded hover:bg-red-700 disabled:opacity-50 font-montserrat"
       >
-        Відправити
+        {{ $t('product.submitReview') }}
       </button>
     </div>
 
     <!-- Список відгуків -->
     <ul v-if="reviews.length" class="space-y-6">
       <li
-  v-for="review in pagedReviews"
-  :key="review.id"
-  class="p-4 bg-[#fff7f6] dark:bg-[#17223b] border-2 border-gray-200 dark:border-[#303b59] rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 max-w-3xl mx-auto"
->
-
-<h4 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-1">
+        v-for="review in pagedReviews"
+        :key="review.id"
+        class="p-4 bg-[#fff7f6] dark:bg-[#17223b] border-2 border-gray-200 dark:border-[#303b59] rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 max-w-3xl mx-auto"
+      >
+        <h4 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-1">
           {{ review.user_first_name }} {{ review.user_last_name }}
         </h4>
 
@@ -135,19 +142,18 @@
           <p class="text-sm text-gray-500">{{ formatReviewDate(review.date) }}</p>
         </div>
 
-<p class="text-base text-gray-700 dark:text-gray-300 mb-3">{{ review.comment }}</p>
+        <p class="text-base text-gray-700 dark:text-gray-300 mb-3">{{ review.comment }}</p>
 
         <div v-if="review.replies.length" class="mt-2 space-y-2">
           <div
-  v-for="(r, idx) in review.replies"
-  :key="idx"
-  class="pl-4 border-l-4 border-red-300 bg-[#fff7f6] dark:bg-[#1e293b] dark:border-[#A01212] rounded shadow-sm"
->
-  <p class="text-sm text-gray-600 dark:text-gray-300">
-    <strong>Відповідь адміністратора:</strong> {{ r.comment }}
-  </p>
-</div>
-
+            v-for="(r, idx) in review.replies"
+            :key="idx"
+            class="pl-4 border-l-4 border-red-300 bg-[#fff7f6] dark:bg-[#1e293b] dark:border-[#A01212] rounded shadow-sm"
+          >
+            <p class="text-sm text-gray-600 dark:text-gray-300">
+              <strong>{{ $t('product.adminReplyLabel') }}</strong> {{ r.comment }}
+            </p>
+          </div>
         </div>
 
         <div v-if="isAdmin" class="mt-3">
@@ -155,7 +161,7 @@
             @click="replyToReview(review.id)"
             class="text-sm font-medium text-red-800 dark:text-gray-100 hover:underline"
           >
-            Відповісти
+            {{ $t('product.writeReplyPlaceholder') }}
           </button>
 
           <div
@@ -163,20 +169,19 @@
             class="mt-2 p-4 bg-white dark:bg-gray-900 rounded-lg shadow space-y-2"
           >
             <textarea
-  v-model="replyText"
-  placeholder="Напишіть відповідь..."
-  required
-  class="w-full p-2 border border-gray-300 dark:border-[#303b59] dark:bg-[#1e293b] dark:text-white rounded focus:outline-none focus:ring font-montserrat"
-></textarea>
+              v-model="replyText"
+              :placeholder="$t('product.writeReplyPlaceholder')"
+              required
+              class="w-full p-2 border border-gray-300 dark:border-[#303b59] dark:bg-[#1e293b] dark:text-white rounded focus:outline-none focus:ring font-montserrat"
+            ></textarea>
 
             <button
-  @click="submitReply"
-  :disabled="loading"
-  class="bg-[#6B1F1F] hover:bg-[#861818] dark:bg-[#A01212] dark:hover:bg-[#c42e2e] text-white py-1 px-3 rounded font-montserrat transition-all duration-300 disabled:opacity-50"
->
-  Відправити відповідь
-</button>
-
+              @click="submitReply"
+              :disabled="loading"
+              class="bg-[#6B1F1F] hover:bg-[#861818] dark:bg-[#A01212] dark:hover:bg-[#c42e2e] text-white py-1 px-3 rounded font-montserrat transition-all duration-300 disabled:opacity-50"
+            >
+              {{ $t('product.submitReply') }}
+            </button>
           </div>
         </div>
       </li>
