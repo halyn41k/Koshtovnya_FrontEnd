@@ -14,65 +14,24 @@ const routes = [
   },
 
 
-  {
+   {
     path: '/category/:categoryId',
     name: 'Category',
     component: CategorySection,
     props: route => ({
-      categoryId: Number(route.params.categoryId),
-      title: route.query.title || 'Категорія'
-    }),
-    meta: { title: 'Категорія' }
-  },
-  
-  {
-    path: '/bracelets',
-    redirect: to => ({
-      name: 'Category',
-      params: { categoryId: 1 },
-      meta: { title: 'Браслети' }
+      categoryId:  Number(route.params.categoryId),
+      categoryKey: route.query.key || 'default'
     })
   },
-  {
-    path: '/herdany',
-    redirect: to => ({
-      name: 'Category',
-      params: { categoryId: 2 },
-      meta: { title: 'Гердани' }
-    })
-  },
-  {
-    path: '/dukats',
-    redirect: to => ({
-      name: 'Category',
-      params: { categoryId: 3 },
-      meta: { title: 'Дукати' }
-    })
-  },
-  {
-    path: '/earrings',
-    redirect: to => ({
-      name: 'Category',
-      params: { categoryId: 4 },
-      meta: { title: 'Силянки' }
-    })
-  },
-  {
-    path: '/sylyanky',
-    redirect: to => ({
-      name: 'Category',
-      params: { categoryId: 5 },
-      meta: { title: 'Сережки' }
-    })
-  },
-  {
-    path: '/belts',
-    redirect: to => ({
-      name: 'Category',
-      params: { categoryId: 6 },
-      meta: { title: 'Пояси' }
-    })
-  },
+
+  // Прямі шляхи для ключових категорій
+  { path: '/bracelets', name: 'Bracelets', component: CategorySection, props: { categoryId: 1, categoryKey: 'bracelets' } },
+  { path: '/herdany',   name: 'Herdany',   component: CategorySection, props: { categoryId: 2, categoryKey: 'herdany'   } },
+  { path: '/dukats',    name: 'Dukats',    component: CategorySection, props: { categoryId: 3, categoryKey: 'dukats'    } },
+  { path: '/earrings',  name: 'Earrings',  component: CategorySection, props: { categoryId: 4, categoryKey: 'earrings'  } },
+  { path: '/sylyanky',  name: 'Sylyanky',  component: CategorySection, props: { categoryId: 5, categoryKey: 'sylyanky'  } },
+  { path: '/belts',     name: 'Belts',     component: CategorySection, props: { categoryId: 6, categoryKey: 'belts'     } },
+
   
   {
     path: '/login',

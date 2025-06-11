@@ -144,27 +144,41 @@ apiClient.interceptors.response.use(
 
 
 export default {
-  // Wishlist
+// 1) Отримати wishlist користувача
   getWishlist: async () => {
-    const { data } = await apiClient.get('/api/wishlist');
-    return data;
+    // GET /api/wishlist?lang=uk&currency=uah
+    const { data } = await apiClient.get('/api/wishlist')
+    // повертаємо обʼєкт або масив, як його повертає бек
+    return data
   },
+  // 2) Видалити один елемент
   deleteWishlistItem: async id => {
-    const { data } = await apiClient.delete(`/api/wishlist/${id}`);
-    toast.success('Товар успішно видалено зі списку бажань');
-    return data;
-  },
-  addToWishlist: async payload => {
-    const { data } = await apiClient.post('/api/wishlist', payload);
-    toast.success('Товар додано до списку бажань');
-    return data;
+    await apiClient.delete(`/api/wishlist/${id}`)
+    toast.success('Товар успішно видалено зі списку бажань')
+    // повернути просто id для зручності
+    return id
   },
 
-  // Cart
+  // 3) Додати у список бажань
+  addToWishlist: async payload => {
+    // payload = { product_id: <id> }
+    await apiClient.post('/api/wishlist', payload)
+    toast.success('Товар додано до списку бажань')
+    // не обовʼязково повертати дані
+  },
+
+ 
+  addToCart: async payload => {
+    // payload = { product_id, quantity, size }
+    await apiClient.post('/api/cart', payload)
+    toast.success('Товар додано до кошика')
+  },
+
+    // 2) Отримати кошик користувача
   getCart: async () => {
-    const { data } = await apiClient.get('/api/cart');
-    toast.success('Кошик завантажено');
-    return data;
+    // GET /api/cart?lang=uk&currency=uah
+    const { data } = await apiClient.get('/api/cart')
+    return data
   },
   getCartCount: async () => {
     const { data } = await apiClient.get('/api/cart/cart-count');
@@ -175,11 +189,7 @@ export default {
     toast.success('Товар видалено з кошика');
     return data;
   },
-  addToCart: async payload => {
-    const { data } = await apiClient.post('/api/cart', payload);
-    toast.success('Товар додано до кошика');
-    return data;
-  },
+
   updateCartItem: async (id, payload) => {
     const { data } = await apiClient.patch(`/api/cart/${id}`, payload);
   
@@ -444,11 +454,13 @@ getAdminFilter: async (config = {}) => {
     toast.success('Адмін: продукт створено');
     return data;
   },
-  getAdminProducts: async () => {
-    const { data } = await apiClient.get('/api/admin/products');
-    toast.success('Адмін: список продуктів отримано');
-    return data;
-  },
+  getAdminProducts: async ({ params, url } = {}) => {
+  // якщо url не вказано, викликаємо базовий ендпоінт
+  const endpoint = url || '/api/admin/products';
+  // params – це звичайний об’єкт фільтрів/пагінації
+  const response = await apiClient.get(endpoint, { params });
+  return response.data; // повертаємо data з відповіді
+},
   updateAdminProduct: async (id, productData) => {
     const { data } = await apiClient.post(`/api/admin/products/${id}`, productData);
     toast.success('Адмін: продукт оновлено');

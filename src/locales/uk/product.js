@@ -43,6 +43,14 @@ export default {
     categoryTitle: 'Категорія',
     applyFilters: 'Застосувати фільтри',
     loadingFilters: 'Завантаження фільтрів...',
-    noFilterOption: '(без фільтра)'
+    noFilterOption: '(без фільтра)',
+    allProducts: 'Всі товари',
+found: 'Знайдено',
+items: 'товарів',
+filter: 'Фільтр',
+clearAll: 'Очистити всі',
+nothingFound: 'Нічого не знайдено за заданими фільтрами 😢',
+resetFilters: 'Скинути фільтри',
+
   }
 }

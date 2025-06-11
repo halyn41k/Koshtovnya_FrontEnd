@@ -5,13 +5,13 @@
       <h2 class="title-kyiv text-3xl mb-2 dark:invert">{{ computedTitle }}</h2>
 
       <div class="flex items-center justify-between mb-2">
-        <p class="text-lg font-medium">Знайдено {{ totalCount }} товарів</p>
+        <p class="text-lg font-medium">{{ $t('product.found') }} {{ totalCount }} {{ $t('product.items') }}</p>
         <button
           @click="toggleFilter"
           class="inline-flex items-center p-2 pl-3 pr-4 rounded-md focus:outline-none focus:ring-2 focus:ring-[#6B1F1F] hover:bg-gray-100 transition lg:hidden"
         >
           <img src="@/assets/icons/filter.svg" alt="Filter" class="w-5 h-5 mr-2" />
-          <span class="text-base font-semibold">Фільтр</span>
+          <span class="text-base font-semibold">{{ $t('product.filter') }}</span>
         </button>
       </div>
 
@@ -32,7 +32,7 @@ class="px-3 py-1 bg-gray-200 dark:bg-[#303b59] text-gray-800 dark:text-gray-100 
           @click="clearAll"
 class="px-3 py-1 bg-gray-200 dark:bg-[#303b59] text-gray-800 dark:text-gray-100 rounded-full flex items-center space-x-1 transition"
         >
-          Очистити всі
+          {{ $t('product.clearAll') }}
         </button>
       </div>
     </div>
@@ -203,7 +203,7 @@ class="px-3 py-1 bg-gray-200 dark:bg-[#303b59] text-gray-800 dark:text-gray-100 
          transition-all duration-300 ease-in-out shadow-sm hover:shadow-md"
 >
 
-  <span>Купити</span>
+  <span>{{ $t('product.buy') }}</span>
   <img src="@/assets/miniarrow.png" alt="arrow" class="w-5 h-4" />
 </button>
 
@@ -214,7 +214,7 @@ class="px-3 py-1 bg-gray-200 dark:bg-[#303b59] text-gray-800 dark:text-gray-100 
   class="w-full h-11 bg-gray-300 text-gray-700 dark:bg-[#3c465f] dark:text-gray-200 font-montserrat font-semibold rounded-lg flex items-center justify-center px-4 transition duration-300"
 >
 
-  Повідомити про наявність
+  {{ $t('product.notifyAvailability') }}
 </button>
 
 </div>
@@ -268,6 +268,7 @@ class="px-3 py-1 bg-gray-200 dark:bg-[#303b59] text-gray-800 dark:text-gray-100 
 
 
 <script>
+import CategoryProduct from '@/components/home/CategoryProduct.vue'; 
 import api from '@/services/api';
 import FilterComponent from '../product/FilterComponent.vue';
 import bus from '@/eventBus';
@@ -278,24 +279,10 @@ const RecentlyViewed = defineAsyncComponent(() => import('@/components/home/Rece
 
 
 export default {
-  beforeRouteEnter(to, from, next) {
-  next(vm => {
-    const stored = sessionStorage.getItem('filters');
-    if (stored) {
-      const parsed = JSON.parse(stored);
-      vm.filters = parsed;
-      vm.filtersKey++;
-      vm.fetchProducts(1, parsed);
-    } else {
-      vm.filters = { category_id: vm.categoryId };
-      vm.filtersKey++;
-      vm.fetchProducts();
-    }
-  });
-},
+ 
 
   name: 'CategorySection',
-  components: { FilterComponent, RecentlyViewed },
+  components: { FilterComponent, RecentlyViewed, CategoryProduct },
 
   data() {
     return {
@@ -304,6 +291,7 @@ export default {
       currentPage: 1,
       productsPerPage: 15,
       filters: {},
+      categories: [],
       visibleProducts: [],
       totalPages: 0,
       filterVisible: false,
@@ -313,20 +301,13 @@ export default {
 
   computed: {
     categoryId() {
-      return Number(this.$route.params.categoryId);
-    },
+  return Number(this.$route.params.categoryId);
+},
     computedTitle() {
-      const names = {
-        1: 'Браслети',
-        2: 'Гердани',
-        3: 'Дукати',
-        4: 'Сережки',
-        5: 'Силянки',
-        6: 'Пояси',
-        15: 'Чокери',
-      };
-      return names[this.categoryId] || 'Категорія';
-    },
+  const category = this.categories.find(cat => cat.id === this.categoryId);
+  return category ? category.name : 'Категорія';
+},
+
     isMobile() {
       return window.innerWidth < 640;
     },
@@ -358,8 +339,39 @@ export default {
       return tags;
     },
   },
+  beforeRouteEnter(to, from, next) {
+  next(async vm => {
+    await vm.fetchCategories(); // ← додано
+
+    const stored = sessionStorage.getItem('filters');
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      vm.filters = parsed;
+      vm.filtersKey++;
+      vm.fetchProducts(1, parsed);
+    } else {
+      vm.filters = { category_id: vm.categoryId };
+      vm.filtersKey++;
+      vm.fetchProducts();
+    }
+  });
+},
+
 
   methods: {
+     async fetchCategories() {
+   try {
+      // викликаємо саме getCategories()
+     const payload = await api.getCategories();
+     // payload — це { data: [ ... ], locale: 'en' }
+      this.categories = payload.data;
+      console.log('Категорії:', this.categories);
+    } catch (error) {
+      console.error('Не вдалося завантажити категорії', error);
+    }
+  },
+
+
     async notifyWhenAvailable(product) {
       try {
         await api.sendNotification({ product_id: product.id });
@@ -514,6 +526,10 @@ this.applyFilters(this.filters);
   },
 
   mounted() {
+      console.log('categoryId:', this.categoryId);
+
+      this.fetchCategories();
+
     this.filterVisible = !this.isMobile;
     document.title = this.computedTitle;
     const stored = sessionStorage.getItem('filters');

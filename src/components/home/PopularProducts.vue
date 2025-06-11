@@ -136,7 +136,7 @@
          text-white font-montserrat font-semibold rounded-lg flex items-center justify-between px-4 
          transition-all duration-300 ease-in-out shadow-sm hover:shadow-md"
 >
-      <span>Купити</span>
+      <span>{{ $t('product.buy') }}</span>
       <img src="@/assets/miniarrow.png" alt="arrow" class="w-5 h-4" />
     </button>
 
@@ -145,7 +145,7 @@
       @click="notifyWhenAvailable(product)"
       class="w-full h-11 bg-gray-300 text-gray-700 dark:bg-[#3c465f] dark:text-gray-200 font-montserrat font-semibold rounded-lg flex items-center justify-center px-4 transition duration-300"
     >
-      Повідомити про наявність
+      {{ $t('product.notifyAvailability') }}
     </button>
   </div>
 </article>

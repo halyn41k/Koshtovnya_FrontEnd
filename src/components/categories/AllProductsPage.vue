@@ -2,16 +2,16 @@
   <section class="font-montserrat">
     <!-- HEADER: Title + Count + Filter button + Active tags -->
     <div class="px-8 pt-[200px] pb-4">
-      <h2 class="title-kyiv text-3xl mb-2 dark:invert">Всі товари</h2>
+<h2 class="title-kyiv text-3xl mb-2 dark:invert">{{ $t('product.allProducts') }}</h2>
 
       <div class="flex items-center justify-between mb-2">
-        <p class="text-lg font-medium">Знайдено {{ totalCount }} товарів</p>
+<p class="text-lg font-medium">{{ $t('product.found') }} {{ totalCount }} {{ $t('product.items') }}</p>
         <button
   @click="toggleFilter"
   class="inline-flex items-center p-2 pl-3 pr-4 rounded-md focus:outline-none focus:ring-2 focus:ring-[#6B1F1F] hover:bg-gray-100 transition lg:hidden"
 >
   <img src="@/assets/icons/filter.svg" alt="Filter" class="w-5 h-5 mr-2" />
-  <span class="text-base font-semibold">Фільтр</span>
+<span class="text-base font-semibold">{{ $t('product.filter') }}</span>
 </button>
 
       </div>
@@ -31,7 +31,7 @@ class="px-3 py-1 bg-gray-200 dark:bg-[#303b59] text-gray-800 dark:text-gray-100 
           @click="clearAll"
 class="px-3 py-1 bg-gray-200 dark:bg-[#303b59] text-gray-800 dark:text-gray-100 rounded-full flex items-center space-x-1 transition"
         >
-          Очистити всі
+          {{ $t('product.clearAll') }}
         </button>
       </div>
     </div>
@@ -80,12 +80,12 @@ class="px-3 py-1 bg-gray-200 dark:bg-[#303b59] text-gray-800 dark:text-gray-100 
       v-if="!loadingProducts && products.length === 0"
       class="text-center text-gray-600 py-16 col-span-full animate-fade-in"
     >
-      <p class="text-lg font-semibold mb-2">Нічого не знайдено за заданими фільтрами 😢</p>
+<p class="text-lg font-semibold mb-2">{{ $t('product.nothingFound') }}</p>
       <button
         @click="clearAll"
         class="mt-4 px-6 py-2 bg-[#6B1F1F] text-white rounded-md hover:bg-[#A01212] transition"
       >
-        Скинути фільтри
+        {{ $t('product.resetFilters') }}
       </button>
     </div>
 
@@ -204,7 +204,7 @@ class="px-3 py-1 bg-gray-200 dark:bg-[#303b59] text-gray-800 dark:text-gray-100 
          text-white font-montserrat font-semibold rounded-lg flex items-center justify-between px-4 
          transition-all duration-300 ease-in-out shadow-sm hover:shadow-md"
 >
-  <span>Купити</span>
+  <span>{{ $t('product.buy') }}</span>
   <img src="@/assets/miniarrow.png" alt="arrow" class="w-5 h-4" />
 </button>
 
@@ -214,7 +214,7 @@ class="px-3 py-1 bg-gray-200 dark:bg-[#303b59] text-gray-800 dark:text-gray-100 
   @click="notifyWhenAvailable(product)"
   class="w-full h-11 bg-gray-300 text-gray-700 dark:bg-[#3c465f] dark:text-gray-200 font-montserrat font-semibold rounded-lg flex items-center justify-center px-4 transition duration-300"
 >
-  Повідомити про наявність
+  {{ $t('product.notifyAvailability') }}
 </button>
 
 
@@ -241,6 +241,7 @@ class="px-3 py-1 bg-gray-200 dark:bg-[#303b59] text-gray-800 dark:text-gray-100 
 
 </main>
     </div>
+    
        <Suspense>
   <template #default>
     <RecentlyViewed />
@@ -249,14 +250,16 @@ class="px-3 py-1 bg-gray-200 dark:bg-[#303b59] text-gray-800 dark:text-gray-100 
     <div class="text-center text-gray-500">Завантаження останніх товарів…</div>
   </template>
 </Suspense>
+    <CategoryProduct class="mt-20 px-4 sm:px-6 lg:px-8" />
+
   </section>
 
 </template>
 
 
 <script>
+import CategoryProduct from '@/components/home/CategoryProduct.vue'; 
 import { defineAsyncComponent } from 'vue';
-
 import { toRaw } from 'vue';
 import api from '@/services/api';
 import FilterComponent from '../product/FilterComponent.vue';
@@ -266,7 +269,7 @@ const RecentlyViewed = defineAsyncComponent(() => import('@/components/home/Rece
 
 export default {
   name: 'AllProducts',
-    components: { FilterComponent, RecentlyViewed },
+    components: { FilterComponent, RecentlyViewed, CategoryProduct },
 
   data() {
     return {

@@ -45,6 +45,13 @@ export default {
     applyFilters: 'Apply Filters',
     loadingFilters: 'Loading filters...',
     noFilterOption: '(no filter)',
-    
+    allProducts: 'All Products',
+found: 'Found',
+items: 'items',
+filter: 'Filter',
+clearAll: 'Clear All',
+nothingFound: 'No products found for the selected filters 😢',
+
+
   }
 }

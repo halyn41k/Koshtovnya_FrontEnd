@@ -7,7 +7,7 @@
       <!-- Доступність -->
       <div class="section bg-white dark:bg-[#1f2a42] p-4 rounded-lg shadow-sm">
         <h2 class="section-title text-center text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">
-          Доступність
+          {{ $t('product.availabilityTitle') }}
         </h2>
         <div class="space-y-3">
           <label
@@ -31,7 +31,7 @@
       <!-- Рейтинг -->
       <div class="section bg-white dark:bg-[#1f2a42] p-4 rounded-lg shadow-sm">
         <h3 class="subsection-title mb-3 text-lg font-semibold text-gray-800 dark:text-gray-100">
-          Рейтинг
+          {{ $t('product.ratingTitle') }}
         </h3>
         <div class="space-y-3">
           <label v-for="star in [5, 4, 3, 2, 1]" :key="star" class="flex items-center space-x-2">
@@ -41,7 +41,9 @@
               v-model="filters.rating"
               class="custom-checkbox"
             />
-            <span class="text-base text-gray-700 dark:text-gray-300">{{ star }} зірки</span>
+            <span class="text-base text-gray-700 dark:text-gray-300">
+              {{ $t('product.starsLabel', { count: star }) }}
+            </span>
           </label>
         </div>
       </div>
@@ -49,7 +51,7 @@
       <!-- Розмір -->
       <div class="section bg-white dark:bg-[#1f2a42] p-4 rounded-lg shadow-sm">
         <h3 class="subsection-title mb-3 text-lg font-semibold text-gray-800 dark:text-gray-100">
-          Розмір (см)
+          {{ $t('product.sizeTitle') }}
         </h3>
         <Slider
           class="w-full"
@@ -64,7 +66,7 @@
       <!-- Вага -->
       <div class="section bg-white dark:bg-[#1f2a42] p-4 rounded-lg shadow-sm">
         <h3 class="subsection-title mb-3 text-lg font-semibold text-gray-800 dark:text-gray-100">
-          Вага (г)
+          {{ $t('product.weightTitle') }}
         </h3>
         <Slider
           class="w-full"
@@ -79,7 +81,7 @@
       <!-- Ціна -->
       <div class="section bg-white dark:bg-[#1f2a42] p-4 rounded-lg shadow-sm">
         <h3 class="subsection-title mb-3 text-lg font-semibold text-gray-800 dark:text-gray-100">
-          Ціна ({{ selectedCurrency === 'USD' ? '$' : '₴' }})
+          {{ $t('product.priceCurrency', { symbol: selectedCurrency === 'USD' ? '$' : '₴' }) }}
         </h3>
         <Slider
           class="w-full"
@@ -94,13 +96,13 @@
       <!-- Колір -->
       <div class="section bg-white dark:bg-[#1f2a42] p-4 rounded-lg shadow-sm">
         <h3 class="subsection-title mb-3 text-lg font-semibold text-gray-800 dark:text-gray-100">
-          Колір
+          {{ $t('product.colorTitle') }}
         </h3>
         <select
           v-model="filters.color"
           class="w-full p-2 border border-gray-300 dark:border-[#303b59] bg-white dark:bg-[#17223b] text-black dark:text-white rounded focus:outline-none focus:ring-2 focus:ring-[#6B1F1F]"
         >
-          <option value="">(без фільтра)</option>
+          <option value="">{{ $t('product.noFilterOption') }}</option>
           <option v-for="color in sortedColorOptions" :key="color" :value="color">
             {{ color }}
           </option>
@@ -110,7 +112,7 @@
       <!-- Тип бісеру -->
       <div class="section bg-white dark:bg-[#1f2a42] p-4 rounded-lg shadow-sm">
         <h3 class="subsection-title mb-3 text-lg font-semibold text-gray-800 dark:text-gray-100">
-          Тип бісеру
+          {{ $t('product.beadTypeTitle') }}
         </h3>
         <div class="space-y-3">
           <label
@@ -134,7 +136,7 @@
       <!-- Виробник бісеру -->
       <div class="section bg-white dark:bg-[#1f2a42] p-4 rounded-lg shadow-sm">
         <h3 class="subsection-title mb-3 text-lg font-semibold text-gray-800 dark:text-gray-100">
-          Виробник бісеру
+          {{ $t('product.beadProducerTitle') }}
         </h3>
         <div class="space-y-3">
           <label
@@ -161,7 +163,7 @@
         class="section bg-white dark:bg-[#1f2a42] p-4 rounded-lg shadow-sm"
       >
         <h3 class="subsection-title mb-3 text-lg font-semibold text-gray-800 dark:text-gray-100">
-          Категорія
+          {{ $t('product.categoryTitle') }}
         </h3>
         <div class="space-y-3">
           <label
@@ -188,16 +190,17 @@
           @click="applyFilters"
           class="w-full max-w-xs px-6 py-3 bg-[#6B1F1F] text-white font-semibold rounded-lg hover:bg-[#531717] transition"
         >
-          Застосувати фільтри
+          {{ $t('product.applyFilters') }}
         </button>
       </div>
     </section>
 
     <div v-else class="text-center text-gray-500 dark:text-gray-400 py-8">
-      Завантаження фільтрів...
+      {{ $t('product.loadingFilters') }}
     </div>
   </div>
 </template>
+
 
 
 <script>

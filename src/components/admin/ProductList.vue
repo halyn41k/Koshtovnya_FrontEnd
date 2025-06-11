@@ -191,6 +191,7 @@ import AddProductModal from './AddProductModal.vue'
 import EditProductModal from './EditProductModal.vue'
 import DeleteProductModal from './DeleteProductModal.vue'
 import ProductDetailModal from './ProductDetailModal.vue'
+import api from '@/services/api';
 
 
 export default {
