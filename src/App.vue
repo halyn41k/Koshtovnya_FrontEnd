@@ -1,9 +1,31 @@
 <template>
-  <div id="app" class="relative bg-white dark:bg-gray-900 text-black dark:text-white min-h-screen">
+  <div
+    id="app"
+    class="relative bg-white dark:bg-gray-900 text-black dark:text-white min-h-screen flex flex-col"
+  >
     <!-- Хедер -->
     <HeaderComponent v-if="!isAdminRoute" />
+
     <!-- Основний контент -->
-    <router-view />
+    <main class="flex-1">
+      <router-view v-slot="{ Component }">
+        <Suspense>
+          <!-- Фолбек — поки завантажується поточний роут -->
+          <template #fallback>
+            <div class="p-8">
+              <div class="animate-pulse space-y-4">
+                <div class="h-8 bg-gray-300 dark:bg-gray-700 rounded w-1/3 mx-auto"></div>
+                <div class="h-4 bg-gray-300 dark:bg-gray-700 rounded w-full"></div>
+                <div class="h-4 bg-gray-300 dark:bg-gray-700 rounded w-full"></div>
+                <div class="h-4 bg-gray-300 dark:bg-gray-700 rounded w-5/6"></div>
+              </div>
+            </div>
+          </template>
+          <!-- Сам роут-компонент -->
+          <component :is="Component" />
+        </Suspense>
+      </router-view>
+    </main>
 
     <!-- Футер -->
     <FooterComponent v-if="!isAdminRoute" />
@@ -15,7 +37,13 @@
       aria-label="Повернутись догори"
       class="fixed bottom-6 right-6 z-50 bg-[#6B1F1F] hover:bg-[#A01212] text-white rounded-full w-11 h-11 flex items-center justify-center shadow-lg transition-opacity duration-300"
     >
-      <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <svg
+        class="w-5 h-5"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+      >
         <path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7" />
       </svg>
     </button>
@@ -44,13 +72,11 @@ export default {
   },
   mounted() {
     window.addEventListener('scroll', this.handleScroll);
-
-    // Автоматичний скрол вгору при переході (запасний варіант)
     this.$router.afterEach(() => {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     });
 
-    // Автоматичний редирект, якщо нема токена (крім Login/Registration)
+    // Простейший guard на токен
     const publicRoutes = ['Login', 'Registration', 'ResetPassword', 'Verify'];
     const token = localStorage.getItem('token');
     if (!token && !publicRoutes.includes(this.$route.name)) {
@@ -59,12 +85,6 @@ export default {
   },
   beforeUnmount() {
     window.removeEventListener('scroll', this.handleScroll);
-  },
-  watch: {
-    '$route'(to, from) {
-      // очищення body класів (якщо раптом щось залишилось після модалок)
-      document.body.classList.remove('overflow-hidden');
-    }
   },
   methods: {
     handleScroll() {

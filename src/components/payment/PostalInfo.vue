@@ -1,104 +1,94 @@
 <template>
   <div class="postal-info font-montserrat text-[14px]">
     <div class="flex flex-col gap-4 w-[520px]">
-
       <!-- Спосіб доставки -->
       <div class="relative">
         <label class="block mb-1 text-sm font-medium text-gray-700">Спосіб доставки:</label>
         <Multiselect
-          v-model="localData.deliveryType"
-          :options="deliveryOptions || []"
+          v-model="deliveryType"
+          :options="deliveryOptions"
           :custom-label="opt => `${opt.label} — ${opt.name}`"
-          :track-by="'id'"
+          track-by="id"
           placeholder="Оберіть спосіб доставки"
-          :searchable="true"
-          :allow-empty="false"
+          searchable
           @input="onDeliveryTypeChange"
         />
         <span v-if="errors.deliveryType" class="text-red-500 text-xs">{{ errors.deliveryType }}</span>
       </div>
 
-     <!-- Місто -->
-<div v-if="localData.deliveryType && !isStorePickup">
-  <label class="block mb-1 text-sm font-medium text-gray-700">Місто:</label>
-  <Combobox v-model="selectedCity" as="div" class="relative">
-    <div class="relative">
-      <ComboboxInput
-        class="block w-full p-2 border border-gray-300 rounded-md text-gray-900 font-normal focus:outline-none focus:ring-2 focus:ring-red-500"
-        :class="{ 'border-red-500': errors.city }"
-        @input="handleCitySearch"
-        :displayValue="city => city?.city || city"
-        placeholder="Введіть місто"
-      />
-      <ComboboxOptions
-        v-if="citiesLocal.length"
-        class="absolute z-50 w-full mt-1 max-h-48 overflow-auto rounded bg-white border shadow-lg"
-      >
-        <ComboboxOption
-          v-for="city in citiesLocal"
-          :key="city.Ref"
-          :value="city"
-          class="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-        >
-          {{ city.city }}
-        </ComboboxOption>
-      </ComboboxOptions>
-    </div>
-  </Combobox>
-  <p v-if="errors.city" class="text-red-500 text-xs mt-1">{{ errors.city }}</p>
-</div>
+      <!-- Місто -->
+      <div v-if="deliveryType && !isStorePickup">
+        <label class="block mb-1 text-sm font-medium text-gray-700">Місто:</label>
+        <Combobox v-model="city" as="div" class="relative">
+          <ComboboxInput
+            class="block w-full p-2 border rounded-md"
+            :class="{ 'border-red-500': errors.city }"
+            @input="handleCitySearch"
+            :displayValue="c => c?.city || c"
+            placeholder="Введіть місто"
+          />
+          <ComboboxOptions v-if="cities.length" class="absolute z-50 w-full mt-1 bg-white border rounded shadow-lg">
+            <ComboboxOption
+              v-for="c in cities"
+              :key="c.Ref"
+              :value="c"
+              class="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+            >
+              {{ c.city }}
+            </ComboboxOption>
+          </ComboboxOptions>
+        </Combobox>
+        <p v-if="errors.city" class="text-red-500 text-xs mt-1">{{ errors.city }}</p>
+      </div>
 
-
-      <!-- Вулиця -->
+      <!-- Вулиця + номер -->
       <div v-if="isCourier">
         <label class="block mb-1 text-sm font-medium text-gray-700">Вулиця:</label>
-        <Combobox v-model="selectedStreet" as="div" class="relative">
-          <div class="relative">
-            <ComboboxInput
-  class="block w-full p-2 border border-gray-300 rounded-md text-gray-900 font-normal focus:outline-none focus:ring-2 focus:ring-red-500"
-              :class="{ 'border-red-500': errors.street }"
-              @input="handleStreetSearch"
-
-              :displayValue="street => street?.Name || street"
-              placeholder="Введіть вулицю"
-            />
-            <ComboboxOptions v-if="streetsLocal.length"
-              class="absolute z-50 w-full mt-1 max-h-48 ovehandleStreetSearchrflow-auto rounded bg-white border shadow-lg">
-              <ComboboxOption v-for="(street, idx) in streetsLocal" :key="idx" :value="street"
-                class="px-4 py-2 hover:bg-gray-100 cursor-pointer">
-                {{ street.Name || street.street }}
-              </ComboboxOption>
-            </ComboboxOptions>
-          </div>
+        <Combobox v-model="street" as="div" class="relative">
+          <ComboboxInput
+            class="block w-full p-2 border rounded-md"
+            :class="{ 'border-red-500': errors.street }"
+            @input="handleStreetSearch"
+            :displayValue="s => s?.Name || s"
+            placeholder="Введіть вулицю"
+          />
+          <ComboboxOptions v-if="streets.length" class="absolute z-50 w-full mt-1 bg-white border rounded shadow-lg">
+            <ComboboxOption
+              v-for="(s, i) in streets"
+              :key="i"
+              :value="s"
+              class="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+            >
+              {{ s.Name }}
+            </ComboboxOption>
+          </ComboboxOptions>
         </Combobox>
         <p v-if="errors.street" class="text-red-500 text-xs mt-1">{{ errors.street }}</p>
 
         <div class="mt-4">
           <label class="block mb-1 text-sm font-medium text-gray-700">Номер будинку:</label>
-          <input   v-model="houseNumberProxy"
- 
-
-class="block w-full p-2 border border-gray-300 rounded-md text-gray-900 font-normal focus:outline-none focus:ring-2 focus:ring-red-500"
+          <input
+            v-model="houseNumber"
+            class="block w-full p-2 border rounded-md"
             :class="{ 'border-red-500': errors.houseNumber }"
-            @input="updateData"
             placeholder="Номер будинку"
           />
           <p v-if="errors.houseNumber" class="text-red-500 text-xs mt-1">{{ errors.houseNumber }}</p>
         </div>
       </div>
 
-      <!-- Відділення / Поштомат -->
+      <!-- Відділення / поштомат -->
       <div v-if="showWarehouse">
-        <label class="block mb-1 text-sm font-medium text-gray-700">{{ isPostomat ? 'Поштомат' : 'Відділення' }}:</label>
+        <label class="block mb-1 text-sm font-medium text-gray-700">
+          {{ isPostomat ? 'Поштомат' : 'Відділення' }}:
+        </label>
         <Multiselect
-          v-model="localData.warehouse"
-          :options="warehousesLocal || []"
-          :label="'name'"
-          :track-by="'id'"
+          v-model="warehouse"
+          :options="warehouses"
+          label="name"
+          track-by="id"
           placeholder="Оберіть відділення"
-          :searchable="true"
-          :allow-empty="false"
-          @input="updateData"
+          searchable
         />
         <span v-if="errors.warehouse" class="text-red-500 text-xs mt-1">{{ errors.warehouse }}</span>
       </div>
@@ -112,352 +102,271 @@ class="block w-full p-2 border border-gray-300 rounded-md text-gray-900 font-nor
   </div>
 </template>
 
-
 <script>
 import axios from 'axios';
 import Multiselect from 'vue-multiselect';
-import { Combobox, ComboboxInput, ComboboxOptions, ComboboxOption } from '@headlessui/vue'
+import { Combobox, ComboboxInput, ComboboxOptions, ComboboxOption } from '@headlessui/vue';
 
 export default {
   name: 'PostalInfo',
-  components: { Multiselect, Combobox,
-    ComboboxInput,
-    ComboboxOptions,
-    ComboboxOption, },
+  components: { Multiselect, Combobox, ComboboxInput, ComboboxOptions, ComboboxOption },
   props: {
-  modelValue: { type: Object, required: true },
-  errors: { type: Object, default: () => ({}) }, // ← ДОДАЙ КОМУ
-  tempUserAddress: { type: Object, default: null },
-},
-
+    modelValue: { type: Object, required: true },
+    errors:     { type: Object, default: () => ({}) },
+    tempUserAddress: { type: Object, default: null },
+  },
+  emits: ['update:modelValue'],
   data() {
     return {
       selectedCity: null,
-
-      localData: { ...this.modelValue },
+      selectedStreet: null,
       deliveryOptions: [],
-      citiesLocal: [],
-      streetsLocal: [],
-      warehousesLocal: [],
-      streetSearchTimeout: null
+      cities: [],
+      streets: [],
+      warehouses: [],
+      citySearchTimeout: null,
+      streetSearchTimeout: null,
+      pendingAddr: null, // замість _pendingAddr
     };
   },
   computed: {
-    houseNumberProxy: {
-  get() {
-    return this.localData.houseNumber || '';
-  },
-  set(value) {
-    this.localData.houseNumber = value;
-    this.updateData();
-  }
-},
-    isCourier() {
-      return this.localData.deliveryType?.delivery_type === 'courier';
+    deliveryType: {
+      get() { return this.modelValue.deliveryType; },
+      set(v) { this.update({ deliveryType: v }); }
     },
-    isPickup() {
-      return this.localData.deliveryType?.delivery_type === 'pickup';
+    city: {
+      get() { return this.modelValue.city; },
+      set(v) { this.update({ city: v, cityRef: v?.Ref }); }
     },
-    isStorePickup() {
-      return this.localData.deliveryType?.name === 'Самовивіз з наших магазинів';
+    street: {
+      get() { return this.modelValue.street; },
+      set(v) { this.update({ street: v.Name || v }); }
     },
-    isPostomat() {
-      return this.localData.deliveryType?.name?.toLowerCase().includes('поштомат');
+    houseNumber: {
+      get() { return this.modelValue.houseNumber; },
+      set(v) { this.update({ houseNumber: v }); }
     },
-    showWarehouse() {
-      return this.isPickup && !this.isStorePickup;
-    }
+    warehouse: {
+      get() { return this.modelValue.warehouse; },
+      set(v) { this.update({ warehouse: v }); }
+    },
+    isCourier()      { return this.deliveryType?.delivery_type === 'courier'; },
+    isPickup()       { return this.deliveryType?.delivery_type === 'pickup'; },
+    isStorePickup()  { return this.deliveryType?.name === 'Самовивіз з наших магазинів'; },
+    isPostomat()     { return this.deliveryType?.name?.toLowerCase().includes('поштомат'); },
+    showWarehouse()  { return this.isPickup && !this.isStorePickup; },
   },
   watch: {
-   modelValue: {
-    handler(val) {
-      console.log('watch.modelValue updated', val);
-      this.localData = { ...val }; // видаляємо houseNumber з localData повністю
+    tempUserAddress: {
+      immediate: true,
+      deep: true,
+      handler(addr) {
+        if (!addr) return;
+        console.log('PostalInfo: отримано tempUserAddress', addr);
 
-      this.selectedCity = val.city && val.cityRef ? { city: val.city, Ref: val.cityRef } : null;
-      this.selectedStreet = val.street ? { Name: val.street } : null;
+        // 1) оновлюємо modelValue полями з addr (узгоджені ключі)
+        const patch = {};
+        if ('phone' in addr) {
+          patch.phone = addr.phone;
+        }
+        if ('city' in addr) {
+          patch.city = addr.city;
+          patch.cityRef = addr.cityRef;
+        }
+        if ('street' in addr) {
+          patch.street = addr.street;
+          if ('streetSearch' in addr) {
+            patch.streetSearch = addr.streetSearch;
+          }
+        }
+        if ('houseNumber' in addr) {
+          patch.houseNumber = addr.houseNumber;
+        }
+        if ('warehouseName' in addr) {
+          patch.warehouse = { name: addr.warehouseName };
+        }
+        this.update(patch);
 
-      // 🛑 ❌ видалити це:
-      // if (val.houseNumber) {
-      //   this.localData.houseNumber = val.houseNumber;
-      // }
+        // Локальні селектори для UI
+        if ('city' in addr && 'cityRef' in addr) {
+          this.selectedCity = { city: addr.city, Ref: addr.cityRef };
+        }
+        if ('street' in addr && this.isCourier) {
+          // розбити на назву вулиці без номера, використовуючи простіший regex
+          const raw = addr.street || '';
+          const m = raw.match(/(.+?)\s+(.+)$/);
+          if (m) {
+            this.selectedStreet = { Name: m[1].trim() };
+            this.update({ streetSearch: m[1].trim() });
+          } else {
+            this.selectedStreet = null;
+          }
+        }
+
+        // 2) Встановлюємо deliveryType за назвою з addr.deliveryTypeName
+        const applyDeliveryType = () => {
+          if (!addr.deliveryTypeName) return;
+          const match = this.deliveryOptions.find(opt => opt.name === addr.deliveryTypeName);
+          if (match) {
+            this.update({ deliveryType: match });
+            if (match.delivery_type === 'courier') {
+              this.fetchStreets();
+            } else if (match.delivery_type === 'pickup') {
+              this.fetchWarehouses(addr.city, addr.cityRef, addr.deliveryTypeName);
+            }
+          } else {
+            console.warn('PostalInfo: не знайдено deliveryType для', addr.deliveryTypeName);
+          }
+        };
+
+        if (this.deliveryOptions.length) {
+          applyDeliveryType();
+          this.pendingAddr = null;
+        } else {
+          this.pendingAddr = addr;
+        }
+      }
     },
-    deep: true,
-    immediate: true
-  },
-  houseNumberWatcher: {
-  handler(val) {
-    if (val && val !== this.localData.houseNumber) {
-      this.localData.houseNumber = val;
+    deliveryOptions(newList) {
+      if (this.pendingAddr && newList.length) {
+        console.log('PostalInfo: deliveryOptions завантажені, застосовуємо pendingAddr', this.pendingAddr);
+        const addr = this.pendingAddr;
+        this.pendingAddr = null;
+        if (addr.deliveryTypeName) {
+          const match = this.deliveryOptions.find(opt => opt.name === addr.deliveryTypeName);
+          if (match) {
+            this.update({ deliveryType: match });
+            if (match.delivery_type === 'courier') {
+              this.fetchStreets();
+            } else if (match.delivery_type === 'pickup') {
+              this.fetchWarehouses(addr.city, addr.cityRef, addr.deliveryTypeName);
+            }
+          } else {
+            console.warn('PostalInfo: не знайдено deliveryType для', addr.deliveryTypeName);
+          }
+        }
+      }
     }
   },
-  immediate: true
-},
-
-  selectedStreet(val) {
-  if (val?.Name || val?.street) {
-    this.selectStreet(val);
-  }
-},
-
-tempUserAddress: {
-  handler(address) {
-    if (!address || !Array.isArray(this.deliveryOptions)) return;
-    this.handleTempAddress(address);
-  },
-  immediate: true,
-  deep: true
-}
-
-
-  },
- async created() {
-  await this.fetchDeliveryTypes();
-
-  if (this.tempUserAddress && Array.isArray(this.deliveryOptions)) {
-    this.handleTempAddress(this.tempUserAddress);
-  }
-
+  async created() {
+    await this.fetchDeliveryTypes();
+    // далі watch.deliveryOptions спрацює, якщо був pendingAddr
   },
   methods: {
-    handleCitySearch(event) {
-  const value = event.target.value;
-  this.selectedCity = value; // Це важливо
-  this.localData.city = value;
-  this.updateData();
-  if (value.length >= 3) {
-    this.fetchCities();
-  }
-},
-handleTempAddress(address) {
-  if (!address || !Array.isArray(this.deliveryOptions)) return;
-
-  const {
-    city,
-    cityRef,
-    street,
-    streetSearch,
-    houseNumber,
-    warehouseName,
-    deliveryTypeName,
-    deliveryCategory
-  } = address;
-
-  this.selectedDeliveryCategory = deliveryCategory;
-
-  const matched = this.deliveryOptions.find(opt => opt.name === deliveryTypeName);
-  if (matched) {
-    this.localData.deliveryType = matched;
-  }
-
-  this.localData.city = city || '';
-  this.localData.cityRef = cityRef || '';
-  this.selectedCity = city && cityRef ? { city, Ref: cityRef } : null;
-
-  if (deliveryCategory === 'courier') {
-  const addressMatch = street?.match(/(.+?)\s+(\d+\w*)$/);
-
-  if (addressMatch) {
-    const [, streetOnly, numberOnly] = addressMatch;
-    this.localData.street = streetOnly.trim();
-    this.localData.streetSearch = streetOnly.trim();
-    // ❌ не this.localData.houseNumber
-    this.$emit('update:modelValue', {
-      ...this.modelValue,
-      street: streetOnly.trim(),
-      streetSearch: streetOnly.trim(),
-      houseNumber: numberOnly.trim()
-    });
-  } else {
-    this.$emit('update:modelValue', {
-      ...this.modelValue,
-      street: street || '',
-      streetSearch: street || '',
-      houseNumber: houseNumber || ''
-    });
-  }
-}
-
-
-  if (deliveryCategory === 'pickup' && city && cityRef && deliveryTypeName) {
-    this.fetchWarehouses(city, cityRef, deliveryTypeName).then(warehouses => {
-      this.warehousesLocal = Array.isArray(warehouses) ? warehouses : [];
-      const match = this.warehousesLocal.find(w => w.name === warehouseName);
-      if (match) {
-        this.localData.warehouse = match;
-      }
-      this.$emit('update:modelValue', { ...this.localData });
-    });
-  } else {
-    this.$emit('update:modelValue', { ...this.localData });
-  }
-},
-
-
-
-   updateData() {
-  this.$emit('update:modelValue', {
-    ...this.modelValue,
-    ...this.localData
-  });
-},
-
+    update(patch) {
+      this.$emit('update:modelValue', { ...this.modelValue, ...patch });
+    },
     async fetchDeliveryTypes() {
-      const token = localStorage.getItem('token');
       try {
-        const { data } = await axios.get('https://koshtovnya.api-dev.bmax-edu.website/api/delivery-types', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        const result = [];
-        for (const type in data.data) {
-          data.data[type].forEach(option => {
-            result.push({
-              id: option.id,
-              name: option.name,
-              delivery_type: type,
-              label: type === 'pickup' ? 'Самовивіз' : 'Кур’єр'
-            });
-          });
-        }
-        this.deliveryOptions = result;
-      } catch (error) {
-        console.error('Помилка отримання способів доставки', error);
-        this.deliveryOptions = [];
+        const token = localStorage.getItem('token');
+        const { data } = await axios.get(
+          'https://koshtovnya.api-dev.bmax-edu.website/api/delivery-types',
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        this.deliveryOptions = Object.entries(data.data).flatMap(
+          ([type, list]) => list.map(opt => ({
+            id: opt.id,
+            name: opt.name,
+            delivery_type: type,
+            label: type === 'pickup' ? 'Самовивіз' : 'Кур’єр'
+          }))
+        );
+      } catch (e) {
+        console.error('PostalInfo: помилка fetchDeliveryTypes', e);
       }
     },
-   onDeliveryTypeChange() {
-  if (this.isStorePickup) {
-    this.localData.city = 'Коломия';
-    this.localData.street = 'вул. Степана Бандери 22';
-    this.localData.houseNumber = '';
-    this.localData.warehouse = null;
-    this.updateData();
-    return;
-  }
-
-  this.localData.city = '';
-  this.localData.street = '';
-  this.localData.houseNumber = '';
-  this.localData.warehouse = null;
-  this.updateData();
-},
-  
-
-
-
-    onCityInput() {
-      this.updateData();
-      if (this.localData.city.length >= 3) this.fetchCities();
+    onDeliveryTypeChange() {
+      if (this.isStorePickup) {
+        this.update({
+          city: 'Коломия',
+          street: 'вул. Степана Бандери 22',
+          houseNumber: '',
+          warehouse: null
+        });
+      } else {
+        this.update({
+          city: '',
+          street: '',
+          houseNumber: '',
+          warehouse: null
+        });
+      }
+    },
+    handleCitySearch(e) {
+      const q = e.target.value;
+      this.update({ city: q });
+      clearTimeout(this.citySearchTimeout);
+      if (q.length < 3) return;
+      this.citySearchTimeout = setTimeout(this.fetchCities, 300);
     },
     async fetchCities() {
-      const token = localStorage.getItem('token');
       try {
+        const token = localStorage.getItem('token');
         const { data } = await axios.get(
           'https://koshtovnya.api-dev.bmax-edu.website/api/nova-poshta/cities',
-          { headers: { Authorization: `Bearer ${token}` }, params: {
-            city: this.localData.city,
-            delivery_type: this.localData.deliveryType?.name || ''
-          } }
+          {
+            headers: { Authorization: `Bearer ${token}` },
+            params: { city: this.city }
+          }
         );
-        this.citiesLocal = data.success && Array.isArray(data.data) ? data.data : [];
-      } catch (e) { console.error('Помилка отримання міст', e); }
+        this.cities = data.success ? data.data : [];
+      } catch (e) {
+        console.error('PostalInfo: помилка fetchCities', e);
+      }
     },
-    onStreetSearch() {
+    handleStreetSearch() {
       clearTimeout(this.streetSearchTimeout);
       this.streetSearchTimeout = setTimeout(this.fetchStreets, 300);
-      this.updateData();
     },
     async fetchStreets() {
-      const token = localStorage.getItem('token');
-      if (!token || this.localData.streetSearch.length < 3) return;
+      if (!this.modelValue.cityRef) return;
       try {
+        const token = localStorage.getItem('token');
         const { data } = await axios.get(
           'https://koshtovnya.api-dev.bmax-edu.website/api/nova-poshta/streets',
-          { headers: { Authorization: `Bearer ${token}` }, params: { Ref: this.localData.cityRef, street: this.localData.streetSearch } }
+          {
+            headers: { Authorization: `Bearer ${token}` },
+            params: {
+              Ref: this.modelValue.cityRef,
+              street: this.street
+            }
+          }
         );
-        this.streetsLocal = Array.isArray(data.data) ? data.data : [];
-      } catch (e) { console.error('Помилка отримання вулиць', e); }
+        this.streets = data.data || [];
+      } catch (e) {
+        console.error('PostalInfo: помилка fetchStreets', e);
+      }
     },
-    handleStreetSearch(event) {
-  const value = event.target.value;
-  this.selectedStreet = value;
-  this.localData.streetSearch = value;
-  this.updateData();
-  if (value.length >= 3) {
-    this.fetchStreets();
-  }
-},
-
-    selectCity(city) {
-      this.localData.city = city.city;
-      this.localData.cityRef = city.Ref;
-      this.citiesLocal = [];
-      this.fetchWarehouses();
-      this.updateData();
-    },
-    selectStreet(street) {
-      const name = street.street || street.Name;
-      this.localData.street = name;
-      this.localData.streetSearch = name;
-      this.streetsLocal = [];
-      this.updateData();
-    },
-    async fetchWarehouses() {
-      const token = localStorage.getItem('token');
+    async fetchWarehouses(city, cityRef, deliveryName) {
+      if (!city || !cityRef) return [];
       try {
-        const { status, data } = await axios.get(
+        const token = localStorage.getItem('token');
+        const { data } = await axios.get(
           'https://koshtovnya.api-dev.bmax-edu.website/api/nova-poshta/ware-houses',
-          { headers: { Authorization: `Bearer ${token}`}, params: {
-            city: this.localData.city,
-            Ref: this.localData.cityRef,
-            delivery_type: this.localData.deliveryType?.name || ''
-          } }
+          {
+            headers: { Authorization: `Bearer ${token}` },
+            params: {
+              city,
+              Ref: cityRef,
+              delivery_type: deliveryName
+            }
+          }
         );
-        this.warehousesLocal = status === 200 && Array.isArray(data.data)
-          ? data.data.map((item,i) => ({ id: i+1, name: item.warehouse }))
-          : [];
-      } catch (e) { console.error('Помилка отримання відділень', e); }
+        this.warehouses = (data.data || []).map((item, i) => ({
+          id: i + 1,
+          name: item.warehouse
+        }));
+        return this.warehouses;
+      } catch (e) {
+        console.error('PostalInfo: помилка fetchWarehouses', e);
+        return [];
+      }
     }
-  },
-
-  
-
+  }
 };
 </script>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500&display=swap');
 .font-montserrat { font-family: 'Montserrat', sans-serif; }
-.multiselect__option--highlight::after { display: none !important; }
-.multiselect__option--highlight { background: #F3F4F6 !important; color: #6B1F1F !important; }
-.multiselect__option--selected { font-weight: 600 !important; }
-.multiselect__option--selected::after {
-  content: 'Обрано' !important;
-  color: #9CA3AF;
-  font-size: 0.75rem;
-  font-weight: 500;
-  float: right;
-  margin-right: 1rem;
-}
-
-.multiselect__option {
-  font-weight: 400 !important; /* Regular */
-}
-
-.multiselect__option--selected {
-  font-weight: 400 !important; /* Забрати жирний для вибраного */
-}
-
-.multiselect__option--highlight {
-  font-weight: 400 !important;
-}
-
-.multiselect__single {
-  font-weight: 400 !important;
-}
-
-.multiselect__option::after {
-  display: none !important; /* Забрати слово "Обрано", якщо треба */
-}
-
 </style>

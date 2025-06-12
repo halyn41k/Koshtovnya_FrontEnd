@@ -1,23 +1,43 @@
 <template>
   <section class="mt-24 px-4 sm:px-6 lg:px-8 font-montserrat">
-   <h2 class="text-3xl lg:text-4xl font-semibold mb-10 text-center">
-  {{ $t('home.customerReviews') }}
-</h2>
+    <h2 class="text-3xl lg:text-4xl font-semibold mb-10 text-center">
+      {{ $t('home.customerReviews') }}
+    </h2>
 
+    <!-- Skeleton Loader -->
+    <div v-if="loading" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+      <article
+        v-for="n in reviewsPerPage"
+        :key="`skel-${n}`"
+        class="min-h-[260px] p-6 rounded-lg border border-gray-200 dark:border-gray-700 shadow-md bg-[#f3f4f6] dark:bg-[#2d3748] animate-pulse flex flex-col justify-between"
+      >
+        <div class="h-6 bg-gray-300 dark:bg-gray-600 rounded w-1/3 mb-4"></div>
+        <div class="flex items-start mb-6">
+          <div class="w-6 h-6 bg-gray-300 dark:bg-gray-600 rounded mr-3"></div>
+          <div class="flex-1 space-y-2">
+            <div class="h-4 bg-gray-300 dark:bg-gray-600 rounded"></div>
+            <div class="h-4 bg-gray-300 dark:bg-gray-600 rounded w-5/6"></div>
+          </div>
+        </div>
+        <div class="flex items-center space-x-4 mt-auto">
+          <div class="w-10 h-10 rounded-full bg-gray-300 dark:bg-gray-600"></div>
+          <div class="flex-1 space-y-2">
+            <div class="h-4 bg-gray-300 dark:bg-gray-600 rounded w-1/2"></div>
+            <div class="h-3 bg-gray-300 dark:bg-gray-600 rounded w-1/3"></div>
+          </div>
+        </div>
+      </article>
+    </div>
 
+    <!-- Actual Reviews -->
     <div class="relative">
       <transition name="fade">
-        <div
-          v-show="show"
-          class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6"
-        >
-        <div
-  v-for="review in visibleReviews"
-  :key="review.id"
-  class="min-h-[260px] p-6 rounded-lg border border-gray-200 dark:border-gray-700 shadow-md bg-white dark:bg-[#1F2937] flex flex-col justify-between transition-colors duration-300"
->
-
-
+        <div v-show="!loading && show" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+          <div
+            v-for="review in visibleReviews"
+            :key="review.id"
+            class="min-h-[260px] p-6 rounded-lg border border-gray-200 dark:border-gray-700 shadow-md bg-white dark:bg-[#1F2937] flex flex-col justify-between transition-colors duration-300"
+          >
             <!-- Зірки -->
             <div class="flex items-center mb-3">
               <svg
@@ -42,19 +62,18 @@
                 class="w-6 h-6 mr-3 mt-1 flex-shrink-0"
               />
               <p class="text-gray-700 dark:text-gray-300 whitespace-pre-line leading-relaxed text-sm">
-  {{ review.comment }}
-</p>
-
+                {{ review.comment }}
+              </p>
             </div>
 
             <!-- Автор -->
             <div class="flex items-center space-x-4 mt-auto">
-             <div
-  v-if="!review.user_image"
-  class="w-10 h-10 rounded-full flex items-center justify-center bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-white font-bold text-sm uppercase overflow-hidden"
->
-  {{ getInitials(review.user_first_name, review.user_last_name) }}
-</div>
+              <div
+                v-if="!review.user_image"
+                class="w-10 h-10 rounded-full flex items-center justify-center bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-white font-bold text-sm uppercase overflow-hidden"
+              >
+                {{ getInitials(review.user_first_name, review.user_last_name) }}
+              </div>
 
               <img
                 v-else
@@ -64,13 +83,11 @@
               />
               <div>
                 <p class="font-semibold text-gray-900 dark:text-white leading-tight">
-  {{ review.user_first_name }} {{ review.user_last_name }}
-</p>
-<p class="text-sm text-gray-500 dark:text-gray-400">
-  {{ review.date }}
-</p>
-
-                
+                  {{ review.user_first_name }} {{ review.user_last_name }}
+                </p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">
+                  {{ review.date }}
+                </p>
               </div>
             </div>
           </div>
@@ -93,6 +110,7 @@ export default {
       reviewsPerPage: 6,
       interval: null,
       show: true,
+      loading: true,  // новий прапорець для скелетонів
     };
   },
   mounted() {
@@ -112,6 +130,7 @@ export default {
       }
     },
     async fetchReviews() {
+      this.loading = true;
       try {
         const data = await api.getTopLatestReviews();
         this.reviews = Array.isArray(data?.data) ? data.data : [];
@@ -119,6 +138,8 @@ export default {
         this.startAutoSlide();
       } catch (error) {
         console.error('Помилка отримання відгуків:', error);
+      } finally {
+        this.loading = false;
       }
     },
     updateVisible() {
@@ -170,6 +191,4 @@ export default {
 .fade-leave-to {
   opacity: 0;
 }
-
-
 </style>

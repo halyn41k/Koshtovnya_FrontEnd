@@ -70,26 +70,37 @@ class="px-3 py-1 bg-gray-200 dark:bg-[#303b59] text-gray-800 dark:text-gray-100 
       </div>
 
       <!-- PRODUCT GRID -->
+<!-- PRODUCT GRID -->
 <main class="flex-1">
+  <!-- Скелетони під час завантаження -->
   <div
-    class="grid gap-4 transition-opacity duration-500 ease-in-out"
-    :class="['grid-cols-1 sm:grid-cols-2 lg:grid-cols-4', loadingProducts ? 'opacity-30' : 'opacity-100']"
+    v-if="loadingProducts"
+    class="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4"
   >
-    <!-- Коли немає товарів -->
-    <div
-      v-if="!loadingProducts && products.length === 0"
-      class="text-center text-gray-600 py-16 col-span-full animate-fade-in"
+    <article
+      v-for="n in 8"
+      :key="`skel-${n}`"
+      class="h-[440px] bg-[#fff7f6] dark:bg-[#17223b]
+             border-2 border-gray-200 dark:border-[#303b59]
+             rounded-2xl animate-pulse overflow-hidden"
     >
-<p class="text-lg font-semibold mb-2">{{ $t('product.nothingFound') }}</p>
-      <button
-        @click="clearAll"
-        class="mt-4 px-6 py-2 bg-[#6B1F1F] text-white rounded-md hover:bg-[#A01212] transition"
-      >
-        {{ $t('product.resetFilters') }}
-      </button>
-    </div>
+      <div class="h-48 bg-gray-300 dark:bg-gray-700"></div>
+      <div class="p-4 space-y-2">
+        <div class="h-4 bg-gray-300 dark:bg-gray-700 rounded w-3/4"></div>
+        <div class="h-4 bg-gray-300 dark:bg-gray-700 rounded w-1/2"></div>
+      </div>
+      <div class="mt-auto p-4">
+        <div class="h-10 bg-gray-300 dark:bg-gray-700 rounded"></div>
+      </div>
+    </article>
+  </div>
 
-    <!-- Товари -->
+  <!-- Реальні товари -->
+  <div
+    v-else
+    class="grid gap-4 transition-opacity duration-500 ease-in-out grid-cols-1 sm:grid-cols-2 lg:grid-cols-4"
+    :class="loadingProducts ? 'opacity-30' : 'opacity-100'"
+  >
     <article
       v-for="product in products"
       :key="product.id"
@@ -223,23 +234,24 @@ class="px-3 py-1 bg-gray-200 dark:bg-[#303b59] text-gray-800 dark:text-gray-100 
           </article>
   </div>
 
-  <!-- Пагінація -->
-  <div v-if="totalPages > 1" class="flex justify-center gap-2 mt-8">
+  <!-- Пагінація (якщо є більше однієї сторінки) -->
+  <div v-if="!loadingProducts && totalPages > 1" class="flex justify-center gap-2 mt-8">
     <button
       v-for="n in totalPages"
       :key="n"
       @click="changePage(n)"
       :class="[
         'px-4 py-2 rounded-lg font-semibold transition duration-200',
-        currentPage === n ? 'bg-[#6B1F1F] text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+        currentPage === n
+          ? 'bg-[#6B1F1F] text-white'
+          : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
       ]"
     >
       {{ n }}
     </button>
   </div>
-   
-
 </main>
+
     </div>
     
        <Suspense>
@@ -273,6 +285,7 @@ export default {
 
   data() {
     return {
+       loadingProducts: true,
       products: [],
       currentPage: 1,
       filters: {},
@@ -391,10 +404,12 @@ this.totalPages = res.meta?.last_page || 1;
 this.totalCount = res.meta?.total || this.products.length;
 
         console.log('Отримані товари:', this.products);
-      } catch (e) {
-        console.error('Не вдалося завантажити товари:', e);
-      }
-    },
+       } catch (e) {
+    console.error('Не вдалося завантажити товари:', e);
+  } finally {
+    this.loadingProducts = false;          // ← після запиту
+  }
+},
     changePage(n) {
       this.fetchProducts(n, this.filters);
     },

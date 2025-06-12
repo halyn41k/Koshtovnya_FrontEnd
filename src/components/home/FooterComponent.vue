@@ -143,22 +143,31 @@ export default {
   },
   methods: {
     async fetchSiteSettings() {
-      try {
-        const response = await api.getSiteSettings();
-        const settingsArray = Array.isArray(response.data)
-          ? response.data
-          : response.data.data || [];
-
-        settingsArray.forEach(({ setting_key, setting_value }) => {
-          if (Object.prototype.hasOwnProperty.call(this.siteSettings, setting_key)) {
-            this.siteSettings[setting_key] = setting_value;
-          }
-        });
-      } catch (error) {
-        console.error('Помилка завантаження налаштувань сайту:', error);
+    try {
+      const cachedLogo = localStorage.getItem('site_logo');
+      if (cachedLogo) {
+        this.siteSettings.site_logo = cachedLogo;
       }
+
+      const response = await api.getSiteSettings();
+      const settingsArray = Array.isArray(response.data)
+        ? response.data
+        : response.data.data || [];
+
+      settingsArray.forEach(({ setting_key, setting_value }) => {
+        if (Object.prototype.hasOwnProperty.call(this.siteSettings, setting_key)) {
+          this.siteSettings[setting_key] = setting_value;
+
+          if (setting_key === 'site_logo') {
+            localStorage.setItem('site_logo', setting_value); // кешуємо логотип
+          }
+        }
+      });
+    } catch (error) {
+      console.error('Помилка завантаження налаштувань сайту:', error);
     }
   }
+}
 };
 </script>
 

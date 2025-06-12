@@ -60,6 +60,7 @@
     "vue-google-oauth2": "^1.5.10",
     "vue-i18n": "^10.0.4",
     "vue-input-facade": "^2.2.0",
+    "vue-loading-skeleton": "^1.1.9",
     "vue-multiselect": "^3.2.0",
     "vue-range-slider": "^0.6.0",
     "vue-router": "^4.3.2",

@@ -12,16 +12,32 @@
       <form @submit.prevent="submitForm" class="space-y-6">
         <!-- Назва та Ціна -->
         <div class="grid grid-cols-2 gap-4">
-          <div class="flex flex-col">
-            <label for="name" class="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('admin.addProduct.name') }}</label>
-            <input
-              id="name"
-              type="text"
-              v-model="form.name"
-              required :placeholder="$t('admin.addProduct.example')"
-              class="border border-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50"
-            />
-          </div>
+  <div class="flex flex-col">
+    <label for="name_uk" class="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
+      {{ $t('admin.addProduct.name') }} (UK)
+    </label>
+    <input
+      id="name_uk"
+      type="text"
+      v-model="form.name_uk"
+      required
+      :placeholder="$t('admin.addProduct.example')"
+  class="border border-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50 text-black dark:text-black"
+    />
+  </div>
+  <div class="flex flex-col">
+    <label for="name_en" class="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
+      {{ $t('admin.addProduct.name') }} (EN)
+    </label>
+    <input
+      id="name_en"
+      type="text"
+      v-model="form.name_en"
+      required
+      :placeholder="$t('admin.addProduct.example')"
+  class="border border-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50 text-black dark:text-black"
+    />
+  </div>
           <div class="flex flex-col">
             <label for="price" class="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('admin.addProduct.price') }}</label>
             <input
@@ -29,7 +45,8 @@
               type="number"
               v-model="form.price"
               required :placeholder="$t('admin.addProduct.price')"
-           class="border border-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50" />
+             class="border border-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50 text-black dark:text-black"
+ />
           </div>
         </div>
 
@@ -85,7 +102,7 @@
               :placeholder="$t('admin.addProduct.weightPlaceholder')"
               v-model="form.weight"
               required
-              class="border border-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50"
+  class="border border-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50 text-black dark:text-black"
             />
           </div>
           <div class="flex flex-col">
@@ -117,46 +134,44 @@
        <div class="flex flex-col space-y-3">
   <label class="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('admin.addProduct.sizes') }}</label>
 
-  <div v-for="(sizeItem, index) in form.sizes" :key="index" class="grid grid-cols-12 gap-2 items-end">
-    <!-- Поле розміру -->
-    <div class="col-span-6">
-      <label class="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('admin.addProduct.size') }}</label>
-      <input
-  v-model.number="sizeItem.size"
-  type="number"
-  step="0.01"
-  min="0"
-  placeholder="23.00"
-  required
-  class="w-full border border-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50"
-/>
-
-    </div>
-
-    <!-- Поле кількості -->
-    <div class="col-span-3">
-            <label class="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('admin.addProduct.quantityShort') }}</label>
-      <input
-        v-model.number="sizeItem.quantity"
-        type="number"
-        min="0"
-        placeholder="0"
-        required
-        class="w-full border border-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50"
-      />
-    </div>
-
-    <!-- Кнопка видалення -->
-    <div class="col-span-3">
-      <button
-        type="button"
-        @click="removeSize(index)"
-        class="w-full px-3 py-2 bg-red-600 text-white rounded-md hover:bg-red-500"
-      >
-        Видалити
-      </button>
-    </div>
+<div v-for="(sizeItem, index) in form.sizes" :key="index" class="grid grid-cols-12 gap-2 items-end">
+  <!-- Додаємо min-w-0, щоб інпут міг зменшуватися всередині колонки -->
+  <div class="col-span-6 min-w-0">
+    <label class="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('admin.addProduct.size') }}</label>
+    <input
+      v-model.number="sizeItem.size"
+      type="number"
+      step="0.01"
+      min="0"
+      placeholder="23.00"
+      required
+      class="w-full border border-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50 text-black dark:text-black"
+    />
   </div>
+
+  <div class="col-span-3 min-w-0">
+    <label class="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('admin.addProduct.quantityShort') }}</label>
+    <input
+      v-model.number="sizeItem.quantity"
+      type="number"
+      min="0"
+      placeholder="0"
+      required
+      class="w-full border border-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50 text-black dark:text-black"
+    />
+  </div>
+
+  <div class="col-span-3 min-w-0">
+    <button
+      type="button"
+      @click="removeSize(index)"
+      class="w-full px-3 py-2 bg-red-600 text-white rounded-md hover:bg-red-500"
+    >
+      {{ $t('admin.addProduct.delete') || 'Видалити' }}
+    </button>
+  </div>
+</div>
+
 
   <button
     type="button"
@@ -178,7 +193,7 @@
     class="grid grid-cols-12 gap-2 items-end"
   >
     <!-- Фурнітура -->
-    <div class="col-span-4">
+    <div class="col-span-4 min-w-0">
       <label class="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('admin.addProduct.fittings') }}</label>
       <Multiselect
         v-model="fitItem.fitting"
@@ -189,7 +204,7 @@
     </div>
 
     <!-- Матеріал -->
-    <div class="col-span-4">
+    <div class="col-span-4 min-w-0">
       <label class="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('admin.addProduct.material') }}</label>
       <Multiselect
         v-model="fitItem.material"
@@ -200,7 +215,7 @@
     </div>
 
     <!-- Кількість -->
-    <div class="col-span-2">
+    <div class="col-span-4 min-w-0">
       <label class="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('admin.addProduct.quantityShort') }}</label>
       <input
         v-model.number="fitItem.quantity"
@@ -208,12 +223,12 @@
         min="1"
         placeholder="К-ть"
         required
-        class="w-full border border-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50"
+  class="border border-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50 text-black dark:text-black"
       />
     </div>
 
     <!-- Кнопка Видалити -->
-    <div class="col-span-2">
+    <div class="col-span-4 min-w-0">
       <button
         type="button"
         @click="removeFitting(index)"
@@ -293,7 +308,7 @@
 
 <script>
 import axios from "axios";
-
+import api from '@/services/api';
 import Multiselect from 'vue-multiselect'
 
 
@@ -305,7 +320,9 @@ export default {
   data() {
     return {
       imagePreview: null,
-
+            name_uk: "",
+      name_en: "",
+      price: "",
       colorMap: {
         Чорний: "#000000",
         Червоний: "#FF0000",
@@ -429,14 +446,14 @@ export default {
     return;
   }
 
-  // Якщо все ок — надсилаємо
   const fd = new FormData();
-  fd.append("image", this.form.image);
-
-  Object.entries(this.form).forEach(([k, v]) => {
-    if (["sizes", "fittings", "colors", "image"].includes(k)) return;
-    fd.append(k, v);
-  });
+fd.append("name_uk", this.form.name_uk);
+fd.append("name_en", this.form.name_en);
+fd.append("price", this.form.price);
+// інші поля:
+this.form.colors.forEach(c => fd.append("colors[]", c));
+// sizes, fittings тощо
+fd.append("image", this.form.image);
 
   this.form.colors.forEach((c) => fd.append("colors[]", c));
 

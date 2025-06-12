@@ -80,13 +80,36 @@ class="px-3 py-1 bg-gray-200 dark:bg-[#303b59] text-gray-800 dark:text-gray-100 
         </div>
       </div>
 
-      <!-- MAIN GRID -->
-      <main class="flex-1">
-        <div
-          class="grid gap-4 transition-opacity duration-500 ease-in-out"
-          :class="['grid-cols-1 sm:grid-cols-2 lg:grid-cols-4', loadingProducts ? 'opacity-30' : 'opacity-100']"
-        >
-          <!-- PRODUCT CARD -->
+    <main class="flex-1">
+  <!-- 1) Скелетони -->
+  <div
+    v-if="loadingProducts"
+    class="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4"
+  >
+    <article
+      v-for="n in productsPerPage"
+      :key="`skel-${n}`"
+      class="h-[440px] bg-[#fff7f6] dark:bg-[#17223b]
+             border-2 border-gray-200 dark:border-[#303b59]
+             rounded-2xl animate-pulse overflow-hidden"
+    >
+      <div class="h-48 bg-gray-300 dark:bg-gray-700"></div>
+      <div class="p-4 space-y-2">
+        <div class="h-4 bg-gray-300 dark:bg-gray-700 rounded w-3/4"></div>
+        <div class="h-4 bg-gray-300 dark:bg-gray-700 rounded w-1/2"></div>
+      </div>
+      <div class="mt-auto p-4">
+        <div class="h-10 bg-gray-300 dark:bg-gray-700 rounded"></div>
+      </div>
+    </article>
+  </div>
+
+  <!-- 2) Реальні товари -->
+  <div
+    v-else
+    class="grid gap-4 transition-opacity duration-500 ease-in-out grid-cols-1 sm:grid-cols-2 lg:grid-cols-4"
+    :class="loadingProducts ? 'opacity-30' : 'opacity-100'"
+  >
           <article
             v-for="product in visibleProducts"
             :key="product.id"
@@ -295,7 +318,7 @@ export default {
       visibleProducts: [],
       totalPages: 0,
       filterVisible: false,
-      loadingProducts: false,
+      loadingProducts: true,
     };
   },
 

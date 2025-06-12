@@ -1,10 +1,15 @@
 <template>
   <div class="container mx-auto mt-[150px] flex flex-col overflow-hidden">
     <!-- Hero Banner -->
-    <div
-      class="w-full h-[510px] bg-cover bg-center relative mb-6 lg:mb-8"
-      :style="{ backgroundImage: `url(${require('@/assets/welcome.png')})` }"
-    >
+    <div v-if="heroLoading"
+     class="w-full h-[510px] rounded-lg bg-gray-300 dark:bg-gray-700 animate-pulse mb-6 lg:mb-8">
+</div>
+
+<!-- Actual Hero -->
+<div v-else
+     class="w-full h-[510px] bg-cover bg-center relative mb-6 lg:mb-8"
+     :style="{ backgroundImage: `url(${require('@/assets/welcome.png')})` }">
+    
       <!-- Hero Text: центр на мобілці, ліворуч на десктопі -->
       <div class="absolute inset-0 flex flex-col items-center lg:items-start justify-center text-center lg:text-left px-4 lg:px-24 space-y-4">
         <div class="text-white font-kyivtype font-bold text-[32px] lg:text-[45px]">
@@ -98,6 +103,7 @@ export default {
   },
   data() {
     return {
+      heroLoading: true,
       products: [],
       newArrivals: [],
       visibleProducts: [],
@@ -117,12 +123,19 @@ export default {
       ],
     };
   },
-  mounted() {
-    this.fetchPopularProducts();
-    this.fetchNewArrivals();
-    this.observeElements();
-    document.title = "Головна";
-  },
+ mounted() {
+  // підвантажуємо картинку у фон
+  const img = new Image();
+  img.src = require('@/assets/welcome.png');
+  img.onload = () => {
+    this.heroLoading = false;
+  };
+
+  this.fetchPopularProducts();
+  this.fetchNewArrivals();
+  this.observeElements();
+  document.title = "Головна";
+},
   methods: {
     observeElements() {
       const elements = document.querySelectorAll('.fade-in');

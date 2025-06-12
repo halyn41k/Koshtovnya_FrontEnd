@@ -7,8 +7,21 @@
       {{ $t('home.shopByCategory') }}
     </h2>
 
+    <!-- Skeleton Loader -->
+    <div v-if="loading" class="w-full max-w-screen-lg px-4">
+      <div class="grid grid-cols-1 gap-y-12 gap-x-12 sm:grid-cols-2 lg:grid-cols-3 lg:gap-x-24">
+        <div
+          v-for="n in fallbackCategories.length"
+          :key="`skel-${n}`"
+          class="relative w-72 h-72 mt-5 mx-auto animate-pulse"
+        >
+          <div class="absolute inset-0 bg-gray-300 dark:bg-gray-700 rounded-lg"></div>
+        </div>
+      </div>
+    </div>
+
     <!-- Categories grid -->
-    <div class="w-full max-w-screen-lg px-4">
+    <div v-else class="w-full max-w-screen-lg px-4">
       <div class="grid grid-cols-1 gap-y-12 gap-x-12 sm:grid-cols-2 lg:grid-cols-3 lg:gap-x-24">
         <router-link
           v-for="category in categories"
@@ -56,8 +69,6 @@
   </section>
 </template>
 
-
-
 <script>
 import api from '@/services/api';
 
@@ -66,6 +77,7 @@ export default {
   data() {
     return {
       categories: [],
+      loading: true,
       fallbackCategories: [
         { id: 1, name: 'Браслети', url: '/bracelets', image_url: require('@/assets/testpicture.png') },
         { id: 2, name: 'Гердани', url: '/herdany', image_url: require('@/assets/testpicture.png') },
@@ -78,6 +90,7 @@ export default {
   },
   methods: {
     async fetchCategories() {
+      this.loading = true;
       try {
         const response = await api.getCategories();
         const items = Array.isArray(response.data)
@@ -96,6 +109,8 @@ export default {
       } catch (err) {
         console.error('Помилка отримання категорій:', err);
         this.categories = this.fallbackCategories;
+      } finally {
+        this.loading = false;
       }
     },
   },

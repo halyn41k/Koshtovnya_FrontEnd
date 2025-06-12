@@ -5,6 +5,9 @@ import store from './store'
 import i18n from './locales'
 import { initTheme } from '@/composables/useDarkMode'
 
+import Skeleton from 'vue-loading-skeleton'
+import 'vue-loading-skeleton/dist/vue-loading-skeleton.css'
+
 initTheme() // 🌓 <== обов'язково ДО mount
 
 import './assets/tailwind.css'     // Tailwind core
@@ -34,6 +37,7 @@ configure({
 })
 
 app
+  .use(Skeleton)
   .use(router)
   .use(store)
   .use(i18n)

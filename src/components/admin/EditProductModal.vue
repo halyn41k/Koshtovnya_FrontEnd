@@ -6,13 +6,33 @@
     <form @submit.prevent="submitForm" class="space-y-6">
       <!-- Назва та Ціна -->
       <div class="grid grid-cols-2 gap-4">
-        <div class="flex flex-col">
-          <label for="name" class="mb-1 text-sm font-medium text-gray-700">Назва</label>
-          <input id="name" type="text" v-model="form.name" required placeholder="Наприклад: Срібний браслет" class="border border-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50" />
-        </div>
+       <div class="flex flex-col">
+  <label for="name_uk" class="mb-1 text-sm font-medium text-gray-700">Назва (UK)</label>
+  <input
+    id="name_uk"
+    type="text"
+    v-model="form.name_uk"
+    required
+    placeholder="Наприклад: Срібний браслет"
+  class="border border-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50 text-black dark:text-black"
+  />
+</div>
+<div class="flex flex-col">
+  <label for="name_en" class="mb-1 text-sm font-medium text-gray-700">Назва (EN)</label>
+  <input
+    id="name_en"
+    type="text"
+    v-model="form.name_en"
+    required
+    placeholder="e.g. Silver bracelet"
+  class="border border-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50 text-black dark:text-black"
+  />
+</div>
+
         <div class="flex flex-col">
           <label for="price" class="mb-1 text-sm font-medium text-gray-700">Ціна</label>
-          <input id="price" type="number" v-model="form.price" required placeholder="грн" class="border border-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50" />
+          <input id="price" type="number" v-model="form.price" required placeholder="грн"   class="border border-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50 text-black dark:text-black"
+ />
         </div>
       </div>
 
@@ -62,7 +82,8 @@
          <div class="grid grid-cols-2 gap-4">
         <div class="flex flex-col">
           <label for="weight" class="mb-1 text-sm font-medium text-gray-700">Вага (г)</label>
-          <input id="weight" type="number" v-model="form.weight" placeholder="Введіть вагу (г)" class="border border-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50" />
+          <input id="weight" type="number" v-model="form.weight" placeholder="Введіть вагу (г)"   class="border border-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50 text-black dark:text-black"
+ />
         </div>
           <div class="flex flex-col">
             <label class="mb-2 text-sm font-medium text-gray-700">Кольори</label>
@@ -97,11 +118,12 @@
         <div v-for="(sizeItem, index) in form.sizes" :key="index" class="flex items-center gap-2">
           <div class="flex flex-col flex-1">
             <label class="text-sm text-gray-600 mb-1">Розмір (см)</label>
-            <input v-model.number="sizeItem.size" type="number" min="1" placeholder="см" required class="border border-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50" />
+            <input v-model.number="sizeItem.size" type="number" min="1" placeholder="см" required class="border border-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50 text-black dark:text-black"/>
           </div>
           <div class="flex flex-col w-28">
             <label class="text-sm text-gray-600 mb-1">К-ть</label>
-            <input v-model.number="sizeItem.quantity" type="number" min="1" placeholder="шт" required class="border border-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50" />
+            <input v-model.number="sizeItem.quantity" type="number" min="1" placeholder="шт" required   class="border border-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50 text-black dark:text-black"/>
+
           </div>
           <button type="button" @click="removeSize(index)" class="px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-500">Видалити</button>
         </div>
@@ -140,8 +162,7 @@
       min="1"
       placeholder="Кількість"
       required
-      class="w-24 border border-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50"
-    />
+      class="border border-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50 text-black dark:text-black"/>
 
     <!-- Кнопка видалення -->
     <button
@@ -192,6 +213,7 @@ import { createToastInterface } from 'vue-toastification';
 import 'vue-toastification/dist/index.css';
 import axios from "axios";
 import Multiselect from 'vue-multiselect'
+import api from '@/services/api';
 
 
 export default {
@@ -224,7 +246,8 @@ components: {
         Сріблястий: "#C0C0C0",
       },
       form: {
-        name: "",
+              name_uk: "",
+      name_en: "",
         price: "",
         category: "",
         bead_producer: "",
@@ -281,8 +304,9 @@ components: {
   methods: {
    initForm(product) {
   const normalize = (v) => (v || "").toString().trim();
+      this.form.name_uk = product.name_uk || product.name || "";
+  this.form.name_en = product.name_en || product.name || "";
 
-  this.form.name = product.name || "";
   this.form.price = product.price || "";
 
   this.form.category = normalize(product.category);
@@ -336,64 +360,56 @@ components: {
       if (idx === -1) this.form.colors.push(c);
       else this.form.colors.splice(idx, 1);
     },
-    submitForm() {
-  const toast = createToastInterface();
-  const fd = new FormData();
-
-  if (this.form.image) {
-    fd.append("image", this.form.image);
-  }
-
-  const fields = [
-    "name", "price", "category", "bead_producer",
-    "country_of_manufacture", "type_of_bead", "weight"
-  ];
-  fields.forEach(field => {
-    if (this.form[field]) {
-      fd.append(field, this.form[field]);
-    }
-  });
-
-  this.form.colors.forEach(color => {
-    fd.append("colors[]", color);
-  });
-
-  this.form.sizes.forEach((item, i) => {
-    fd.append(`sizes[${i}][size]`, item.size);
-    fd.append(`sizes[${i}][quantity]`, item.quantity);
-  });
-
-  this.form.fittings.forEach((item, i) => {
-    fd.append(`fittings[${i}][fitting]`, item.fitting);
-    fd.append(`fittings[${i}][material]`, item.material);
-    fd.append(`fittings[${i}][quantity]`, item.quantity);
-  });
-
-  fd.append("_method", "PATCH");
-
-  axios.post(
-    `https://koshtovnya.api-dev.bmax-edu.website/api/admin/products/${this.product.id}`,
-    fd,
-    {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-        "Content-Type": "multipart/form-data",
-        Accept: "application/json"
+    async submitForm() {
+      const toast = createToastInterface();
+      try {
+        const fd = new FormData();
+        if (this.product && this.product.id) {
+          fd.append('_method', 'PATCH');
+        }
+        fd.append("name_uk", this.form.name_uk);
+        fd.append("name_en", this.form.name_en);
+        fd.append("price", this.form.price);
+        if (this.form.category) {
+          fd.append("category", typeof this.form.category==='object'?this.form.category.id:this.form.category);
+        }
+        if (this.form.bead_producer) {
+          fd.append("bead_producer", typeof this.form.bead_producer==='object'?this.form.bead_producer.id:this.form.bead_producer);
+        }
+        if (this.form.country_of_manufacture) {
+          fd.append("country_of_manufacture", typeof this.form.country_of_manufacture==='object'?this.form.country_of_manufacture.id:this.form.country_of_manufacture);
+        }
+        if (this.form.type_of_bead) {
+          fd.append("type_of_bead", typeof this.form.type_of_bead==='object'?this.form.type_of_bead.id:this.form.type_of_bead);
+        }
+        fd.append("weight", this.form.weight);
+        this.form.colors.forEach(c => fd.append("colors[]", c));
+        this.form.sizes.forEach((item,i) => {
+          fd.append(`sizes[${i}][size]`, item.size);
+          fd.append(`sizes[${i}][quantity]`, item.quantity);
+        });
+        this.form.fittings.forEach((item,i) => {
+          fd.append(`fittings[${i}][fitting]`, typeof item.fitting==='object'?item.fitting.id:item.fitting);
+          fd.append(`fittings[${i}][material]`, typeof item.material==='object'?item.material.id:item.material);
+          fd.append(`fittings[${i}][quantity]`, item.quantity);
+        });
+        if (this.form.image) {
+          fd.append("image", this.form.image);
+        }
+        let result;
+        if (this.product && this.product.id) {
+          result = await api.updateProduct(this.product.id, fd);
+          this.$emit('product-updated', result);
+        } else {
+          result = await api.createProduct(fd);
+          this.$emit('product-added', result);
+        }
+        toast.success(this.product && this.product.id ? 'Товар оновлено' : 'Товар додано');
+        this.close();
+      } catch (error) {
+        // обробка помилок вже у service
       }
-    }
-  )
-  .then((res) => {
-    const updatedProduct = res.data?.data || res.data?.product;
-    toast.success("Товар оновлено успішно!");
-    this.$emit("product-updated", updatedProduct);
-    this.close();
-  })
-  .catch((err) => {
-    console.error("❌ Помилка оновлення товару:", err.response || err);
-    toast.error("Не вдалося оновити товар. Спробуйте пізніше.");
-  });
-},
-
+    },
     close() {
       this.$emit("close");
     },

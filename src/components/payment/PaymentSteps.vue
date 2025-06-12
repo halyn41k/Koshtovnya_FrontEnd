@@ -8,10 +8,7 @@
           :key="index"
           class="flex flex-col gap-3 mt-4"
         >
-          <!-- Розділювач -->
           <div v-if="index !== 0" class="w-full h-px bg-gray-300 dark:bg-gray-600 my-2"></div>
-
-          <!-- Заголовок кроку -->
           <div
             class="flex items-center gap-3 cursor-pointer p-3 rounded-md transition hover:bg-gray-100 dark:hover:bg-gray-700"
             :class="{
@@ -25,8 +22,6 @@
             >
               {{ index + 1 }}. {{ step.title }}
             </span>
-
-            <!-- Іконка -->
             <img
               v-if="step.completed"
               src="https://cdn.builder.io/api/v1/image/assets/c3e46d0a629546c7a48302a5db3297d5/142a83ede010f318e450c11b423feee035ee7a5315eb7e3159f36ffbf44c3d8d"
@@ -40,8 +35,6 @@
               class="w-6 h-6"
             />
           </div>
-
-          <!-- Контент кроку -->
           <div
             v-if="index === currentStep && step.isExpanded"
             class="mt-3 transition-all duration-300 ease-in-out"
@@ -62,7 +55,6 @@
               @validate="validateAndProceed"
               :temp-user-address="tempUserAddress"
             />
-
             <button
               v-if="(canProceedToNextStep || isStorePickupSelected) && currentStep < steps.length - 1"
               @click="validateAndProceed"
@@ -77,36 +69,32 @@
   </div>
 </template>
 
-
-
 <script>
 import api from '@/services/api';
 import { mapActions } from "vuex";
-import DeliveryAddress from "./DeliveryAddress.vue";
 import PersonalInfo from "./PersonalInfo.vue";
 import PostalInfo from "./PostalInfo.vue";
+import PostalInfoManually from "./PostalInfoManually.vue";
 import PaymentInfo from "./PaymentInfo.vue";
-
 
 export default {
   name: "PaymentSteps",
   components: {
-    DeliveryAddress,
     PersonalInfo,
     PostalInfo,
+    PostalInfoManually,
     PaymentInfo,
   },
   data() {
     return {
-     steps: [
-  { title: "Особиста інформація", completed: false, validated: false, isExpanded: true },
-  { title: "Поштове відділення", completed: false, validated: false, isExpanded: false },
-  { title: "Оплата", completed: false, validated: false, isExpanded: false },
-],
-
-
+      steps: [
+        { title: "Особиста інформація", completed: false, validated: false, isExpanded: true },
+        { title: "Поштове відділення", completed: false, validated: false, isExpanded: false },
+        { title: "Оплата", completed: false, validated: false, isExpanded: false },
+      ],
       currentStep: 0,
       tempUserAddress: null,
+      showManualForm: false,
       selectedDeliveryCategory: '',
       formData: {
         paymentMethod: "",
@@ -115,7 +103,6 @@ export default {
         secondName: "",
         phone: "",
         city: "",
-        streetSearch: "",
         cityRef: "",
         deliveryType: "",
         street: "",
@@ -127,24 +114,21 @@ export default {
       cities: [],
       streets: [],
       warehouses: [],
-      deliveryOptions: [], // комбінований список тип + спосіб
-      hasTriedSubmit: false,
+      deliveryOptions: [],
       cartItems: [],
       deliveryCost: 0,
     };
   },
   computed: {
     isStorePickupSelected() {
-  return this.formData.deliveryType?.name === 'Самовивіз з наших магазинів';
-},
- filteredDeliveryOptions() {
-    if (!this.selectedDeliveryCategory) return this.deliveryOptions;
-    return this.deliveryOptions.filter(
-      opt => opt.value === this.selectedDeliveryCategory
-    );
-  },
-
-
+      return this.formData.deliveryType?.name === 'Самовивіз з наших магазинів';
+    },
+    filteredDeliveryOptions() {
+      if (!this.selectedDeliveryCategory) return this.deliveryOptions;
+      return this.deliveryOptions.filter(
+        opt => opt.delivery_type === this.selectedDeliveryCategory
+      );
+    },
     canProceedToNextStep() {
       if (this.currentStep === 0) {
         return this.validatePersonalInfo();
@@ -163,117 +147,119 @@ export default {
       "updateDeliveryCost",
     ]),
     getStepComponent(title) {
-      switch (title) {
-        case "Особиста інформація":
-          return "PersonalInfo";
-        case "Поштове відділення":
-          return "PostalInfo";
-        case "Оплата":
-          return "PaymentInfo";
-        default:
-          return "div";
+      if (title === "Особиста інформація") {
+        return "PersonalInfo";
       }
+      if (title === "Поштове відділення") {
+        return this.showManualForm ? "PostalInfoManually" : "PostalInfo";
+      }
+      if (title === "Оплата") {
+        return "PaymentInfo";
+      }
+      return "div";
     },
     toggleStep(index) {
-  // Якщо натискаєш на той самий крок — просто перемикаєш isExpanded
-  if (this.currentStep === index) {
-    this.steps[index].isExpanded = !this.steps[index].isExpanded;
-  } else {
-    // Інакше — звична логіка переходу
-    this.steps[this.currentStep].isExpanded = false;
-    this.currentStep = index;
-    this.steps[this.currentStep].isExpanded = true;
-  }
-},
+      if (this.currentStep === index) {
+        this.steps[index].isExpanded = !this.steps[index].isExpanded;
+      } else {
+        this.steps[this.currentStep].isExpanded = false;
+        this.currentStep = index;
+        this.steps[this.currentStep].isExpanded = true;
+      }
+    },
     updateDeliveryOptions() {
-  const deliveryData = {
-    courier: [
-      { id: 5, name: "Кур'єр Нової Пошти", value: 'courier', label: 'Курʼєр' },
-      { id: 6, name: "Кур'єр УКРПОШТИ", value: 'courier', label: 'Курʼєр' }
-    ],
-    pickup: [
-      { id: 1, name: "Самовивіз з наших магазинів", value: 'pickup', label: 'Самовивіз' },
-      { id: 2, name: "Самовивіз з поштоматів Нової Пошти", value: 'pickup', label: 'Самовивіз' },
-      { id: 3, name: "Самовивіз з Нової Пошти", value: 'pickup', label: 'Самовивіз' },
-      { id: 4, name: "Самовивіз з УКРПОШТИ", value: 'pickup', label: 'Самовивіз' }
-    ]
-  };
-
-  this.deliveryOptions = [...deliveryData.courier, ...deliveryData.pickup];
-},
+      const deliveryData = {
+        courier: [
+          { id: 5, name: "Кур'єр Нової Пошти", delivery_type: 'courier', label: 'Курʼєр' },
+          { id: 6, name: "Кур'єр УКРПОШТИ", delivery_type: 'courier', label: 'Курʼєр' }
+        ],
+        pickup: [
+          { id: 1, name: "Самовивіз з наших магазинів", delivery_type: 'pickup', label: 'Самовивіз' },
+          { id: 2, name: "Самовивіз з поштоматів Нової Пошти", delivery_type: 'pickup', label: 'Самовивіз' },
+          { id: 3, name: "Самовивіз з Нової Пошти", delivery_type: 'pickup', label: 'Самовивіз' },
+          { id: 4, name: "Самовивіз з УКРПОШТИ", delivery_type: 'pickup', label: 'Самовивіз' }
+        ]
+      };
+      this.deliveryOptions = [...deliveryData.courier, ...deliveryData.pickup];
+    },
     validateAndProceed() {
-  let isValid = false;
-
-  switch (this.currentStep) {
-    case 0:
-      isValid = this.validatePersonalInfo();
-      break;
-    case 1:
-      isValid = this.validatePostalInfo();
-      break;
-    case 2:
-      isValid = !!this.formData.paymentMethod;
-      if (!isValid) this.errors.paymentMethod = "Оберіть спосіб оплати";
-      break;
-  }
-
-  if (!isValid) {
-    this.steps[this.currentStep].validated = true;
-    this.steps[this.currentStep].completed = false;
-    return;
-  }
-
-  // ✅ ОНОВИТИ ДАНІ КОРИСТУВАЧА В СТЕЙТІ
-  this.updateCustomerData(this.formData);
-
-  this.steps[this.currentStep].validated = true;
-  this.steps[this.currentStep].completed = true;
-  this.steps[this.currentStep].isExpanded = false;
-
-  if (this.currentStep < this.steps.length - 1) {
-    this.currentStep++;
-    this.steps[this.currentStep].isExpanded = true;
-  } else {
-    this.$emit("steps-complete", true);
-  }
-},
-validateCurrentStep() {
-  switch (this.currentStep) {
-    case 0:
-      return this.validatePersonalInfo(true);
-    case 1:
-      return this.validatePostalInfo(true);
-    case 2:
-      return !!this.formData.paymentMethod;
-    default:
-      return false;
-  }
-},
-
+      let isValid = false;
+      if (this.currentStep === 0) {
+        isValid = this.validatePersonalInfo();
+      } else if (this.currentStep === 1) {
+        isValid = this.validatePostalInfo();
+      } else if (this.currentStep === 2) {
+        isValid = !!this.formData.paymentMethod;
+        if (!isValid) this.errors.paymentMethod = "Оберіть спосіб оплати";
+      }
+      if (!isValid) {
+        this.steps[this.currentStep].validated = true;
+        this.steps[this.currentStep].completed = false;
+        return;
+      }
+      this.updateCustomerData(this.formData);
+      this.steps[this.currentStep].validated = true;
+      this.steps[this.currentStep].completed = true;
+      this.steps[this.currentStep].isExpanded = false;
+      if (this.currentStep < this.steps.length - 1) {
+        this.currentStep++;
+        this.steps[this.currentStep].isExpanded = true;
+      } else {
+        this.$emit("steps-complete", true);
+      }
+    },
     validatePersonalInfo(silent = false) {
-  if (!silent) this.errors = {};
-  let valid = true;
-
-  if (!this.formData.firstName) {
-    if (!silent) this.errors.firstName = "Ім'я обов'язкове";
-    valid = false;
-  }
-  if (!this.formData.lastName) {
-    if (!silent) this.errors.lastName = "Прізвище обов'язкове";
-    valid = false;
-  }
-  if (!this.formData.secondName) {
-    if (!silent) this.errors.secondName = "По батькові обов'язкове";
-    valid = false;
-  }
-  if (!this.formData.phone) {
-    if (!silent) this.errors.phone = "Номер телефону обов'язковий";
-    valid = false;
-  }
-
-  return valid;
-},
-    
+      if (!silent) this.errors = {};
+      let valid = true;
+      if (!this.formData.firstName) {
+        if (!silent) this.errors.firstName = "Ім'я обов'язкове";
+        valid = false;
+      }
+      if (!this.formData.lastName) {
+        if (!silent) this.errors.lastName = "Прізвище обов'язкове";
+        valid = false;
+      }
+      if (!this.formData.secondName) {
+        if (!silent) this.errors.secondName = "По батькові обов'язкове";
+        valid = false;
+      }
+      if (!this.formData.phone) {
+        if (!silent) this.errors.phone = "Номер телефону обов'язковий";
+        valid = false;
+      }
+      return valid;
+    },
+    validatePostalInfo(silent = false) {
+      if (!silent) this.errors = {};
+      let valid = true;
+      if (!this.formData.deliveryType) {
+        if (!silent) this.errors.deliveryType = "Спосіб доставки обов'язковий";
+        valid = false;
+      }
+      if (!this.isStorePickupSelected) {
+        if (!this.formData.city) {
+          if (!silent) this.errors.city = "Місто обов'язкове";
+          valid = false;
+        }
+        if (this.formData.deliveryType?.delivery_type === "courier") {
+          if (!this.formData.street) {
+            if (!silent) this.errors.street = "Виберіть вулицю";
+            valid = false;
+          }
+          if (!this.formData.houseNumber) {
+            if (!silent) this.errors.houseNumber = "Введіть номер будинку";
+            valid = false;
+          }
+        }
+        if (this.formData.deliveryType?.delivery_type === "pickup") {
+          if (!this.formData.warehouse) {
+            if (!silent) this.errors.warehouse = "Відділення обов'язкове";
+            valid = false;
+          }
+        }
+      }
+      return valid;
+    },
     setCities(newCities) {
       this.cities = newCities;
     },
@@ -283,252 +269,169 @@ validateCurrentStep() {
     setWarehouses(newWarehouses) {
       this.warehouses = newWarehouses;
     },
-    async fetchDeliveryTypes() {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        alert("Будь ласка, увійдіть у свій обліковий запис.");
-        this.$router.push("/login");
-        return;
-      }
-      try {
-        await api.getDeliveryTypes();
-      } catch (error) {
-        console.error("Помилка отримання типів доставки", error);
-        alert("Помилка отримання типів доставки");
-      }
-    },
-    async fetchCartItems() {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        alert("Будь ласка, увійдіть.");
-        this.$router.push("/login");
-        return [];
-      }
-      try {
-        const data = await api.getCart();
-        const cartData = data.data || [];
-        this.cartItems = JSON.parse(JSON.stringify(cartData));
-        this.updateCartItems(this.cartItems);
-        return this.cartItems;
-      } catch (error) {
-        console.error("Помилка завантаження кошика", error);
-        return [];
-      }
-    },
-    async fetchProfile() {
-      const token = localStorage.getItem("token");
-      if (!token) return;
-      try {
-        const response = await api.getProfile();
-        const user = response.user;
-        this.formData.firstName = user.first_name || "";
-        this.formData.lastName = user.last_name || "";
-        this.formData.secondName = user.second_name || "";
-      } catch (error) {
-        console.error("Помилка завантаження профілю", error);
-      }
-    },
     async fetchUserAddress() {
-  const token = localStorage.getItem("token");
-  if (!token) return;
-
-  try {
-    const response = await api.getUserAddress();
-    const addressData = response.data;
-    if (addressData) {
-      this.formData.phone = addressData.phone_number || "";
-      this.formData.city = addressData.city || "";
-      this.formData.cityRef = addressData.Ref || "";
-
-    if (addressData.delivery_type === "courier") {
-  const fullAddress = addressData.delivery_address || "";
-
-  // Спробуємо знайти останнє число з текстом як номер будинку
-  const addressMatch = fullAddress.match(/^(.*?)(?:[, ]+)?((\d+[^\s]*)|(\d+\/\d+)|(\d+\s?[а-яА-ЯіІїЇєЄa-zA-Z-]+))$/);
-
-  if (addressMatch) {
-    const [, streetOnly, numberOnly] = addressMatch;
-    this.formData.streetSearch = streetOnly.trim();
-    this.formData.street = streetOnly.trim();
-    this.formData.houseNumber = numberOnly.trim();
-  } else {
-    // якщо не змогли розбити — як fallback
-    this.formData.streetSearch = fullAddress;
-    this.formData.street = fullAddress;
-    this.formData.houseNumber = addressData.house_number || '';
-  }
-}
-
-
-
-      this.tempUserAddress = {
-        phone: addressData.phone_number || '',
-        city: addressData.city || '',
-        cityRef: addressData.Ref || '',
-        street: addressData.delivery_address || '',
-        streetSearch: addressData.delivery_address || '',
-        houseNumber: addressData.house_number || '',
-        warehouseName: addressData.delivery_address,
-        deliveryTypeName: addressData.delivery_name,
-        deliveryCategory: addressData.delivery_type,
-        userName: addressData.user || ''
-      };
-
-      this.selectedDeliveryCategory =
-        addressData.delivery_type === "courier" ? "courier" : "pickup";
-
-      this.updateDeliveryOptions(this.selectedDeliveryCategory);
-
-      this.$nextTick(async () => {
-        const match = this.deliveryOptions.find(
-          opt => opt.name === addressData.delivery_name
-        );
-        if (match) {
-          this.formData.deliveryType = match;
+      try {
+        const response = await api.getUserAddress();
+        const addressData = response.data?.data ?? response.data;
+        if (addressData) {
+          this.formData.phone = addressData.phone_number || "";
+          if (addressData.user) {
+            const parts = addressData.user.split(" ");
+            this.formData.lastName = parts[0] || '';
+            this.formData.firstName = parts[1] || '';
+            this.formData.secondName = parts[2] || '';
+          }
+          this.showManualForm = false;
+          this.tempUserAddress = {
+            phone: addressData.phone_number,
+            city: addressData.city,
+            cityRef: addressData.Ref,
+            delivery_address: addressData.delivery_address,
+            houseNumber: addressData.house_number,
+            deliveryTypeName: addressData.delivery_name,
+            deliveryCategory: addressData.delivery_type,
+            userName: addressData.user,
+          };
+          await this.loadDeliveryOptionsAndAutoFill(addressData);
         } else {
-          console.warn("Не знайдено deliveryType для", addressData.delivery_name);
+          this.showManualForm = true;
         }
-
-        // Завантажити відділення
-        this.warehouses = await this.fetchWarehouses(
-          addressData.city,
-          addressData.Ref,
-          addressData.delivery_name
+      } catch (error) {
+        console.error("Помилка отримання адреси користувача", error.response?.data || error);
+        this.showManualForm = true;
+      }
+    },
+    async loadDeliveryOptionsAndAutoFill(addressData) {
+      this.updateDeliveryOptions();
+      let match = this.deliveryOptions.find(opt => opt.name === addressData.delivery_name);
+      if (!match) {
+        match = this.deliveryOptions.find(opt =>
+          opt.delivery_type === addressData.delivery_type &&
+          opt.name.toLowerCase().includes(
+            String(addressData.delivery_name).toLowerCase().split('нова пошта')[0].trim()
+          )
         );
-
-        const warehouseMatch = this.warehouses.find(
-          w => w.name === addressData.delivery_address
+      }
+      if (!match) {
+        match = this.deliveryOptions.find(opt => opt.delivery_type === addressData.delivery_type);
+      }
+      if (match) {
+        this.formData.deliveryType = match;
+        this.selectedDeliveryCategory = match.delivery_type;
+      }
+      try {
+        const citiesResp = await api.getNPCities({ city: addressData.city });
+        const citiesList = citiesResp.data.success ? citiesResp.data.data : [];
+        this.cities = citiesList;
+        const foundCity = citiesList.find(c =>
+          c.Ref === addressData.Ref ||
+          String(c.city).toLowerCase() === String(addressData.city).toLowerCase()
         );
-        if (warehouseMatch) {
-          this.formData.warehouse = warehouseMatch;
+        if (foundCity) {
+          this.formData.city = foundCity;
+          this.formData.cityRef = foundCity.Ref;
+        } else {
+          this.formData.city = addressData.city;
+          this.formData.cityRef = addressData.Ref;
         }
-
-        // ПІБ
-        const [last, first, second] = addressData.user
-          ? addressData.user.split(" ")
-          : ["", "", ""];
-        this.formData.lastName = last;
-        this.formData.firstName = first;
-        this.formData.secondName = second;
-      });
-    }
-  } catch (error) {
-    console.error("Помилка отримання адреси користувача", error);
-  }
-},
-async fetchWarehouses(city, cityRef, deliveryName) {
-  const token = localStorage.getItem("token");
-  if (!token || !city || !cityRef) return [];
-
-  try {
-    const data = await api.getNPtwarehouses({
-      city,
-      Ref: cityRef,
-      delivery_type: deliveryName || ''
-    });
-    return Array.isArray(data)
-      ? data.map((item, i) => ({ id: i + 1, name: item.warehouse }))
-      : [];
-  } catch (e) {
-    console.error("Помилка отримання відділень", e);
-    return [];
-  }
-},
- revalidateSteps() {
-  const personal = this.steps.find(s => s.title === 'Особиста інформація');
-  if (personal?.validated) {
-    personal.completed = this.validatePersonalInfo(true);
-  }
-
-  const postal = this.steps.find(s => s.title === 'Поштове відділення');
-  if (postal?.validated) {
-    postal.completed = this.validatePostalInfo(true);
-  }
-
-  const payment = this.steps.find(s => s.title === 'Оплата');
-  if (payment?.validated) {
-    payment.completed = !!this.formData.paymentMethod;
-  }
-},
-
-  validatePostalInfo(silent = false) {
-  console.log('formData.houseNumber', this.formData.houseNumber); // 👉 додай це
-
-    if (!silent) this.errors = {};
-    let valid = true;
-
-    if (!this.formData.deliveryType || this.formData.deliveryType.name === '') {
-      if (!silent) this.errors.deliveryType = "Спосіб доставки обов'язковий";
-      valid = false;
-    }
-
-    if (!this.isStorePickupSelected) {
-      if (!this.formData.city) {
-        if (!silent) this.errors.city = "Місто обов'язкове";
-        valid = false;
+      } catch (e) {
+        console.error("Помилка fetchCities під час автопідстановки", e);
+        this.formData.city = addressData.city;
+        this.formData.cityRef = addressData.Ref;
       }
-
-      if (this.selectedDeliveryCategory === "courier") {
-        if (!this.formData.street) {
-          if (!silent) this.errors.street = "Виберіть вулицю";
-          valid = false;
+      if (this.formData.deliveryType?.delivery_type === 'courier') {
+        try {
+          const streetsResp = await api.getNPStreets({
+            Ref: this.formData.cityRef,
+            street: addressData.delivery_address
+          });
+          const streetsList = streetsResp.data.data || [];
+          this.streets = streetsList;
+          const raw = addressData.delivery_address || '';
+          const parts = raw.split(/\s+/);
+          const namePart = parts.slice(0, parts.length - 1).join(' ');
+          const foundStreet = streetsList.find(s =>
+            String(s.Name).toLowerCase() === namePart.toLowerCase()
+          );
+          if (foundStreet) {
+            this.formData.street = foundStreet;
+          } else {
+            this.formData.street = namePart;
+          }
+          this.formData.houseNumber = addressData.house_number || '';
+        } catch (e) {
+          console.error("Помилка fetchStreets під час автопідстановки", e);
+          this.formData.street = addressData.delivery_address || '';
+          this.formData.houseNumber = addressData.house_number || '';
         }
-        if (!this.formData.houseNumber) {
-          if (!silent) this.errors.houseNumber = "Введіть номер будинку";
-          valid = false;
+      } else if (this.formData.deliveryType?.delivery_type === 'pickup') {
+        try {
+          const whResp = await api.getNPWarehouses({
+            city: typeof this.formData.city === 'object' ? this.formData.city.city : this.formData.city,
+            Ref: this.formData.cityRef,
+            delivery_type: addressData.delivery_name
+          });
+          const whList = Array.isArray(whResp.data.data)
+            ? whResp.data.data.map((item, i) => ({ id: i+1, name: item.warehouse }))
+            : [];
+          this.warehouses = whList;
+          const target = String(addressData.delivery_address).toLowerCase().replace(/\s+/g,' ').trim();
+          const foundW = whList.find(w =>
+            w.name.toLowerCase().replace(/\s+/g,' ').includes(target) ||
+            target.includes(w.name.toLowerCase().replace(/\s+/g,' '))
+          );
+          if (foundW) {
+            this.formData.warehouse = foundW;
+          }
+        } catch (e) {
+          console.error("Помилка fetchWarehouses під час автопідстановки", e);
         }
       }
-
-      if (this.selectedDeliveryCategory === "pickup") {
-        if (!this.formData.warehouse) {
-          if (!silent) this.errors.warehouse = "Відділення обов'язкове";
-          valid = false;
-        }
+    },
+    revalidateSteps() {
+      const personal = this.steps.find(s => s.title === 'Особиста інформація');
+      if (personal?.validated) {
+        personal.completed = this.validatePersonalInfo(true);
       }
-    }
-
-    return valid;
-  },
-
+      const postal = this.steps.find(s => s.title === 'Поштове відділення');
+      if (postal?.validated) {
+        postal.completed = this.validatePostalInfo(true);
+      }
+      const payment = this.steps.find(s => s.title === 'Оплата');
+      if (payment?.validated) {
+        payment.completed = !!this.formData.paymentMethod;
+      }
+    },
   },
   created() {
-  this.updateDeliveryOptions();
-
-  this.fetchUserAddress().then(() => {
-    this.fetchDeliveryTypes().then(() => {
-     
-      
-    });
-  });
-},
-
-
+    this.updateDeliveryOptions();
+    this.fetchUserAddress();
+  },
   watch: {
-  formData: {
-    handler() {
+    formData: {
+      handler() {
+        this.revalidateSteps();
+      },
+      deep: true
+    },
+    'formData.paymentMethod'(val) {
       this.revalidateSteps();
     },
-    deep: true
+    'formData.phone'(val) {
+      this.revalidateSteps();
+    },
+    currentStep() {
+      this.revalidateSteps();
+    },
   },
-  'formData.paymentMethod'(val) {
+  mounted() {
     this.revalidateSteps();
   },
-  'formData.phone'(val) {
-    this.revalidateSteps();
-  },
-   currentStep() {
-    this.revalidateSteps(); // це обовʼязково! перевіряє при перемиканні кроку
-  },
-},
-mounted() {
-  this.revalidateSteps(); // одразу після завантаження
-},
 };
 </script>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700&display=swap');
-
 @font-face {
   font-family: 'KyivType Titling Black2';
   src: url('@/assets/fonts/KyivType2020-14-12/KyivType-NoVariable/TTF/KyivTypeTitling-Black2.ttf') format('truetype');
@@ -536,7 +439,6 @@ mounted() {
   font-style: normal;
   font-display: swap;
 }
-
 .font-montserrat {
   font-family: 'Montserrat', sans-serif;
 }

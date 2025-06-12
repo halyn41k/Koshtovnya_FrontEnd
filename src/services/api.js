@@ -569,6 +569,119 @@ getAdminFilter: async (config = {}) => {
   deleteCategory: async id => {
     const { data } = await apiClient.delete(`/api/admin/categories/${id}`);
     return data;
-  }
+  },
 
+   getProductDetail: async (id) => {
+    try {
+      const { data } = await apiClient.get(`/api/admin/products/${id}`);
+      toast.success('Дані товару завантажено');
+      return data.data;
+    } catch (error) {
+      console.error(`Помилка завантаження деталей товару ${id}:`, error);
+      toast.error('Не вдалося завантажити деталі товару');
+      throw error;
+    }
+  },
+
+  listProducts: async (params = {}) => {
+    try {
+      const { data } = await apiClient.get('/api/admin/products', { params });
+      // data: { data: [...], links:..., meta:... }
+      // Не показуємо toast щокроку, щоб не спамити, але можна за потреби.
+      return data;
+    } catch (error) {
+      console.error('Помилка завантаження списку товарів:', error.response || error);
+      toast.error('Не вдалося завантажити товари');
+      throw error;
+    }
+  },
+
+  // 4) Створення нового продукту
+  createProduct: async (formData) => {
+    try {
+      const { data } = await apiClient.post('/api/admin/products', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      toast.success('Товар успішно додано');
+      return data.data || data.product;
+    } catch (error) {
+      console.error('Помилка створення товару:', error.response || error);
+      if (error.response?.status === 422 && error.response.data.errors) {
+        const msgs = [];
+        Object.values(error.response.data.errors).forEach(arr => {
+          if (Array.isArray(arr)) arr.forEach(m => msgs.push(m));
+        });
+        toast.error(msgs.join('; '));
+      } else {
+        toast.error('Не вдалося створити товар');
+      }
+      throw error;
+    }
+  },
+
+  // 5) Оновлення продукту (PATCH через POST+_method)
+  updateProduct: async (id, formData) => {
+    if (!id) throw new Error('Product ID is required');
+    try {
+      const { data } = await apiClient.post(`/api/admin/products/${id}`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      toast.success('Товар успішно оновлено');
+      return data.data || data.product;
+    } catch (error) {
+      console.error(`Помилка оновлення товару ${id}:`, error.response || error);
+      if (error.response?.status === 422 && error.response.data.errors) {
+        const msgs = [];
+        Object.values(error.response.data.errors).forEach(arr => {
+          if (Array.isArray(arr)) arr.forEach(m => msgs.push(m));
+        });
+        toast.error(msgs.join('; '));
+      } else {
+        toast.error('Не вдалося оновити товар');
+      }
+      throw error;
+    }
+  },
+
+  // 6) Видалення продукту
+  deleteProduct: async (id) => {
+    if (!id) throw new Error('Product ID is required');
+    try {
+      const { data } = await apiClient.delete(`/api/admin/products/${id}`);
+      toast.success('Товар видалено');
+      return data;
+    } catch (error) {
+      console.error(`Помилка видалення товару ${id}:`, error.response || error);
+      toast.error('Не вдалося видалити товар');
+      throw error;
+    }
+  },
+
+  // 7) Відновлення продукту
+  restoreProduct: async (id) => {
+    if (!id) throw new Error('Product ID is required');
+    try {
+      const { data } = await apiClient.post(`/api/admin/products/${id}/restore`);
+      toast.success('Товар відновлено');
+      return data;
+    } catch (error) {
+      console.error(`Помилка відновлення товару ${id}:`, error.response || error);
+      toast.error('Не вдалося відновити товар');
+      throw error;
+    }
+  },
+
+  // 8) Дані для форми (категорії, виробники і т.д.)
+  getProductFormData: async () => {
+    try {
+      const { data } = await apiClient.get('/api/admin/products/form-data');
+      toast.success('Дані для форми завантажено');
+      return data.data;
+    } catch (error) {
+      console.error('Помилка завантаження form-data:', error.response || error);
+      toast.error('Не вдалося завантажити дані для форми');
+      throw error;
+    }
+  },
 };
+

@@ -183,16 +183,13 @@
   </main>
 </template>
 
-
 <script>
-import axios from 'axios'
 import FilterProduct from './FilterProduct.vue'
 import AddProductModal from './AddProductModal.vue'
 import EditProductModal from './EditProductModal.vue'
 import DeleteProductModal from './DeleteProductModal.vue'
 import ProductDetailModal from './ProductDetailModal.vue'
 import api from '@/services/api';
-
 
 export default {
   name: 'ProductList',
@@ -208,7 +205,7 @@ export default {
       filtersKey: 0,
       products: [],
       showDetailModal: false,
-productDetails: null,
+      productDetails: null,
       searchQuery: '',
       meta: null,
       showAddModal: false,
@@ -219,98 +216,81 @@ productDetails: null,
       currentFilters: {}
     }
   },
- 
   methods: {
+    // Відкрити деталі через api
     async openProductDetails(productId) {
-  try {
-    // 🔥 Шукаємо товар у списку, щоб дістати is_deleted
-    const base = this.products.find(p => p.id === productId)
-    const res = await axios.get(`https://koshtovnya.api-dev.bmax-edu.website/api/admin/products/${productId}`, {
-      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-    });
-
-    // 👇 вручну додаємо is_deleted із попереднього запиту
-    this.productDetails = { ...res.data.data, is_deleted: base?.is_deleted ?? false }
-
-    this.showDetailModal = true
-  } catch (e) {
-    console.error('❌ Помилка отримання деталей товару:', e)
-  }
-},
+      try {
+        const base = this.products.find(p => p.id === productId)
+        const detail = await api.getProductDetail(productId)
+        this.productDetails = { ...detail, is_deleted: base?.is_deleted ?? false }
+        this.showDetailModal = true
+      } catch (e) {
+        console.error('❌ Помилка отримання деталей товару:', e)
+      }
+    },
 
     goToPage(url) {
       if (!url || this.searchQuery.trim()) return;
-      this.fetchProducts(url);
+      // Викликаємо fetchProducts, передавши повний URL
+      this.fetchProducts(url, null)
     },
-    fetchFilteredProducts(filters) {
-  const endpoint = 'https://koshtovnya.api-dev.bmax-edu.website/api/admin/products';
 
-  const params = new URLSearchParams();
+    // Фільтрація
+    async fetchFilteredProducts(filters) {
+      try {
+        const paramsObj = {}
+        Object.entries(filters).forEach(([key, val]) => {
+          paramsObj[key] = val
+        })
+        // Виклик через сервіс: повертає { data, meta, links }
+        const resp = await api.getAdminProducts({ params: paramsObj })
+        this.products = resp.data || []
+        this.meta = null
+      } catch (err) {
+        console.error('❌ Помилка запиту товарів:', err)
+        this.products = []
+        this.meta = null
+      }
+    },
 
-  console.log('%c🚀 fetchFilteredProducts():', 'color: orange;', filters);
+    // Завантажити сторінку товарів (пагінація, пошук, фільтри)
+    async fetchProducts(url = null, page = 1) {
+      try {
+        const paramsObj = { ...this.currentFilters }
+        if (this.searchQuery.trim()) {
+          paramsObj.search = this.searchQuery.trim()
+        }
+        if (page != null) {
+          paramsObj.page = page
+        }
+        let resp
+        if (url) {
+          // Якщо передано повний URL, витягуємо відносний шлях + пошуковий рядок
+          try {
+            const u = new URL(url)
+            const relative = u.pathname + u.search
+            resp = await api.getAdminProducts({ url: relative, params: paramsObj })
+          } catch (e) {
+            // Якщо не вдалося розпарсити як URL, передаємо його як відносний
+            resp = await api.getAdminProducts({ url, params: paramsObj })
+          }
+        } else {
+          resp = await api.getAdminProducts({ params: paramsObj })
+        }
+        this.products = resp.data || []
+        this.meta = this.searchQuery.trim() ? null : (resp.meta || null)
+      } catch (error) {
+        console.error('❌ Помилка завантаження товарів:', error)
+        this.products = []
+        this.meta = null
+      }
+    },
 
-  Object.entries(filters).forEach(([key, val]) => {
-  if (Array.isArray(val)) {
-    val.forEach(v => params.append(`${key}[]`, v)); 
-  } else {
-    params.append(key, val);
-  }
-});
-
-
-  const url = `${endpoint}?${params.toString()}`;
-  console.log('%c🌐 URL запиту:', 'color: blue;', url);
-
-  axios.get(url, {
-    headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-  })
-    .then(res => {
-      console.log('%c✅ Отримано товари:', 'color: green;', res.data);
-      this.products = res.data.data || [];
-      this.meta = null;
-    })
-    .catch(err => {
-      console.error('❌ Помилка запиту товарів:', err);
-      this.products = [];
-      this.meta = null;
-    });
-},
-
-    fetchProducts(url = null, page = 1) {
-  const endpoint = url || 'https://koshtovnya.api-dev.bmax-edu.website/api/admin/products'
-  const params = new URLSearchParams()
-
-  Object.entries(this.currentFilters).forEach(([key, val]) => {
-    Array.isArray(val)
-      ? val.forEach(v => params.append(key, v))
-      : params.append(key, val)
-  })
-
-  if (this.searchQuery.trim()) {
-    params.append('search', this.searchQuery.trim())
-  }
-
-  params.append('page', page)
-
-  const fullUrl = `${endpoint}?${params.toString()}`
-
-  axios.get(fullUrl, {
-    headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-  })
-    .then(response => {
-      this.products = response.data.data || []
-      this.meta = this.searchQuery.trim() ? null : (response.data.meta || null)
-    })
-    .catch(error => {
-      console.error('❌ Помилка завантаження товарів:', error)
-      this.products = []
-      this.meta = null
-    })
-},
-changePage(page) {
-  if (page < 1 || page > this.meta.last_page) return
-  this.fetchProducts(null, page)
-},
+    changePage(page) {
+      if (!this.meta) return
+      if (page < 1 || page > this.meta.last_page) return
+      this.fetchProducts(null, page)
+    },
 
     onSearch() {
       clearTimeout(this.searchTimeout);
@@ -322,109 +302,96 @@ changePage(page) {
         }
       }, 400);
     },
-    fetchSearchedProducts(query) {
-      const search = query.trim();
-      if (!search) return this.fetchProducts();
-      axios.get(`https://koshtovnya.api-dev.bmax-edu.website/api/admin/products/search/${encodeURIComponent(search)}`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-      })
-      .then(response => {
-this.products = (response.data.data || []).sort((a, b) => b.id - a.id);
-        this.meta = null;
-      })
-      .catch(error => {
-        console.error('❌ Помилка пошуку товарів:', error);
-        this.products = [];
-        this.meta = null;
-      });
+
+    async fetchSearchedProducts(query) {
+      const search = query.trim()
+      if (!search) return this.fetchProducts()
+      try {
+        const resp = await api.searchProducts(search)
+        let list = []
+        if (Array.isArray(resp)) {
+          list = resp
+        } else if (resp.data && Array.isArray(resp.data)) {
+          list = resp.data
+        }
+        this.products = list.sort((a, b) => b.id - a.id)
+        this.meta = null
+      } catch (error) {
+        console.error('❌ Помилка пошуку товарів:', error)
+        this.products = []
+        this.meta = null
+      }
     },
+
     paginationLinks() {
-  if (!this.meta || this.meta.last_page <= 1) return []
-  return Array.from({ length: this.meta.last_page }, (_, i) => ({
-    label: (i + 1).toString(),
-    page: i + 1,
-    active: this.meta.current_page === i + 1
-  }))
-},
-    restoreProduct(id) {
-      axios.post(`https://koshtovnya.api-dev.bmax-edu.website/api/admin/products/${id}/restore`, {}, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-      })
-      .then(() => {
-        this.fetchProducts();
-      })
-      .catch(err => {
-        console.error('❌ Помилка відновлення товару:', err);
-      });
+      if (!this.meta || this.meta.last_page <= 1) return []
+      return Array.from({ length: this.meta.last_page }, (_, i) => ({
+        label: (i + 1).toString(),
+        page: i + 1,
+        active: this.meta.current_page === i + 1
+      }))
     },
+
+    async restoreProduct(id) {
+      try {
+        await api.restoreProduct(id)
+        await this.fetchProducts()
+      } catch (err) {
+        console.error('❌ Помилка відновлення товару:', err)
+      }
+    },
+
     openFilter() { this.showFilter = true },
     closeFilter() { this.showFilter = false },
+
     applyFilters(rawFilters) {
-  const adapted = {};
-  console.log('🎯 Вихідні фільтри:', rawFilters);
+      const adapted = {}
+      if (rawFilters.availability?.length) {
+        const map = { 'В наявності': 1, 'Немає в наявності': 0 }
+        adapted.is_available = rawFilters.availability.map(a => map[a]).filter(v => v !== undefined)
+      }
+      if (rawFilters.rating?.length) adapted.rating = rawFilters.rating
+      if (rawFilters.color) adapted.color = rawFilters.color
+      if (rawFilters.producers?.length) adapted.bead_producer = rawFilters.producers
+      else if (rawFilters.bead_producer?.length) adapted.bead_producer = rawFilters.bead_producer
+      if (rawFilters.beadTypes?.length) adapted.type_of_bead = rawFilters.beadTypes
+      if (rawFilters.category?.length) adapted.category = rawFilters.category
+      if (rawFilters.size && Array.isArray(rawFilters.size)) {
+        adapted.size_from = rawFilters.size[0]
+        adapted.size_to = rawFilters.size[1]
+      }
+      if (rawFilters.weight && Array.isArray(rawFilters.weight)) {
+        adapted.weight_from = rawFilters.weight[0]
+        adapted.weight_to = rawFilters.weight[1]
+      }
+      if (rawFilters.price && Array.isArray(rawFilters.price)) {
+        adapted.price_from = rawFilters.price[0]
+        adapted.price_to = rawFilters.price[1]
+      }
+      this.currentFilters = adapted
+      sessionStorage.setItem('admin-filters', JSON.stringify(adapted))
+      this.fetchFilteredProducts(adapted)
+      this.closeFilter()
+    },
 
-  if (rawFilters.availability?.length) {
-    const map = {
-      'В наявності': 1,
-      'Немає в наявності': 0
-    };
-    adapted.is_available = rawFilters.availability.map(a => map[a]).filter(v => v !== undefined);
-  }
+    removeTag(tag) {
+      const nf = { ...this.currentFilters }
+      const val = nf[tag.key]
+      if (Array.isArray(val)) {
+        if (val.length === 2 && typeof val[0] === 'number') delete nf[tag.key]
+        else nf[tag.key] = val.filter(v => v !== tag.value)
+      } else {
+        delete nf[tag.key]
+      }
+      this.applyFilters(nf)
+    },
 
-  if (rawFilters.rating?.length) adapted.rating = rawFilters.rating;
-  if (rawFilters.color) adapted.color = rawFilters.color;
-
-  // 💥 ось тут додаємо обидва варіанти
-  if (rawFilters.producers?.length) adapted.bead_producer = rawFilters.producers;
-  else if (rawFilters.bead_producer?.length) adapted.bead_producer = rawFilters.bead_producer;
-
-  if (rawFilters.beadTypes?.length) adapted.type_of_bead = rawFilters.beadTypes;
-  if (rawFilters.category?.length) adapted.category = rawFilters.category;
-
-  if (rawFilters.size && Array.isArray(rawFilters.size)) {
-    adapted.size_from = rawFilters.size[0];
-    adapted.size_to = rawFilters.size[1];
-  }
-
-  if (rawFilters.weight && Array.isArray(rawFilters.weight)) {
-    adapted.weight_from = rawFilters.weight[0];
-    adapted.weight_to = rawFilters.weight[1];
-  }
-
-  if (rawFilters.price && Array.isArray(rawFilters.price)) {
-    adapted.price_from = rawFilters.price[0];
-    adapted.price_to = rawFilters.price[1];
-  }
-
-  console.log('📦 Адаптовані фільтри:', adapted);
-
-  this.currentFilters = adapted;
-  sessionStorage.setItem('admin-filters', JSON.stringify(adapted));
-  this.fetchFilteredProducts(adapted);
-  this.closeFilter();
-},
-
-removeTag(tag) {
-  const nf = { ...this.currentFilters };
-  const val = nf[tag.key];
-  if (Array.isArray(val)) {
-    if (val.length === 2 && typeof val[0] === 'number') delete nf[tag.key];
-    else nf[tag.key] = val.filter(v => v !== tag.value);
-  } else {
-    delete nf[tag.key];
-  }
-  this.applyFilters(nf);
-},
-
-
-clearAllFilters() {
-  this.currentFilters = {};
-  this.filtersKey++; // для оновлення FilterComponent
-  sessionStorage.removeItem('admin-filters');
-  this.fetchProducts(); // завантажити всі товари
-},
-
-
+    clearAllFilters() {
+      this.currentFilters = {}
+      this.filtersKey++
+      sessionStorage.removeItem('admin-filters')
+      this.fetchProducts()
+    },
 
     openAddModal() { this.showAddModal = true },
     closeAddModal() { this.showAddModal = false },
@@ -432,44 +399,47 @@ clearAllFilters() {
     closeEditModal() { this.showEditModal = false; this.selectedProduct = null },
     deleteProduct(id) { this.selectedProduct = this.products.find(p => p.id === id); this.showDeleteModal = true },
     closeDeleteModal() { this.showDeleteModal = false; this.selectedProduct = null },
-    onProductAdded(p) { this.products.unshift(p); this.closeAddModal() },
+
+    onProductAdded(p) {
+      this.products.unshift(p)
+      this.closeAddModal()
+    },
     onProductUpdated(u) {
-      const i = this.products.findIndex(p => p.id === u.id);
-      if (i !== -1) this.products[i] = u;
-      this.closeEditModal();
+      const i = this.products.findIndex(p => p.id === u.id)
+      if (i !== -1) this.products[i] = u
+      this.closeEditModal()
     },
     onProductDeleted(id) {
-      this.products = this.products.filter(p => p.id !== id);
-      this.closeDeleteModal();
+      this.products = this.products.filter(p => p.id !== id)
+      this.closeDeleteModal()
     },
   },
-  mounted() {
-  document.title = 'Товари';
-  const stored = sessionStorage.getItem('admin-filters');
-  if (stored) {
-    this.currentFilters = JSON.parse(stored);
-    this.fetchFilteredProducts(this.currentFilters);
-  } else {
-    this.fetchProducts();
-  }
-},
-
-  computed: {
-  activeTags() {
-    const tags = [];
-    for (const [key, val] of Object.entries(this.currentFilters)) {
-      if (Array.isArray(val)) {
-        if (val.length === 2 && typeof val[0] === 'number') {
-          tags.push({ key, value: val, label: `${val[0]} – ${val[1]}` });
-        } else {
-          tags.push(...val.map(v => ({ key, value: v, label: `${v}` })));
-        }
-      } else if (val) {
-        tags.push({ key, value: val, label: `${val}` });
-      }
+  async mounted() {
+    document.title = 'Товари'
+    const stored = sessionStorage.getItem('admin-filters')
+    if (stored) {
+      this.currentFilters = JSON.parse(stored)
+      await this.fetchFilteredProducts(this.currentFilters)
+    } else {
+      await this.fetchProducts()
     }
-    return tags;
+  },
+  computed: {
+    activeTags() {
+      const tags = []
+      for (const [key, val] of Object.entries(this.currentFilters)) {
+        if (Array.isArray(val)) {
+          if (val.length === 2 && typeof val[0] === 'number') {
+            tags.push({ key, value: val, label: `${val[0]} – ${val[1]}` })
+          } else {
+            tags.push(...val.map(v => ({ key, value: v, label: `${v}` })))
+          }
+        } else if (val) {
+          tags.push({ key, value: val, label: `${val}` })
+        }
+      }
+      return tags
+    }
   }
-},
 }
 </script>

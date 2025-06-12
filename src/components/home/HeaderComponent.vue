@@ -527,13 +527,19 @@ changeCurrency(curr) {
     toggleCategories() { this.isCategoriesOpen = !this.isCategoriesOpen; },
     toggleMobileSearch() { this.mobileSearchActive = !this.mobileSearchActive; },
     fetchCartCount() { api.getCartCount().then(r => this.cartCount = r.cart_count || 0).catch(() => {}); },
-    fetchSiteSettings() {
-      api.getSiteSettings().then(r =>
+     fetchSiteSettings() {
+    api.getSiteSettings()
+      .then(r => {
         (r.data || []).forEach(({ setting_key, setting_value }) => {
-          if (setting_key === 'site_logo') this.siteSettings.site_logo = setting_value;
-        })
-      ).catch(() => {});
-    },
+          if (setting_key === 'site_logo') {
+            this.siteSettings.site_logo = setting_value;
+            // та оновлюємо кеш
+            localStorage.setItem('site_logo', setting_value);
+          }
+        });
+      })
+      .catch(() => {});
+  },
     async fetchCategories() {
   try {
     const res = await api.getCategories();
@@ -561,7 +567,10 @@ changeCurrency(curr) {
     handleOutsideClick(e) { if (!this.$el.contains(e.target)) this.resetResults(); }
   },
   mounted() {
-
+    const cachedLogo = localStorage.getItem('site_logo');
+  if (cachedLogo) {
+    this.siteSettings.site_logo = cachedLogo;
+  }
       this.state.isDarkMode = document.documentElement.classList.contains('dark');
 
   this.$nextTick(() => this.headerHeight = this.$refs.headerEl?.offsetHeight || 64);
