@@ -2,21 +2,33 @@
   <main class="w-full p-4 space-y-6 relative bg-white dark:bg-[#0B1A2F] text-black dark:text-white">
     <!-- Заголовок -->
     <div class="flex justify-between items-center">
-      <h1 class="text-2xl font-bold">Звіт по Прибутку</h1>
+      <h1 class="text-2xl font-bold">{{ $t('admin.profitReport.title') }}</h1>
     </div>
 
     <!-- Дати + кнопки в ряд -->
     <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
       <!-- Дата -->
       <div class="flex gap-4 items-center">
-        <VueDatePicker v-model="startDate" placeholder="Дата від" :locale="uk" />
-        <VueDatePicker v-model="endDate" placeholder="Дата до" :locale="uk" />
+          <VueDatePicker
+      v-model="startDate"
+      :placeholder="$t('admin.profitReport.dateFrom')"
+      :locale="locale"
+      teleport
+    />
+
+    <!-- Кінцева дата -->
+    <VueDatePicker
+      v-model="endDate"
+      :placeholder="$t('admin.profitReport.dateTo')"
+      :locale="locale"
+      teleport
+    />
 
         <button
           @click="fetchIncomeReport()"
           class="px-5 py-2 bg-[#6B1F1F] text-white rounded hover:bg-[#A01212] transition"
         >
-          Застосувати
+          {{ $t('admin.profitReport.apply') }}
         </button>
 
         <button
@@ -24,7 +36,7 @@
           @click="resetDates"
           class="px-5 py-2 bg-gray-200 dark:bg-[#1E2B45] text-gray-800 dark:text-white rounded hover:bg-gray-300 dark:hover:bg-[#2C3E66] transition"
         >
-          Скинути
+          {{ $t('admin.profitReport.reset') }}
         </button>
       </div>
 
@@ -34,19 +46,19 @@
           @click="printReport"
           class="px-4 py-2 bg-[#6B1F1F] text-white rounded hover:bg-[#A01212] transition"
         >
-          Друк
+          {{ $t('admin.profitReport.print') }}
         </button>
         <button
           @click="exportToExcel"
           class="px-4 py-2 bg-[#6B1F1F] text-white rounded hover:bg-[#A01212] transition"
         >
-          Excel
+          {{ $t('admin.profitReport.excel') }}
         </button>
         <button
           @click="exportToPDF"
           class="px-4 py-2 bg-[#6B1F1F] text-white rounded hover:bg-[#A01212] transition"
         >
-          PDF
+          {{ $t('admin.profitReport.pdf') }}
         </button>
       </div>
     </div>
@@ -60,12 +72,24 @@
       <table class="min-w-full table-auto text-sm">
         <thead class="bg-gray-100 dark:bg-[#1B335C] text-left">
           <tr>
-            <th class="px-4 py-3 text-gray-700 dark:text-gray-300">ID</th>
-            <th class="px-4 py-3 text-gray-700 dark:text-gray-300">Дата</th>
-            <th class="px-4 py-3 text-gray-700 dark:text-gray-300">Виторг</th>
-            <th class="px-4 py-3 text-gray-700 dark:text-gray-300">Транзакції</th>
-            <th class="px-4 py-3 text-gray-700 dark:text-gray-300">Витрати</th>
-            <th class="px-4 py-3 text-gray-700 dark:text-gray-300">Прибуток</th>
+            <th class="px-4 py-3 text-gray-700 dark:text-gray-300">
+              {{ $t('admin.profitReport.table.id') }}
+            </th>
+            <th class="px-4 py-3 text-gray-700 dark:text-gray-300">
+              {{ $t('admin.profitReport.table.date') }}
+            </th>
+            <th class="px-4 py-3 text-gray-700 dark:text-gray-300">
+              {{ $t('admin.profitReport.table.revenue') }}
+            </th>
+            <th class="px-4 py-3 text-gray-700 dark:text-gray-300">
+              {{ $t('admin.profitReport.table.transactions') }}
+            </th>
+            <th class="px-4 py-3 text-gray-700 dark:text-gray-300">
+              {{ $t('admin.profitReport.table.expenses') }}
+            </th>
+            <th class="px-4 py-3 text-gray-700 dark:text-gray-300">
+              {{ $t('admin.profitReport.table.netIncome') }}
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -74,14 +98,27 @@
             :key="row.id"
             class="hover:bg-gray-50 dark:hover:bg-[#1C2F51] transition-all"
           >
-            <td class="px-4 py-2 border-b border-[#E0E0E0] dark:border-[#2A4C79] text-sm text-gray-800 dark:text-gray-200 text-left">{{ row.id }}</td>
-            <td class="px-4 py-2 border-b border-[#E0E0E0] dark:border-[#2A4C79] text-sm text-gray-800 dark:text-gray-200 text-left">{{ row.date }}</td>
-            <td class="px-4 py-2 border-b border-[#E0E0E0] dark:border-[#2A4C79] text-sm text-gray-800 dark:text-gray-200 text-left">{{ row.revenue }} грн</td>
-            <td class="px-4 py-2 border-b border-[#E0E0E0] dark:border-[#2A4C79] text-sm text-gray-800 dark:text-gray-200 text-left">{{ row.transaction_number || '—' }}</td>
-            <td class="px-4 py-2 border-b border-[#E0E0E0] dark:border-[#2A4C79] text-sm text-gray-800 dark:text-gray-200 text-left">{{ row.expenses }} грн</td>
+            <td class="px-4 py-2 border-b border-[#E0E0E0] dark:border-[#2A4C79] text-sm text-gray-800 dark:text-gray-200">
+              {{ row.id }}
+            </td>
+            <td class="px-4 py-2 border-b border-[#E0E0E0] dark:border-[#2A4C79] text-sm text-gray-800 dark:text-gray-200">
+              {{ row.date }}
+            </td>
+            <td class="px-4 py-2 border-b border-[#E0E0E0] dark:border-[#2A4C79] text-sm text-gray-800 dark:text-gray-200">
+              {{ row.revenue }} грн
+            </td>
+            <td class="px-4 py-2 border-b border-[#E0E0E0] dark:border-[#2A4C79] text-sm text-gray-800 dark:text-gray-200">
+              {{ row.transaction_number || '—' }}
+            </td>
+            <td class="px-4 py-2 border-b border-[#E0E0E0] dark:border-[#2A4C79] text-sm text-gray-800 dark:text-gray-200">
+              {{ row.expenses }} грн
+            </td>
             <td
-              class="px-4 py-2 border-b border-[#E0E0E0] dark:border-[#2A4C79] text-sm font-semibold text-left"
-              :class="{ 'text-green-700 dark:text-green-400': row.net_income > 0, 'text-red-600 dark:text-red-400': row.net_income < 0 }"
+              class="px-4 py-2 border-b border-[#E0E0E0] dark:border-[#2A4C79] text-sm font-semibold"
+              :class="{
+                'text-green-700 dark:text-green-400': row.net_income > 0,
+                'text-red-600 dark:text-red-400': row.net_income < 0
+              }"
             >
               {{ row.net_income }} грн
             </td>
@@ -96,9 +133,18 @@
       v-if="summary"
       class="bg-gray-50 dark:bg-[#1A2F4D] p-4 rounded-md border border-gray-200 dark:border-[#2F4F7A] space-y-1"
     >
-      <p><strong>Всього виручка:</strong> {{ summary.total_income }} грн</p>
-      <p><strong>Всього витрати:</strong> {{ summary.total_expenses }} грн</p>
-      <p><strong>Чистий прибуток:</strong> {{ summary.total_net_income }} грн</p>
+      <p>
+        <strong>{{ $t('admin.profitReport.summary.totalRevenue') }}:</strong>
+        {{ summary.total_income }} грн
+      </p>
+      <p>
+        <strong>{{ $t('admin.profitReport.summary.totalExpenses') }}:</strong>
+        {{ summary.total_expenses }} грн
+      </p>
+      <p>
+        <strong>{{ $t('admin.profitReport.summary.totalNetIncome') }}:</strong>
+        {{ summary.total_net_income }} грн
+      </p>
     </div>
 
     <!-- Порожній стан -->
@@ -106,10 +152,11 @@
       v-else
       class="py-12 text-center text-gray-500 dark:text-gray-400 border border-dashed dark:border-gray-600 rounded-md"
     >
-      <p>Поки що не було додано жодного звіту по прибутку.</p>
+      <p>{{ $t('admin.profitReport.noData') }}</p>
     </div>
   </main>
 </template>
+
 
 <script>
 import axios from "axios";
@@ -134,7 +181,7 @@ export default {
       startDate: null,
       endDate: null,
       searchQuery: "",
-    uk // ← ось так
+     locale: uk,
     };
   },
   computed: {

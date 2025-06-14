@@ -115,7 +115,9 @@
             <img :src="product.image_url" alt="Product image" class="w-26 h-14 object-cover rounded-md" />
           </div>
           <div class="flex flex-col gap-1">
-            <div class="text-base font-semibold text-red-900 dark:text-red-200">{{ product.price }} грн</div>
+<div class="text-base font-semibold text-red-900 dark:text-red-200">
+  {{ formatPrice(product.price, product.currency) }}
+</div>
             <div class="text-sm text-gray-700 dark:text-gray-400">{{ product.bead_producer_name }}</div>
           </div>
         </div>
@@ -167,7 +169,9 @@
       </button>
     </div>
 
-    <!-- Модалки -->
+    
+  </main>
+  <!-- Модалки -->
     <AddProductModal v-if="showAddModal" @close="closeAddModal" @product-added="onProductAdded" />
     <EditProductModal v-if="showEditModal" :product="selectedProduct" @close="closeEditModal" @product-updated="onProductUpdated" />
     <DeleteProductModal v-if="showDeleteModal" :product="selectedProduct" @close="closeDeleteModal" @product-deleted="onProductDeleted" />
@@ -180,7 +184,6 @@
       @delete="deleteProduct"
       @restore="restoreProduct"
     />
-  </main>
 </template>
 
 <script>
@@ -323,6 +326,17 @@ export default {
       }
     },
 
+  formatPrice(price, currency) {
+    const val = Number(price)
+    const curr = (currency || 'UAH').toUpperCase()
+    const locale = curr === 'USD' ? 'en-US' : 'uk-UA'
+
+    return new Intl.NumberFormat(locale, {
+      style: 'currency',
+      currency: curr
+    }).format(val)
+  },
+
     paginationLinks() {
       if (!this.meta || this.meta.last_page <= 1) return []
       return Array.from({ length: this.meta.last_page }, (_, i) => ({
@@ -331,6 +345,7 @@ export default {
         active: this.meta.current_page === i + 1
       }))
     },
+    
 
     async restoreProduct(id) {
       try {

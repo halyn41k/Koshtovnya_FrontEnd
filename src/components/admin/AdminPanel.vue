@@ -309,7 +309,7 @@ export default {
         superadmin: [
           ['statistics', 'DashboardView', 'stats'],
           ['users', Clients, 'people'],
-          ['employees', Employees, 'people'],
+          ['employees', Employees, 'employee'],
           ['products', ProductList, 'goods'],
           ['orders', Orders, 'orders'],
           ['reports', Reports, 'reports'],
@@ -318,7 +318,7 @@ export default {
         admin: [
           ['statistics', 'DashboardView', 'stats'],
           ['users', Clients, 'people'],
-          ['employees', Employees, 'people'],
+          ['employees', Employees, 'employee'],
           ['products', ProductList, 'goods'],
           ['orders', Orders, 'orders'],
           ['accessRights', Settings, 'settings'],

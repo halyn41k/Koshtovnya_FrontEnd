@@ -106,10 +106,11 @@
             :title="client.is_banned ? 'Розбанити' : 'Забанити'"
           >
             <img
-              :src="client.is_banned ? require('@/assets/icons/unban.svg') : require('@/assets/icons/ban.svg')"
-              class="w-5 h-5 invert dark:invert-0"
-              alt="Ban"
-            />
+  :src="client.is_banned ? require('@/assets/icons/unban.svg') : require('@/assets/icons/ban.svg')"
+  class="w-5 h-5"
+  alt="Ban"
+/>
+
           </button>
         </td>
       </tr>
@@ -151,15 +152,7 @@
       >&gt;</button>
     </div>
 
-    <!-- Модал -->
-    <UserModal
-      v-if="showUserModal"
-      :user="modalClient"
-      :key="modalKey"
-      :title="modalTitle"
-      @close="closeUserModal"
-      @userSubmit="handleUserSubmit"
-    />
+  
 
     <!-- Toast -->
     <div
@@ -169,6 +162,15 @@
       Користувач успішно {{ toastAction }}!
     </div>
   </main>
+  <UserModal
+  v-if="showUserModal"
+  :user="modalClient"
+  :context="'user'"
+  :title="modalTitle"
+  @close="closeUserModal"
+  @userSubmit="handleUserSubmit"
+/>
+
 </template>
 
 

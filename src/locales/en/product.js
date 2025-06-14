@@ -28,7 +28,7 @@ export default {
   ratingLabel: 'Rating:',
   reviewPlaceholder: 'Write a review...',
   submitReview: 'Submit',
-  starsLabel: 'stars',
+  starsLabel: "{count} stars",
   adminReplyLabel: 'Administrator Reply:',
   writeReplyPlaceholder: 'Write a reply...',
   submitReply: 'Submit Reply',

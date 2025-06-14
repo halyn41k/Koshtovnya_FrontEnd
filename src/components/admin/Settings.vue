@@ -104,26 +104,36 @@
         </button>
       </div>
 
-      <div
-        class="overflow-x-auto rounded-xl border border-gray-200 dark:border-slate-600 shadow-sm"
-      >
+      <div class="overflow-x-auto rounded-xl border border-gray-200 dark:border-slate-600 shadow-sm">
         <table class="min-w-full text-sm text-gray-800 dark:text-slate-200">
           <thead class="bg-[#f7e4e4] dark:bg-[#334155] text-left font-semibold text-[#3a3a3a] dark:text-slate-200">
             <tr>
               <th class="px-4 py-3">ID</th>
-              <th class="px-4 py-3">Назва</th>
+              <th class="px-4 py-3">{{ $t('admin.settings.categoryNameUk') }}</th>
+              <th class="px-4 py-3">{{ $t('admin.settings.categoryNameEn') }}</th>
               <th class="px-4 py-3">Зображення</th>
               <th class="px-4 py-3 text-right">Керування</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-200 dark:divide-slate-600 bg-white dark:bg-slate-800">
-            <tr v-for="cat in categories" :key="cat.id" class="hover:bg-gray-50 dark:hover:bg-slate-700">
+            <tr
+              v-for="cat in categories"
+              :key="cat.id"
+              class="hover:bg-gray-50 dark:hover:bg-slate-700"
+            >
               <td class="px-4 py-3">{{ cat.id }}</td>
               <td class="px-4 py-3">
                 <input
-                  v-model="cat.name"
-                  class="w-full border border-gray-300 dark:border-slate-500 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-pink-200 dark:bg-slate-700 dark:text-white"
+                  v-model="cat.name.uk"
                   @change="updateCategory(cat)"
+                  class="w-full border border-gray-300 dark:border-slate-500 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-pink-200 dark:bg-slate-700 dark:text-white"
+                />
+              </td>
+              <td class="px-4 py-3">
+                <input
+                  v-model="cat.name.en"
+                  @change="updateCategory(cat)"
+                  class="w-full border border-gray-300 dark:border-slate-500 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-pink-200 dark:bg-slate-700 dark:text-white"
                 />
               </td>
               <td class="px-4 py-3">
@@ -156,10 +166,47 @@
       >
         <div class="bg-white dark:bg-[#1E293B] p-6 rounded-lg shadow-xl w-full max-w-md space-y-4 relative">
           <button @click="showAddModal = false" class="absolute top-2 right-3 text-xl dark:text-slate-200">&times;</button>
-          <h3 class="text-lg font-semibold text-gray-800 dark:text-slate-100">Додати нову категорію</h3>
-          <input v-model="newCategory.name" placeholder="Назва" class="w-full px-3 py-2 border border-gray-300 dark:border-slate-500 rounded text-sm dark:bg-slate-700 dark:text-white" />
-          <input type="file" @change="e => newCategory.image = e.target.files[0]" />
-          <button @click="createCategory" class="w-full py-2 bg-[#6B1F1F] text-white rounded hover:bg-[#A01212] text-sm transition">
+          <h3 class="text-lg font-semibold text-gray-800 dark:text-slate-100">
+            {{ $t('admin.settings.createCategory') }}
+          </h3>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300">
+              {{ $t('admin.settings.categoryNameUk') }}
+            </label>
+            <input
+              v-model="newCategory.name.uk"
+              placeholder="{{ $t('admin.settings.categoryNameUk') }}"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-slate-500 rounded text-sm focus:outline-none focus:ring-1 focus:ring-pink-200 dark:bg-slate-700 dark:text-white"
+            />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300">
+              {{ $t('admin.settings.categoryNameEn') }}
+            </label>
+            <input
+              v-model="newCategory.name.en"
+              placeholder="{{ $t('admin.settings.categoryNameEn') }}"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-slate-500 rounded text-sm focus:outline-none focus:ring-1 focus:ring-pink-200 dark:bg-slate-700 dark:text-white"
+            />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300">
+              {{ $t('admin.settings.categoryImage') }}
+            </label>
+            <input
+              type="file"
+              @change="e => newCategory.image = e.target.files[0]"
+              class="w-full text-sm text-gray-700 dark:text-gray-200"
+            />
+          </div>
+
+          <button
+            @click="createCategory"
+            class="w-full py-2 bg-[#6B1F1F] text-white rounded hover:bg-[#A01212] text-sm transition"
+          >
             {{ $t('admin.settings.create') }}
           </button>
         </div>
@@ -241,15 +288,28 @@ export default {
       }
     },
     async fetchCategories() {
-      const toast = useToast();
-      try {
-        const response = await api.getCategories();
-        this.categories = response.data;
-      } catch (e) {
-        console.error('❌ Помилка при завантаженні категорій:', e);
-        toast.error('Не вдалося завантажити категорії');
-      }
-    },
+  const toast = useToast();
+  try {
+    const fd = new FormData();
+    fd.append('_method', 'GET');
+    const response = await api.getCategories(fd); // метод все ще POST
+    const data = response.data.data || response.data;
+
+    this.categories = data.map(c => ({
+      id: c.id,
+      image_url: c.image_url,
+      name: {
+        uk: c.name_uk,
+        en: c.name_en
+      },
+      name_display: c.name // Підставляється в залежності від locale на бекенді
+    }));
+  } catch (e) {
+    console.error('❌ Помилка при завантаженні категорій:', e);
+    toast.error('Не вдалося завантажити категорії');
+  }
+},
+
     async createCategory() {
       const toast = useToast();
       if (!this.newCategory.name || !this.newCategory.image) {

@@ -82,9 +82,13 @@ export default {
       logo: "Logo",
       save: "Save",
       categories: "Categories",
-      addCategory: "Add category",
-      create: "Create"
-    },
+      create: "Create",
+    categoryNameUk: "Name (UK)",
+    categoryNameEn: "Name (EN)",
+    categoryImage: "Category Image",
+    createCategory: "Create category",
+    addCategory: "Add new category",
+  },
     addProduct: {
       title: "Add product",
       name: "Name",
@@ -147,6 +151,50 @@ export default {
       loadError: "Failed to load profile.",
       updated: "Data updated.",
       updateError: "Update failed."
+    },
+     userModal: {
+    title: 'Add User',
+    firstName: "First Name",
+    firstNamePlaceholder: "Enter first name",
+    secondName: "Middle Name",
+    secondNamePlaceholder: "Enter middle name",
+    lastName: "Last Name",
+    lastNamePlaceholder: "Enter last name",
+    email: "Email",
+    emailPlaceholder: "Enter email",
+    phone: "Phone",
+    phonePlaceholder: "380XXXXXXXXX",
+    role: "Role",
+    rolePlaceholder: "Select a role",
+    cancel: "Cancel",
+    create: "Create",
+    update: "Update"
+  },
+
+
+   profitReport: {
+      title: "Income Report",
+      dateFrom: "Date from",
+      dateTo: "Date to",
+      apply: "Apply",
+      reset: "Reset",
+      print: "Print",
+      excel: "Excel",
+      pdf: "PDF",
+      table: {
+      id: "ID",
+        date: "Date",
+        revenue: "Revenue",
+        transactions: "Transactions",
+        expenses: "Expenses",
+        netIncome: "Profit"
+      },
+      summary: {
+      totalRevenue: "Total Revenue",
+        totalExpenses: "Total Expenses",
+        totalNetIncome: "Net Income"
+      },
+      noData: "No income reports have been added yet."
     }
-  }
+  },
 };

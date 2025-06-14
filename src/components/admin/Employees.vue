@@ -118,15 +118,7 @@
       >&gt;</button>
     </div>
 
-    <!-- Модаль -->
-    <UserModal
-      v-if="showUserModal"
-      :user="modalUser"
-      :key="modalKey"
-      :title="modalTitle"
-      @close="closeUserModal"
-      @userSubmit="handleUserSubmit"
-    />
+   
 
     <!-- Toast -->
     <div
@@ -136,6 +128,16 @@
       Працівника успішно {{ toastAction }}!
     </div>
   </main>
+   <!-- Модаль -->
+    <UserModal
+  v-if="showUserModal"
+  :user="modalUser"
+  :context="'employee'"
+  :title="modalTitle"
+  @close="closeUserModal"
+  @userSubmit="handleUserSubmit"
+/>
+
 </template>
 
 

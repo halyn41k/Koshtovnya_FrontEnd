@@ -109,24 +109,25 @@
             <label class="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('admin.addProduct.colors') }}</label>
             <div class="flex flex-wrap gap-2">
               <button
-                v-for="color in formData.colors"
-                :key="color"
-                type="button"
-                @click="toggleColor(color)"
-                :class="[
-                  'flex items-center px-2 py-1 border rounded-md space-x-2',
-                  form.colors.includes(color)
-                    ? 'border-[#6B1F1F] bg-[#6B1F1F]/10'
-                    : 'border-gray-300'
-                ]"
-              >
-                <span
-                  class="w-5 h-5 rounded-full border"
-                  :class="form.colors.includes(color) ? 'border-[#6B1F1F]' : 'border-gray-300'"
-                  :style="{ backgroundColor: colorMap[color] }"
-                ></span>
-                <span class="text-sm text-gray-700">{{ color }}</span>
-              </button>
+  v-for="color in formData.colors"
+  :key="color"
+  type="button"
+  @click="toggleColor(color)"
+  :class="[
+    'flex items-center px-2 py-1 border rounded-md space-x-2',
+    form.colors.includes(color)
+      ? 'border-[#6B1F1F] bg-[#6B1F1F]/10'
+      : 'border-gray-300'
+  ]"
+>
+  <span
+    class="w-5 h-5 rounded-full border"
+    :class="form.colors.includes(color) ? 'border-[#6B1F1F]' : 'border-gray-300'"
+    :style="{ backgroundColor: colorMap[color] }"
+  ></span>
+  <span class="text-sm text-gray-700">{{ color }}</span>
+</button>
+
             </div>
           </div>
         </div>
@@ -307,47 +308,25 @@
 </template>
 
 <script>
-import axios from "axios";
 import api from '@/services/api';
-import Multiselect from 'vue-multiselect'
-
+import Multiselect from 'vue-multiselect';
 
 export default {
-  components: {
-  Multiselect
-},
   name: "AddProductModal",
+  components: { Multiselect },
+
   data() {
     return {
       imagePreview: null,
-            name_uk: "",
-      name_en: "",
-      price: "",
-      colorMap: {
-        Чорний: "#000000",
-        Червоний: "#FF0000",
-        Білий: "#FFFFFF",
-        Зелений: "#008000",
-        Синій: "#0000FF",
-        Жовтий: "#FFFF00",
-        Помаранчевий: "#FFA500",
-        Фіолетовий: "#800080",
-        Коричневий: "#8B4513",
-        Сірий: "#808080",
-        Рожевий: "#FFC0CB",
-        Блакитний: "#87CEEB",
-        Бежевий: "#F5F5DC",
-        Золотий: "#FFD700",
-        Сріблястий: "#C0C0C0",
-      },
       form: {
-        name: "",
-        price: "",
-        category: "",
-        bead_producer: "",
-        country_of_manufacture: "",
-        type_of_bead: "",
-        weight: "",
+        name_uk: '',
+        name_en: '',
+        price: '',
+        category: '',
+        bead_producer: '',
+        country_of_manufacture: '',
+        type_of_bead: '',
+        weight: '',
         colors: [],
         sizes: [],
         fittings: [],
@@ -362,133 +341,142 @@ export default {
         fittings: [],
         materials: [],
       },
+       colorMap: {
+      // українські старі
+      Чорний: "#000000", Червоний: "#FF0000", Білий: "#FFFFFF",
+      Зелений: "#008000", Синій: "#0000FF", Жовтий: "#FFFF00",
+      Помаранчевий: "#FFA500", Фіолетовий: "#800080", Коричневий: "#8B4513",
+      Сірий: "#808080", Рожевий: "#FFC0CB", Блакитний: "#87CEEB",
+      Бежевий: "#F5F5DC", Золотий: "#FFD700", Сріблястий: "#C0C0C0",
+
+      // тепер додай англійські:
+      Black:   "#000000",
+      Red:     "#FF0000",
+      White:   "#FFFFFF",
+      Green:   "#008000",
+      Blue:    "#0000FF",
+      Yellow:  "#FFFF00",
+      Orange:  "#FFA500",
+      Purple:  "#800080",
+      Brown:   "#8B4513",
+      Gray:    "#808080",
+      Pink:    "#FFC0CB",
+      Lightblue:"#87CEEB",
+      Beige:   "#F5F5DC",
+      Gold:    "#FFD700",
+      Silver:  "#C0C0C0",
+    }
+
     };
   },
-  mounted() {
-    axios
-      .get(
-        "https://koshtovnya.api-dev.bmax-edu.website/api/admin/products/form-data",
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      )
-      .then((res) => {
-        const d = res.data.data;
-        this.formData.categories = d.categories || [];
-        this.formData.bead_producers = d.bead_producers || [];
-        this.formData.countries_of_manufacture =
-          d.countries_of_manufacture || [];
-        this.formData.type_of_bead = d.type_of_bead || [];
-        this.formData.colors = d.colors || [];
-        this.formData.fittings = d.fittings || [];
-        this.formData.materials = d.materials || [];
-      })
-      .catch(console.error);
-  },
-  methods: {
-    handleFileChange(e) {
-  const file = e.target.files[0];
-  if (file) {
-    this.form.image = file;
-    this.imagePreview = URL.createObjectURL(file);
+
+  async mounted() {
+  try {
+    const data = await api.getProductFormData();
+
+    // Інші дані:
+    this.formData.categories               = data.categories;
+    this.formData.bead_producers           = data.bead_producers;
+    this.formData.countries_of_manufacture = data.countries_of_manufacture;
+    this.formData.type_of_bead             = data.type_of_bead;
+    this.formData.fittings                 = data.fittings;
+    this.formData.materials                = data.materials;
+
+    // А назви кольорів беремо з бекенду:
+    // — усе, що є в API, + тільки ті, для кого в нас є local colorMap
+    this.formData.colors = data.colors
+      .map(c => c.name_uk || c)       // якщо бек повертає об’єкти { name_uk, ... }
+      .filter(name => this.colorMap[name]);  // лишаємо тільки ті, що в colorMap
+
+  } catch (e) {
+    console.error('Не вдалося завантажити дані для форми:', e);
   }
 },
-    addSize() {
-      this.form.sizes.push({ size: "", quantity: 1 });
+
+
+  methods: {
+    handleFileChange(e) {
+      const file = e.target.files[0];
+      if (file) {
+        this.form.image = file;
+        this.imagePreview = URL.createObjectURL(file);
+      }
     },
-    removeSize(i) {
-      this.form.sizes.splice(i, 1);
-    },
-    addFitting() {
-      this.form.fittings.push({ fitting: "", material: "", quantity: 1 });
-    },
-    removeFitting(i) {
-      this.form.fittings.splice(i, 1);
-    },
+
+    addSize() { this.form.sizes.push({ size: '', quantity: 1 }); },
+    removeSize(i) { this.form.sizes.splice(i, 1); },
+    addFitting() { this.form.fittings.push({ fitting: '', material: '', quantity: 1 }); },
+    removeFitting(i) { this.form.fittings.splice(i, 1); },
     toggleColor(c) {
       const idx = this.form.colors.indexOf(c);
       if (idx === -1) this.form.colors.push(c);
       else this.form.colors.splice(idx, 1);
     },
-    submitForm() {
-  // Клієнтська валідація
-  if (!this.form.colors.length) {
-    alert(this.$t('admin.addProduct.colorRequired'));
-    return;
-  }
 
-  if (!this.form.sizes.length) {
-    alert(this.$t('admin.addProduct.sizeRequired'));
-    return;
-  }
+    async submitForm() {
+      // Клієнтська валідація
+      if (!this.form.colors.length) {
+        alert(this.$t('admin.addProduct.colorRequired'));
+        return;
+      }
+      if (!this.form.sizes.length) {
+        alert(this.$t('admin.addProduct.sizeRequired'));
+        return;
+      }
+      const sizeInvalid = this.form.sizes.some(s => !s.size || s.quantity === null || s.quantity === '');
+      if (sizeInvalid) {
+        alert(this.$t('admin.addProduct.sizeInvalid'));
+        return;
+      }
+      if (!this.form.fittings.length) {
+        alert(this.$t('admin.addProduct.fittingRequired'));
+        return;
+      }
+      const fittingInvalid = this.form.fittings.some(f => !f.fitting || !f.material || !f.quantity);
+      if (fittingInvalid) {
+        alert(this.$t('admin.addProduct.fittingInvalid'));
+        return;
+      }
+      if (!this.form.image) {
+        alert(this.$t('admin.addProduct.imageRequired'));
+        return;
+      }
 
-  const sizeInvalid = this.form.sizes.some(s => !s.size || s.quantity === null || s.quantity === '');
-  if (sizeInvalid) {
-    alert(this.$t('admin.addProduct.sizeInvalid'));
-    return;
-  }
+      // Формуємо FormData
+      const fd = new FormData();
+      fd.append('name_uk', this.form.name_uk);
+      fd.append('name_en', this.form.name_en);
+      fd.append('price', this.form.price);
+      fd.append('category', this.form.category);
+      fd.append('bead_producer', this.form.bead_producer);
+      fd.append('country_of_manufacture', this.form.country_of_manufacture);
+      fd.append('type_of_bead', this.form.type_of_bead);
+      fd.append('weight', this.form.weight);
+      this.form.colors.forEach(c => fd.append('colors[]', c));
+      this.form.sizes.forEach((s, i) => {
+        fd.append(`sizes[${i}][size]`, s.size);
+        fd.append(`sizes[${i}][quantity]`, s.quantity);
+      });
+      this.form.fittings.forEach((f, i) => {
+        fd.append(`fittings[${i}][fitting]`, f.fitting);
+        fd.append(`fittings[${i}][material]`, f.material);
+        fd.append(`fittings[${i}][quantity]`, f.quantity);
+      });
+      fd.append('image', this.form.image);
 
-  if (!this.form.fittings.length) {
-    alert(this.$t('admin.addProduct.fittingRequired'));
-    return;
-  }
-
-  const fittingInvalid = this.form.fittings.some(f => !f.fitting || !f.material || !f.quantity);
-  if (fittingInvalid) {
-    alert(this.$t('admin.addProduct.fittingInvalid'));
-    return;
-  }
-
-  if (!this.form.image) {
-    alert(this.$t('admin.addProduct.imageRequired'));
-    return;
-  }
-
-  const fd = new FormData();
-fd.append("name_uk", this.form.name_uk);
-fd.append("name_en", this.form.name_en);
-fd.append("price", this.form.price);
-// інші поля:
-this.form.colors.forEach(c => fd.append("colors[]", c));
-// sizes, fittings тощо
-fd.append("image", this.form.image);
-
-  this.form.colors.forEach((c) => fd.append("colors[]", c));
-
-  this.form.sizes.forEach((s, i) => {
-    fd.append(`sizes[${i}][size]`, s.size);
-    fd.append(`sizes[${i}][quantity]`, s.quantity);
-  });
-
-  this.form.fittings.forEach((f, i) => {
-    fd.append(`fittings[${i}][fitting]`, f.fitting);
-    fd.append(`fittings[${i}][material]`, f.material);
-    fd.append(`fittings[${i}][quantity]`, f.quantity);
-  });
-
-  axios
-    .post("https://koshtovnya.api-dev.bmax-edu.website/api/admin/products", fd, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-        "Content-Type": "multipart/form-data",
-      },
-    })
-    .then((r) => {
-      const d = r.data.data || r.data.product;
-      this.$emit("product-added", Array.isArray(d) ? Object.assign({}, ...d) : d);
-      this.close();
-    })
-    .catch((err) => {
-      console.error('❌ Помилка створення товару:', err);
-      alert(this.$t('admin.addProduct.createError'));
-    });
-},
-    close() {
-      this.$emit("close");
+      try {
+        const product = await api.createProduct(fd);
+        this.$emit('product-added', product);
+        this.close();
+      } catch (err) {
+        console.error('Помилка створення товару:', err);
+      }
     },
-  },
+
+    close() {
+      this.$emit('close');
+    }
+  }
 };
 </script>
 

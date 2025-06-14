@@ -1,93 +1,26 @@
 <template>
   <div class="fixed inset-0 bg-black/50 z-[999] flex items-center justify-center">
-
-    <div class="bg-white rounded-xl w-full max-w-md p-6 shadow-lg animate-fade-in">
+    <div class="bg-white dark:bg-[#1f2a42] rounded-xl w-full max-w-md p-6 shadow-lg animate-fade-in">
       <!-- Header -->
-      <div class="flex justify-between items-center border-b pb-3 mb-4">
-        <h2 class="text-xl font-bold text-gray-800">{{ title }}</h2>
+      <div class="flex justify-between items-center border-b border-gray-200 dark:border-gray-700 pb-3 mb-4">
+        <h2 class="text-xl font-bold text-black dark:invert">{{ title }}</h2>
         <button @click="$emit('close')" class="text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
       </div>
 
       <!-- Form -->
       <form @submit.prevent="handleSubmit" class="space-y-4">
-        <div>
-          <label for="first_name" class="block font-medium text-sm mb-1">Ім'я:</label>
-          <input
-            id="first_name"
-            v-model="form.first_name"
-            type="text"
-            required
-            placeholder="Введіть ім'я"
-            class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#6B1F1F]"
+        <!-- Dynamic fields based on context -->
+        <div v-for="field in visibleFields" :key="field.key">
+          <label :for="field.key" class="block font-medium text-sm mb-1 text-black dark:invert">
+            {{ $t(field.label) }}:
+          </label>
+          <component
+            :is="field.component || 'input'"
+            :id="field.key"
+            v-model="form[field.key]"
+            v-bind="field.props"
+            class="w-full border border-gray-300 dark:border-gray-600 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#6B1F1F] bg-white dark:bg-[#2a3748] text-black dark:text-black"
           />
-        </div>
-
-        <div>
-          <label for="second_name" class="block font-medium text-sm mb-1">По батькові:</label>
-          <input
-            id="second_name"
-            v-model="form.second_name"
-            type="text"
-            required
-            placeholder="Введіть по батькові"
-            class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#6B1F1F]"
-          />
-        </div>
-
-        <div>
-          <label for="last_name" class="block font-medium text-sm mb-1">Прізвище:</label>
-          <input
-            id="last_name"
-            v-model="form.last_name"
-            type="text"
-            required
-            placeholder="Введіть прізвище"
-            class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#6B1F1F]"
-          />
-        </div>
-
-        <div>
-          <label for="email" class="block font-medium text-sm mb-1">Email:</label>
-          <input
-            id="email"
-            v-model="form.email"
-              type="email"
-  inputmode="email"
-
-            required
-            placeholder="Введіть email"
-            class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#6B1F1F]"
-          />
-        </div>
-
-        <div>
-  <label for="role" class="block font-medium text-sm mb-1">Роль:</label>
-  <Multiselect
-    id="role"
-    v-model="form.role"
-    :options="roleOptions"
-    placeholder="Оберіть роль"
-    class="custom-multiselect"
-  />
-</div>
-
-
-        <div>
-          <label for="phone_number" class="block font-medium text-sm mb-1">Телефон:</label>
-          <!-- У компоненті UserModal.vue -->
-<input
-  v-model="form.phone_number"
-  type="tel"
-  inputmode="numeric"
-  maxlength="12"
-  required
-  placeholder="380XXXXXXXXX"
-  class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#6B1F1F]"
-  @input="form.phone_number = form.phone_number.replace(/\D/g, '')"
-/>
-
-
-
         </div>
 
         <!-- Actions -->
@@ -97,13 +30,13 @@
             @click="$emit('close')"
             class="py-2 rounded bg-gray-400 hover:bg-gray-500 text-white font-semibold transition"
           >
-            Відміна
+            {{ $t('admin.userModal.cancel') }}
           </button>
           <button
             type="submit"
             class="py-2 rounded bg-[#6B1F1F] hover:bg-[#A01212] text-white font-semibold transition"
           >
-            {{ form.id ? 'Оновити' : 'Створити' }}
+            {{ form.id ? $t('admin.userModal.update') : $t('admin.userModal.create') }}
           </button>
         </div>
       </form>
@@ -113,73 +46,143 @@
 
 <script>
 import Multiselect from 'vue-multiselect'
+
 export default {
   name: 'UserModal',
   components: {
-  Multiselect
-},
-  
+    Multiselect
+  },
   props: {
-  title: {
-    type: String,
-    default: 'Додати користувача'
-  },
-  user: {
-    type: Object,
-    default: () => ({
-      id: null,
-      first_name: '',
-      second_name: '',
-      last_name: '',
-      email: '',
-      phone_number: '',
-      role: ''
-    })
-  }
-
-
-  },
-  data() {
-    return {
-      roleOptions: ["admin", "manager", "superadmin", "user"],
-      form: {
+    title: {
+      type: String,
+      default: 'Додати користувача'
+    },
+    user: {
+      type: Object,
+      default: () => ({
+        id: null,
         first_name: '',
         second_name: '',
         last_name: '',
         email: '',
         phone_number: '',
-        role: '',
-        id: null
+        role: ''
+      })
+    },
+    /**
+     * Context from parent ('employee', 'client', 'admin')
+     */
+    context: {
+      type: String,
+      default: 'employee'
+    }
+  },
+  data() {
+    return {
+      // Configuration for all possible fields
+      fields: {
+        first_name: {
+          label: 'admin.userModal.firstName',
+          props: {
+            type: 'text',
+            required: true,
+            placeholder: this.$t('admin.userModal.firstNamePlaceholder')
+          }
+        },
+        second_name: {
+          label: 'admin.userModal.secondName',
+          props: {
+            type: 'text',
+            required: true,
+            placeholder: this.$t('admin.userModal.secondNamePlaceholder')
+          }
+        },
+        last_name: {
+          label: 'admin.userModal.lastName',
+          props: {
+            type: 'text',
+            required: true,
+            placeholder: this.$t('admin.userModal.lastNamePlaceholder')
+          }
+        },
+        email: {
+          label: 'admin.userModal.email',
+          props: {
+            type: 'email',
+            inputmode: 'email',
+            required: true,
+            placeholder: this.$t('admin.userModal.emailPlaceholder')
+          }
+        },
+        phone_number: {
+          label: 'admin.userModal.phone',
+          props: {
+            type: 'tel',
+            inputmode: 'numeric',
+            maxlength: 12,
+            required: true,
+            placeholder: this.$t('admin.userModal.phonePlaceholder')
+          }
+        },
+        role: {
+          label: 'admin.userModal.role',
+          component: 'Multiselect',
+          props: {
+            options: ['admin', 'manager', 'superadmin', 'user'],
+            placeholder: this.$t('admin.userModal.rolePlaceholder')
+          }
+        }
+      },
+      form: {
+        id: null,
+        first_name: '',
+        second_name: '',
+        last_name: '',
+        email: '',
+        phone_number: '',
+        role: ''
       }
     }
   },
- watch: {
-  user: {
-    handler(newUser) {
-      if (!newUser || typeof newUser !== 'object') return
-      this.form = {
-        id: newUser.id ?? null,
-        first_name: newUser.first_name || '',
-        second_name: newUser.second_name || '',
-        last_name: newUser.last_name || '',
-        email: newUser.email || '',
-        phone_number: newUser.phone_number || '',
-        role: newUser.role || ''
+  computed: {
+    visibleFields() {
+      const mapping = {
+          employee: ['first_name', 'last_name', 'email', 'phone_number', 'role'],
+     user:     ['first_name', 'last_name', 'email',  'phone_number', 'role'],
+        admin: ['first_name', 'second_name', 'last_name', 'email', 'role']
       }
-    },
-    deep: true,
-    immediate: true
-  }
-},
-
+      const keys = mapping[this.context] || mapping.employee
+      return keys.map(key => ({ key, ...this.fields[key] }))
+    }
+  },
+  watch: {
+    user: {
+      handler(newUser) {
+        if (!newUser || typeof newUser !== 'object') return
+        this.form = {
+          id: newUser.id ?? null,
+          first_name: newUser.first_name || '',
+          second_name: newUser.second_name || '',
+          last_name: newUser.last_name || '',
+          email: newUser.email || '',
+          phone_number: newUser.phone_number || '',
+          role: newUser.role || ''
+        }
+      },
+      deep: true,
+      immediate: true
+    }
+  },
   methods: {
     handleSubmit() {
-  console.log('🟢 submit form:', this.form)
-  this.$emit('userSubmit', { ...this.form })
-},
-   
-},
-};
+      // Clean phone: keep only digits
+      if (this.form.phone_number) {
+        this.form.phone_number = this.form.phone_number.replace(/\D/g, '')
+      }
+      this.$emit('userSubmit', { ...this.form })
+    }
+  }
+}
 </script>
 
 <style scoped>
@@ -202,17 +205,16 @@ export default {
 }
 
 .multiselect__option--highlight {
-  background: #F3F4F6 !important; /* Ніжно-рожевий */
-  color: #6B1F1F !important; /* Головний колір тексту */
+  background: #F3F4F6 !important;
+  color: #6B1F1F !important;
 }
 .multiselect__option--selected {
-  font-weight: 600 !important; /* semibold */
+  font-weight: 600 !important;
 }
-
 .multiselect__option--selected::after {
   content: 'Обрано' !important;
-  color: #9CA3AF; /* світло-сірий */
-  font-size: 0.75rem; /* text-sm */
+  color: #9CA3AF;
+  font-size: 0.75rem;
   font-weight: 500;
   float: right;
   margin-right: 1rem;

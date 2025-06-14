@@ -74,17 +74,7 @@ export default {
       details: "Деталі замовлення",
       close: "Закрити"
     },
-    settings: {
-      title: "Налаштування",
-      address: "Адреса",
-      phone: "Телефон",
-      email: "Email",
-      logo: "Логотип",
-      save: "Зберегти",
-      categories: "Категорії",
-      addCategory: "Додати категорію",
-      create: "Створити"
-    },
+   
     addProduct: {
       title: "Додати товар",
       name: "Назва",
@@ -147,6 +137,56 @@ export default {
       loadError: "Не вдалося завантажити профіль.",
       updated: "Дані оновлено.",
       updateError: "Помилка оновлення."
-    }
+    },
+    userModal: {
+    title: 'Додати користувача',
+    firstName: "Ім'я",
+    firstNamePlaceholder: "Введіть ім'я",
+    secondName: "По батькові",
+    secondNamePlaceholder: "Введіть по батькові",
+    lastName: "Прізвище",
+    lastNamePlaceholder: "Введіть прізвище",
+    email: "Email",
+    emailPlaceholder: "Введіть email",
+    phone: "Телефон",
+    phonePlaceholder: "380XXXXXXXXX",
+    role: "Роль",
+    rolePlaceholder: "Оберіть роль",
+    cancel: "Відміна",
+    create: "Створити",
+    update: "Оновити"
+  },
+   profitReport: {
+      title: "Звіт по прибутку",
+      dateFrom: "Дата від",
+      dateTo: "Дата до",
+      apply: "Застосувати",
+      reset: "Скинути",
+      print: "Друк",
+      excel: "Excel",
+      pdf: "PDF",
+      table: {
+        id: "ID",
+        date: "Дата",
+        revenue: "Виторг",
+        transactions: "Транзакції",
+        expenses: "Витрати",
+        netIncome: "Прибуток"
+      },
+      summary: {
+        totalRevenue: "Всього виручка",
+        totalExpenses: "Всього витрати",
+        totalNetIncome: "Чистий прибуток"
+      },
+      noData: "Поки що не було додано жодного звіту по прибутку."
+  },
+  "settings": {
+    "categoryNameUk": "Назва (укр.)",
+    "categoryNameEn": "Назва (англ.)",
+    "categoryImage": "Зображення категорії",
+    "createCategory": "Додати категорію",
+    "addCategory": "Додати нову категорію",
+    "create": "Створити"
+  },
   }
 };

@@ -27,7 +27,7 @@ export default {
     ratingLabel: 'Рейтинг:',
     reviewPlaceholder: 'Напишіть відгук...',
     submitReview: 'Відправити',
-    starsLabel: 'зірок',
+    starsLabel: "{count} stars",
     adminReplyLabel: 'Відповідь адміністратора:',
     writeReplyPlaceholder: 'Напишіть відповідь...',
     submitReply: 'Відправити відповідь',
