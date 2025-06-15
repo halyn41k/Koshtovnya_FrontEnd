@@ -43,26 +43,23 @@
 import confetti from 'canvas-confetti';
 import bus from '@/eventBus';
 
-
 export default {
   name: 'PaymentConfirmed',
   mounted() {
     document.title = 'Підтвердження оплати';
 
+    // через 3 секунди — повне перенаправлення з перезавантаженням сторінки
     setTimeout(() => {
-      this.$router.push({ path: '/account', query: { tab: 'orderhistory' } });
-    }, 10000);
+      window.location.replace(window.location.origin + '/account?tab=orderhistory');
+    }, 3000);
 
+    // запускаємо конфетті
     const canvas = this.$refs.confettiCanvas;
     const myConfetti = confetti.create(canvas, { resize: true, useWorker: true });
+    myConfetti({ particleCount: 200, spread: 180, origin: { y: 0.6 } });
 
-    myConfetti({
-      particleCount: 200,
-      spread: 180,
-      origin: { y: 0.6 },
-    });
-    bus.emit('cart-updated'); // оновлення кошика
-
+    // повідомити про оновлення кошика
+    bus.emit('cart-updated');
   },
 };
 </script>
@@ -78,38 +75,11 @@ export default {
   font-display: swap;
 }
 
-.font-montserrat {
-  font-family: 'Montserrat', sans-serif;
-}
-.font-kyiv {
-  font-family: 'KyivType Titling Black2', sans-serif;
-}
+.font-montserrat { font-family: 'Montserrat', sans-serif; }
+.font-kyiv { font-family: 'KyivType Titling Black2', sans-serif; }
 
-@keyframes fade-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes slide-up {
-  from {
-    opacity: 0;
-    transform: translateY(40px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.animate-fade-in {
-  animation: fade-in 1s ease-out both;
-}
-
-.animate-slide-up {
-  animation: slide-up 0.8s ease-out both;
-}
+@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slide-up { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
+.animate-fade-in { animation: fade-in 1s ease-out both; }
+.animate-slide-up { animation: slide-up 0.8s ease-out both; }
 </style>

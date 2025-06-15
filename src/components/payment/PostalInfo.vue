@@ -83,13 +83,15 @@
           {{ isPostomat ? 'Поштомат' : 'Відділення' }}:
         </label>
         <Multiselect
-          v-model="warehouse"
-          :options="warehouses"
-          label="name"
-          track-by="id"
-          placeholder="Оберіть відділення"
-          searchable
-        />
+  v-model="warehouse"
+  :options="warehouses"
+  label="name"
+  track-by="id"
+  placeholder="Оберіть відділення"
+  searchable
+  taggable                      
+  @tag="onWarehouseTag"      
+/>
         <span v-if="errors.warehouse" class="text-red-500 text-xs mt-1">{{ errors.warehouse }}</span>
       </div>
 
@@ -111,22 +113,22 @@ export default {
   name: 'PostalInfo',
   components: { Multiselect, Combobox, ComboboxInput, ComboboxOptions, ComboboxOption },
   props: {
-    modelValue: { type: Object, required: true },
-    errors:     { type: Object, default: () => ({}) },
+    modelValue:      { type: Object, required: true },
+    errors:          { type: Object, default: () => ({}) },
     tempUserAddress: { type: Object, default: null },
   },
   emits: ['update:modelValue'],
   data() {
     return {
-      selectedCity: null,
-      selectedStreet: null,
-      deliveryOptions: [],
-      cities: [],
-      streets: [],
-      warehouses: [],
-      citySearchTimeout: null,
-      streetSearchTimeout: null,
-      pendingAddr: null, // замість _pendingAddr
+      selectedCity:       null,
+      selectedStreet:     null,
+      deliveryOptions:    [],
+      cities:             [],
+      streets:            [],
+      warehouses:         [],
+      citySearchTimeout:  null,
+      streetSearchTimeout:null,
+      pendingAddr:        null,
     };
   },
   computed: {
@@ -150,49 +152,56 @@ export default {
       get() { return this.modelValue.warehouse; },
       set(v) { this.update({ warehouse: v }); }
     },
-    isCourier()      { return this.deliveryType?.delivery_type === 'courier'; },
-    isPickup()       { return this.deliveryType?.delivery_type === 'pickup'; },
-    isStorePickup()  { return this.deliveryType?.name === 'Самовивіз з наших магазинів'; },
-    isPostomat()     { return this.deliveryType?.name?.toLowerCase().includes('поштомат'); },
-    showWarehouse()  { return this.isPickup && !this.isStorePickup; },
+    isCourier()     { return this.deliveryType?.delivery_type === 'courier'; },
+    isPickup()      { return this.deliveryType?.delivery_type === 'pickup'; },
+    isStorePickup() { return this.deliveryType?.name === 'Самовивіз з наших магазинів'; },
+    isPostomat()    { return this.deliveryType?.name?.toLowerCase().includes('поштомат'); },
+    showWarehouse() { return this.isPickup && !this.isStorePickup; },
   },
   watch: {
+    warehouses(newList) {
+      console.log('Список відділень:', newList);
+      const wName = this.modelValue.warehouse?.name;
+      if (wName) {
+        const match = newList.find(w => w.name === wName);
+        if (match) this.update({ warehouse: match });
+      }
+    },
     tempUserAddress: {
       immediate: true,
-      deep: true,
+      deep:      true,
       handler(addr) {
         if (!addr) return;
         console.log('PostalInfo: отримано tempUserAddress', addr);
-
-        // 1) оновлюємо modelValue полями з addr (узгоджені ключі)
+        // оновимо поля міста/телефону/тощо
         const patch = {};
-        if ('phone' in addr) {
-          patch.phone = addr.phone;
-        }
+        if ('phone' in addr)         patch.phone = addr.phone;
         if ('city' in addr) {
-          patch.city = addr.city;
+          patch.city    = addr.city;
           patch.cityRef = addr.cityRef;
         }
         if ('street' in addr) {
           patch.street = addr.street;
-          if ('streetSearch' in addr) {
-            patch.streetSearch = addr.streetSearch;
-          }
+          if ('streetSearch' in addr) patch.streetSearch = addr.streetSearch;
         }
-        if ('houseNumber' in addr) {
-          patch.houseNumber = addr.houseNumber;
-        }
-        if ('warehouseName' in addr) {
-          patch.warehouse = { name: addr.warehouseName };
-        }
+        if ('houseNumber' in addr)   patch.houseNumber = addr.houseNumber;
         this.update(patch);
 
-        // Локальні селектори для UI
-        if ('city' in addr && 'cityRef' in addr) {
+        // inject кастомної адреси в warehouses, якщо є:
+        const customName = addr.warehouseName || addr.delivery_address;
+        if (customName && !this.warehouses.find(w => w.name === customName)) {
+          this.warehouses.unshift({ id: -1, name: customName });
+        }
+        // одразу обрати її:
+        if (customName) {
+          this.update({ warehouse: this.warehouses.find(w => w.name === customName) });
+        }
+
+        // Локальні селектори UI
+        if (addr.city && addr.cityRef) {
           this.selectedCity = { city: addr.city, Ref: addr.cityRef };
         }
-        if ('street' in addr && this.isCourier) {
-          // розбити на назву вулиці без номера, використовуючи простіший regex
+        if (addr.street && this.isCourier) {
           const raw = addr.street || '';
           const m = raw.match(/(.+?)\s+(.+)$/);
           if (m) {
@@ -203,37 +212,9 @@ export default {
           }
         }
 
-        // 2) Встановлюємо deliveryType за назвою з addr.deliveryTypeName
-        const applyDeliveryType = () => {
-          if (!addr.deliveryTypeName) return;
-          const match = this.deliveryOptions.find(opt => opt.name === addr.deliveryTypeName);
-          if (match) {
-            this.update({ deliveryType: match });
-            if (match.delivery_type === 'courier') {
-              this.fetchStreets();
-            } else if (match.delivery_type === 'pickup') {
-              this.fetchWarehouses(addr.city, addr.cityRef, addr.deliveryTypeName);
-            }
-          } else {
-            console.warn('PostalInfo: не знайдено deliveryType для', addr.deliveryTypeName);
-          }
-        };
-
-        if (this.deliveryOptions.length) {
-          applyDeliveryType();
-          this.pendingAddr = null;
-        } else {
-          this.pendingAddr = addr;
-        }
-      }
-    },
-    deliveryOptions(newList) {
-      if (this.pendingAddr && newList.length) {
-        console.log('PostalInfo: deliveryOptions завантажені, застосовуємо pendingAddr', this.pendingAddr);
-        const addr = this.pendingAddr;
-        this.pendingAddr = null;
+        // deliveryType за назвою
         if (addr.deliveryTypeName) {
-          const match = this.deliveryOptions.find(opt => opt.name === addr.deliveryTypeName);
+          const match = this.deliveryOptions.find(o => o.name === addr.deliveryTypeName);
           if (match) {
             this.update({ deliveryType: match });
             if (match.delivery_type === 'courier') {
@@ -241,8 +222,6 @@ export default {
             } else if (match.delivery_type === 'pickup') {
               this.fetchWarehouses(addr.city, addr.cityRef, addr.deliveryTypeName);
             }
-          } else {
-            console.warn('PostalInfo: не знайдено deliveryType для', addr.deliveryTypeName);
           }
         }
       }
@@ -250,11 +229,19 @@ export default {
   },
   async created() {
     await this.fetchDeliveryTypes();
-    // далі watch.deliveryOptions спрацює, якщо був pendingAddr
+    // якщо був pendingAddr — watch.deliveryOptions може відпрацювати
   },
   methods: {
     update(patch) {
       this.$emit('update:modelValue', { ...this.modelValue, ...patch });
+    },
+    onWarehouseTag(newTag) {
+      const nextId = this.warehouses.length
+        ? Math.max(...this.warehouses.map(w => w.id)) + 1
+        : 1;
+      const custom = { id: nextId, name: newTag };
+      this.warehouses.unshift(custom);
+      this.update({ warehouse: custom });
     },
     async fetchDeliveryTypes() {
       try {
@@ -263,8 +250,8 @@ export default {
           'https://koshtovnya.api-dev.bmax-edu.website/api/delivery-types',
           { headers: { Authorization: `Bearer ${token}` } }
         );
-        this.deliveryOptions = Object.entries(data.data).flatMap(
-          ([type, list]) => list.map(opt => ({
+        this.deliveryOptions = Object.entries(data.data).flatMap(([type, list]) =>
+          list.map(opt => ({
             id: opt.id,
             name: opt.name,
             delivery_type: type,
@@ -284,12 +271,7 @@ export default {
           warehouse: null
         });
       } else {
-        this.update({
-          city: '',
-          street: '',
-          houseNumber: '',
-          warehouse: null
-        });
+        this.update({ city: '', street: '', houseNumber: '', warehouse: null });
       }
     },
     handleCitySearch(e) {
@@ -304,10 +286,7 @@ export default {
         const token = localStorage.getItem('token');
         const { data } = await axios.get(
           'https://koshtovnya.api-dev.bmax-edu.website/api/nova-poshta/cities',
-          {
-            headers: { Authorization: `Bearer ${token}` },
-            params: { city: this.city }
-          }
+          { headers: { Authorization: `Bearer ${token}` }, params: { city: this.city } }
         );
         this.cities = data.success ? data.data : [];
       } catch (e) {
@@ -324,13 +303,7 @@ export default {
         const token = localStorage.getItem('token');
         const { data } = await axios.get(
           'https://koshtovnya.api-dev.bmax-edu.website/api/nova-poshta/streets',
-          {
-            headers: { Authorization: `Bearer ${token}` },
-            params: {
-              Ref: this.modelValue.cityRef,
-              street: this.street
-            }
-          }
+          { headers: { Authorization: `Bearer ${token}` }, params: { Ref: this.modelValue.cityRef, street: this.street } }
         );
         this.streets = data.data || [];
       } catch (e) {
@@ -343,19 +316,25 @@ export default {
         const token = localStorage.getItem('token');
         const { data } = await axios.get(
           'https://koshtovnya.api-dev.bmax-edu.website/api/nova-poshta/ware-houses',
-          {
-            headers: { Authorization: `Bearer ${token}` },
-            params: {
-              city,
-              Ref: cityRef,
-              delivery_type: deliveryName
-            }
-          }
+          { headers: { Authorization: `Bearer ${token}` }, params: { city, Ref: cityRef, delivery_type: deliveryName } }
         );
-        this.warehouses = (data.data || []).map((item, i) => ({
+        // стандартний список
+        const list = (data.data || []).map((item, i) => ({
           id: i + 1,
           name: item.warehouse
         }));
+        // inject кастомної
+        const addr = this.tempUserAddress;
+        if (addr && addr.delivery_address && !list.find(w => w.name === addr.delivery_address)) {
+          list.unshift({ id: -1, name: addr.delivery_address });
+        }
+        this.warehouses = list;
+        // синхронізуємо модель
+        const wName = this.modelValue.warehouse?.name;
+        if (wName) {
+          const m = list.find(w => w.name === wName);
+          if (m) this.update({ warehouse: m });
+        }
         return this.warehouses;
       } catch (e) {
         console.error('PostalInfo: помилка fetchWarehouses', e);
@@ -365,6 +344,7 @@ export default {
   }
 };
 </script>
+
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500&display=swap');

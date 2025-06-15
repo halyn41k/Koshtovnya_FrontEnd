@@ -1,3 +1,5 @@
+### AccountInfo.vue
+```vue
 <template>
   <div class="font-sans min-h-screen bg-gray-50 dark:bg-[#121212] text-black dark:text-white transition-colors duration-300">
     <!-- Header -->
@@ -9,22 +11,16 @@
       </h1>
     </header>
 
- <main
-   class="flex flex-col lg:flex-row mx-auto max-w-[1300px] min-h-[500px]
-          bg-[#FFF7F6] dark:bg-[#17223b] rounded-lg shadow-md bg-no-repeat bg-right
-          bg-[length:50%] overflow-hidden transition-all duration-300 mt-[100px]"
-      style="background-image: url('@/assets/accountpattern.png')"
+    <main
+      class="flex flex-col lg:flex-row mx-auto max-w-[1300px] min-h-[500px]
+             bg-[#FFF7F6] dark:bg-[#17223b] rounded-lg shadow-md overflow-hidden transition-all duration-300 mt-[100px]"
     >
       <!-- Sidebar -->
       <aside class="w-full lg:w-64 border-b lg:border-b-0 lg:border-r border-gray-300 dark:border-gray-600 p-4">
         <ul class="flex flex-col divide-y divide-gray-300 dark:divide-gray-600">
-          <li
-            v-for="(item, i) in menuItems"
-            :key="i"
-            class="py-3"
-          >
+          <li v-for="(item, i) in menuItems" :key="i" class="py-3">
             <button
-              @click="toggleAccordion(i)"
+              @click="selectTab(i)"
               :class="[
                 'flex items-center justify-between w-full p-2 rounded-lg cursor-pointer transition-colors duration-200',
                 activeTab === i
@@ -33,12 +29,9 @@
               ]"
             >
               <div class="flex items-center">
-<img :src="item.icon" :alt="item.title" class="w-5 h-5 mr-2 transition-all duration-300 dark:invert" />
-                <span class="font-semibold text-base">
-                  {{ $t(item.title) }}
-                </span>
+                <img :src="item.icon" :alt="item.title" class="w-5 h-5 mr-2 transition-all duration-300 dark:invert" />
+                <span class="font-semibold text-base">{{ $t(item.title) }}</span>
               </div>
-
               <svg
                 v-if="i !== 4"
                 class="w-4 h-4 ml-2 transition-transform duration-300 ease-in-out lg:hidden"
@@ -54,11 +47,8 @@
               </svg>
             </button>
 
-            <!-- Mobile only content -->
-            <div
-              v-if="openedAccordions.includes(i) && i !== 4"
-              class="mt-3 block lg:hidden"
-            >
+            <!-- Mobile content -->
+            <div v-if="openedAccordions.includes(i) && i !== 4" class="mt-3 block lg:hidden">
               <component
                 :is="getTabComponent(i)"
                 :userId="userId"
@@ -85,7 +75,7 @@
       </section>
     </main>
 
-    <!-- Toast message -->
+    <!-- Toast -->
     <div
       v-if="message"
       class="fixed top-4 right-4 px-4 py-2 rounded shadow text-sm font-medium transition-colors duration-300"
@@ -98,7 +88,6 @@
   </div>
 </template>
 
-
 <script>
 import PersonalInfo from './PersonalInfo.vue';
 import Addresses from './UserAddresses.vue';
@@ -106,10 +95,7 @@ import OrderHistory from './OrderHistory.vue';
 import Wishlist from './UserWishlist.vue';
 import api from '@/services/api';
 
-
 export default {
-  props: ['order', 'closeModal', 'formatCurrencyIntl'],
-
   name: 'AccountInfo',
   components: { PersonalInfo, Addresses, OrderHistory, Wishlist },
   data() {
@@ -122,13 +108,12 @@ export default {
       second_name: '',
       email: '',
       menuItems: [
-  { title: 'user.info', icon: require('@/assets/icons/user2.svg') },
-  { title: 'user.addresses', icon: require('@/assets/location.png') },
-  { title: 'user.orderHistory', icon: require('@/assets/history.png') },
-  { title: 'user.wishlist', icon: require('@/assets/icons/heart.svg') },
-  { title: 'user.logout', icon: require('@/assets/exit.png') },
-],
-
+        { title: 'user.info', icon: require('@/assets/icons/user2.svg') },
+        { title: 'user.addresses', icon: require('@/assets/location.png') },
+        { title: 'user.orderHistory', icon: require('@/assets/history.png') },
+        { title: 'user.wishlist', icon: require('@/assets/icons/heart.svg') },
+        { title: 'user.logout', icon: require('@/assets/exit.png') },
+      ],
       message: '',
       messageType: '',
     };
@@ -142,54 +127,16 @@ export default {
         case 3: return Wishlist;
         default: return null;
       }
-    },
+    }
   },
   methods: {
-    toggleAccordion(i) {
-  if (i === 4) {
-    this.selectTab(i);
-    return;
-  }
-
-  if (this.openedAccordions.includes(i)) {
-    this.openedAccordions = this.openedAccordions.filter(idx => idx !== i);
-  } else {
-    this.openedAccordions.push(i);
-  }
-
-  // Паралельно оновлюємо активну вкладку для десктопу
-  this.activeTab = i;
-},
-
-getTabComponent(i) {
-  switch (i) {
-    case 0: return 'PersonalInfo';
-    case 1: return 'Addresses';
-    case 2: return 'OrderHistory';
-    case 3: return 'Wishlist';
-    default: return null;
-  }
-},
-
-    async fetchProfile() {
-  try {
-    const { user } = await api.getProfile();
-    this.userId = user.id;
-    this.first_name = user.first_name || '';
-    this.last_name = user.last_name || '';
-    this.second_name = user.second_name || '';
-    this.email = user.email || '';
-  } catch (error) {
-    this.setMessage('Не вдалося завантажити профіль.', 'error');
-  }
-},
-    async selectTab(i) {
+    selectTab(i) {
       if (i === 4) {
-        try {
-          const res = await fetch('https://koshtovnya.api-dev.bmax-edu.website/api/logout', {
-            method: 'POST',
-            headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-          });
+        fetch('https://koshtovnya.api-dev.bmax-edu.website/api/logout', {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        })
+        .then(res => {
           if (res.ok) {
             localStorage.removeItem('token');
             this.$router.push({ name: 'Login' });
@@ -197,40 +144,49 @@ getTabComponent(i) {
           } else {
             this.setMessage('Не вдалося вийти. Спробуйте пізніше.', 'error');
           }
-        } catch {
-          this.setMessage('Не вдалося вийти. Спробуйте пізніше.', 'error');
-        }
+        })
+        .catch(() => this.setMessage('Не вдалося вийти. Спробуйте пізніше.', 'error'));
       } else {
         this.activeTab = i;
+        const tabMap = ['personalinfo', 'addresses', 'orderhistory', 'wishlist'];
+        this.$router.replace({ query: { tab: tabMap[i] } });
       }
+    },
+    getTabComponent(i) {
+      return [ 'PersonalInfo', 'Addresses', 'OrderHistory', 'Wishlist' ][i] || null;
     },
     setMessage(text, type) {
       this.message = text;
       this.messageType = type;
       setTimeout(() => (this.message = this.messageType = ''), 5000);
+    },
+    async fetchProfile() {
+      try {
+        const { user } = await api.getProfile();
+        this.userId = user.id;
+        this.first_name = user.first_name || '';
+        this.last_name = user.last_name || '';
+        this.second_name = user.second_name || '';
+        this.email = user.email || '';
+      } catch {
+        this.setMessage('Не вдалося завантажити профіль.', 'error');
+      }
     }
   },
   mounted() {
-    const tab = this.$route.query.tab;
-    if (tab === 'wishlist') this.activeTab = 3;
+    switch (this.$route.query.tab) {
+      case 'addresses':    this.activeTab = 1; break;
+      case 'orderhistory': this.activeTab = 2; break;
+      case 'wishlist':     this.activeTab = 3; break;
+      default:             this.activeTab = 0;
+    }
     this.fetchProfile();
-  },
-  watch: {
-    '$route.query.tab'(t) { if (t === 'wishlist') this.activeTab = 3; }
   }
 };
 </script>
 
-
 <style scoped>
-.font-kyivBlack2 {
-  font-family: 'KyivType Titling Black2', sans-serif;
-}
-
+.font-kyivBlack2 { font-family: 'KyivType Titling Black2', sans-serif; }
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');
-
-.font-sans {
-  font-family: 'Montserrat', sans-serif;
-}
-
+.font-sans { font-family: 'Montserrat', sans-serif; }
 </style>
