@@ -57,7 +57,6 @@
                   label="label"
                   @input="onStatusChange(order)"
                   @select="onStatusChange(order)"
-                  @open="console.log('Multiselect open for', order.id)"
                 />
               </td>
               <td class="px-4 py-2 text-sm text-gray-800 dark:text-gray-200">{{ order.phone_number }}</td>
@@ -109,27 +108,15 @@ import 'vue-multiselect/dist/vue-multiselect.min.css'
 import Multiselect from 'vue-multiselect'
 import api from '@/services/api'
 
-/*
-  Мапінг internal → бекенд-значення і ключі локалізації:
-*/
-const STATUS_MAP = {
-  pending:   { backend: 'Pending',   labelKey: 'admin.orders.statusOrder.pending' },
-  shipped:   { backend: 'Sent',      labelKey: 'admin.orders.statusOrder.shipped' },
-  delivered: { backend: 'Delivered', labelKey: 'admin.orders.statusOrder.delivered' },
-  cancelled: { backend: 'Cancelled', labelKey: 'admin.orders.statusOrder.cancelled' },
-}
-/*
-  Якщо бекенд повертає некоректні raw-рядки, враховуємо їх тут:
-*/
-const BACKEND_ALIAS = {
-  'Panding': 'pending',
-  'Pending': 'pending',
-  'Sent': 'shipped',
-  'Shipped': 'shipped',
-  'Delivered': 'delivered',
-  'Cancelled': 'cancelled',
-  'orders.status.Скасовано': 'cancelled',
-}
+// Статичний перелік статусів, де:
+// - `value`: технічне значення для бекенду
+// - `labelKey`: ключ для i18n
+const STATIC_STATUS_LIST = [
+  { value: 'В очікуванні', labelKey: 'admin.orders.statusOrder.pending' },
+  { value: 'Відправлено',   labelKey: 'admin.orders.statusOrder.sent' },
+  { value: 'Доставлено',     labelKey: 'admin.orders.statusOrder.delivered' },
+  { value: 'Скасовано',      labelKey: 'admin.orders.statusOrder.cancelled' }
+]
 
 export default {
   name: 'OrderList',
@@ -138,19 +125,26 @@ export default {
     return {
       orders: [],
       searchQuery: '',
-      sortState: { id: 'none', order_date: 'none', statusInternal: 'none', phone_number: 'none', products: 'none' },
+      sortState: {
+        id: 'none',
+        order_date: 'none',
+        statusInternal: 'none',
+        phone_number: 'none',
+        products: 'none'
+      },
       meta: { last_page: 1 },
       currentPage: 1,
       highlightedOrderId: null,
       showDetailsModal: false,
-      orderDetails: {}
+      orderDetails: {},
+      rawStatusList: [] // [{ value: 'pending', labelKey: 'orders.status.pending' }, ...]
     }
   },
   computed: {
     statusOptions() {
-      return Object.entries(STATUS_MAP).map(([internal, { labelKey }]) => ({
-        value: internal,
-        label: this.$t(labelKey)
+      return this.rawStatusList.map(raw => ({
+        value: raw.value,
+        label: this.$t(raw.labelKey)
       }))
     },
     columns() {
@@ -168,7 +162,7 @@ export default {
         return (
           o.id.toString().includes(q) ||
           (o.order_date || '').toLowerCase().includes(q) ||
-          (o.statusInternal || '').includes(q) ||
+          (o.statusInternal || '').toLowerCase().includes(q) ||
           (o.phone_number || '').includes(q)
         )
       })
@@ -178,7 +172,6 @@ export default {
           let va = a[key], vb = b[key]
           if (Array.isArray(va)) va = va.join()
           if (Array.isArray(vb)) vb = vb.join()
-          // порівнюємо рядки або числа
           return order === 'asc' ? (va > vb ? 1 : -1) : (va < vb ? 1 : -1)
         })
       }
@@ -186,12 +179,41 @@ export default {
     }
   },
   mounted() {
-    this.fetchOrders()
+    this.initStatusList().then(() => this.fetchOrders())
+  },
+  watch: {
+    '$i18n.locale'(newLocale) {
+      // Оновлення label при зміні мови
+      this.orders = this.orders.map(o => {
+        const match = this.rawStatusList.find(s => s.value === o.statusInternal)
+        return {
+          ...o,
+          selectedOption: match
+            ? { value: match.value, label: this.$t(match.labelKey) }
+            : { value: o.statusInternal, label: o.statusInternal }
+        }
+      })
+    }
   },
   methods: {
-    normalizeStatus(raw) {
-      if (!raw) return 'pending'
-      return BACKEND_ALIAS[raw] || 'pending'
+    async initStatusList() {
+      try {
+        // Можна отримати з API, якщо потрібно:
+        // const res = await api.getAdminOrderStatuses()
+        // this.rawStatusList = res.data
+        this.rawStatusList = STATIC_STATUS_LIST.slice()
+      } catch (e) {
+        console.warn('Не вдалося отримати список статусів, використовуємо static:', e)
+        this.rawStatusList = STATIC_STATUS_LIST.slice()
+      }
+    },
+    cleanRawStatus(raw) {
+      if (!raw) return ''
+      if (raw.startsWith('orders.status.')) {
+        const parts = raw.split('.')
+        return parts[parts.length - 1]
+      }
+      return raw
     },
     async fetchOrders(page = 1) {
       console.log('>>> fetchOrders, page →', page)
@@ -199,15 +221,17 @@ export default {
         const res = await api.getAdminOrders(page)
         console.log('<<< API meta →', res.meta)
         this.orders = res.data.map(o => {
-          const internal = this.normalizeStatus(o.status)
+          const cleaned = this.cleanRawStatus(o.status)
+          const match = this.rawStatusList.find(s => s.value === cleaned)
+          const selectedOption = match
+            ? { value: match.value, label: this.$t(match.labelKey) }
+            : { value: cleaned, label: cleaned }
+
           return {
             ...o,
-            _rawStatus: o.status,
-            statusInternal: internal,
-            selectedOption: {
-              value: internal,
-              label: this.$t(STATUS_MAP[internal].labelKey)
-            }
+            _rawStatus: cleaned,
+            statusInternal: cleaned,
+            selectedOption
           }
         })
         this.meta = { ...res.meta }
@@ -220,10 +244,6 @@ export default {
       const ord = this.sortState[col]
       Object.keys(this.sortState).forEach(k => (this.sortState[k] = 'none'))
       this.sortState[col] = ord === 'none' ? 'asc' : ord === 'asc' ? 'desc' : 'none'
-      // Після зміни сорту не обов’язково перезапитувати, якщо дані вже є локально.
-      // Якщо потрібна нова сторінка, можна fetchOrders.
-      // Тут лишаємо без fetchOrders, бо сортуємо локально:
-      // Якщо сортування серверне, замінити на this.fetchOrders(this.currentPage)
     },
     getSortIcon(s) {
       if (s === 'asc') return require('@/assets/icons/asc.svg')
@@ -235,35 +255,43 @@ export default {
       this.fetchOrders(page)
     },
     async onStatusChange(order) {
-      const prevInternal = order.statusInternal
-      const newInternal = order.selectedOption.value
-      const backendValue = STATUS_MAP[newInternal].backend
-      order.statusInternal = newInternal
+      const prevRaw = order._rawStatus
+      const sel = order.selectedOption
+      const newRaw = sel && sel.value
+      if (!this.rawStatusList.find(s => s.value === newRaw)) {
+        console.error('Спроба надіслати невідомий статус:', sel)
+        order.selectedOption = { value: prevRaw, label: this.$t(`orders.status.${prevRaw}`) }
+        return
+      }
+      order.statusInternal = newRaw
       try {
-        await api.updateAdminOrder(order.id, { status: backendValue })
-        order._rawStatus = backendValue
+        const payload = { status: newRaw }
+        console.log('Надсилаємо PATCH status:', payload)
+        await api.updateAdminOrder(order.id, payload)
+        order._rawStatus = newRaw
         this.highlightedOrderId = order.id
         setTimeout(() => (this.highlightedOrderId = null), 3000)
       } catch (e) {
         console.error('Помилка оновлення статусу:', e)
-        // Відкотити
-        order.statusInternal = prevInternal
-        order.selectedOption = {
-          value: prevInternal,
-          label: this.$t(STATUS_MAP[prevInternal].labelKey)
+        if (e.response?.data?.errors?.status) {
+          console.warn('Validation errors for status:', e.response.data.errors.status)
         }
-        // TODO: показати toast з повідомленням про помилку
+        order.statusInternal = prevRaw
+        order.selectedOption = {
+          value: prevRaw,
+          label: this.$t(`orders.status.${prevRaw}`)
+        }
       }
     },
     async showOrderDetails(id) {
       try {
         const res = await api.getAdminOrder(id)
         const raw = res.data.status
-        const internal = this.normalizeStatus(raw)
+        const cleaned = this.cleanRawStatus(raw)
         this.orderDetails = {
           ...res.data,
-          statusInternal: internal,
-          statusLabel: this.$t(STATUS_MAP[internal].labelKey)
+          statusInternal: cleaned,
+          statusLabel: this.$t(`orders.status.${cleaned}`)
         }
         this.showDetailsModal = true
       } catch (e) {
@@ -277,6 +305,7 @@ export default {
   }
 }
 </script>
+
 
 <style scoped>
 @keyframes fade-in {

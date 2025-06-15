@@ -684,7 +684,11 @@ getAdminFilter: async (config = {}) => {
       throw error;
     }
   },
-
+    getAdminStatsIncome: async (params) => {
+    // params може бути { period } або { start_date, end_date }
+    const { data } = await apiClient.get('/api/admin/stats/income', { params });
+    return data;
+  },
   
 };
 

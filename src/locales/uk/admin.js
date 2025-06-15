@@ -121,7 +121,7 @@ export default {
       close: "Закрити",
       "statusOrder": {
         "pending": "В очікуванні",
-        "shipped": "Відправлено",
+        "sent": "Відправлено",
         "delivered": "Доставлено",
         "cancelled": "Скасовано"
       }

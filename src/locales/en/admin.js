@@ -127,7 +127,7 @@ export default {
       close: "Close",
        "statusOrder": {
         "pending": "Pending",
-        "shipped": "Shipped",
+        "sent": "Sent",
         "delivered": "Delivered",
         "cancelled": "Cancelled"
       }
