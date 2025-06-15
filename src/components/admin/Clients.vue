@@ -162,14 +162,15 @@
     >
       Користувач успішно {{ toastAction }}!
     </div>
-  </main>
- <ClientModal
+     <ClientModal
      v-if="showUserModal"
      :user="modalClient"
       :title="modalTitle"
       @close="showUserModal = false"
       @save="handleUserSubmit"
     />
+  </main>
+
 
 </template>
 

@@ -117,9 +117,7 @@
     >
       {{ $t('admin.employees.toastMessage', { action: toastAction }) }}
     </div>
-   
-  </main>
-   <EmployeeModal
+      <EmployeeModal
       v-if="showEmployeeModal"
       :key="modalKey"
       :employee="modalEmployee"
@@ -127,6 +125,8 @@
       @close="closeModal"
       @submit="handleSubmit"
     />
+  </main>
+
 </template>
 
 <script>

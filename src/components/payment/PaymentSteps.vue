@@ -62,6 +62,11 @@
             >
               Далі
             </button>
+            <pre class="mt-4 p-4 bg-gray-100 dark:bg-gray-700 text-xs rounded">
+  {{ formData }}
+  canProceed: {{ canProceedToNextStep }}
+</pre>
+
           </div>
         </div>
       </div>
@@ -120,8 +125,10 @@ export default {
     };
   },
   computed: {
-    isStorePickupSelected() {
-      return this.formData.deliveryType?.name === 'Самовивіз з наших магазинів';
+        isStorePickupSelected() {
+      // Наприклад, окремо для “Самовивіз з наших магазинів”
+      return this.formData.deliveryType?.delivery_type === 'pickup'
+        && this.formData.deliveryType?.name?.includes('наших магазинів');
     },
     filteredDeliveryOptions() {
       if (!this.selectedDeliveryCategory) return this.deliveryOptions;
@@ -129,16 +136,16 @@ export default {
         opt => opt.delivery_type === this.selectedDeliveryCategory
       );
     },
-    canProceedToNextStep() {
-      if (this.currentStep === 0) {
-        return this.validatePersonalInfo();
-      } else if (this.currentStep === 1) {
-        return this.validatePostalInfo();
-      } else if (this.currentStep === 2) {
-        return !!this.formData.paymentMethod;
-      }
-      return false;
-    },
+   canProceedToNextStep() {
+    if (this.currentStep === 0) {
+       return this.validatePersonalInfo(true);
+     } else if (this.currentStep === 1) {
+       return this.validatePostalInfo(true);
+     } else if (this.currentStep === 2) {
+       return !!this.formData.paymentMethod;
+     }
+     return false;
+   },
   },
   methods: {
     ...mapActions("order", [
@@ -229,37 +236,41 @@ export default {
       }
       return valid;
     },
-    validatePostalInfo(silent = false) {
-      if (!silent) this.errors = {};
+
+
+   validatePostalInfo(silent = false) {
+   if (!silent) this.errors = {};
       let valid = true;
-      if (!this.formData.deliveryType) {
-        if (!silent) this.errors.deliveryType = "Спосіб доставки обов'язковий";
-        valid = false;
-      }
-      if (!this.isStorePickupSelected) {
-        if (!this.formData.city) {
-          if (!silent) this.errors.city = "Місто обов'язкове";
-          valid = false;
-        }
-        if (this.formData.deliveryType?.delivery_type === "courier") {
-          if (!this.formData.street) {
-            if (!silent) this.errors.street = "Виберіть вулицю";
-            valid = false;
-          }
-          if (!this.formData.houseNumber) {
-            if (!silent) this.errors.houseNumber = "Введіть номер будинку";
-            valid = false;
-          }
-        }
-        if (this.formData.deliveryType?.delivery_type === "pickup") {
-          if (!this.formData.warehouse) {
-            if (!silent) this.errors.warehouse = "Відділення обов'язкове";
-            valid = false;
-          }
-        }
-      }
-      return valid;
-    },
+   const dt = this.formData.deliveryType;
+   if (!dt) {
+     if (!silent) this.errors.deliveryType = "Спосіб доставки обов'язковий";
+     valid = false;
+   }
+   if (!this.isStorePickupSelected) {
+    if (!this.formData.city) {
+       if (!silent) this.errors.city = "Місто обов'язкове";
+       valid = false;
+     }
+     if (dt?.delivery_type === "courier") {
+       if (!this.formData.street) {
+         if (!silent) this.errors.street = "Виберіть вулицю";
+         valid = false;
+       }
+       if (!this.formData.houseNumber) {
+         if (!silent) this.errors.houseNumber = "Введіть номер будинку";
+         valid = false;
+       }
+     }
+     if (dt?.delivery_type === 'pickup') {
+       // якщо ще не обрано склад - валідиться лише після вибору
+       if (!this.formData.warehouse?.name) {
+         if (!silent) this.errors.warehouse = "Відділення обов'язкове";
+         valid = false;
+       }
+     }
+   }
+   return valid;
+ },
     setCities(newCities) {
       this.cities = newCities;
     },
@@ -409,11 +420,12 @@ export default {
   },
   watch: {
     formData: {
-      handler() {
-        this.revalidateSteps();
-      },
-      deep: true
-    },
+    deep: true,
+    handler(val) {
+      console.log('formData:', val, 'canProceed:', this.canProceedToNextStep);
+      this.revalidateSteps();
+    }
+  },
     'formData.paymentMethod'(val) {
       this.revalidateSteps();
     },
