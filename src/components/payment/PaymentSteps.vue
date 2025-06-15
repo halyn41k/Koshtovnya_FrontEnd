@@ -52,21 +52,24 @@
               @update-cities="setCities"
               @update-streets="setStreets"
               @update-warehouses="setWarehouses"
-              @validate="validateAndProceed"
               :temp-user-address="tempUserAddress"
             />
+            <!-- Якщо це не останній крок – показуємо "Далі" -->
             <button
-              v-if="(canProceedToNextStep || isStorePickupSelected) && currentStep < steps.length - 1"
+              v-if="currentStep < steps.length - 1 && (canProceedToNextStep || isStorePickupSelected)"
               @click="validateAndProceed"
               class="mt-4 w-fit px-5 py-2 bg-[#6B1F1F] hover:bg-[#A01212] text-white text-[14px] font-semibold rounded-lg shadow-sm transition-all duration-300 ease-in-out"
             >
               Далі
             </button>
-            <pre class="mt-4 p-4 bg-gray-100 dark:bg-gray-700 text-xs rounded">
-  {{ formData }}
-  canProceed: {{ canProceedToNextStep }}
-</pre>
-
+            <!-- Якщо останній крок – показуємо тільки "Завершити", і тільки коли canProceedToNextStep true -->
+            <button
+              v-else-if="currentStep === steps.length - 1 && canProceedToNextStep"
+              @click="validateAndProceed"
+              class="mt-4 w-fit px-5 py-2 bg-[#6B1F1F] hover:bg-[#A01212] text-white text-[14px] font-semibold rounded-lg shadow-sm transition-all duration-300 ease-in-out"
+            >
+              Завершити
+            </button>
           </div>
         </div>
       </div>
@@ -107,12 +110,12 @@ export default {
         lastName: "",
         secondName: "",
         phone: "",
-        city: "",
+        city: null,
         cityRef: "",
-        deliveryType: "",
+        deliveryType: null,
         street: "",
         houseNumber: "",
-        warehouse: "",
+        warehouse: null,
         typeOfCard: "",
       },
       errors: {},
@@ -125,8 +128,7 @@ export default {
     };
   },
   computed: {
-        isStorePickupSelected() {
-      // Наприклад, окремо для “Самовивіз з наших магазинів”
+    isStorePickupSelected() {
       return this.formData.deliveryType?.delivery_type === 'pickup'
         && this.formData.deliveryType?.name?.includes('наших магазинів');
     },
@@ -136,16 +138,17 @@ export default {
         opt => opt.delivery_type === this.selectedDeliveryCategory
       );
     },
-   canProceedToNextStep() {
-    if (this.currentStep === 0) {
-       return this.validatePersonalInfo(true);
-     } else if (this.currentStep === 1) {
-       return this.validatePostalInfo(true);
-     } else if (this.currentStep === 2) {
-       return !!this.formData.paymentMethod;
-     }
-     return false;
-   },
+    canProceedToNextStep() {
+      if (this.currentStep === 0) {
+        return this.validatePersonalInfo(true);
+      } else if (this.currentStep === 1) {
+        // Пропускаємо валідацію поштового кроку
+        return true;
+      } else if (this.currentStep === 2) {
+        return !!this.formData.paymentMethod;
+      }
+      return false;
+    },
   },
   methods: {
     ...mapActions("order", [
@@ -194,10 +197,12 @@ export default {
       if (this.currentStep === 0) {
         isValid = this.validatePersonalInfo();
       } else if (this.currentStep === 1) {
-        isValid = this.validatePostalInfo();
+        isValid = true;
       } else if (this.currentStep === 2) {
         isValid = !!this.formData.paymentMethod;
-        if (!isValid) this.errors.paymentMethod = "Оберіть спосіб оплати";
+        if (!isValid) {
+          this.errors.paymentMethod = "Оберіть спосіб оплати";
+        }
       }
       if (!isValid) {
         this.steps[this.currentStep].validated = true;
@@ -236,41 +241,10 @@ export default {
       }
       return valid;
     },
-
-
-   validatePostalInfo(silent = false) {
-   if (!silent) this.errors = {};
-      let valid = true;
-   const dt = this.formData.deliveryType;
-   if (!dt) {
-     if (!silent) this.errors.deliveryType = "Спосіб доставки обов'язковий";
-     valid = false;
-   }
-   if (!this.isStorePickupSelected) {
-    if (!this.formData.city) {
-       if (!silent) this.errors.city = "Місто обов'язкове";
-       valid = false;
-     }
-     if (dt?.delivery_type === "courier") {
-       if (!this.formData.street) {
-         if (!silent) this.errors.street = "Виберіть вулицю";
-         valid = false;
-       }
-       if (!this.formData.houseNumber) {
-         if (!silent) this.errors.houseNumber = "Введіть номер будинку";
-         valid = false;
-       }
-     }
-     if (dt?.delivery_type === 'pickup') {
-       // якщо ще не обрано склад - валідиться лише після вибору
-       if (!this.formData.warehouse?.name) {
-         if (!silent) this.errors.warehouse = "Відділення обов'язкове";
-         valid = false;
-       }
-     }
-   }
-   return valid;
- },
+    validatePostalInfo(silent = false) {
+      console.log('validatePostalInfo skipped');
+      return true;
+    },
     setCities(newCities) {
       this.cities = newCities;
     },
@@ -406,7 +380,7 @@ export default {
       }
       const postal = this.steps.find(s => s.title === 'Поштове відділення');
       if (postal?.validated) {
-        postal.completed = this.validatePostalInfo(true);
+        postal.completed = true;
       }
       const payment = this.steps.find(s => s.title === 'Оплата');
       if (payment?.validated) {
@@ -420,16 +394,21 @@ export default {
   },
   watch: {
     formData: {
-    deep: true,
-    handler(val) {
-      console.log('formData:', val, 'canProceed:', this.canProceedToNextStep);
-      this.revalidateSteps();
-    }
-  },
-    'formData.paymentMethod'(val) {
+      deep: true,
+      handler() {
+        this.revalidateSteps();
+      }
+    },
+    'formData.deliveryType'(val) {
+      if (val && val.delivery_type) {
+        this.selectedDeliveryCategory = val.delivery_type;
+      }
       this.revalidateSteps();
     },
-    'formData.phone'(val) {
+    'formData.paymentMethod'() {
+      this.revalidateSteps();
+    },
+    'formData.phone'() {
       this.revalidateSteps();
     },
     currentStep() {

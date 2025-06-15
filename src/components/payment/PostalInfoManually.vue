@@ -60,27 +60,29 @@
           Вулиця:
         </label>
         <Combobox as="div" v-model="selectedStreet" class="relative">
-          <ComboboxInput
-            class="block w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
-            :class="{ 'border-red-500': errors.street }"
-            @input="handleStreetInput"
-            :displayValue="s => s?.Name || s"
-            placeholder="Введіть вулицю"
-          />
-          <ComboboxOptions
-            v-if="streetsLocal.length"
-            class="absolute z-50 w-full mt-1 bg-white border rounded shadow-lg"
-          >
-            <ComboboxOption
-              v-for="(s, i) in streetsLocal"
-              :key="i"
-              :value="s"
-              class="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-            >
-              {{ s.Name }}
-            </ComboboxOption>
-          </ComboboxOptions>
-        </Combobox>
+  <ComboboxInput
+    class="block w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+    :class="{ 'border-red-500': errors.street }"
+    v-model="localData.street"
+    @input="handleStreetInput"
+    :displayValue="s => s?.street || s"
+    placeholder="Введіть вулицю"
+  />
+  <ComboboxOptions
+    v-if="streetsLocal.length"
+    class="absolute z-50 w-full mt-1 bg-white border rounded shadow-lg"
+  >
+    <ComboboxOption
+      v-for="(s, i) in streetsLocal"
+      :key="i"
+      :value="s"
+      class="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+    >
+      {{ s.street }}
+    </ComboboxOption>
+  </ComboboxOptions>
+</Combobox>
+
         <p v-if="errors.street" class="text-red-500 text-xs mt-1">
           {{ errors.street }}
         </p>
@@ -292,33 +294,45 @@ onWarehouseSelect(option) {
       }
     },
 
-    handleStreetInput() {
-      clearTimeout(this.streetTimeout)
-      this.updateData()
-      if (!this.localData.street || this.localData.street.length < 3) return
-      this.streetTimeout = setTimeout(this.fetchStreets, 300)
-    },
+ handleStreetInput(e) {
+   clearTimeout(this.streetTimeout)
+   // записуємо введене у localData.street
+   this.localData.street = e.target.value
+   this.updateData()
+   // Якщо немає cityRef — чистимо список
+   if (!this.localData.cityRef) {
+     this.streetsLocal = []
+     return
+   }
+   // чекаємо принаймні 3 символи
+   if (!this.localData.street || this.localData.street.length < 3) return
+this.streetTimeout = setTimeout(this.fetchStreets, 300)
+ },
 
     async fetchStreets() {
-      try {
-        const token = localStorage.getItem('token')
-        const { data } = await axios.get(
-          'https://koshtovnya.api-dev.bmax-edu.website/api/nova-poshta/streets',
-          {
-            headers: { Authorization: `Bearer ${token}` },
-            params: {
-              Ref: this.localData.cityRef,
-              street: this.localData.street
-            }
-          }
-        )
-        const list = data.data || []
-        this.streetsLocal = list
-        this.$emit('update-streets', list)
-      } catch (e) {
-        console.error('Помилка fetchStreets', e)
+  if (!this.localData.cityRef) return
+  console.log('Запит вулиць, Ref=', this.localData.cityRef, 'street=', this.localData.street)
+  try {
+    const token = localStorage.getItem('token')
+    const { data } = await axios.get(
+      'https://koshtovnya.api-dev.bmax-edu.website/api/nova-poshta/streets',
+      {
+        headers: { Authorization: `Bearer ${token}` },
+        params: {
+          Ref: this.localData.cityRef,
+          street: this.localData.street
+        }
       }
-    },
+    )
+    console.log('Відповідь fetchStreets:', data)
+    const list = data.data || []
+    this.streetsLocal = list
+    this.$emit('update-streets', list)
+  } catch (e) {
+    console.error('Помилка fetchStreets', e)
+  }
+},
+
 
     selectCity(city) {
       this.localData.city    = city.city
@@ -329,12 +343,13 @@ onWarehouseSelect(option) {
     },
 
     selectStreet(street) {
-      const name = street.Name || street.street
-      this.localData.street       = name
-      this.localData.streetSearch = name
-      this.streetsLocal           = []
-      this.updateData()
-    },
+    // записуємо правильне поле
+    this.localData.street = street.street
+    this.localData.streetSearch = street.street
+    this.streetsLocal = []
+    this.updateData()
+  },
+
 
     async fetchWarehouses() {
       try {

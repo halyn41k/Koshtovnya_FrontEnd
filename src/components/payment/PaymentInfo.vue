@@ -33,26 +33,15 @@
       </div>
 
       <span
-        v-if="errors.paymentOption"
+        v-if="errors.paymentMethod"
         class="text-red-500 dark:text-red-300 text-xs montserrat"
       >
-        {{ errors.paymentOption }}
+        {{ errors.paymentMethod }}
       </span>
     </div>
-
-    <button
-      :disabled="!localData.paymentMethod"
-      @click="validateAndProceed"
-      class="mt-4 p-2.5 bg-[#6b1f1f] text-white rounded text-[14px]
-             font-medium montserrat disabled:opacity-50 disabled:cursor-not-allowed
-             hover:bg-[#811d1d] transition"
-    >
-      Далі
-    </button>
+    <!-- Кнопка тепер прибрана: батько керує кнопкою «Завершити» для останнього кроку -->
   </div>
 </template>
-
-
 
 <script>
 export default {
@@ -84,15 +73,9 @@ export default {
   methods: {
     updateData() {
       this.$emit("update:modelValue", this.localData);
-    },
-    validateAndProceed() {
-      if (this.localData.paymentMethod) {
-        this.updateData();
-        this.$emit("validate");
-      } else {
-        this.$emit("update-errors", {
-          paymentOption: "Оберіть спосіб оплати",
-        });
+      // очищаємо помилку при виборі
+      if (this.localData.paymentMethod && this.errors.paymentMethod) {
+        this.$emit("clear-error", "paymentMethod");
       }
     },
   },
