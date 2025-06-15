@@ -3,6 +3,8 @@
   "version": "0.1.0",
   "private": false,
   "scripts": {
+    "check-locales": "node checkNumericKeys.js",
+
     "serve": "vue-cli-service serve ./src/main.js --open",
     "build": "vue-cli-service build",
     "lint": "eslint ./src",

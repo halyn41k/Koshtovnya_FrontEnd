@@ -1,5 +1,5 @@
 // vue.config.js
-const path = require('path');
+const path = require('path')
 
 module.exports = {
   configureWebpack: {
@@ -9,9 +9,9 @@ module.exports = {
       },
       extensions: ['.js', '.vue', '.json'],
     },
+    devtool: 'source-map',      // ← Додаємо source‑maps
   },
   chainWebpack: config => {
-    // Вимикає перевірку регістру шляху
-    config.plugins.delete('case-sensitive-paths');
+    config.plugins.delete('case-sensitive-paths')
   }
-};
+}

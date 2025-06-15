@@ -81,7 +81,7 @@ export default {
       "email": "Email",
       "emailPlaceholder": "email@example.com",
       "phone": "Phone",
-      "phonePlaceholder": "0931234567",
+      "phonePlaceholder": "'0931234567'",
       "role": "Role",
       "rolePlaceholder": "Select a role",
       "cancel": "Cancel",

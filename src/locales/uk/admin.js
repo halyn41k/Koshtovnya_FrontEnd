@@ -75,7 +75,7 @@ export default {
     "email": "Email",
     "emailPlaceholder": "email@example.com",
     "phone": "Телефон",
-    "phonePlaceholder": "0931234567",
+    "phonePlaceholder": "'0931234567'",
     "role": "Роль",
     "rolePlaceholder": "Виберіть роль",
     "cancel": "Скасувати",
