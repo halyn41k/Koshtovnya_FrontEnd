@@ -61,6 +61,9 @@ wishlistEmpty: "Ваш список бажаного порожній :(",
 buy: "Купити",
 notAvailable: "Немає в наявності",
 clearWishlist: "Очистити список",
-
+   status_pending:   "В очікуванні",
+   status_sent:      "Відправлено",
+   status_delivered: "Доставлено",
+   status_cancelled: "Скасовано",
 }
 };

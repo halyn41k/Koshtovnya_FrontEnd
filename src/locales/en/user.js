@@ -61,7 +61,10 @@ wishlistEmpty: "Your wishlist is empty :(",
 buy: "Buy",
 notAvailable: "Not available",
 clearWishlist: "Clear wishlist",
-
+   status_pending:   "Penging",
+   status_sent:      "Sent",
+   status_delivered: "Delivered",
+   status_cancelled: "Cancelled",
 
 }
 };

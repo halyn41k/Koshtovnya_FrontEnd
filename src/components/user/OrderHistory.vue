@@ -25,7 +25,7 @@
             <span class="text-sm text-gray-600 dark:text-gray-300 whitespace-nowrap">{{ order.order_date }}</span>
           </div>
           <span class="text-sm sm:text-base font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">
-            {{ $t('user.status') }}: {{ order.status }}
+            {{ $t('user.status') }}: {{ order.statusLabel  }}
           </span>
         </div>
 
@@ -71,7 +71,7 @@
               {{ $t('user.orderDetails') }}
             </button>
             <button
-              v-if="order.status === 'В очікуванні'"
+              v-if="order.statusCode === 'pending'"
               @click="cancelOrder(order.id)"
               class="inline-flex items-center px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-sm text-gray-800 dark:text-white font-medium rounded-lg transition"
             >
@@ -113,38 +113,69 @@ export default {
     };
   },
   methods: {
-    async fetchOrders() {
-  const token = localStorage.getItem("token");
-  if (!token) {
-    alert("Будь ласка, увійдіть у свій обліковий запис.");
-    this.$router.push("/login");
-    return;
-  }
-  try {
-    const data = await api.getOrders();
-    this.orders = (data.orders || []).map(order => ({
-      id: order.id,
-      order_date: order.order_date,
-      status: order.status,
-      amount: order.amount,
-      currency: order.currency, // ДОДАНО!
-      items: (order.products || []).map(item => ({
-        id: item.id,
-        title: item.name,
-        price: item.price,
-        currency: item.currency, // ДОДАНО!
-        quantity: item.quantity,
-        image_url: item.image_url || "default_image_path",
-        is_deleted: item.is_deleted,
-      })),
-    }));
-  } catch (error) {
-    console.error("Помилка завантаження замовлень:", error);
-    alert("Не вдалося завантажити ваші замовлення.");
-  } finally {
-    this.loading = false;
-  }
-},
+ async fetchOrders() {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert(this.$t('user.loginRequired') || "Будь ласка, увійдіть у свій обліковий запис.");
+      this.$router.push("/login");
+      return;
+    }
+
+    this.loading = true;
+
+    try {
+      const data = await api.getOrders();
+
+      // Мапа для приведення рядка статусу до одного з internal code
+      const statusNormalizeMap = {
+        // англійські варіанти
+        'pending':     'pending',
+        'canceled':    'cancelled',
+        'cancelled':   'cancelled',
+        'sent':        'sent',
+        'delivered':   'delivered',
+        // українські варіанти
+        'в очікуванні': 'pending',
+        'скасовано':    'cancelled',
+        'відправлено':  'sent',
+        'доставлено':   'delivered'
+      };
+
+      this.orders = (data.orders || []).map(order => {
+        // raw — те, що прийшло з API, у нижньому регістрі
+        const raw = String(order.status).toLowerCase();
+        // code — один з pending|sent|delivered|cancelled
+        const code = statusNormalizeMap[raw] || raw;
+
+        return {
+          id:            order.id,
+          order_date:    order.order_date,
+          statusCode:    code,
+          statusLabel:   this.$t(`user.status_${code}`),
+          amount:        order.amount,
+          currency:      order.currency,
+          items:         (order.products || []).map(item => ({
+                           id:          item.id,
+                           title:       item.name,
+                           price:       item.price,
+                           currency:    item.currency,
+                           quantity:    item.quantity,
+                           image_url:   item.image_url || "default_image_path",
+                           is_deleted:  item.is_deleted
+                         }))
+        };
+      });
+
+    } catch (error) {
+      console.error("Помилка завантаження замовлень:", error);
+      alert(this.$t('user.loadError') || "Не вдалося завантажити ваші замовлення.");
+    } finally {
+      this.loading = false;
+    }
+  },
+
+
+
     formatCurrencyIntl(price, currency) {
   const fallbackCurrency = (localStorage.getItem('currency') || 'UAH').toUpperCase();
   const finalCurrency = (currency || fallbackCurrency).toUpperCase();

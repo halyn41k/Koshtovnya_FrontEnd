@@ -42,7 +42,7 @@
               class="custom-checkbox"
             />
             <span class="text-base text-gray-700 dark:text-gray-300">
-              {{ $t('product.starsLabel', { count: star }) }}
+              {{ $t('product.starsAdminLabel', { count: star }) }}
             </span>
           </label>
         </div>
