@@ -73,7 +73,7 @@ export default {
     "lastName": "Прізвище",
     "lastNamePlaceholder": "Введіть прізвище",
     "email": "Email",
-    "emailPlaceholder": "email@example.com",
+    "emailPlaceholder": "Email",
     "phone": "Телефон",
     "phonePlaceholder": "'0931234567'",
     "role": "Роль",

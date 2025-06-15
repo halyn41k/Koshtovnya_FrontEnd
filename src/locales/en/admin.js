@@ -79,7 +79,7 @@ export default {
       "lastName": "Last Name",
       "lastNamePlaceholder": "Enter last name",
       "email": "Email",
-      "emailPlaceholder": "email@example.com",
+      "emailPlaceholder": "Email",
       "phone": "Phone",
       "phonePlaceholder": "'0931234567'",
       "role": "Role",
