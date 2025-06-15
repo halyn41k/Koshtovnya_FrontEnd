@@ -422,12 +422,13 @@ getAdminFilter: async (config = {}) => {
     return data;
   },
 
-  // Admin
-  getAdminOrders: async () => {
-    const { data } = await apiClient.get('/api/admin/orders');
-    toast.success('Адмін: замовлення отримано');
-    return data;
-  },
+ getAdminOrders: async (page = 1) => {
+   const { data } = await apiClient.get('/api/admin/orders', {
+     params: { page }
+   });
+   toast.success('Адмін: замовлення отримано');
+   return data;
+ },
   getAdminOrder: async id => {
     const { data } = await apiClient.get(`/api/admin/orders/${id}`);
     toast.success('Адмін: деталі замовлення отримано');

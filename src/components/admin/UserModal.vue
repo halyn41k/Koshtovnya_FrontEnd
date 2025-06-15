@@ -147,10 +147,11 @@ export default {
   computed: {
     visibleFields() {
       const mapping = {
-          employee: ['first_name', 'last_name', 'email', 'phone_number', 'role'],
-     user:     ['first_name', 'last_name', 'email',  'phone_number', 'role'],
-        admin: ['first_name', 'second_name', 'last_name', 'email', 'role']
-      }
+  employee: ['first_name', 'second_name', 'last_name', 'email', 'phone_number', 'role'],
+  user:     ['first_name', 'second_name', 'last_name', 'email', 'phone_number', 'role'],
+  admin:    ['first_name', 'second_name', 'last_name', 'email', 'role']
+}
+
       const keys = mapping[this.context] || mapping.employee
       return keys.map(key => ({ key, ...this.fields[key] }))
     }

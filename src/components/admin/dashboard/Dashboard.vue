@@ -12,15 +12,14 @@
             {{ $t('admin.dashboard.period') }}
           </label>
           <Multiselect
-            v-model="selectedPeriod"
-            :options="periodOptions"
-            track-by="value"
-            label="label"
-            :reduce="opt => opt.value"
-            class="custom-multiselect w-40"
-            @input="onPeriodChange"
-            placeholder=" " 
-            :allow-empty="false"
+    v-model="selectedPeriod"
+    :options="periodOptions"
+    track-by="value"
+    label="label"
+    class="custom-multiselect w-40"
+    @input="onPeriodChange"
+    :placeholder="t('admin.dashboard.month')"
+    :allow-empty="false"
           />
         </div>
 
@@ -158,7 +157,7 @@ const periodOptions = computed(() => [
 ])
 
 // Вибір періоду або кастомного діапазону дат
-const selectedPeriod = ref('month')
+const selectedPeriod = ref(periodOptions.value.find(o => o.value === 'month'))
 const dateRange = ref(null) // [Date, Date] або null
 
 // Стан для статистики

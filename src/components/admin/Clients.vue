@@ -14,13 +14,14 @@
     </div>
 
    <div class="relative w-80">
-  <input
+<input
   v-model="searchQuery"
   @input="onSearch"
   type="text"
-  placeholder="Пошук"
+  :placeholder="$t('admin.clients.search')" 
   class="w-full pl-10 pr-4 py-2 border border-[#E0E0E0] dark:border-[#303b59] dark:bg-[#17223b] dark:text-white rounded focus:outline-none focus:ring focus:ring-pink-200"
 />
+
 <img
   src="@/assets/icons/search.svg"
   alt="Search"
@@ -93,10 +94,10 @@
           </span>
         </td>
         <td class="px-4 py-2 border-b border-[#E0E0E0] dark:border-gray-700 flex gap-2">
-          <button @click="openUpdateModal(user)" class="p-1 hover:bg-gray-100 dark:hover:bg-[#2a354e] rounded">
+          <button @click="openUpdateModal(client)" class="p-1 hover:bg-gray-100 dark:hover:bg-[#2a354e] rounded">
   <img src="@/assets/icons/edit.svg" class="w-5 h-5 dark:invert" alt="Edit" />
 </button>
-<button @click="deleteUser(user.id)" class="p-1 hover:bg-gray-100 dark:hover:bg-[#2a354e] rounded">
+<button @click="deleteUser(client.id)" class="p-1 hover:bg-gray-100 dark:hover:bg-[#2a354e] rounded">
   <img src="@/assets/icons/delete.svg" class="w-5 h-5 dark:invert" alt="Delete" />
 </button>
 
@@ -162,21 +163,20 @@
       Користувач успішно {{ toastAction }}!
     </div>
   </main>
-  <UserModal
-  v-if="showUserModal"
-  :user="modalClient"
-  :context="'user'"
-  :title="modalTitle"
-  @close="closeUserModal"
-  @userSubmit="handleUserSubmit"
-/>
+ <ClientModal
+     v-if="showUserModal"
+     :user="modalClient"
+      :title="modalTitle"
+      @close="showUserModal = false"
+      @save="handleUserSubmit"
+    />
 
 </template>
 
 
 <script>
 import axios from 'axios'
-import UserModal from './UserModal.vue'
+import ClientModal from './ClientModal.vue'
 import { createToastInterface } from 'vue-toastification'
 import api from '@/services/api';
 
@@ -184,7 +184,7 @@ const toast = createToastInterface()
 
 export default {
   name: 'ClientList',
-  components: { UserModal },
+  components: { ClientModal },
   data() {
     return {
       clients: [],
@@ -287,18 +287,41 @@ console.log('⬅️ Юзери з API:', this.clients);
       if (!url) return
       this.fetchUsers(url)
     },
-    openAddModal() {
-      this.modalTitle = 'Створити користувача'
-      this.modalKey = Date.now()
-      this.modalClient = null
-      this.showUserModal = true
-    },
-    openUpdateModal(client) {
-  this.modalTitle = 'Оновити користувача'
-  this.modalKey = Date.now()
-  this.modalClient = { ...client }
-  this.showUserModal = true
-},
+        openAddModal() {
+    this.modalTitle = this.$t('admin.userModal.createUser')  
+    this.modalClient = { id: null, first_name: '', second_name: '', last_name: '', email: '' }
+    this.showUserModal = true
+  },
+  openUpdateModal(client) {
+    this.modalTitle = this.$t('admin.userModal.updateUser') 
+    this.modalClient = { ...client }
+    this.showUserModal = true
+  },
+    handleUserSubmit(u) {
+   console.trace('handleUserSubmit called with', u)
+    const isUpdate = !!u.id;
+    const url = isUpdate
+      ? `https://koshtovnya.api-dev.bmax-edu.website/api/admin/user/${u.id}`
+      : 'https://koshtovnya.api-dev.bmax-edu.website/api/admin/user';
+    const method = isUpdate ? 'patch' : 'post';
+
+    axios[method](url, u, {
+      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+    })
+      .then(r => {
+        this.toastAction = isUpdate ? 'оновлено' : 'створено';
+        this.highlightedUserId = r.data.id;
+        this.showUserModal = false;
+        this.fetchUsers();
+        toast.success(`Користувача успішно ${this.toastAction}!`, { timeout: 3000 });
+        setTimeout(() => (this.highlightedUserId = null), 3000);
+      })
+      .catch(e => {
+        console.error('❌ Помилка при збереженні користувача:', e.response?.data || e);
+        toast.error('Помилка при збереженні користувача', { timeout: 3000 });
+      });
+  },
+
 banUser(id) {
   axios.post(`https://koshtovnya.api-dev.bmax-edu.website/api/admin/users/${id}/ban`, {}, {
     headers: {
@@ -337,41 +360,7 @@ unbanUser(id) {
     closeUserModal() {
       this.showUserModal = false
     },
-    handleUserSubmit(u) {
-  if (!u || typeof u !== 'object') {
-    console.error('handleUserSubmit отримав невалідний обʼєкт:', u)
-    return
-  }
-
-  const isUpdate = !!u.id
-  const url = isUpdate
-    ? `https://koshtovnya.api-dev.bmax-edu.website/api/admin/user/${u.id}`
-    : 'https://koshtovnya.api-dev.bmax-edu.website/api/admin/user'
-
-  const method = isUpdate ? 'patch' : 'post'
-
-  axios[method](url, u, {
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem('token')}`
-    }
-  })
-    .then((r) => {
-      this.toastAction = isUpdate ? 'оновлено' : 'створено'
-      this.highlightedUserId = r?.data?.data?.id
-setTimeout(() => (this.highlightedUserId = null), 3000)
-
-
-      this.fetchUsers()
-      this.closeUserModal() // ← важливо
-
-      toast.success(`Користувача успішно ${this.toastAction}!`, { timeout: 3000 })
-
-      setTimeout(() => (this.showToast = false), 3000)
-    })
-    .catch((e) => {
-      console.error('❌ Помилка при збереженні користувача:', e?.response?.data || e)
-    })
-},
+  
     deleteUser(id) {
   axios
     .delete(`https://koshtovnya.api-dev.bmax-edu.website/api/admin/users/${id}`, {

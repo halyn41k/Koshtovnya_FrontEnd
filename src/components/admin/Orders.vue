@@ -36,12 +36,7 @@
               >
                 <div class="inline-flex items-center gap-1">
                   {{ col.label }}
-                  <img
-                    v-if="col.sortable"
-                    :src="getSortIcon(sortState[col.key])"
-                    class="w-4 h-4"
-                    alt=""
-                  />
+                  <img v-if="col.sortable" :src="getSortIcon(sortState[col.key])" class="w-4 h-4" alt=""/>
                 </div>
               </th>
             </tr>
@@ -54,18 +49,16 @@
             >
               <td class="px-4 py-2 text-sm text-gray-800 dark:text-gray-200">{{ order.id }}</td>
               <td class="px-4 py-2 text-sm text-gray-800 dark:text-gray-200">{{ order.order_date }}</td>
-              <td class="px-4 py-2 text-sm text-gray-800 dark:text-gray-200">
+              <td class="px-4 py-2 text-sm text-gray-800 dark:text-gray-200 w-48">
                 <Multiselect
-  v-model="order.status"
-  :options="statusOptions"
-  :placeholder="$t('admin.orders.selectStatus')"
-  :allow-empty="false"
-  :close-on-select="true"
-  :show-labels="false"
-  @input="updateStatus(order.id, order.status)"
-  class="text-sm custom-multiselect"
-/>
-
+                  v-model="order.selectedOption"
+                  :options="statusOptions"
+                  track-by="value"
+                  label="label"
+                  @input="onStatusChange(order)"
+                  @select="onStatusChange(order)"
+                  @open="console.log('Multiselect open for', order.id)"
+                />
               </td>
               <td class="px-4 py-2 text-sm text-gray-800 dark:text-gray-200">{{ order.phone_number }}</td>
               <td class="px-4 py-2 text-sm text-gray-800 dark:text-gray-200">{{ order.products.join(', ') }}</td>
@@ -75,7 +68,7 @@
       </div>
     </div>
 
-    <!-- Порожній стани -->
+    <!-- Порожні стани -->
     <div v-else-if="!orders.length && !searchQuery" class="py-20 text-center text-gray-500 dark:text-gray-400">
       {{ $t('admin.orders.noOrders') }}
     </div>
@@ -85,222 +78,212 @@
 
     <!-- Пагінація -->
     <div v-if="orders.length" class="flex justify-center items-center gap-2 mt-6">
-      <button
-        @click="goToPage(currentPage - 1)"
-        :disabled="currentPage === 1"
-        class="px-3 py-1 rounded bg-white border border-gray-300 hover:bg-gray-100 disabled:opacity-50 dark:bg-[#112a45] dark:border-[#2b4b6e] dark:hover:bg-[#153254]"
-      >&lt;</button>
+      <button @click="fetchOrders(currentPage - 1)" :disabled="currentPage === 1" class="px-3 py-1 rounded bg-white border border-gray-300 hover:bg-gray-100 disabled:opacity-50 dark:bg-[#112a45] dark:border-[#2b4b6e] dark:hover:bg-[#153254]">&lt;</button>
       <button
         v-for="page in meta.last_page"
         :key="page"
-        @click="goToPage(page)"
-        :class="[
-          'px-3 py-1 rounded border border-gray-300 hover:bg-gray-100',
-          page === currentPage ? 'bg-[#6B1F1F] text-white' : 'bg-white dark:bg-[#112a45] dark:border-[#2b4b6e] dark:text-white'
-        ]"
+        @click="fetchOrders(page)"
+        :class="[ 'px-3 py-1 rounded border border-gray-300 hover:bg-gray-100', page === currentPage ? 'bg-[#6B1F1F] text-white' : 'bg-white dark:bg-[#112a45] dark:border-[#2b4b6e] dark:text-white' ]"
       >
         {{ page }}
       </button>
-      <button
-        @click="goToPage(currentPage + 1)"
-        :disabled="currentPage === meta.last_page"
-        class="px-3 py-1 rounded bg-white border border-gray-300 hover:bg-gray-100 disabled:opacity-50 dark:bg-[#112a45] dark:border-[#2b4b6e] dark:hover:bg-[#153254]"
-      >&gt;</button>
+      <button @click="fetchOrders(currentPage + 1)" :disabled="currentPage === meta.last_page" class="px-3 py-1 rounded bg-white border border-gray-300 hover:bg-gray-100 disabled:opacity-50 dark:bg-[#112a45] dark:border-[#2b4b6e] dark:hover:bg-[#153254]">&gt;</button>
     </div>
 
     <!-- Модал деталів -->
-    <div
-      v-if="showDetailsModal"
-      class="fixed inset-0 bg-black bg-opacity-25 flex items-center justify-center z-50"
-      @click.self="closeDetailsModal"
-    >
+    <div v-if="showDetailsModal" class="fixed inset-0 bg-black bg-opacity-25 flex items-center justify-center z-50" @click.self="closeDetailsModal">
       <div class="bg-white rounded-lg p-6 w-full max-w-md shadow-lg dark:bg-[#1a2f4a] dark:text-white">
         <h3 class="text-xl font-semibold mb-4">{{ $t('admin.orders.details') }} #{{ orderDetails.id }}</h3>
         <p class="mb-2"><strong>Дата:</strong> {{ orderDetails.order_date }}</p>
-        <p class="mb-2"><strong>Статус:</strong> {{ orderDetails.status }}</p>
+        <p class="mb-2"><strong>Статус:</strong> {{ orderDetails.statusLabel }}</p>
         <p class="mb-2"><strong>Телефон:</strong> {{ orderDetails.phone_number }}</p>
         <p class="mb-4"><strong>Продукти:</strong> {{ orderDetails.products.join(', ') }}</p>
-        <button
-          @click="closeDetailsModal"
-          class="mt-2 px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400 dark:bg-gray-600 dark:text-white dark:hover:bg-gray-500"
-        >{{ $t('admin.orders.close') }}</button>
+        <button @click="closeDetailsModal" class="mt-2 px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400 dark:bg-[#1a2f4a] dark:text-white dark:hover:bg-[#153254]">{{ $t('admin.orders.close') }}</button>
       </div>
     </div>
   </main>
 </template>
 
-
 <script>
-import axios from "axios";
+import 'vue-multiselect/dist/vue-multiselect.min.css'
 import Multiselect from 'vue-multiselect'
+import api from '@/services/api'
+
+/*
+  Мапінг internal → бекенд-значення і ключі локалізації:
+*/
+const STATUS_MAP = {
+  pending:   { backend: 'Pending',   labelKey: 'admin.orders.statusOrder.pending' },
+  shipped:   { backend: 'Sent',      labelKey: 'admin.orders.statusOrder.shipped' },
+  delivered: { backend: 'Delivered', labelKey: 'admin.orders.statusOrder.delivered' },
+  cancelled: { backend: 'Cancelled', labelKey: 'admin.orders.statusOrder.cancelled' },
+}
+/*
+  Якщо бекенд повертає некоректні raw-рядки, враховуємо їх тут:
+*/
+const BACKEND_ALIAS = {
+  'Panding': 'pending',
+  'Pending': 'pending',
+  'Sent': 'shipped',
+  'Shipped': 'shipped',
+  'Delivered': 'delivered',
+  'Cancelled': 'cancelled',
+  'orders.status.Скасовано': 'cancelled',
+}
 
 export default {
-  name: "OrderList",
-  components: {
-    Multiselect
-  },
+  name: 'OrderList',
+  components: { Multiselect },
   data() {
     return {
-      statusOptions: ["В очікуванні", "Відправлено", "Доставлено", "Скасовано"],
       orders: [],
-      searchQuery: "",
-      sortState: {
-        id: "none",
-        order_date: "none",
-        status: "none",
-        phone_number: "none",
-        products: "none"
-      },
+      searchQuery: '',
+      sortState: { id: 'none', order_date: 'none', statusInternal: 'none', phone_number: 'none', products: 'none' },
       meta: { last_page: 1 },
       currentPage: 1,
       highlightedOrderId: null,
       showDetailsModal: false,
       orderDetails: {}
-    };
+    }
   },
   computed: {
+    statusOptions() {
+      return Object.entries(STATUS_MAP).map(([internal, { labelKey }]) => ({
+        value: internal,
+        label: this.$t(labelKey)
+      }))
+    },
     columns() {
       return [
-        { key: "id", label: this.$t('admin.orders.id'), sortable: true },
-        { key: "order_date", label: this.$t('admin.orders.date'), sortable: true },
-        { key: "status", label: this.$t('admin.orders.status'), sortable: true },
-        { key: "phone_number", label: this.$t('admin.orders.phone'), sortable: true },
-        { key: "products", label: this.$t('admin.orders.products'), sortable: true }
-      ];
+        { key: 'id', label: this.$t('admin.orders.id'), sortable: true },
+        { key: 'order_date', label: this.$t('admin.orders.date'), sortable: true },
+        { key: 'statusInternal', label: this.$t('admin.orders.status'), sortable: true },
+        { key: 'phone_number', label: this.$t('admin.orders.phone'), sortable: true },
+        { key: 'products', label: this.$t('admin.orders.products'), sortable: true }
+      ]
     },
     filteredAndSorted() {
       let arr = this.orders.filter(o => {
-        const q = this.searchQuery.toLowerCase();
+        const q = this.searchQuery.toLowerCase()
         return (
           o.id.toString().includes(q) ||
-          o.order_date.toLowerCase().includes(q) ||
-          o.status.toLowerCase().includes(q) ||
-          o.phone_number.includes(q)
-        );
-      });
-      const [key, order] = Object.entries(this.sortState).find(([_, v]) => v !== "none") || [];
+          (o.order_date || '').toLowerCase().includes(q) ||
+          (o.statusInternal || '').includes(q) ||
+          (o.phone_number || '').includes(q)
+        )
+      })
+      const [key, order] = Object.entries(this.sortState).find(([, v]) => v !== 'none') || []
       if (key) {
         arr.sort((a, b) => {
-          let va = a[key], vb = b[key];
-          if (Array.isArray(va)) va = va.join();
-          if (order === "asc") return va > vb ? 1 : va < vb ? -1 : 0;
-          else return va < vb ? 1 : va > vb ? -1 : 0;
-        });
+          let va = a[key], vb = b[key]
+          if (Array.isArray(va)) va = va.join()
+          if (Array.isArray(vb)) vb = vb.join()
+          // порівнюємо рядки або числа
+          return order === 'asc' ? (va > vb ? 1 : -1) : (va < vb ? 1 : -1)
+        })
       }
-      return arr;
+      return arr
     }
   },
   mounted() {
-    this.fetchOrders(1);
+    this.fetchOrders()
   },
   methods: {
+    normalizeStatus(raw) {
+      if (!raw) return 'pending'
+      return BACKEND_ALIAS[raw] || 'pending'
+    },
     async fetchOrders(page = 1) {
-      this.currentPage = page;
-      const params = { page };
-      const sorted = Object.entries(this.sortState).find(([_, v]) => v !== "none");
-      if (sorted) {
-        params.sort_by = sorted[0];
-        params.sort_order = sorted[1];
-      }
+      console.log('>>> fetchOrders, page →', page)
       try {
-        const res = await axios.get("https://koshtovnya.api-dev.bmax-edu.website/api/admin/orders", {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-          params
-        });
-        // Ensure placeholder appears for null statuses
-        this.orders = res.data.data.map(o => ({ ...o, status: o.status || '' }));
-        this.meta.last_page = res.data.meta.last_page;
+        const res = await api.getAdminOrders(page)
+        console.log('<<< API meta →', res.meta)
+        this.orders = res.data.map(o => {
+          const internal = this.normalizeStatus(o.status)
+          return {
+            ...o,
+            _rawStatus: o.status,
+            statusInternal: internal,
+            selectedOption: {
+              value: internal,
+              label: this.$t(STATUS_MAP[internal].labelKey)
+            }
+          }
+        })
+        this.meta = { ...res.meta }
+        this.currentPage = res.meta.current_page
       } catch (e) {
-        console.error(e);
+        console.error('Помилка завантаження замовлень:', e)
       }
     },
     cycleSort(col) {
-      const ord = this.sortState[col];
-      Object.keys(this.sortState).forEach(k => (this.sortState[k] = "none"));
-      this.sortState[col] = ord === "none" ? "asc" : ord === "asc" ? "desc" : "none";
-      this.fetchOrders(this.currentPage);
+      const ord = this.sortState[col]
+      Object.keys(this.sortState).forEach(k => (this.sortState[k] = 'none'))
+      this.sortState[col] = ord === 'none' ? 'asc' : ord === 'asc' ? 'desc' : 'none'
+      // Після зміни сорту не обов’язково перезапитувати, якщо дані вже є локально.
+      // Якщо потрібна нова сторінка, можна fetchOrders.
+      // Тут лишаємо без fetchOrders, бо сортуємо локально:
+      // Якщо сортування серверне, замінити на this.fetchOrders(this.currentPage)
     },
     getSortIcon(s) {
-      if (s === "asc") return require("@/assets/icons/asc.svg");
-      if (s === "desc") return require("@/assets/icons/desc.svg");
-      return require("@/assets/icons/none_sorted.svg");
+      if (s === 'asc') return require('@/assets/icons/asc.svg')
+      if (s === 'desc') return require('@/assets/icons/desc.svg')
+      return require('@/assets/icons/none_sorted.svg')
     },
     goToPage(page) {
-      if (page < 1 || page > this.meta.last_page) return;
-      this.fetchOrders(page);
+      if (page < 1 || page > this.meta.last_page) return
+      this.fetchOrders(page)
     },
-    showOrderDetails(id) {
-      axios
-        .get(`https://koshtovnya.api-dev.bmax-edu.website/api/admin/orders/${id}`, {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
-        })
-        .then(res => {
-          this.orderDetails = { ...res.data.data, status: res.data.data.status || '' };
-          this.showDetailsModal = true;
-        })
-        .catch(console.error);
+    async onStatusChange(order) {
+      const prevInternal = order.statusInternal
+      const newInternal = order.selectedOption.value
+      const backendValue = STATUS_MAP[newInternal].backend
+      order.statusInternal = newInternal
+      try {
+        await api.updateAdminOrder(order.id, { status: backendValue })
+        order._rawStatus = backendValue
+        this.highlightedOrderId = order.id
+        setTimeout(() => (this.highlightedOrderId = null), 3000)
+      } catch (e) {
+        console.error('Помилка оновлення статусу:', e)
+        // Відкотити
+        order.statusInternal = prevInternal
+        order.selectedOption = {
+          value: prevInternal,
+          label: this.$t(STATUS_MAP[prevInternal].labelKey)
+        }
+        // TODO: показати toast з повідомленням про помилку
+      }
+    },
+    async showOrderDetails(id) {
+      try {
+        const res = await api.getAdminOrder(id)
+        const raw = res.data.status
+        const internal = this.normalizeStatus(raw)
+        this.orderDetails = {
+          ...res.data,
+          statusInternal: internal,
+          statusLabel: this.$t(STATUS_MAP[internal].labelKey)
+        }
+        this.showDetailsModal = true
+      } catch (e) {
+        console.error('Не вдалося отримати деталі замовлення:', e)
+      }
     },
     closeDetailsModal() {
-      this.showDetailsModal = false;
-      this.orderDetails = {};
-    },
-    updateStatus(id, status) {
-      axios
-        .patch(
-          `https://koshtovnya.api-dev.bmax-edu.website/api/admin/orders/${id}`,
-          { status },
-          { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
-        )
-        .then(() => {
-          this.highlightedOrderId = id;
-          setTimeout(() => this.highlightedOrderId = null, 3000);
-        })
-        .catch(console.error);
+      this.showDetailsModal = false
+      this.orderDetails = {}
     }
   }
-};
+}
 </script>
 
 <style scoped>
-/* Світла тема */
-.custom-multiselect .multiselect {
-  background-color: white;
-  border: 1px solid #d1d5db; /* gray-300 */
-  border-radius: 0.375rem;   /* rounded-md */
-  color: #1f2937;            /* gray-800 */
-  font-size: 0.875rem;       /* text-sm */
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
-
-/* Темна тема */
-.dark .custom-multiselect .multiselect {
-  background-color: #112a45;
-  border-color: #2b4b6e;
-  color: #fff;
-}
-
-/* Dropdown */
-.custom-multiselect .multiselect__content-wrapper {
-  background-color: white;
-  border-radius: 0 0 0.375rem 0.375rem;
-}
-.dark .custom-multiselect .multiselect__content-wrapper {
-  background-color: #112a45;
-}
-
-/* Опції */
-.custom-multiselect .multiselect__option {
-  padding: 0.5rem;
-  font-size: 0.875rem;
-}
-.dark .custom-multiselect .multiselect__option {
-  color: #fff;
-}
-.dark .custom-multiselect .multiselect__option--highlight {
-  background-color: #153254;
-}
-
-/* Обрана опція */
-.custom-multiselect .multiselect__single {
-  color: inherit;
-}
+.animate-fade-in { animation: fade-in 0.5s ease-out both; }
+.custom-multiselect .multiselect__option--highlight::after { display: none !important; }
+.multiselect__option--highlight { background: #F3F4F6 !important; color: #6B1F1F !important; }
 </style>

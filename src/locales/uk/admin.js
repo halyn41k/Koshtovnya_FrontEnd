@@ -46,6 +46,52 @@ export default {
       noUsers: "Поки що не було додано жодного користувача.",
       noResults: "За запитом \"{query}\" нічого не знайдено."
     },
+     "employees": {
+      "title": "Працівники",
+      "add": "Додати працівника",
+      "search": "Пошук працівників",
+      "actions": "Керування",
+      "edit": "Редагувати",
+      "delete": "Видалити",
+      "noEmployees": "Поки що не було додано жодного працівника.",
+      "noResults": "За запитом «{query}» нічого не знайдено.",
+      "toastMessage": "Працівника успішно {action}!",
+      "columns": {
+        "id": "ID",
+        "first_name": "Ім’я",
+        "email": "Email",
+        "phone_number": "Телефон",
+        "date": "Дата прийому",
+        "role": "Роль"
+      },
+    },
+    "userModal": {
+    "firstName": "Ім’я",
+    "firstNamePlaceholder": "Введіть ім’я",
+    "secondName": "По батькові",
+    "secondNamePlaceholder": "Введіть по батькові",
+    "lastName": "Прізвище",
+    "lastNamePlaceholder": "Введіть прізвище",
+    "email": "Email",
+    "emailPlaceholder": "email@example.com",
+    "phone": "Телефон",
+    "phonePlaceholder": "0931234567",
+    "role": "Роль",
+    "rolePlaceholder": "Виберіть роль",
+    "cancel": "Скасувати",
+    "create": "Створити",
+    "update": "Оновити",
+    "errors": {
+      "emailRequired": "Email обов'язковий",
+      "emailInvalid": "Невірний формат Email",
+      "phoneRequired": "Телефон обов'язковий",
+      "phoneInvalid": "Номер має містити 10 цифр",
+      "firstNameRequired": "Ім’я обов'язкове",
+      "secondNameRequired": "По батькові обов'язкове",
+      "lastNameRequired": "Прізвище обов'язкове",
+      "roleRequired": "Роль обов'язкова"
+    }
+  },
     products: {
       title: "Товари",
       add: "Додати",
@@ -72,7 +118,13 @@ export default {
       noOrders: "Поки що не було додано жодного замовлення.",
       noResults: "За запитом \"{query}\" нічого не знайдено.",
       details: "Деталі замовлення",
-      close: "Закрити"
+      close: "Закрити",
+      "statusOrder": {
+        "pending": "В очікуванні",
+        "shipped": "Відправлено",
+        "delivered": "Доставлено",
+        "cancelled": "Скасовано"
+      }
     },
    
     addProduct: {
@@ -138,23 +190,9 @@ export default {
       updated: "Дані оновлено.",
       updateError: "Помилка оновлення."
     },
-    userModal: {
-    title: 'Додати користувача',
-    firstName: "Ім'я",
-    firstNamePlaceholder: "Введіть ім'я",
-    secondName: "По батькові",
-    secondNamePlaceholder: "Введіть по батькові",
-    lastName: "Прізвище",
-    lastNamePlaceholder: "Введіть прізвище",
-    email: "Email",
-    emailPlaceholder: "Введіть email",
-    phone: "Телефон",
-    phonePlaceholder: "380XXXXXXXXX",
-    role: "Роль",
-    rolePlaceholder: "Оберіть роль",
-    cancel: "Відміна",
-    create: "Створити",
-    update: "Оновити"
+    "employeeModal": {
+    "createTitle": "Додати працівника",
+    "updateTitle": "Оновити працівника"
   },
    profitReport: {
       title: "Звіт по прибутку",

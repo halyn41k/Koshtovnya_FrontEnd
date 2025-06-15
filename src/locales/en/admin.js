@@ -46,6 +46,58 @@ export default {
       noUsers: "No users have been added yet.",
       noResults: "Nothing found for \"{query}\"."
     },
+     "employees": {
+      "title": "Employees",
+      "add": "Add Employee",
+      "search": "Search employees",
+      "actions": "Actions",
+      "edit": "Edit",
+      "delete": "Delete",
+      "noEmployees": "No employees added yet.",
+      "noResults": "No results found for \"{query}\".",
+      "toastMessage": "Employee {action} successfully!",
+      "columns": {
+        "id": "ID",
+        "first_name": "First Name",
+        "email": "Email",
+        "phone_number": "Phone",
+        "date": "Hire Date",
+        "role": "Role"
+      }
+    },
+     "employeeModal": {
+    "createTitle": "Add Employee",
+    "updateTitle": "Update Employee"
+  },
+      "userModal": {
+      "createUser": "Create user",
+    "updateUser": "Update user",
+      "firstName": "First Name",
+      "firstNamePlaceholder": "Enter first name",
+      "secondName": "Middle Name",
+      "secondNamePlaceholder": "Enter middle name",
+      "lastName": "Last Name",
+      "lastNamePlaceholder": "Enter last name",
+      "email": "Email",
+      "emailPlaceholder": "email@example.com",
+      "phone": "Phone",
+      "phonePlaceholder": "0931234567",
+      "role": "Role",
+      "rolePlaceholder": "Select a role",
+      "cancel": "Cancel",
+      "create": "Create",
+      "update": "Update",
+      "errors": {
+        "emailRequired": "Email is required",
+        "emailInvalid": "Invalid email format",
+        "phoneRequired": "Phone is required",
+        "phoneInvalid": "Phone number must be exactly 10 digits",
+        "firstNameRequired": "First name is required",
+        "secondNameRequired": "Middle name is required",
+        "lastNameRequired": "Last name is required",
+        "roleRequired": "Role is required"
+      }
+    },
     products: {
       title: "Products",
       add: "Add",
@@ -72,7 +124,13 @@ export default {
       noOrders: "No orders have been added yet.",
       noResults: "No results for \"{query}\".",
       details: "Order details",
-      close: "Close"
+      close: "Close",
+       "statusOrder": {
+        "pending": "Pending",
+        "shipped": "Shipped",
+        "delivered": "Delivered",
+        "cancelled": "Cancelled"
+      }
     },
     settings: {
       title: "Settings",
@@ -152,25 +210,6 @@ export default {
       updated: "Data updated.",
       updateError: "Update failed."
     },
-     userModal: {
-    title: 'Add User',
-    firstName: "First Name",
-    firstNamePlaceholder: "Enter first name",
-    secondName: "Middle Name",
-    secondNamePlaceholder: "Enter middle name",
-    lastName: "Last Name",
-    lastNamePlaceholder: "Enter last name",
-    email: "Email",
-    emailPlaceholder: "Enter email",
-    phone: "Phone",
-    phonePlaceholder: "380XXXXXXXXX",
-    role: "Role",
-    rolePlaceholder: "Select a role",
-    cancel: "Cancel",
-    create: "Create",
-    update: "Update"
-  },
-
 
    profitReport: {
       title: "Income Report",
