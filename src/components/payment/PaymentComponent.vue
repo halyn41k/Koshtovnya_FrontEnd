@@ -12,7 +12,7 @@
                    font-kyivBlack2 text-[34px] font-black tracking-[-1.2px]
                    text-center">
           <div class="flex-1 h-[2px] bg-gray-400 mx-2"></div>
-      Оплата    
+      {{ $t('payment.paymentTitle') }}  
 <div class="flex-1 h-[2px] bg-gray-400 mx-2"></div>
         </h1>
       </header>
@@ -119,7 +119,7 @@ export default {
     totalAmount: 0,
   };
 },
-
+   
   watch: {
   cartItems: { handler: "calculateTotalAmount", deep: true },
   deliveryCost: "calculateTotalAmount",
@@ -135,6 +135,10 @@ export default {
 },
 
   methods: {
+    updateData(newPartial) {
+      // якщо вам треба зливати часткові оновлення:
+      this.formData = { ...this.formData, ...newPartial };
+    },
     calculateTotalAmount() {
       this.totalAmount =
         this.cartItems.reduce(

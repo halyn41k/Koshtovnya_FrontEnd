@@ -5,18 +5,18 @@
       <!-- Спосіб доставки -->
       <div class="relative">
         <label class="block mb-1 text-sm font-medium text-gray-700">
-          Спосіб доставки:
+          {{ $t('payment.deliveryMethod') }}:
         </label>
-       <Multiselect
-  v-model="localData.deliveryType"
-  :options="deliveryOptionsLocal"
-  :custom-label="opt => `${opt.label} — ${opt.name}`"
-  track-by="id"
-  placeholder="Оберіть спосіб доставки"
-  searchable
-  :allow-empty="false"
-  @input="onDeliveryTypeChange"
-/>
+        <Multiselect
+          v-model="localData.deliveryType"
+          :options="deliveryOptionsLocal"
+          :custom-label="opt => `${opt.label} — ${opt.name}`"
+          track-by="id"
+          :placeholder="$t('payment.selectDeliveryMethod')"
+          searchable
+          :allow-empty="false"
+          @input="onDeliveryTypeChange"
+        />
         <span v-if="errors.deliveryType" class="text-red-500 text-xs">
           {{ errors.deliveryType }}
         </span>
@@ -25,7 +25,7 @@
       <!-- Місто -->
       <div v-if="localData.deliveryType && !isStorePickup">
         <label class="block mb-1 text-sm font-medium text-gray-700">
-          Місто:
+          {{ $t('payment.city') }}:
         </label>
         <Combobox as="div" v-model="selectedCity" class="relative">
           <ComboboxInput
@@ -33,7 +33,7 @@
             :class="{ 'border-red-500': errors.city }"
             @input="handleCityInput"
             :displayValue="c => c?.city || c"
-            placeholder="Введіть місто"
+            :placeholder="$t('payment.enterCity')"
           />
           <ComboboxOptions
             v-if="citiesLocal.length"
@@ -57,46 +57,45 @@
       <!-- Вулиця + номер -->
       <div v-if="isCourier">
         <label class="block mb-1 text-sm font-medium text-gray-700">
-          Вулиця:
+          {{ $t('payment.street') }}:
         </label>
         <Combobox as="div" v-model="selectedStreet" class="relative">
-  <ComboboxInput
-    class="block w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
-    :class="{ 'border-red-500': errors.street }"
-    v-model="localData.street"
-    @input="handleStreetInput"
-    :displayValue="s => s?.street || s"
-    placeholder="Введіть вулицю"
-  />
-  <ComboboxOptions
-    v-if="streetsLocal.length"
-    class="absolute z-50 w-full mt-1 bg-white border rounded shadow-lg"
-  >
-    <ComboboxOption
-      v-for="(s, i) in streetsLocal"
-      :key="i"
-      :value="s"
-      class="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-    >
-      {{ s.street }}
-    </ComboboxOption>
-  </ComboboxOptions>
-</Combobox>
-
+          <ComboboxInput
+            class="block w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+            :class="{ 'border-red-500': errors.street }"
+            v-model="localData.street"
+            @input="handleStreetInput"
+            :displayValue="s => s?.street || s"
+            :placeholder="$t('payment.enterStreet')"
+          />
+          <ComboboxOptions
+            v-if="streetsLocal.length"
+            class="absolute z-50 w-full mt-1 bg-white border rounded shadow-lg"
+          >
+            <ComboboxOption
+              v-for="(s, i) in streetsLocal"
+              :key="i"
+              :value="s"
+              class="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+            >
+              {{ s.street }}
+            </ComboboxOption>
+          </ComboboxOptions>
+        </Combobox>
         <p v-if="errors.street" class="text-red-500 text-xs mt-1">
           {{ errors.street }}
         </p>
 
         <div class="mt-4">
           <label class="block mb-1 text-sm font-medium text-gray-700">
-            Номер будинку:
+            {{ $t('payment.houseNumber') }}:
           </label>
           <input
             v-model="localData.houseNumber"
             class="block w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
             :class="{ 'border-red-500': errors.houseNumber }"
             @input="updateData"
-            placeholder="Номер будинку"
+            :placeholder="$t('payment.houseNumberPlaceholder')"
           />
           <p v-if="errors.houseNumber" class="text-red-500 text-xs mt-1">
             {{ errors.houseNumber }}
@@ -107,14 +106,14 @@
       <!-- Відділення / Поштомат -->
       <div v-if="showWarehouse">
         <label class="block mb-1 text-sm font-medium text-gray-700">
-          {{ isPostomat ? 'Поштомат' : 'Відділення' }}:
+          {{ isPostomat ? $t('payment.postomat') : $t('payment.warehouse') }}:
         </label>
-               <Multiselect
+        <Multiselect
           v-model="localData.warehouse"
-         :options="warehousesLocal"
+          :options="warehousesLocal"
           label="name"
-         track-by="id"
-          placeholder="Оберіть відділення"
+          track-by="id"
+          :placeholder="$t('payment.selectWarehouse')"
           searchable
           :allow-empty="false"
           @input="updateData"
@@ -126,12 +125,13 @@
 
       <!-- Магазин -->
       <div v-if="isStorePickup" class="text-sm text-gray-800">
-        <p><strong>Місто:</strong> Коломия</p>
-        <p><strong>Адреса:</strong> вул. Степана Бандери 22</p>
+        <p><strong>{{ $t('payment.city') }}:</strong> {{ $t('payment.storeCity') }}</p>
+        <p><strong>{{ $t('payment.address') }}:</strong> {{ $t('payment.storeAddress') }}</p>
       </div>
     </div>
   </div>
 </template>
+
 
 <script>
 import axios from 'axios'

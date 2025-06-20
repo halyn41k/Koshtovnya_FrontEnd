@@ -52,7 +52,7 @@ items: 'items',
 filter: 'Filter',
 clearAll: 'Clear All',
 nothingFound: 'No products found for the selected filters 😢',
-
+Viewotherproducts: 'View other products',
 
   }
 }

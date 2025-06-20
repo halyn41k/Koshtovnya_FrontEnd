@@ -10,13 +10,13 @@
           :for="key"
           class="text-sm text-gray-700 dark:text-gray-300 font-medium"
         >
-          {{ getLabel(key) }}
+          {{ $t(`payment.fields.${key}.label`) }}
         </label>
         <input
           :id="key"
           :type="field.type"
           v-model="localData[key]"
-          :placeholder="field.placeholder"
+          :placeholder="$t(`payment.fields.${key}.placeholder`)"
           @input="updateData"
           class="border border-gray-400 dark:border-gray-600 p-2 rounded
                  text-black dark:text-white bg-white dark:bg-gray-800
@@ -33,7 +33,6 @@
     </div>
   </div>
 </template>
-
 
 
 <script>

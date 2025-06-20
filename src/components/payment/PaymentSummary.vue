@@ -1,83 +1,82 @@
 <template>
   <section class="relative z-[5]">
     <div
-  class="
-    w-full
-    p-4 lg:p-5
-    bg-[#FFF7F6] dark:bg-gray-800 border border-[#E6E6E6] dark:border-gray-600 rounded-lg
-    transition-all duration-300 text-black dark:text-white"
+      class="
+        w-full
+        p-4 lg:p-5
+        bg-[#FFF7F6] dark:bg-gray-800 border border-[#E6E6E6] dark:border-gray-600 rounded-lg
+        transition-all duration-300 text-black dark:text-white"
       style="font-family: 'Montserrat', sans-serif;"
     >
-     
-
       <!-- Заголовок -->
-      <h2 class="text-black dark:text-white font-bold text-[20px] leading-[1.3] mb-4">
-        Сума до оплати
+      <h2
+        class="text-black dark:text-white font-bold text-[20px] leading-[1.3] mb-4"
+      >
+        {{ $t('payment.title') }}
       </h2>
 
       <!-- Деталі замовлення -->
       <div class="font-normal text-[14px] leading-[1.3]">
-        <!-- Товари в кошику -->
         <div
           v-for="item in safeCartItems"
           :key="item.id"
           class="flex justify-between mb-2.5"
         >
           <span>{{ item.name }}</span>
-          <!-- Буде: -->
-<span class="text-[#A01212] font-semibold text-[14px]">
-  {{ formatCurrencyIntl(item.price * item.quantity, item.currency) }}
-</span>
+          <span class="text-[#A01212] font-semibold text-[14px]">
+            {{ formatCurrencyIntl(item.price * item.quantity, item.currency) }}
+          </span>
         </div>
 
         <!-- Вартість доставки -->
         <div class="flex justify-between mb-2.5">
-          <span>Доставка</span>
+          <span>{{ $t('payment.delivery') }}</span>
           <span class="text-[#A01212] font-semibold text-[14px]">
-  {{ formatCurrencyIntl(deliveryCost, detectedCurrency) }}
-</span>
+            {{ formatCurrencyIntl(deliveryCost, detectedCurrency) }}
+          </span>
         </div>
 
         <!-- Загальна сума -->
         <div class="flex justify-between text-[18px] mt-4">
-          <span>Загальна сума</span>
+          <span>{{ $t('payment.total') }}</span>
           <span class="text-[#A01212] font-semibold">
-  {{ formatCurrencyIntl(totalWithDelivery, detectedCurrency) }}
-</span>
+            {{ formatCurrencyIntl(totalWithDelivery, detectedCurrency) }}
+          </span>
         </div>
       </div>
 
       <!-- Кнопка оформлення -->
       <button
-    @click="submitOrder"
-    :disabled="isButtonDisabled"
-    class="w-full flex justify-between items-center font-bold text-[15px] leading-[1.3]
-           rounded-[8px] py-[6px] px-[15px] mt-2.5 h-[40px] transition-colors duration-300
-           border border-[#6B1F1F]"
-    :class="{
-      'bg-[#6B1F1F] text-white hover:bg-[#A01212] cursor-pointer': !isButtonDisabled,
-      'bg-gray-300 text-gray-500 cursor-not-allowed': isButtonDisabled
-    }"
-  >
-    <span>Оформити замовлення</span>
-    <img
-      src="https://cdn.builder.io/api/v1/image/assets/TEMP/436b738744905f60c6a542e2cd314f5694db20045d36b8991f8dab9a31b316a0"
-      alt="Order icon"
-      class="w-6 h-6"
-    />
-  </button>
+        @click="submitOrder"
+        :disabled="isButtonDisabled"
+        class="w-full flex justify-between items-center font-bold text-[15px] leading-[1.3]
+               rounded-[8px] py-[6px] px-[15px] mt-2.5 h-[40px] transition-colors duration-300
+               border border-[#6B1F1F]"
+        :class="{
+          'bg-[#6B1F1F] text-white hover:bg-[#A01212] cursor-pointer': !isButtonDisabled,
+          'bg-gray-300 text-gray-500 cursor-not-allowed': isButtonDisabled
+        }"
+      >
+        <span>{{ $t('payment.submit') }}</span>
+        <img
+          src="https://cdn.builder.io/api/v1/image/assets/TEMP/436b738744905f60c6a542e2cd314f5694db20045d36b8991f8dab9a31b316a0"
+          alt="Order icon"
+          class="w-6 h-6"
+        />
+      </button>
 
-  <!-- Тултіп -->
-  <div
-    v-if="isButtonDisabled"
-    class="absolute top-full mt-2 left-1/2 -translate-x-1/2 bg-black text-white text-[12px]
-           px-3 py-1 rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-  >
-    Заповніть усі кроки оформлення
-  </div>
+      <!-- Тултіп -->
+      <div
+        v-if="isButtonDisabled"
+        class="absolute top-full mt-2 left-1/2 -translate-x-1/2 bg-black text-white text-[12px]
+               px-3 py-1 rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+      >
+        {{ $t('payment.tooltip') }}
+      </div>
     </div>
   </section>
 </template>
+
 
 <script>
 import api from '@/services/api';

@@ -4,7 +4,6 @@
   "private": false,
   "scripts": {
     "check-locales": "node checkNumericKeys.js",
-
     "serve": "vue-cli-service serve ./src/main.js --open",
     "build": "vue-cli-service build",
     "lint": "eslint ./src",
@@ -47,6 +46,7 @@
     "express": "^4.19.2",
     "jspdf": "^2.5.2",
     "loader": "^2.1.1",
+    "lucide-vue-next": "^0.518.0",
     "mitt": "^3.0.1",
     "msal": "^1.4.18",
     "mysql": "^2.18.1",

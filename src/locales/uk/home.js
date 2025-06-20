@@ -6,7 +6,7 @@ home: {
   followInsta: 'Слідкуй за нами в Instagram, щоб',
   dontMissTheMost: 'не пропустити найцікавіше!',
     aboutUs: 'Про нас',
-  wishlist: 'Список бажань',
+  wishlist: 'Список бажаного',
   aboutDelivery: "Про оплату | Доставку",
   siteName: "Коштовня",
   searchPlaceholder: "Пошук товарів...",

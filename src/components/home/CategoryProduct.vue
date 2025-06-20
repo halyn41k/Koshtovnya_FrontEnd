@@ -89,30 +89,32 @@ export default {
     };
   },
   methods: {
-    async fetchCategories() {
-      this.loading = true;
-      try {
-        const response = await api.getCategories();
-        const items = Array.isArray(response.data)
-          ? response.data
-          : response.data.data || [];
-        const fixedUrls = [
-          '/bracelets', '/herdany', '/sylyanky',
-          '/dukats', '/earrings', '/belts'
-        ];
-        this.categories = items.map((cat, idx) => ({
-          id: cat.id,
-          name: cat.name,
-          image_url: cat.image_url,
-          url: fixedUrls[idx] || `/category/${cat.id}`
-        }));
-      } catch (err) {
-        console.error('Помилка отримання категорій:', err);
-        this.categories = this.fallbackCategories;
-      } finally {
-        this.loading = false;
-      }
-    },
+     async fetchCategories() {
+    this.loading = true;
+    try {
+      const response = await api.getCategories();
+      const items = Array.isArray(response.data)
+        ? response.data
+        : response.data.data || [];
+
+      // Прив’язуємо прямий маршрут з id
+      this.categories = items.map(cat => ({
+        id: cat.id,
+        name: cat.name,
+        image_url: cat.image_url,
+        url: `/category/${cat.id}`
+      }));
+    } catch (err) {
+      console.error('Помилка отримання категорій:', err);
+      // Для fallback теж формуємо правильні url
+      this.categories = this.fallbackCategories.map(cat => ({
+        ...cat,
+        url: `/category/${cat.id}`
+      }));
+    } finally {
+      this.loading = false;
+    }
+  },
   },
   mounted() {
     this.fetchCategories();

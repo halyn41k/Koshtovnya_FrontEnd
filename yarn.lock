@@ -7910,6 +7910,11 @@ lru.min@^1.0.0:
   resolved "https://registry.yarnpkg.com/lru.min/-/lru.min-1.1.2.tgz#01ce1d72cc50c7faf8bd1f809ebf05d4331021eb"
   integrity sha512-Nv9KddBcQSlQopmBHXSsZVY5xsdlZkdH/Iey0BlcBYggMd4two7cZnKOK9vmy3nY0O5RGH99z1PCeTpPqszUYg==
 
+lucide-vue-next@^0.518.0:
+  version "0.518.0"
+  resolved "https://registry.yarnpkg.com/lucide-vue-next/-/lucide-vue-next-0.518.0.tgz#bee60522b106163ef79310b7a5feb306eecc795b"
+  integrity sha512-x4Vb3rMtz7y389aSGa0icMlm+X9vcO0tJBcXpvzi0K1NQn1IUUoXH4ENWQoLB/ZWtpkL1r6MAiIL+ycFPBFP8Q==
+
 magic-string@^0.30.17:
   version "0.30.17"
   resolved "https://registry.yarnpkg.com/magic-string/-/magic-string-0.30.17.tgz#450a449673d2460e5bbcfba9a61916a1714c7453"

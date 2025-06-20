@@ -176,6 +176,23 @@ export default {
       cancel: "Скасувати",
       delete: "Видалити"
     },
+     settings: {
+      title: "Налаштування",
+      address: "Адреса",
+      phone: "Телефон",
+      email: "Email",
+      logo: "Логотип",
+      save: "Зберегти",
+      categories: "Категорії",
+      create: "Створити",
+      
+      // Ось сюди додаємо:
+      categoryNameUk: "Назва (укр.)",
+      categoryNameEn: "Назва (англ.)",
+      categoryImage: "Зображення категорії",
+      createCategory: "Додати категорію",
+      addCategory: "Додати нову категорію",
+    },
     profile: {
       title: "Профіль адміністратора",
       firstName: "Ім’я",
@@ -218,13 +235,6 @@ export default {
       },
       noData: "Поки що не було додано жодного звіту по прибутку."
   },
-  "settings": {
-    "categoryNameUk": "Назва (укр.)",
-    "categoryNameEn": "Назва (англ.)",
-    "categoryImage": "Зображення категорії",
-    "createCategory": "Додати категорію",
-    "addCategory": "Додати нову категорію",
-    "create": "Створити"
-  },
+  
   }
 };

@@ -1,4 +1,3 @@
-// services/api.js
 import axios from 'axios';
 import router from '@/router';
 import i18n from '@/i18n';              // експорт вашого Vue I18n-екземпляру
@@ -11,50 +10,40 @@ const toast = createToastInterface({
   closeOnClick: true,
 });
 
+// helper для тостів з урахуванням мови
+function showToast(type, ukMessage, originalMessage) {
+  const currentLang = i18n.global.locale.value || 'uk';
+  const msg = (currentLang === 'uk') ? ukMessage : (originalMessage || ukMessage);
+  toast[type](msg);
+}
+
 let hasShownAuthToast = false;
 
 const apiClient = axios.create({
   baseURL: 'https://koshtovnya.api-dev.bmax-edu.website',
-  headers: {
-    'Content-Type': 'application/json'
-  },
+  headers: { 'Content-Type': 'application/json' },
   timeout: 10000,
 });
 
 apiClient.interceptors.request.use(config => {
-  // --- Auth token ---
   const token = localStorage.getItem('token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
+  if (token) config.headers.Authorization = `Bearer ${token}`;
 
-  // --- Поточна мова та валюта ---
   const lang = i18n.global.locale.value || localStorage.getItem('language') || 'uk';
   const currency = (localStorage.getItem('currency') || 'uah').toLowerCase();
 
-  // Для GET: додаємо у params
   if (config.method === 'get') {
-    config.params = {
-      ...(config.params || {}),
-      lang,
-      currency,
-    };
+    config.params = { ...(config.params || {}), lang, currency };
   } else {
-    // Для інших: у body
     if (config.data instanceof FormData) {
       config.data.append('lang', lang);
       config.data.append('currency', currency);
     } else if (config.data) {
-      config.data = {
-        ...config.data,
-        lang,
-        currency,
-      };
+      config.data = { ...config.data, lang, currency };
     } else {
       config.data = { lang, currency };
     }
   }
-
   return config;
 }, error => Promise.reject(error));
 
@@ -62,85 +51,72 @@ apiClient.interceptors.response.use(
   response => response,
   error => {
     const response = error.response;
-
-    // Якщо зовсім немає відповіді
     if (!response) {
-      toast.error('Немає зв’язку із сервером. Спробуйте ще раз.');
+      showToast('error', 'Немає зв’язку із сервером. Спробуйте ще раз.', 'Network error or timeout');
       return Promise.reject({ message: 'Network error or timeout' });
     }
 
-    // 401 Unauthorized
     if (response.status === 401) {
       localStorage.removeItem('token');
-      const currentPath = window.location.pathname;
-      if (currentPath !== '/login') {
-        window.location.href = '/login';
-      }
-      // Одноразово показуємо toast
+      if (window.location.pathname !== '/login') window.location.href = '/login';
       if (!hasShownAuthToast) {
-        toast.warning('Будь ласка, увійдіть у систему');
+        showToast('warning', 'Будь ласка, увійдіть у систему', response.data?.message);
         hasShownAuthToast = true;
         setTimeout(() => { hasShownAuthToast = false; }, 10000);
       }
       return Promise.reject(response.data);
     }
 
-    // Інші кастомні помилки з message
-    const msg = (response.data?.message || '').toLowerCase();
-    if (msg.includes('banned')) {
+    const msg = response.data?.message || '';
+    if (msg.toLowerCase().includes('banned')) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       window.location.href = '/login?error=user_is_banned';
       return Promise.reject(response.data);
     }
-    if (msg.includes('you are already subscribed for notifications')) {
-      toast.error('Ви вже підписані на сповіщення для цього товару 😢');
+
+    if (msg.toLowerCase().includes('you are already subscribed for notifications')) {
+      showToast('error', 'Ви вже підписані на сповіщення для цього товару 😢', response.data?.message);
       return Promise.reject(response.data);
     }
-    if (msg.includes('not enough stock available')) {
-      toast.error('Немає достатньо товару в наявності 😢');
+    if (msg.toLowerCase().includes('not enough stock available')) {
+      showToast('error', 'Немає достатньо товару в наявності 😢', response.data?.message);
       return Promise.reject(response.data);
     }
 
-    // HTTP-статуси
     switch (response.status) {
       case 400:
-        toast.error(response.data.message || 'Неправильні дані запиту');
+        showToast('error', 'Неправильні дані запиту', response.data?.message);
         break;
       case 403:
-        toast.error('У вас недостатньо прав для цієї дії');
+        showToast('error', 'У вас недостатньо прав для цієї дії', response.data?.message);
         break;
-        case 404:
-      // якщо це API-запит, просто відхиляємо проміс
-      if (response.config.url.startsWith('/api/')) {
+      case 404:
+        if (response.config.url.startsWith('/api/')) {
+          return Promise.reject(response.data);
+        }
+        showToast('info', 'Сторінку не знайдено', response.data?.message);
+        router.push({ name: 'NotFound' });
         return Promise.reject(response.data);
-      }
-      // інакше — редіректимо на сторінку 404
-      toast.info('Сторінку не знайдено');
-      router.push({ name: 'NotFound' });
-      return Promise.reject(response.data);
-
-
       case 422:
-        Object.values(response.data.errors || {})
-          .flat()
-          .forEach(m => toast.error(m));
+        Object.values(response.data.errors || {}).flat().forEach(m =>
+          showToast('error', m, m)
+        );
         break;
       case 500:
-        if (msg.includes('out of range value for column')) {
-          toast.error('Цей товар більше не в наявності 😢');
+        if (msg.toLowerCase().includes('out of range value for column')) {
+          showToast('error', 'Цей товар більше не в наявності 😢', response.data?.message);
         } else {
-          toast.error('Сталася помилка на сервері. Спробуйте пізніше');
+          showToast('error', 'Сталася помилка на сервері. Спробуйте пізніше', response.data?.message);
         }
         break;
       default:
-        toast.error(response.data.message || `Сталася помилка: ${response.status}`);
+        showToast('error', `Сталася помилка: ${response.status}`, response.data?.message);
     }
 
     return Promise.reject(response.data);
   }
 );
-
 
 
 export default {
@@ -406,11 +382,6 @@ getAdminFilter: async (config = {}) => {
   },
 
 
-  // Delivery types & Profile
-  getDeliveryTypes: async () => {
-    const { data } = await apiClient.get('/api/delivery-types');
-    return data;
-  },
   getProfile: async () => {
     const { data } = await apiClient.get('/api/profile');
     toast.success('Профіль завантажено');
@@ -690,5 +661,9 @@ getAdminFilter: async (config = {}) => {
     return data;
   },
   
+   getDeliveryTypes: async () => {
+    const response = await apiClient.get('/api/delivery-types');
+    return response.data;
+  },
 };
 

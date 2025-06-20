@@ -11,8 +11,9 @@
       </h3>
 
       <p class="text-base mb-4">
-        {{ $t('user.status') }}: <span class="font-medium">{{ order.status }}</span>
-      </p>
+  {{ $t('user.status') }}: <span class="font-medium">{{ order.statusLabel }}</span>
+</p>
+
 
       <div
         v-if="order.items?.length"

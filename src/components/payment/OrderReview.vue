@@ -1,7 +1,7 @@
 <template>
   <div class="order-review font-montserrat text-[14px]">
     <p class="text-gray-700 dark:text-gray-200 font-semibold mb-4">
-      Будь ласка, перевірте своє замовлення перед оплатою.
+      {{ $t('payment.orderReview.title') }}
     </p>
 
     <section
@@ -24,20 +24,24 @@
               {{ item.title }}
             </h3>
             <p class="text-gray-600 dark:text-gray-300">
-              <span class="font-semibold">{{ formatCurrencyIntl(item.price, item.currency) }}</span> за штуку
+              <span class="font-semibold">
+                {{ formatCurrencyIntl(item.price, item.currency) }}
+              </span>
+              {{ $t('payment.orderReview.unit') }}
             </p>
             <p class="text-gray-600 dark:text-gray-300">
-              Кількість: {{ item.quantity }}
+              {{ $t('payment.orderReview.quantityLabel') }}: {{ item.quantity }}
             </p>
           </div>
         </div>
       </div>
       <div v-else class="text-center text-gray-500 dark:text-gray-400 py-10">
-        Ваш кошик порожній.
+        {{ $t('payment.orderReview.emptyCart') }}
       </div>
     </section>
   </div>
 </template>
+
 
 
 

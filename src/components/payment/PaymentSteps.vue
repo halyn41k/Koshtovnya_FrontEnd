@@ -20,7 +20,7 @@
             <span
               :class="[step.completed ? 'text-gray-400 dark:text-gray-500' : 'text-gray-900 dark:text-white', 'font-bold']"
             >
-              {{ index + 1 }}. {{ step.title }}
+              {{ index + 1 }}. {{ $t('payment.steps.' + step.title) }}
             </span>
             <img
               v-if="step.completed"
@@ -54,21 +54,21 @@
               @update-warehouses="setWarehouses"
               :temp-user-address="tempUserAddress"
             />
-            <!-- Якщо це не останній крок – показуємо "Далі" -->
+
             <button
               v-if="currentStep < steps.length - 1 && (canProceedToNextStep || isStorePickupSelected)"
               @click="validateAndProceed"
               class="mt-4 w-fit px-5 py-2 bg-[#6B1F1F] hover:bg-[#A01212] text-white text-[14px] font-semibold rounded-lg shadow-sm transition-all duration-300 ease-in-out"
             >
-              Далі
+              {{ $t('payment.steps.next') }}
             </button>
-            <!-- Якщо останній крок – показуємо тільки "Завершити", і тільки коли canProceedToNextStep true -->
+
             <button
               v-else-if="currentStep === steps.length - 1 && canProceedToNextStep"
               @click="validateAndProceed"
               class="mt-4 w-fit px-5 py-2 bg-[#6B1F1F] hover:bg-[#A01212] text-white text-[14px] font-semibold rounded-lg shadow-sm transition-all duration-300 ease-in-out"
             >
-              Завершити
+              {{ $t('payment.steps.finish') }}
             </button>
           </div>
         </div>
@@ -79,94 +79,72 @@
 
 <script>
 import api from '@/services/api';
-import { mapActions } from "vuex";
-import PersonalInfo from "./PersonalInfo.vue";
-import PostalInfo from "./PostalInfo.vue";
-import PostalInfoManually from "./PostalInfoManually.vue";
-import PaymentInfo from "./PaymentInfo.vue";
+import { mapActions } from 'vuex';
+import PersonalInfo from './PersonalInfo.vue';
+import PostalInfo from './PostalInfo.vue';
+import PostalInfoManually from './PostalInfoManually.vue';
+import PaymentInfo from './PaymentInfo.vue';
 
 export default {
-  name: "PaymentSteps",
-  components: {
-    PersonalInfo,
-    PostalInfo,
-    PostalInfoManually,
-    PaymentInfo,
-  },
+  name: 'PaymentSteps',
+  components: { PersonalInfo, PostalInfo, PostalInfoManually, PaymentInfo },
   data() {
     return {
       steps: [
-        { title: "Особиста інформація", completed: false, validated: false, isExpanded: true },
-        { title: "Поштове відділення", completed: false, validated: false, isExpanded: false },
-        { title: "Оплата", completed: false, validated: false, isExpanded: false },
+        { title: 'personalInfo', completed: false, validated: false, isExpanded: true },
+        { title: 'delivery', completed: false, validated: false, isExpanded: false },
+        { title: 'payment', completed: false, validated: false, isExpanded: false }
       ],
       currentStep: 0,
       tempUserAddress: null,
       showManualForm: false,
       selectedDeliveryCategory: '',
       formData: {
-        paymentMethod: "",
-        firstName: "",
-        lastName: "",
-        secondName: "",
-        phone: "",
+        paymentMethod: '',
+        firstName: '',
+        lastName: '',
+        secondName: '',
+        phone: '',
         city: null,
-        cityRef: "",
+        cityRef: '',
         deliveryType: null,
-        street: "",
-        houseNumber: "",
+        street: '',
+        houseNumber: '',
         warehouse: null,
-        typeOfCard: "",
+        typeOfCard: ''
       },
       errors: {},
       cities: [],
       streets: [],
       warehouses: [],
-      deliveryOptions: [],
-      cartItems: [],
-      deliveryCost: 0,
+      deliveryOptions: []
     };
   },
   computed: {
     isStorePickupSelected() {
-      return this.formData.deliveryType?.delivery_type === 'pickup'
-        && this.formData.deliveryType?.name?.includes('наших магазинів');
-    },
-    filteredDeliveryOptions() {
-      if (!this.selectedDeliveryCategory) return this.deliveryOptions;
-      return this.deliveryOptions.filter(
-        opt => opt.delivery_type === this.selectedDeliveryCategory
+      return (
+        this.formData.deliveryType?.delivery_type === 'pickup' &&
+        this.formData.deliveryType?.name.includes('наших магазинів')
       );
     },
-    canProceedToNextStep() {
-      if (this.currentStep === 0) {
-        return this.validatePersonalInfo(true);
-      } else if (this.currentStep === 1) {
-        // Пропускаємо валідацію поштового кроку
-        return true;
-      } else if (this.currentStep === 2) {
-        return !!this.formData.paymentMethod;
-      }
-      return false;
+    filteredDeliveryOptions() {
+      if (!this.selectedDeliveryCategory || !this.deliveryOptions.length) return [];
+      return this.deliveryOptions.filter(opt => opt.delivery_type === this.selectedDeliveryCategory);
     },
+    canProceedToNextStep() {
+      if (this.currentStep === 0) return this.validatePersonalInfo(true);
+      if (this.currentStep === 1) return true;
+      if (this.currentStep === 2) return !!this.formData.paymentMethod;
+      return false;
+    }
   },
   methods: {
-    ...mapActions("order", [
-      "updateCustomerData",
-      "updateCartItems",
-      "updateDeliveryCost",
-    ]),
+    ...mapActions('order', ['updateCustomerData', 'updateCartItems', 'updateDeliveryCost']),
     getStepComponent(title) {
-      if (title === "Особиста інформація") {
-        return "PersonalInfo";
-      }
-      if (title === "Поштове відділення") {
-        return this.showManualForm ? "PostalInfoManually" : "PostalInfo";
-      }
-      if (title === "Оплата") {
-        return "PaymentInfo";
-      }
-      return "div";
+      if (title === 'personalInfo') return 'PersonalInfo';
+      if (title === 'delivery') return this.showManualForm ? 'PostalInfoManually' : 'PostalInfo';
+      if (title === 'payment') return 'PaymentInfo';
+      return 'div';
     },
     toggleStep(index) {
       if (this.currentStep === index) {
@@ -177,32 +155,25 @@ export default {
         this.steps[this.currentStep].isExpanded = true;
       }
     },
-    updateDeliveryOptions() {
-      const deliveryData = {
-        courier: [
-          { id: 5, name: "Кур'єр Нової Пошти", delivery_type: 'courier', label: 'Курʼєр' },
-          { id: 6, name: "Кур'єр УКРПОШТИ", delivery_type: 'courier', label: 'Курʼєр' }
-        ],
-        pickup: [
-          { id: 1, name: "Самовивіз з наших магазинів", delivery_type: 'pickup', label: 'Самовивіз' },
-          { id: 2, name: "Самовивіз з поштоматів Нової Пошти", delivery_type: 'pickup', label: 'Самовивіз' },
-          { id: 3, name: "Самовивіз з Нової Пошти", delivery_type: 'pickup', label: 'Самовивіз' },
-          { id: 4, name: "Самовивіз з УКРПОШТИ", delivery_type: 'pickup', label: 'Самовивіз' }
-        ]
-      };
-      this.deliveryOptions = [...deliveryData.courier, ...deliveryData.pickup];
+    async updateDeliveryOptions() {
+      try {
+        const result = await api.getDeliveryTypes();
+        this.deliveryOptions = result.data || result;
+        const categories = [...new Set(this.deliveryOptions.map(opt => opt.delivery_type))];
+        if (!categories.includes(this.selectedDeliveryCategory)) {
+          this.selectedDeliveryCategory = categories[0];
+        }
+      } catch (e) {
+        console.error('Помилка delivery types:', e);
+      }
     },
     validateAndProceed() {
       let isValid = false;
-      if (this.currentStep === 0) {
-        isValid = this.validatePersonalInfo();
-      } else if (this.currentStep === 1) {
-        isValid = true;
-      } else if (this.currentStep === 2) {
+      if (this.currentStep === 0) isValid = this.validatePersonalInfo();
+      else if (this.currentStep === 1) isValid = true;
+      else if (this.currentStep === 2) {
         isValid = !!this.formData.paymentMethod;
-        if (!isValid) {
-          this.errors.paymentMethod = "Оберіть спосіб оплати";
-        }
+        if (!isValid) this.errors.paymentMethod = 'Оберіть спосіб оплати';
       }
       if (!isValid) {
         this.steps[this.currentStep].validated = true;
@@ -217,207 +188,35 @@ export default {
         this.currentStep++;
         this.steps[this.currentStep].isExpanded = true;
       } else {
-        this.$emit("steps-complete", true);
+        this.$emit('steps-complete', true);
       }
     },
     validatePersonalInfo(silent = false) {
       if (!silent) this.errors = {};
       let valid = true;
-      if (!this.formData.firstName) {
-        if (!silent) this.errors.firstName = "Ім'я обов'язкове";
-        valid = false;
-      }
-      if (!this.formData.lastName) {
-        if (!silent) this.errors.lastName = "Прізвище обов'язкове";
-        valid = false;
-      }
-      if (!this.formData.secondName) {
-        if (!silent) this.errors.secondName = "По батькові обов'язкове";
-        valid = false;
-      }
-      if (!this.formData.phone) {
-        if (!silent) this.errors.phone = "Номер телефону обов'язковий";
-        valid = false;
-      }
+      if (!this.formData.firstName) { if (!silent) this.errors.firstName = "Ім'я обов'язкове"; valid = false; }
+      if (!this.formData.lastName)  { if (!silent) this.errors.lastName  = "Прізвище обов'язкове"; valid = false; }
+      if (!this.formData.secondName){ if (!silent) this.errors.secondName= "По батькові обов'язкове"; valid = false; }
+      if (!this.formData.phone)     { if (!silent) this.errors.phone     = "Номер телефону обов'язковий"; valid = false; }
       return valid;
     },
-    validatePostalInfo(silent = false) {
-      console.log('validatePostalInfo skipped');
-      return true;
-    },
-    setCities(newCities) {
-      this.cities = newCities;
-    },
-    setStreets(newStreets) {
-      this.streets = newStreets;
-    },
-    setWarehouses(newWarehouses) {
-      this.warehouses = newWarehouses;
-    },
-    async fetchUserAddress() {
-      try {
-        const response = await api.getUserAddress();
-        const addressData = response.data?.data ?? response.data;
-        if (addressData) {
-          this.formData.phone = addressData.phone_number || "";
-          if (addressData.user) {
-            const parts = addressData.user.split(" ");
-            this.formData.lastName = parts[0] || '';
-            this.formData.firstName = parts[1] || '';
-            this.formData.secondName = parts[2] || '';
-          }
-          this.showManualForm = false;
-          this.tempUserAddress = {
-            phone: addressData.phone_number,
-            city: addressData.city,
-            cityRef: addressData.Ref,
-            delivery_address: addressData.delivery_address,
-            houseNumber: addressData.house_number,
-            deliveryTypeName: addressData.delivery_name,
-            deliveryCategory: addressData.delivery_type,
-            userName: addressData.user,
-          };
-          await this.loadDeliveryOptionsAndAutoFill(addressData);
-        } else {
-          this.showManualForm = true;
-        }
-      } catch (error) {
-        console.error("Помилка отримання адреси користувача", error.response?.data || error);
-        this.showManualForm = true;
-      }
-    },
-    async loadDeliveryOptionsAndAutoFill(addressData) {
-      this.updateDeliveryOptions();
-      let match = this.deliveryOptions.find(opt => opt.name === addressData.delivery_name);
-      if (!match) {
-        match = this.deliveryOptions.find(opt =>
-          opt.delivery_type === addressData.delivery_type &&
-          opt.name.toLowerCase().includes(
-            String(addressData.delivery_name).toLowerCase().split('нова пошта')[0].trim()
-          )
-        );
-      }
-      if (!match) {
-        match = this.deliveryOptions.find(opt => opt.delivery_type === addressData.delivery_type);
-      }
-      if (match) {
-        this.formData.deliveryType = match;
-        this.selectedDeliveryCategory = match.delivery_type;
-      }
-      try {
-        const citiesResp = await api.getNPCities({ city: addressData.city });
-        const citiesList = citiesResp.data.success ? citiesResp.data.data : [];
-        this.cities = citiesList;
-        const foundCity = citiesList.find(c =>
-          c.Ref === addressData.Ref ||
-          String(c.city).toLowerCase() === String(addressData.city).toLowerCase()
-        );
-        if (foundCity) {
-          this.formData.city = foundCity;
-          this.formData.cityRef = foundCity.Ref;
-        } else {
-          this.formData.city = addressData.city;
-          this.formData.cityRef = addressData.Ref;
-        }
-      } catch (e) {
-        console.error("Помилка fetchCities під час автопідстановки", e);
-        this.formData.city = addressData.city;
-        this.formData.cityRef = addressData.Ref;
-      }
-      if (this.formData.deliveryType?.delivery_type === 'courier') {
-        try {
-          const streetsResp = await api.getNPStreets({
-            Ref: this.formData.cityRef,
-            street: addressData.delivery_address
-          });
-          const streetsList = streetsResp.data.data || [];
-          this.streets = streetsList;
-          const raw = addressData.delivery_address || '';
-          const parts = raw.split(/\s+/);
-          const namePart = parts.slice(0, parts.length - 1).join(' ');
-          const foundStreet = streetsList.find(s =>
-            String(s.Name).toLowerCase() === namePart.toLowerCase()
-          );
-          if (foundStreet) {
-            this.formData.street = foundStreet;
-          } else {
-            this.formData.street = namePart;
-          }
-          this.formData.houseNumber = addressData.house_number || '';
-        } catch (e) {
-          console.error("Помилка fetchStreets під час автопідстановки", e);
-          this.formData.street = addressData.delivery_address || '';
-          this.formData.houseNumber = addressData.house_number || '';
-        }
-      } else if (this.formData.deliveryType?.delivery_type === 'pickup') {
-        try {
-          const whResp = await api.getNPWarehouses({
-            city: typeof this.formData.city === 'object' ? this.formData.city.city : this.formData.city,
-            Ref: this.formData.cityRef,
-            delivery_type: addressData.delivery_name
-          });
-          const whList = Array.isArray(whResp.data.data)
-            ? whResp.data.data.map((item, i) => ({ id: i+1, name: item.warehouse }))
-            : [];
-          this.warehouses = whList;
-          const target = String(addressData.delivery_address).toLowerCase().replace(/\s+/g,' ').trim();
-          const foundW = whList.find(w =>
-            w.name.toLowerCase().replace(/\s+/g,' ').includes(target) ||
-            target.includes(w.name.toLowerCase().replace(/\s+/g,' '))
-          );
-          if (foundW) {
-            this.formData.warehouse = foundW;
-          }
-        } catch (e) {
-          console.error("Помилка fetchWarehouses під час автопідстановки", e);
-        }
-      }
-    },
     revalidateSteps() {
-      const personal = this.steps.find(s => s.title === 'Особиста інформація');
-      if (personal?.validated) {
-        personal.completed = this.validatePersonalInfo(true);
-      }
-      const postal = this.steps.find(s => s.title === 'Поштове відділення');
-      if (postal?.validated) {
-        postal.completed = true;
-      }
-      const payment = this.steps.find(s => s.title === 'Оплата');
-      if (payment?.validated) {
-        payment.completed = !!this.formData.paymentMethod;
-      }
-    },
+      const personal = this.steps.find(s => s.title === 'personalInfo');
+      if (personal?.validated) personal.completed = this.validatePersonalInfo(true);
+      const payment  = this.steps.find(s => s.title === 'payment');
+      if (payment?.validated)  payment.completed  = !!this.formData.paymentMethod;
+    }
   },
   created() {
     this.updateDeliveryOptions();
-    this.fetchUserAddress();
   },
   watch: {
-    formData: {
-      deep: true,
-      handler() {
-        this.revalidateSteps();
-      }
-    },
-    'formData.deliveryType'(val) {
-      if (val && val.delivery_type) {
-        this.selectedDeliveryCategory = val.delivery_type;
-      }
-      this.revalidateSteps();
-    },
-    'formData.paymentMethod'() {
-      this.revalidateSteps();
-    },
-    'formData.phone'() {
-      this.revalidateSteps();
-    },
-    currentStep() {
-      this.revalidateSteps();
-    },
+    formData: { deep: true, handler() { this.revalidateSteps(); } },
+    'formData.deliveryType'(val) { if (val?.delivery_type) this.selectedDeliveryCategory = val.delivery_type; this.revalidateSteps(); },
+    'formData.paymentMethod'() { this.revalidateSteps(); },
+    currentStep() { this.revalidateSteps(); }
   },
-  mounted() {
-    this.revalidateSteps();
-  },
+  mounted() { this.revalidateSteps(); }
 };
 </script>
 

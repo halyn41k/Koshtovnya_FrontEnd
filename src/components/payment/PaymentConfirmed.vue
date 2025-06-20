@@ -7,7 +7,7 @@
     <header class="flex items-center justify-center gap-6 mb-12 animate-fade-in">
       <div class="flex-1 h-px bg-gray-300 dark:bg-gray-600"></div>
       <h1 class="text-3xl sm:text-4xl font-black tracking-tight text-center text-gray-900 dark:text-white drop-shadow-md font-kyiv">
-        Оплата підтверджена
+        {{ $t('paymentConfirmed.header') }}
       </h1>
       <div class="flex-1 h-px bg-gray-300 dark:bg-gray-600"></div>
     </header>
@@ -18,15 +18,15 @@
     >
       <section class="space-y-6 text-center">
         <p class="text-lg text-gray-700 dark:text-gray-300 font-montserrat">
-          Ви успішно здійснили оплату. Зачекайте, будь ласка, вас перенаправляють...
+          {{ $t('paymentConfirmed.message1') }}
         </p>
         <p class="text-gray-600 dark:text-gray-400 font-montserrat">
-          Якщо перенаправлення не відбулося, перейдіть за посиланням
+          {{ $t('paymentConfirmed.message2') }}
           <router-link
             to="/account?tab=orderhistory"
             class="text-red-600 dark:text-blue-300 font-semibold hover:underline"
           >
-            Історія замовлень
+            {{ $t('paymentConfirmed.orderHistoryLink') }}
           </router-link>.
         </p>
       </section>
@@ -46,7 +46,7 @@ import bus from '@/eventBus';
 export default {
   name: 'PaymentConfirmed',
   mounted() {
-    document.title = 'Підтвердження оплати';
+    document.title = this.$t('paymentConfirmed.header');
 
     // через 3 секунди — повне перенаправлення з перезавантаженням сторінки
     setTimeout(() => {

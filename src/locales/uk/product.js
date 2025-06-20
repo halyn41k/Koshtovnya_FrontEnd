@@ -52,6 +52,6 @@ filter: 'Фільтр',
 clearAll: 'Очистити всі',
 nothingFound: 'Нічого не знайдено за заданими фільтрами 😢',
 resetFilters: 'Скинути фільтри',
-
+Viewotherproducts: 'Перегляньте інші товари',
   }
 }

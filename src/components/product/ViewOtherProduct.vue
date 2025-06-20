@@ -3,7 +3,7 @@
     <!-- Заголовок з лініями -->
     <div class="flex items-center my-6">
       <hr class="flex-grow border-t-2 border-gray-300 dark:border-gray-600" />
-      <h2 class="mx-4 text-2xl font-bold text-gray-900 dark:invert">Перегляньте інші товари</h2>
+      <h2 class="mx-4 text-2xl font-bold text-gray-900 dark:invert">{{ $t('product.Viewotherproducts') }}</h2>
       <hr class="flex-grow border-t-2 border-gray-300 dark:border-gray-600" />
     </div>
 
