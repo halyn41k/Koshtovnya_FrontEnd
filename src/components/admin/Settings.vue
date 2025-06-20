@@ -14,7 +14,7 @@
         </label>
         <input
           v-model="settings.address"
-          placeholder="Введіть адресу"
+          :placeholder="$t('admin.settings.address')"
           type="text"
           class="w-full px-3 py-2 border border-gray-300 dark:border-slate-500 rounded focus:outline-none focus:ring-2 focus:ring-pink-200 text-sm dark:bg-slate-800 dark:text-white"
         />
@@ -26,7 +26,7 @@
         </label>
         <input
           v-model="settings.phone"
-          placeholder="Введіть номер телефону"
+          :placeholder="$t('admin.settings.phone')"
           type="tel"
           class="w-full px-3 py-2 border border-gray-300 dark:border-slate-500 rounded focus:outline-none focus:ring-2 focus:ring-pink-200 text-sm dark:bg-slate-800 dark:text-white"
         />
@@ -38,7 +38,7 @@
         </label>
         <input
           v-model="settings.email"
-          placeholder="Введіть email"
+          :placeholder="$t('admin.settings.email')"
           type="email"
           class="w-full px-3 py-2 border border-gray-300 dark:border-slate-500 rounded focus:outline-none focus:ring-2 focus:ring-pink-200 text-sm dark:bg-slate-800 dark:text-white"
         />
@@ -48,39 +48,29 @@
         <label class="text-sm font-medium text-gray-700 dark:text-slate-300">
           {{ $t('admin.settings.logo') }}
         </label>
-        <div
-          class="mt-2 w-24 h-24 border-2 border-dashed border-gray-300 dark:border-slate-600 rounded flex items-center justify-center cursor-pointer"
-          @click="triggerFileInput"
-          @dragover.prevent
-          @drop.prevent="handleDrop"
+        <!-- Custom upload button -->
+        <button
+          type="button"
+          @click="$refs.logoInput.click()"
+          class="mt-2 flex items-center gap-2 px-4 py-2 bg-[#6B1F1F] hover:bg-[#A01212] text-white rounded text-sm transition"
         >
-          <img
-            v-if="logoPreview"
-            :src="logoPreview"
-            alt="Logo"
-            class="w-full h-full object-contain"
-          />
-          <svg
-            v-else
-            class="w-6 h-6 text-gray-400 dark:text-slate-400"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M7 16l-4-4m0 0l4-4m-4 4h18"
-            />
-          </svg>
-        </div>
+          <img src="@/assets/icons/upload.svg" alt="Upload" class="w-5 h-5 invert" />
+          {{ $t('admin.settings.chooseFile') }}
+        </button>
         <input
-          ref="fileInput"
+          ref="logoInput"
           type="file"
+          accept="image/*"
           class="hidden"
-          @change="handleFileUpload"
+          @change="processFile($event.target.files[0])"
         />
+        <div v-if="logoPreview" class="mt-2 w-24 h-24">
+          <img
+            :src="logoPreview"
+            alt="Logo Preview"
+            class="w-full h-full object-contain rounded"
+          />
+        </div>
       </div>
 
       <button
@@ -91,6 +81,7 @@
       </button>
     </form>
 
+    <!-- Categories Section -->
     <section class="bg-white dark:bg-[#1E293B] p-4 rounded shadow space-y-4">
       <div class="flex items-center justify-between">
         <h2 class="text-xl font-semibold text-gray-800 dark:text-slate-100">
@@ -116,11 +107,7 @@
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-200 dark:divide-slate-600 bg-white dark:bg-slate-800">
-            <tr
-              v-for="cat in categories"
-              :key="cat.id"
-              class="hover:bg-gray-50 dark:hover:bg-slate-700"
-            >
+            <tr v-for="cat in categories" :key="cat.id" class="hover:bg-gray-50 dark:hover:bg-slate-700">
               <td class="px-4 py-3">{{ cat.id }}</td>
               <td class="px-4 py-3">
                 <input
@@ -137,11 +124,7 @@
                 />
               </td>
               <td class="px-4 py-3">
-                <img
-                  :src="cat.image_url"
-                  alt="Зображення категорії"
-                  class="w-12 h-12 object-contain border rounded"
-                />
+                <img :src="cat.image_url" alt="" class="w-12 h-12 object-contain border rounded" />
               </td>
               <td class="px-4 py-3 text-right space-x-2">
                 <button
@@ -158,12 +141,9 @@
       </div>
     </section>
 
+    <!-- Add Category Modal -->
     <transition name="fade">
-      <div
-        v-if="showAddModal"
-        class="fixed inset-0 z-50 flex items-center justify-center"
-        style="background-color: rgba(0, 0, 0, 0.5);"
-      >
+      <div v-if="showAddModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
         <div class="bg-white dark:bg-[#1E293B] p-6 rounded-lg shadow-xl w-full max-w-md space-y-4 relative">
           <button @click="showAddModal = false" class="absolute top-2 right-3 text-xl dark:text-slate-200">&times;</button>
           <h3 class="text-lg font-semibold text-gray-800 dark:text-slate-100">
@@ -176,7 +156,7 @@
             </label>
             <input
               v-model="newCategory.name.uk"
-              placeholder="{{ $t('admin.settings.categoryNameUk') }}"
+              :placeholder="$t('admin.settings.categoryNameUk')"
               class="w-full px-3 py-2 border border-gray-300 dark:border-slate-500 rounded text-sm focus:outline-none focus:ring-1 focus:ring-pink-200 dark:bg-slate-700 dark:text-white"
             />
           </div>
@@ -187,7 +167,7 @@
             </label>
             <input
               v-model="newCategory.name.en"
-              placeholder="{{ $t('admin.settings.categoryNameEn') }}"
+              :placeholder="$t('admin.settings.categoryNameEn')"
               class="w-full px-3 py-2 border border-gray-300 dark:border-slate-500 rounded text-sm focus:outline-none focus:ring-1 focus:ring-pink-200 dark:bg-slate-700 dark:text-white"
             />
           </div>
@@ -196,10 +176,21 @@
             <label class="block text-sm font-medium text-gray-700 dark:text-slate-300">
               {{ $t('admin.settings.categoryImage') }}
             </label>
+            <!-- Custom upload button for category -->
+            <button
+              type="button"
+              @click="$refs.catInput.click()"
+              class="flex items-center gap-2 mt-2 px-4 py-2 bg-[#6B1F1F] hover:bg-[#A01212] text-white rounded text-sm transition"
+            >
+              <img src="@/assets/icons/upload.svg" alt="Upload" class="w-5 h-5 invert" />
+              {{ $t('admin.settings.chooseFile') }}
+            </button>
             <input
+              ref="catInput"
               type="file"
+              accept="image/*"
+              class="hidden"
               @change="e => newCategory.image = e.target.files[0]"
-              class="w-full text-sm text-gray-700 dark:text-gray-200"
             />
           </div>
 
@@ -225,21 +216,12 @@ export default {
     return {
       settings: { address: '', phone: '', email: '', logo: null },
       logoPreview: null,
-      newCategory: { name: '', image: null },
+      newCategory: { name: { uk: '', en: '' }, image: null },
       showAddModal: false,
       categories: []
     };
   },
   methods: {
-    triggerFileInput() {
-      this.$refs.fileInput.click();
-    },
-    handleDrop(e) {
-      this.processFile(e.dataTransfer.files[0]);
-    },
-    handleFileUpload(e) {
-      this.processFile(e.target.files[0]);
-    },
     processFile(file) {
       if (file && file.type.startsWith('image/')) {
         this.settings.logo = file;
@@ -249,24 +231,18 @@ export default {
     async fetchSettings() {
       const toast = useToast();
       try {
-        // Виклик методу з services/api для отримання налаштувань
         const response = await api.getAdminSiteSettings();
-        // Якщо бекенд підтримує лише PATCH, тоді в сервісі цей метод використовує POST+_method=GET
         const data = response.data.data || response.data;
-        // Припустимо, дані надходять як масив налаштувань
         const map = data.reduce((acc, { setting_key, setting_value }) => {
           acc[setting_key] = setting_value;
           return acc;
         }, {});
-
-        this.settings.address   = map.footer_address_info || '';
-        this.settings.phone     = map.footer_phone_number || '';
-        this.settings.email     = map.footer_email_info || '';
-        this.settings.logo      = null;
-        this.logoPreview        = map.site_logo || null;
+        this.settings.address = map.footer_address_info || '';
+        this.settings.phone = map.footer_phone_number || '';
+        this.settings.email = map.footer_email_info || '';
+        this.logoPreview = map.site_logo || null;
       } catch (e) {
-        console.error('❌ Помилка при отриманні налаштувань:', e);
-        toast.error('Не вдалося завантажити налаштування');
+        useToast().error('Не вдалося завантажити налаштування');
       }
     },
     async saveSettings() {
@@ -276,83 +252,69 @@ export default {
         fd.append('footer_address_info', this.settings.address);
         fd.append('footer_phone_number', this.settings.phone);
         fd.append('footer_email_info', this.settings.email);
-        if (this.settings.logo instanceof File) {
-          fd.append('site_logo', this.settings.logo);
-        }
-        // Виклик методу для збереження через PATCH
+        if (this.settings.logo instanceof File) fd.append('site_logo', this.settings.logo);
         await api.postAdminSiteSettings(fd);
         toast.success('Налаштування збережено');
-      } catch (e) {
-        console.error('❌ Помилка при збереженні налаштувань:', e);
-        toast.error('Не вдалося зберегти налаштування');
+      } catch {
+        useToast().error('Не вдалося зберегти налаштування');
       }
     },
     async fetchCategories() {
-  const toast = useToast();
-  try {
-    const fd = new FormData();
-    fd.append('_method', 'GET');
-    const response = await api.getCategories(fd); // метод все ще POST
-    const data = response.data.data || response.data;
-
-    this.categories = data.map(c => ({
-      id: c.id,
-      image_url: c.image_url,
-      name: {
-        uk: c.name_uk,
-        en: c.name_en
-      },
-      name_display: c.name // Підставляється в залежності від locale на бекенді
-    }));
-  } catch (e) {
-    console.error('❌ Помилка при завантаженні категорій:', e);
-    toast.error('Не вдалося завантажити категорії');
-  }
-},
-
+      const toast = useToast();
+      try {
+        const response = await api.getCategories(new FormData());
+        const data = response.data.data || response.data;
+        this.categories = data.map(c => ({
+          id: c.id,
+          image_url: c.image_url,
+          name: { uk: c.name_uk, en: c.name_en }
+        }));
+      } catch {
+        useToast().error('Не вдалося завантажити категорії');
+      }
+    },
     async createCategory() {
       const toast = useToast();
-      if (!this.newCategory.name || !this.newCategory.image) {
-        toast.warning('Заповніть назву та оберіть зображення');
+      if (!this.newCategory.name.uk || !this.newCategory.name.en || !this.newCategory.image) {
+        toast.warning('Заповніть всі поля');
         return;
       }
       try {
         const fd = new FormData();
-        fd.append('name', this.newCategory.name);
+        fd.append('name_uk', this.newCategory.name.uk);
+        fd.append('name_en', this.newCategory.name.en);
         fd.append('image', this.newCategory.image);
         await api.createCategory(fd);
         toast.success('Категорію додано');
-        this.newCategory = { name: '', image: null };
         this.showAddModal = false;
+        this.newCategory = { name: { uk: '', en: '' }, image: null };
         await this.fetchCategories();
-      } catch (e) {
-        console.error('❌ Помилка при створенні категорії:', e);
-        toast.error('Не вдалося створити категорію');
+      } catch {
+        useToast().error('Не вдалося створити категорію');
       }
     },
     async updateCategory(category) {
       const toast = useToast();
       try {
         const fd = new FormData();
-        fd.append('name', category.name);
+        fd.append('name_uk', category.name.uk);
+        fd.append('name_en', category.name.en);
         fd.append('_method', 'PATCH');
         await api.updateCategory(category.id, fd);
         toast.info('Категорію оновлено');
-      } catch (e) {
-        console.error('❌ Помилка при оновленні категорії:', e);
-        toast.error('Не вдалося оновити категорію');
+      } catch {
+        useToast().error('Не вдалося оновити категорію');
       }
     },
     async deleteCategory(id) {
       const toast = useToast();
-      if (!confirm('Ви впевнені, що хочете видалити категорію?')) return;
+      if (!confirm('Ви впевнені?')) return;
       try {
         await api.deleteCategory(id);
         toast.warning('Категорію видалено');
         await this.fetchCategories();
-      } catch (e) {
-        console.error('❌ Помилка при видаленні категорії:', e);
-        toast.error('Не вдалося видалити категорію');
+      } catch {
+        useToast().error('Не вдалося видалити категорію');
       }
     }
   },
@@ -366,15 +328,9 @@ export default {
 };
 </script>
 
-
-
 <style>
 .fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.2s ease;
-}
+.fade-leave-active { transition: opacity .2s ease; }
 .fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-}
+.fade-leave-to { opacity: 0; }
 </style>

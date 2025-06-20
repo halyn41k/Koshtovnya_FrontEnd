@@ -166,10 +166,7 @@ export default {
       imageRequired: "Будь ласка, завантажте зображення товару.",
       createError: "Сталася помилка при додаванні товару."
     },
-    editProduct: {
-      title: "Редагувати товар",
-      save: "Зберегти"
-    },
+
     deleteProduct: {
       title: "Підтвердіть видалення",
       question: "Ви впевнені, що хочете видалити товар \"{name}\"?",
@@ -177,6 +174,7 @@ export default {
       delete: "Видалити"
     },
      settings: {
+      chooseFile: "Вибрати файл",
       title: "Налаштування",
       address: "Адреса",
       phone: "Телефон",
@@ -236,5 +234,56 @@ export default {
       noData: "Поки що не було додано жодного звіту по прибутку."
   },
   
+  productModal: {
+    price: 'Ціна',
+    beadProducer: 'Виробник бісеру',
+    country: 'Країна виробництва',
+    material: 'Матеріал',
+    beadType: 'Тип бісеру',
+    fittings: 'Фурнітура',
+    pcs: 'шт',
+    weight: 'Вага',
+    colors: 'Кольори',
+    variants: 'Розміри',
+    size: 'Розмір',
+    available: 'доступний',
+    notAvailable: 'н/д',
+    rating: 'Рейтинг',
+    reviews: 'відгуків',
+    edit: 'Редагувати',
+    delete: 'Видалити',
+    restore: 'Відновити',
+    close: 'Закрити'
+  },
+  editProduct: {
+  title: "Редагувати товар",
+  nameUk: "Назва (укр.)",
+  nameEn: "Назва (англ.)",
+  price: "Ціна",
+  category: "Категорія",
+  chooseCategory: "Оберіть категорію",
+  beadProducer: "Виробник бісеру",
+  chooseProducer: "Оберіть виробника",
+  country: "Країна виробництва",
+  chooseCountry: "Оберіть країну",
+  beadType: "Тип бісеру",
+  chooseType: "Оберіть тип",
+  weight: "Вага",
+  weightPlaceholder: "Введіть вагу (г)",
+  colors: "Кольори",
+  sizes: "Розміри",
+  sizeCm: "Розмір (см)",
+  quantity: "Кількість",
+  addSize: "Додати розмір",
+  remove: "Видалити",
+  fittings: "Фурнітура",
+  chooseFitting: "Оберіть фурнітуру",
+  chooseMaterial: "Оберіть матеріал",
+  addFitting: "Додати фурнітуру",
+  image: "Зображення",
+  chooseFile: "Вибрати файл",
+  cancel: "Скасувати",
+  save: "Зберегти"
+}
   }
 };

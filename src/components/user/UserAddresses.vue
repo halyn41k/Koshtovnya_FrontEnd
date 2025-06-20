@@ -26,11 +26,22 @@
         <!-- Phone -->
         <div>
           <label class="block text-gray-800 dark:text-gray-100 mb-1">{{ $t('user.phone') }}:</label>
-          <input v-model="phoneNumber" @input="formatPhoneNumber"
-            :placeholder="$t('user.enterPhone')"
-            maxlength="10" inputmode="numeric" pattern="[0-9]*"
-            class="w-full px-3 py-2 border rounded-lg focus:ring focus:ring-opacity-50"
-            :class="errors.phoneNumber ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'" />
+          <input
+  v-model="phoneNumber"
+  @input="formatPhoneNumber"
+  :placeholder="$t('user.enterPhone')"
+  maxlength="10"
+  inputmode="numeric"
+  pattern="[0-9]*"
+  class="w-full px-3 py-2 border rounded-lg focus:ring focus:ring-opacity-50
+         bg-white dark:bg-[#17223b]
+         text-gray-900 dark:text-gray-100
+         placeholder-gray-400 dark:placeholder-gray-600"
+  :class="errors.phoneNumber
+    ? 'border-red-500'
+    : 'border-gray-300 dark:border-gray-600'"
+/>
+
           <p v-if="errors.phoneNumber" class="text-red-500 dark:text-gray-100 text-sm mt-1">{{ errors.phoneNumber }}</p>
         </div>
 

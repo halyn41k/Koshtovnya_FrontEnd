@@ -14,7 +14,9 @@
       "
     >
       <!-- Заголовок -->
-      <h2 class="text-2xl font-bold mb-4">{{ product.name }}</h2>
+      <h2 class="text-2xl font-bold mb-4">
+        {{ product.name }}
+      </h2>
 
       <!-- Зображення -->
       <img
@@ -26,51 +28,74 @@
       <!-- Інформація -->
       <div class="space-y-2 text-sm">
         <p>
-          <strong class="text-gray-700 dark:text-gray-300">Ціна:</strong>
+          <strong class="text-gray-700 dark:text-gray-300">
+            {{ $t('admin.productModal.price') }}:
+          </strong>
           <span>{{ product.price }} грн</span>
         </p>
         <p>
-          <strong class="text-gray-700 dark:text-gray-300">Виробник бісеру:</strong>
+          <strong class="text-gray-700 dark:text-gray-300">
+            {{ $t('admin.productModal.beadProducer') }}:
+          </strong>
           <span>{{ product.bead_producer_name }}</span>
         </p>
         <p>
-          <strong class="text-gray-700 dark:text-gray-300">Країна виробництва:</strong>
+          <strong class="text-gray-700 dark:text-gray-300">
+            {{ $t('admin.productModal.country') }}:
+          </strong>
           <span>{{ product.country_of_manufacture }}</span>
         </p>
         <p>
-          <strong class="text-gray-700 dark:text-gray-300">Матеріал:</strong>
+          <strong class="text-gray-700 dark:text-gray-300">
+            {{ $t('admin.productModal.material') }}:
+          </strong>
           <span>{{ product.material }}</span>
         </p>
         <p>
-          <strong class="text-gray-700 dark:text-gray-300">Тип бісеру:</strong>
+          <strong class="text-gray-700 dark:text-gray-300">
+            {{ $t('admin.productModal.beadType') }}:
+          </strong>
           <span>{{ product.type_of_bead }}</span>
         </p>
 
         <div v-if="product.type_of_fitting?.length">
-          <strong class="text-gray-700 dark:text-gray-300">Фурнітура:</strong>
+          <strong class="text-gray-700 dark:text-gray-300">
+            {{ $t('admin.productModal.fittings') }}:
+          </strong>
           <ul class="ml-4 list-disc">
-            <li v-for="(fit, index) in product.type_of_fitting" :key="index">
-              {{ fit.fitting }} — {{ fit.material }} ({{ fit.quantity }} шт)
+            <li v-for="(fit, idx) in product.type_of_fitting" :key="idx">
+              {{ fit.fitting }} — {{ fit.material }} ({{ fit.quantity }} {{ $t('admin.productModal.pcs') }})
             </li>
           </ul>
         </div>
 
         <p>
-          <strong class="text-gray-700 dark:text-gray-300">Вага:</strong>
+          <strong class="text-gray-700 dark:text-gray-300">
+            {{ $t('admin.productModal.weight') }}:
+          </strong>
           <span>{{ product.weight }} г</span>
         </p>
         <p>
-          <strong class="text-gray-700 dark:text-gray-300">Кольори:</strong>
+          <strong class="text-gray-700 dark:text-gray-300">
+            {{ $t('admin.productModal.colors') }}:
+          </strong>
           <span>{{ product.colors?.join(', ') }}</span>
         </p>
 
         <div>
-          <strong class="text-gray-700 dark:text-gray-300">Розміри:</strong>
+          <strong class="text-gray-700 dark:text-gray-300">
+            {{ $t('admin.productModal.variants') }}:
+          </strong>
           <ul class="ml-4 list-disc">
             <li v-for="v in product.variants" :key="v.size">
-              Розмір {{ v.size }} см – {{ v.quantity }} шт
-              (<span :class="v.is_available ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">
-                {{ v.is_available ? 'доступний' : 'н/д' }}
+              {{ $t('admin.productModal.size') }} {{ v.size }} см – {{ v.quantity }} {{ $t('admin.productModal.pcs') }}
+              (<span :class="v.is_available 
+                ? 'text-green-600 dark:text-green-400' 
+                : 'text-red-600 dark:text-red-400'">
+                {{ v.is_available 
+                  ? $t('admin.productModal.available') 
+                  : $t('admin.productModal.notAvailable') 
+                }}
               </span>)
             </li>
           </ul>
@@ -78,77 +103,54 @@
 
         <div class="pt-2">
           <p>
-            <strong class="text-gray-700 dark:text-gray-300">Рейтинг:</strong>
-            <span>{{ product.rating }} ({{ product.review_count }} відгуків)</span>
+            <strong class="text-gray-700 dark:text-gray-300">
+              {{ $t('admin.productModal.rating') }}:
+            </strong>
+            <span>{{ product.rating }} ({{ product.review_count }} {{ $t('productModal.reviews') }})</span>
           </p>
         </div>
       </div>
 
       <!-- Кнопки дій -->
       <div class="flex justify-end gap-3 mt-6">
-        <!-- Редагування -->
         <button
           v-if="!isDeleted"
           @click="emitAndClose('edit', product)"
-          class="
-            flex items-center gap-2 px-4 py-2 
-            bg-[#6B1F1F] hover:bg-[#A01212] 
-            text-white rounded 
-            transition
-          "
+          class="flex items-center gap-2 px-4 py-2 bg-[#6B1F1F] hover:bg-[#A01212] text-white rounded transition"
         >
           <img src="@/assets/icons/edit-2.svg" alt="Edit" class="w-5 h-5 invert dark:invert-0" />
-          <span>Редагувати</span>
+          <span>{{ $t('admin.productModal.edit') }}</span>
         </button>
 
-        <!-- Видалити -->
         <button
           v-if="!isDeleted"
           @click="emitAndClose('delete', product.id)"
-          class="
-            flex items-center gap-2 px-4 py-2 
-            bg-[#6B1F1F] hover:bg-[#A01212] 
-            text-white rounded 
-            transition
-          "
+          class="flex items-center gap-2 px-4 py-2 bg-[#6B1F1F] hover:bg-[#A01212] text-white rounded transition"
         >
           <img src="@/assets/icons/delete-2.svg" alt="Delete" class="w-5 h-5 invert dark:invert-0" />
-          <span>Видалити</span>
+          <span>{{ $t('admin.productModal.delete') }}</span>
         </button>
 
-        <!-- Відновити -->
         <button
           v-if="isDeleted"
           @click="emitAndClose('restore', product.id)"
-          class="
-            flex items-center gap-2 px-4 py-2 
-            bg-[#6B1F1F] hover:bg-[#A01212] 
-            text-white rounded 
-            transition
-          "
+          class="flex items-center gap-2 px-4 py-2 bg-[#6B1F1F] hover:bg-[#A01212] text-white rounded transition"
         >
           <img src="@/assets/icons/restore-wh.svg" alt="Restore" class="w-5 h-5 invert dark:invert-0" />
-          <span>Відновити</span>
+          <span>{{ $t('admin.productModal.restore') }}</span>
         </button>
 
-        <!-- Закрити -->
         <button
           @click="close"
-          class="
-            px-4 py-2 
-            bg-gray-300 dark:bg-gray-600 
-            text-gray-800 dark:text-gray-200 
-            hover:bg-gray-400 dark:hover:bg-gray-500 
-            rounded 
-            transition
-          "
+          class="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-800 dark:text-gray-200 hover:bg-gray-400 dark:hover:bg-gray-500 rounded transition"
         >
-          Закрити
+          {{ $t('admin.productModal.close') }}
         </button>
       </div>
     </div>
   </div>
 </template>
+
 
 <script>
 export default {

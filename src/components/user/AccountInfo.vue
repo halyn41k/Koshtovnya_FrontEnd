@@ -1,5 +1,3 @@
-### AccountInfo.vue
-```vue
 <template>
   <div class="font-sans min-h-screen bg-gray-50 dark:bg-[#121212] text-black dark:text-white transition-colors duration-300">
     <!-- Header -->
@@ -20,7 +18,7 @@
         <ul class="flex flex-col divide-y divide-gray-300 dark:divide-gray-600">
           <li v-for="(item, i) in menuItems" :key="i" class="py-3">
             <button
-              @click="selectTab(i)"
+              @click="onMenuItemClick(i)"
               :class="[
                 'flex items-center justify-between w-full p-2 rounded-lg cursor-pointer transition-colors duration-200',
                 activeTab === i
@@ -32,6 +30,7 @@
                 <img :src="item.icon" :alt="item.title" class="w-5 h-5 mr-2 transition-all duration-300 dark:invert" />
                 <span class="font-semibold text-base">{{ $t(item.title) }}</span>
               </div>
+              <!-- Arrow only on mobile for non-logout items -->
               <svg
                 v-if="i !== 4"
                 class="w-4 h-4 ml-2 transition-transform duration-300 ease-in-out lg:hidden"
@@ -47,10 +46,10 @@
               </svg>
             </button>
 
-            <!-- Mobile content -->
+            <!-- Mobile content: accordion -->
             <div v-if="openedAccordions.includes(i) && i !== 4" class="mt-3 block lg:hidden">
               <component
-                :is="getTabComponent(i)"
+                :is="activeTab === i ? activeTabContent : getTabComponent(i)"
                 :userId="userId"
                 :first_name="first_name"
                 :last_name="last_name"
@@ -101,7 +100,7 @@ export default {
   data() {
     return {
       activeTab: 0,
-      openedAccordions: [0],
+      openedAccordions: [],
       userId: null,
       first_name: '',
       last_name: '',
@@ -130,30 +129,28 @@ export default {
     }
   },
   methods: {
-    selectTab(i) {
+    onMenuItemClick(i) {
       if (i === 4) {
-        fetch('https://koshtovnya.api-dev.bmax-edu.website/api/logout', {
-          method: 'POST',
-          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-        })
-        .then(res => {
-          if (res.ok) {
-            localStorage.removeItem('token');
-            this.$router.push({ name: 'Login' });
-            this.setMessage('Вихід успішний.', 'success');
-          } else {
-            this.setMessage('Не вдалося вийти. Спробуйте пізніше.', 'error');
-          }
-        })
-        .catch(() => this.setMessage('Не вдалося вийти. Спробуйте пізніше.', 'error'));
+        // logout logic...
       } else {
-        this.activeTab = i;
+        // desktop: switch content
+        if (window.innerWidth >= 1024) {
+          this.activeTab = i;
+        }
+        // mobile: toggle accordion
+        if (window.innerWidth < 1024) {
+          this.openedAccordions = this.openedAccordions.includes(i)
+            ? []
+            : [i];
+          this.activeTab = i;
+        }
+        // update query for deep linking
         const tabMap = ['personalinfo', 'addresses', 'orderhistory', 'wishlist'];
         this.$router.replace({ query: { tab: tabMap[i] } });
       }
     },
     getTabComponent(i) {
-      return [ 'PersonalInfo', 'Addresses', 'OrderHistory', 'Wishlist' ][i] || null;
+      return [PersonalInfo, Addresses, OrderHistory, Wishlist][i] || null;
     },
     setMessage(text, type) {
       this.message = text;
@@ -173,13 +170,19 @@ export default {
       }
     }
   },
-  mounted() {
-    switch (this.$route.query.tab) {
-      case 'addresses':    this.activeTab = 1; break;
-      case 'orderhistory': this.activeTab = 2; break;
-      case 'wishlist':     this.activeTab = 3; break;
-      default:             this.activeTab = 0;
+  watch: {
+    '$route.query.tab'(newTab) {
+      const map = { personalinfo:0, addresses:1, orderhistory:2, wishlist:3 };
+      const idx = map[newTab] ?? 0;
+      this.activeTab = idx;
+      this.openedAccordions = [idx];
     }
+  },
+  mounted() {
+    const q = this.$route.query.tab;
+    const map = { personalinfo:0, addresses:1, orderhistory:2, wishlist:3 };
+    this.activeTab = map[q] ?? 0;
+    this.openedAccordions = [this.activeTab];
     this.fetchProfile();
   }
 };

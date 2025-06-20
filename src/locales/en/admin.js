@@ -133,6 +133,7 @@ export default {
       }
     },
     settings: {
+      chooseFile: "Choose file",
       title: "Settings",
       address: "Address",
       phone: "Phone",
@@ -186,10 +187,7 @@ export default {
       imageRequired: "Please upload product image.",
       createError: "An error occurred while adding the product."
     },
-    editProduct: {
-      title: "Edit product",
-      save: "Save"
-    },
+
     deleteProduct: {
       title: "Confirm deletion",
       question: "Are you sure you want to delete product \"{name}\"?",
@@ -234,6 +232,58 @@ export default {
         totalNetIncome: "Net Income"
       },
       noData: "No income reports have been added yet."
-    }
+    },
+       productModal: {
+    price: 'Price',
+    beadProducer: 'Bead producer',
+    country: 'Country of manufacture',
+    material: 'Material',
+    beadType: 'Type of bead',
+    fittings: 'Fittings',
+    pcs: 'pcs',
+    weight: 'Weight',
+    colors: 'Colors',
+    variants: 'Variants',
+    size: 'Size',
+    available: 'available',
+    notAvailable: 'n/a',
+    rating: 'Rating',
+    reviews: 'reviews',
+    edit: 'Edit',
+    delete: 'Delete',
+    restore: 'Restore',
+    close: 'Close'
   },
+  editProduct: {
+title: "Edit product",
+nameUk: "Name (ukr.)",
+nameEn: "Name (eng.)",
+price: "Price",
+category: "Category",
+chooseCategory: "Choose category",
+beadProducer: "Bead producer",
+chooseProducer: "Choose manufacturer",
+country: "Country of production",
+chooseCountry: "Choose country",
+beadType: "Bead type",
+chooseType: "Choose type",
+weight: "Weight",
+weightPlaceholder: "Enter weight (g)",
+colors: "Colors",
+sizes: "Sizes",
+sizeCm: "Size (cm)",
+quantity: "Quantity",
+addSize: "Add size",
+remove: "Remove",
+fittings: "Fittings",
+chooseFitting: "Choose fittings",
+chooseMaterial: "Choose material",
+addFitting: "Add Fitting",
+image: "Image",
+chooseFile: "Choose File",
+cancel: "Cancel",
+save: "Save"
+},
+  },
+  
 };

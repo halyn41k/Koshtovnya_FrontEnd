@@ -13,47 +13,41 @@
         <!-- Назва та Ціна -->
         <div class="grid grid-cols-2 gap-4">
           <div class="flex flex-col">
-            <label
-              for="name_uk"
-              class="mb-1 text-sm font-medium text-gray-700"
-            >
-              Назва (UK)
+            <label for="name_uk" class="mb-1 text-sm font-medium text-gray-700">
+              {{ $t('admin.editProduct.nameUk') }}
             </label>
             <input
               id="name_uk"
               type="text"
               v-model="form.name_uk"
               required
-              placeholder="Наприклад: Срібний браслет"
+              :placeholder="$t('admin.editProduct.nameUk')"
               class="border border-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50 text-black dark:text-black"
             />
           </div>
           <div class="flex flex-col">
-            <label
-              for="name_en"
-              class="mb-1 text-sm font-medium text-gray-700"
-            >
-              Назва (EN)
+            <label for="name_en" class="mb-1 text-sm font-medium text-gray-700">
+              {{ $t('admin.editProduct.nameEn') }}
             </label>
             <input
               id="name_en"
               type="text"
               v-model="form.name_en"
               required
-              placeholder="e.g. Silver bracelet"
+              :placeholder="$t('admin.editProduct.nameEn')"
               class="border border-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50 text-black dark:text-black"
             />
           </div>
           <div class="flex flex-col">
             <label for="price" class="mb-1 text-sm font-medium text-gray-700">
-              Ціна
+              {{ $t('admin.editProduct.price') }}
             </label>
             <input
               id="price"
               type="number"
               v-model="form.price"
               required
-              placeholder="грн"
+              :placeholder="$t('admin.editProduct.price')"
               class="border border-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50 text-black dark:text-black"
             />
           </div>
@@ -62,44 +56,46 @@
         <!-- Категорії та інші селектори -->
         <div class="grid grid-cols-2 gap-4">
           <div class="flex flex-col">
-            <label class="mb-1 text-sm font-medium text-gray-700">Категорія</label>
+            <label class="mb-1 text-sm font-medium text-gray-700">
+              {{ $t('admin.editProduct.category') }}
+            </label>
             <Multiselect
               v-model="form.category"
               :options="formData.categories"
-              placeholder="Оберіть категорію"
+              :placeholder="$t('admin.editProduct.chooseCategory')"
               class="custom-multiselect"
             />
           </div>
           <div class="flex flex-col">
-            <label class="mb-1 text-sm font-medium text-gray-700"
-              >Бісер виробник</label
-            >
+            <label class="mb-1 text-sm font-medium text-gray-700">
+              {{ $t('admin.editProduct.beadProducer') }}
+            </label>
             <Multiselect
               v-model="form.bead_producer"
               :options="formData.bead_producers"
-              placeholder="Оберіть виробника"
+              :placeholder="$t('admin.editProduct.chooseProducer')"
               class="custom-multiselect"
             />
           </div>
           <div class="flex flex-col">
-            <label class="mb-1 text-sm font-medium text-gray-700"
-              >Країна виробництва</label
-            >
+            <label class="mb-1 text-sm font-medium text-gray-700">
+              {{ $t('admin.editProduct.country') }}
+            </label>
             <Multiselect
               v-model="form.country_of_manufacture"
               :options="formData.countries_of_manufacture"
-              placeholder="Оберіть країну"
+              :placeholder="$t('admin.editProduct.chooseCountry')"
               class="custom-multiselect"
             />
           </div>
           <div class="flex flex-col">
-            <label class="mb-1 text-sm font-medium text-gray-700"
-              >Тип бісеру</label
-            >
+            <label class="mb-1 text-sm font-medium text-gray-700">
+              {{ $t('admin.editProduct.beadType') }}
+            </label>
             <Multiselect
               v-model="form.type_of_bead"
               :options="formData.type_of_bead"
-              placeholder="Оберіть тип"
+              :placeholder="$t('admin.editProduct.chooseType')"
               class="custom-multiselect"
             />
           </div>
@@ -108,19 +104,21 @@
         <!-- Вага та кольори -->
         <div class="grid grid-cols-2 gap-4">
           <div class="flex flex-col">
-            <label for="weight" class="mb-1 text-sm font-medium text-gray-700"
-              >Вага (г)</label
-            >
+            <label for="weight" class="mb-1 text-sm font-medium text-gray-700">
+              {{ $t('admin.editProduct.weight') }}
+            </label>
             <input
               id="weight"
               type="number"
               v-model="form.weight"
-              placeholder="Введіть вагу (г)"
+              :placeholder="$t('admin.editProduct.weightPlaceholder')"
               class="border border-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50 text-black dark:text-black"
             />
           </div>
           <div class="flex flex-col">
-            <label class="mb-2 text-sm font-medium text-gray-700">Кольори</label>
+            <label class="mb-2 text-sm font-medium text-gray-700">
+              {{ $t('admin.editProduct.colors') }}
+            </label>
             <div class="flex flex-wrap gap-2">
               <button
                 v-for="color in formData.colors"
@@ -136,11 +134,7 @@
               >
                 <span
                   class="w-5 h-5 rounded-full border"
-                  :class="
-                    form.colors.includes(color)
-                      ? 'border-[#6B1F1F]'
-                      : 'border-gray-300'
-                  "
+                  :class="form.colors.includes(color) ? 'border-[#6B1F1F]' : 'border-gray-300'"
                   :style="{ backgroundColor: colorMap[color] }"
                 ></span>
                 <span class="text-sm text-gray-700">{{ color }}</span>
@@ -151,30 +145,34 @@
 
         <!-- Розміри -->
         <div class="flex flex-col space-y-3">
-          <label class="text-sm font-medium text-gray-700">Розміри</label>
+          <label class="text-sm font-medium text-gray-700">
+            {{ $t('admin.editProduct.sizes') }}
+          </label>
           <div
             v-for="(sizeItem, index) in form.sizes"
             :key="index"
             class="flex items-center gap-2"
           >
             <div class="flex flex-col flex-1">
-              <label class="text-sm text-gray-600 mb-1">Розмір (см)</label>
+              <label class="text-sm text-gray-600 mb-1">
+                {{ $t('admin.editProduct.sizeCm') }}
+              </label>
               <input
                 v-model.number="sizeItem.size"
                 type="number"
                 min="1"
-                placeholder="см"
                 required
                 class="border border-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50 text-black dark:text-black"
               />
             </div>
             <div class="flex flex-col w-28">
-              <label class="text-sm text-gray-600 mb-1">К-ть</label>
+              <label class="text-sm text-gray-600 mb-1">
+                {{ $t('admin.editProduct.quantity') }}
+              </label>
               <input
                 v-model.number="sizeItem.quantity"
                 type="number"
                 min="1"
-                placeholder="шт"
                 required
                 class="border border-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50 text-black dark:text-black"
               />
@@ -184,7 +182,7 @@
               @click="removeSize(index)"
               class="px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-500"
             >
-              Видалити
+              {{ $t('admin.editProduct.remove') }}
             </button>
           </div>
           <button
@@ -192,13 +190,15 @@
             @click="addSize"
             class="w-max px-4 py-2 bg-[#6B1F1F] text-white rounded-md hover:bg-[#A01212]"
           >
-            Додати розмір
+            {{ $t('admin.editProduct.addSize') }}
           </button>
         </div>
 
         <!-- Фурнітура -->
         <div class="flex flex-col space-y-3">
-          <label class="text-sm font-medium text-gray-700">Фурнітура</label>
+          <label class="text-sm font-medium text-gray-700">
+            {{ $t('admin.editProduct.fittings') }}
+          </label>
           <div
             v-for="(fitItem, index) in form.fittings"
             :key="index"
@@ -207,20 +207,19 @@
             <Multiselect
               v-model="fitItem.fitting"
               :options="formData.fittings"
-              placeholder="Оберіть фурнітуру"
+              :placeholder="$t('admin.editProduct.chooseFitting')"
               class="flex-1 custom-multiselect"
             />
             <Multiselect
               v-model="fitItem.material"
               :options="formData.materials"
-              placeholder="Оберіть матеріал"
+              :placeholder="$t('admin.editProduct.chooseMaterial')"
               class="flex-1 custom-multiselect"
             />
             <input
               v-model.number="fitItem.quantity"
               type="number"
               min="1"
-              placeholder="Кількість"
               required
               class="border border-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-[#6B1F1F]/50 text-black dark:text-black"
             />
@@ -229,7 +228,7 @@
               @click="removeFitting(index)"
               class="px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-500"
             >
-              Видалити
+              {{ $t('admin.editProduct.remove') }}
             </button>
           </div>
           <button
@@ -237,17 +236,19 @@
             @click="addFitting"
             class="w-max px-4 py-2 bg-[#6B1F1F] text-white rounded-md hover:bg-[#A01212]"
           >
-            Додати фурнітуру
+            {{ $t('admin.editProduct.addFitting') }}
           </button>
         </div>
 
         <!-- Зображення -->
         <div class="flex flex-col">
-          <label class="mb-1 text-sm font-medium text-gray-700">Зображення</label>
+          <label class="mb-1 text-sm font-medium text-gray-700">
+            {{ $t('admin.editProduct.image') }}
+          </label>
           <label
             class="inline-flex items-center px-4 py-2 border-2 border-dashed border-gray-300 rounded-md cursor-pointer text-sm text-gray-600 hover:border-[#A01212]"
           >
-            Вибрати файл
+            {{ $t('admin.editProduct.chooseFile') }}
             <input
               type="file"
               @change="handleFileChange"
@@ -258,7 +259,7 @@
           <div v-if="imagePreview" class="mt-2 relative">
             <img
               :src="imagePreview"
-              alt="Превʼю"
+              alt="Preview"
               class="max-h-40 rounded-md border"
             />
             <button
@@ -278,7 +279,7 @@
             @click="close"
             class="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400"
           >
-            {{ $t('admin.addProduct.cancel') }}
+            {{ $t('admin.editProduct.cancel') }}
           </button>
           <button
             type="submit"
@@ -291,6 +292,7 @@
     </div>
   </div>
 </template>
+
 
 <script>
 import { createToastInterface } from 'vue-toastification';

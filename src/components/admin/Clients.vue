@@ -93,27 +93,28 @@
             {{ client.is_banned ? $t('admin.clients.banned') : $t('admin.clients.active') }}
           </span>
         </td>
-        <td class="px-4 py-2 border-b border-[#E0E0E0] dark:border-gray-700 flex gap-2">
-          <button @click="openUpdateModal(client)" class="p-1 hover:bg-gray-100 dark:hover:bg-[#2a354e] rounded">
-  <img src="@/assets/icons/edit.svg" class="w-5 h-5 dark:invert" alt="Edit" />
-</button>
-<button @click="deleteUser(client.id)" class="p-1 hover:bg-gray-100 dark:hover:bg-[#2a354e] rounded">
-  <img src="@/assets/icons/delete.svg" class="w-5 h-5 dark:invert" alt="Delete" />
-</button>
+        <td class="px-4 py-2 border-b border-[#E0E0E0] dark:border-gray-700 text-sm text-gray-800 dark:text-white">
+  <div class="flex gap-2">
+    <button @click="openUpdateModal(client)" class="p-1 hover:bg-gray-100 dark:hover:bg-[#2a354e] rounded">
+      <img src="@/assets/icons/edit.svg" class="w-5 h-5 dark:invert" alt="Edit" />
+    </button>
+    <button @click="deleteUser(client.id)" class="p-1 hover:bg-gray-100 dark:hover:bg-[#2a354e] rounded">
+      <img src="@/assets/icons/delete.svg" class="w-5 h-5 dark:invert" alt="Delete" />
+    </button>
+    <button
+      @click="client.is_banned ? unbanUser(client.id) : banUser(client.id)"
+      class="p-1 hover:bg-gray-100 rounded"
+      :title="client.is_banned ? 'Розбанити' : 'Забанити'"
+    >
+      <img
+        :src="client.is_banned ? require('@/assets/icons/unban.svg') : require('@/assets/icons/ban.svg')"
+        class="w-5 h-5"
+        alt="Ban"
+      />
+    </button>
+  </div>
+</td>
 
-          <button
-            @click="client.is_banned ? unbanUser(client.id) : banUser(client.id)"
-            class="p-1 hover:bg-gray-100 rounded"
-            :title="client.is_banned ? 'Розбанити' : 'Забанити'"
-          >
-            <img
-  :src="client.is_banned ? require('@/assets/icons/unban.svg') : require('@/assets/icons/ban.svg')"
-  class="w-5 h-5"
-  alt="Ban"
-/>
-
-          </button>
-        </td>
       </tr>
     </tbody>
   </table>
