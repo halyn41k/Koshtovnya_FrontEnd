@@ -4,6 +4,7 @@ export default {
     paymentTitle: 'Payment',
     title: 'Amount to Pay',
     delivery: 'Delivery',
+    courier: 'Courier',
     total: 'Total Amount',
     submit: 'Place Order',
     tooltip: 'Please complete all checkout steps',

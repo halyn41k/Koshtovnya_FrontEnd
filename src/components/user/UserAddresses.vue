@@ -226,6 +226,7 @@ class="px-5 py-2 border-2 border-red-600 text-red-600 dark:text-white rounded-lg
 <script>
 import Loader from '../home/Loader.vue';
 import axios from "axios";
+import api from '@/services/api.js';
 import Multiselect from 'vue-multiselect'
 import { Combobox, ComboboxInput, ComboboxOptions, ComboboxOption } from '@headlessui/vue'
 import { useToast } from 'vue-toastification';
@@ -292,9 +293,10 @@ export default {
   },
 
   created() {
-    this.fetchDeliveryTypes().then(() => {
-      this.fetchUserAddress();
-    });
+
+    this.fetchDeliveryTypes().then(() => 
+       this.fetchUserAddress()
+     );
 
     if (!this.addressAvailable) {
       this.fetchUserPhoneNumber();
@@ -690,40 +692,37 @@ this.$nextTick(() => {
         console.error("Помилка отримання номера телефону:", error);
       }
     },
-    async fetchDeliveryTypes() {
-  const token = localStorage.getItem("token");
-  if (!token) {
-    alert("Будь ласка, увійдіть у свій обліковий запис.");
-    this.$router.push("/login");
-    return;
-  }
-  try {
-    const response = await axios.get("https://koshtovnya.api-dev.bmax-edu.website/api/delivery-types", {
-      headers: { Authorization: `Bearer ${token}` }
-    });
+       async fetchDeliveryTypes() {
+    try {
+      const response = await api.getDeliveryTypes();
+      // response.data === { pickup: [...], courier: [...] }
+      const groups = response.data;
+      const opts = [];
 
-    const result = [];
-    const data = response.data.data;
+      for (const [type, items] of Object.entries(groups)) {
+        // Використовуємо $t для локалізованих назв
+        const label = type === 'pickup'
+          ? this.$t('payment.delivery')   // ключ, який додаємо в uk.js/en.js
+          : this.$t('payment.courier');
 
-    for (const typeKey in data) {
-      const label = typeKey === 'courier' ? "Кур'єр" : "Самовивіз";
-
-      data[typeKey].forEach(option => {
-        result.push({
-          label,
-          value: typeKey,
-          name: option.name,
-          id: option.id,
-          is_store: option.name === "Самовивіз з наших магазинів" // 💥 ось тут
+        items.forEach(item => {
+          opts.push({
+            id: item.id,
+            value: item.delivery_type,
+            name: item.name,
+            label,
+            is_store: item.name === "Самовивіз з наших магазинів"
+          });
         });
-      });
-    }
+      }
 
-    this.deliveryOptions = result;
-  } catch (error) {
-    console.error("Error fetching delivery types:", error);
-  }
-},
+      this.deliveryOptions = opts;
+    } catch (err) {
+      console.error('Не вдалося завантажити delivery-types:', err);
+      toast.error(this.$t('user.loadDeliveryError')); // локалізований тост
+    }
+  },
+    
     handleCityInput() {
       console.log("Введене місто:", this.formData.city);
       if (this.formData.city.length >= 3) {

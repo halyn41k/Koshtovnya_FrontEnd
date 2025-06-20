@@ -118,6 +118,7 @@
 <script>
 import axios from 'axios';
 import Multiselect from 'vue-multiselect';
+import api from '@/services/api.js';   
 import { Combobox, ComboboxInput, ComboboxOptions, ComboboxOption } from '@headlessui/vue'
 
 export default {
@@ -317,25 +318,27 @@ async handleTempAddress(address) {
 
 
     async fetchDeliveryTypes() {
-      const token = localStorage.getItem('token');
       try {
-        const { data } = await axios.get('https://koshtovnya.api-dev.bmax-edu.website/api/delivery-types', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        const result = [];
-        for (const type in data.data) {
-          data.data[type].forEach(option => {
-            result.push({
-              id: option.id,
-              name: option.name,
+       // викликаємо централізований сервіс
+        const response = await api.getDeliveryTypes();
+        // сервіс повертає { data: { pickup: […], courier: […] } }
+        const groups = response.data; 
+        const opts = [];
+        for (const [type, items] of Object.entries(groups)) {
+          const label = type === 'pickup' ? this.$t('payment.delivery') : this.$t('payment.courier'); 
+          // або ж жорстко: type === 'pickup' ? 'Самовивіз' : 'Кур’єр'
+          items.forEach(item => {
+            opts.push({
+              id: item.id,
+             name: item.name,
               delivery_type: type,
-              label: type === 'pickup' ? 'Самовивіз' : 'Кур’єр'
+             label
             });
           });
         }
-        this.deliveryOptions = result;
-      } catch (error) {
-        console.error('Помилка отримання способів доставки', error);
+        this.deliveryOptions = opts;
+      } catch (err) {
+        console.error('Не вдалося завантажити delivery-types:', err);
         this.deliveryOptions = [];
       }
     },

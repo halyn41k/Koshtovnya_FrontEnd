@@ -4,6 +4,7 @@ export default {
     paymentTitle: 'Оплата',
     title: 'Сума до оплати',
     delivery: 'Доставка',
+    courier: 'Кур\'єр',
     total: 'Загальна сума',
     submit: 'Оформити замовлення',
     tooltip: 'Заповніть усі кроки оформлення',
