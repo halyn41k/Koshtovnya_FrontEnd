@@ -1,6 +1,6 @@
 <template>  
   <div class="personal-info">
-    <div class="flex flex-col gap-4 w-[400px]">
+    <div class="flex flex-col gap-4 w-full max-w-[400px] overflow-x-auto">
       <div
         v-for="(field, key) in fields"
         :key="key"

@@ -174,7 +174,7 @@
       <div class="flex items-center justify-between py-3 px-4 md:px-0">
         <!-- Desktop search + results -->
         <div
-          class="hidden md:flex items-center bg-[#F2E8E8] dark:bg-gray-800 rounded-lg focus-within:border focus-within:border-stroke dark:focus-within:border-gray-600
+          class="hidden md:flex items-center bg-[#F2E8E8] dark:bg-gray-800 rounded-lg focus-within:border focus-within:border-stroke dark:focus-within:border-gray-600  max-w-sm font-base
                  transition-all duration-200 relative w-full max-w-sm"
         >
           <input
@@ -197,7 +197,7 @@
           <div
             v-if="isVisible"
             class="absolute top-full left-0 w-full bg-[#F6E7E7] dark:bg-gray-800 rounded-lg shadow-lg z-50
-                   max-h-[400px] overflow-y-auto"
+                   max-h-[400px] overflow-y-auto font-base"
           >
             <div v-if="loading" class="p-4 text-center text-gray-600">
               Завантаження<span class="loading-dots"></span>
@@ -367,12 +367,13 @@
         class="fixed left-0 right-0 bg-[#FAFAFA] dark:bg-gray-900 px-4 py-2 border-b border-stroke dark:border-gray-600 md:hidden z-40"
         :style="{ top: headerHeight + 'px' }"
       >
-        <div class="flex items-center bg-card dark:bg-gray-800 rounded-lg overflow-hidden">
+        <div class="flex items-center bg-card dark:bg-gray-800 rounded-lg overflow-hidden font-base">
+
           <input
             v-model="searchQuery"
             @keyup.enter="startSearch"
 :placeholder="$t('home.searchPlaceholder')"
-            class="flex-1 px-3 py-2 bg-[#F2E8E8] dark:bg-gray-800 dark:bg-gray-700 border-none focus:outline-none text-input"
+            class="flex-1 px-3 py-2 bg-[#F2E8E8] dark:bg-gray-800 dark:bg-gray-700 border-none focus:outline-none text-input font-base"
           />
           <button @click="startSearch" class="px-3">
             <img src="@/assets/magnifying-glass-svgrepo-com.svg" alt="Search" class="w-5 h-5"/>
@@ -381,14 +382,14 @@
 
         <div
           v-if="isVisible"
-          class="mt-2 bg-[#F6E7E7] dark:bg-gray-800 rounded-lg shadow-lg z-50 max-h-[300px] overflow-y-auto"
+          class="mt-2 bg-[#F6E7E7] dark:bg-gray-800 rounded-lg shadow-lg z-50 max-h-[300px] overflow-y-auto font-base"
         >
           <div v-if="loading" class="p-4 text-center text-gray-600">
-            Завантаження<span class="loading-dots"></span>
+            {{ $t('home.loading') }}<span class="loading-dots"></span>
           </div>
           <div v-else>
             <div v-if="results.length === 0" class="p-4 text-center text-gray-500">
-              Нічого не знайдено
+              {{ $t('home.noResults') }}
             </div>
             <ul v-else>
               <li
@@ -667,5 +668,7 @@ changeCurrency(curr) {
 .dark .price-color {
   color: #ffffff;
 }
-
+.text-input {
+  font-family: inherit; /* успадковує font-base з батька */
+}
 </style>

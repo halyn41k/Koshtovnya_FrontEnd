@@ -20,6 +20,8 @@ contactUs: "Contact Us",
 followUs: "Follow Us",
 shopByCategory: "Shop by category",
 recentlyViewed: "Recently Viewed Products",
+    loading: "Loading",            // ← новий ключ
+    noResults: "Nothing found" 
 
   }
 };
