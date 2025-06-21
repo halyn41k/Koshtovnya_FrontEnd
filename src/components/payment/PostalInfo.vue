@@ -1,6 +1,6 @@
 <template>
   <div class="postal-info font-montserrat text-[14px]">
-    <div class="flex flex-col gap-4 w-[520px]">
+    <div class="flex flex-col gap-4 w-full max-w-[520px] overflow-x-auto">
 
       <!-- Спосіб доставки -->
       <div class="relative">
@@ -9,7 +9,7 @@
         >
           {{ $t('payment.deliveryMethod') }}
         </label>
-        <Multiselect
+       <Multiselect
           v-model="localData.deliveryType"
           :options="deliveryOptions || []"
           :custom-label="opt => `${opt.label} — ${opt.name}`"
@@ -18,7 +18,8 @@
           :searchable="true"
           :allow-empty="false"
           @input="onDeliveryTypeChange"
-          class="dark:bg-gray-700 text-gray-900"
+          class="dark:bg-gray-700 text-gray-900 w-full"
+          :class="{'md:min-w-[400px]': true}" 
         />
         <span v-if="errors.deliveryType" class="text-red-500 text-xs">
           {{ errors.deliveryType }}
