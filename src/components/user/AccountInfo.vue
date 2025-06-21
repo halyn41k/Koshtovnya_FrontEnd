@@ -129,9 +129,17 @@ export default {
     }
   },
   methods: {
-    onMenuItemClick(i) {
+    async onMenuItemClick(i) {
       if (i === 4) {
-        // logout logic...
+         try {
+        await api.logout();            // якщо є ендпоінт на бекенді
+      } catch (e) {
+        console.warn('Помилка logout:', e);
+      }
+      localStorage.removeItem('token'); // прибираємо токен
+      // будь-які інші чистки стору/стейту
+      this.$router.push('/login');     // переходимо на сторінку входу
+      return;
       } else {
         // desktop: switch content
         if (window.innerWidth >= 1024) {
