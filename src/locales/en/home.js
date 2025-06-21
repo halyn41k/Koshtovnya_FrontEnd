@@ -12,7 +12,7 @@ export default {
   popularProducts: "Popular products",
   newArrivals: "New arrivals",
   customerReviews: "Customer reviews",
-description: "Jewelry created with love.",
+description: "Handmade products, created with love.",
 links: "Links",
 userAccount: "My Account",
 contactUs: "Contact Us",

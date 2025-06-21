@@ -1,6 +1,6 @@
 import axios from 'axios';
 import router from '@/router';
-import i18n from '@/i18n';              // експорт вашого Vue I18n-екземпляру
+import i18n from '@/i18n';              // ваш Vue I18n–екземпляр
 import { createToastInterface } from 'vue-toastification';
 import 'vue-toastification/dist/index.css';
 
@@ -8,13 +8,19 @@ const toast = createToastInterface({
   position: 'top-right',
   timeout: 5000,
   closeOnClick: true,
+  // щоб можна було писати ключі i18n напряму
+  i18n,
+  i18nName: 't'
 });
 
-// helper для тостів з урахуванням мови
-function showToast(type, ukMessage, originalMessage) {
-  const currentLang = i18n.global.locale.value || 'uk';
-  const msg = (currentLang === 'uk') ? ukMessage : (originalMessage || ukMessage);
-  toast[type](msg);
+// helper для тостів з урахуванням мови з localStorage або i18n
+function showToast(type, ukMessageKey, originalMessage = '') {
+  const storedLang = localStorage.getItem('language');
+  const currentLang = storedLang || i18n.global.locale.value || 'uk';
+  const msg = i18n.t(ukMessageKey);
+  // якщо бек повернув свою тексту, показуємо її у оригінальному вигляді
+  const detail = originalMessage || msg;
+  toast[type](detail);
 }
 
 let hasShownAuthToast = false;
@@ -29,7 +35,8 @@ apiClient.interceptors.request.use(config => {
   const token = localStorage.getItem('token');
   if (token) config.headers.Authorization = `Bearer ${token}`;
 
-  const lang = i18n.global.locale.value || localStorage.getItem('language') || 'uk';
+  const storedLang = localStorage.getItem('language');
+  const lang = storedLang || i18n.global.locale.value || 'uk';
   const currency = (localStorage.getItem('currency') || 'uah').toLowerCase();
 
   if (config.method === 'get') {
@@ -52,66 +59,68 @@ apiClient.interceptors.response.use(
   error => {
     const response = error.response;
     if (!response) {
-      showToast('error', 'Немає зв’язку із сервером. Спробуйте ще раз.', 'Network error or timeout');
+      showToast('error', 'toasts.networkError', 'Network error or timeout');
       return Promise.reject({ message: 'Network error or timeout' });
     }
+
+    const msg = response.data?.message || '';
 
     if (response.status === 401) {
       localStorage.removeItem('token');
       if (window.location.pathname !== '/login') window.location.href = '/login';
       if (!hasShownAuthToast) {
-        showToast('warning', 'Будь ласка, увійдіть у систему', response.data?.message);
+        showToast('warning', 'toasts.loginRequired', msg);
         hasShownAuthToast = true;
         setTimeout(() => { hasShownAuthToast = false; }, 10000);
       }
       return Promise.reject(response.data);
     }
 
-    const msg = response.data?.message || '';
     if (msg.toLowerCase().includes('banned')) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       window.location.href = '/login?error=user_is_banned';
+      showToast('error', 'toasts.userBanned');
       return Promise.reject(response.data);
     }
 
     if (msg.toLowerCase().includes('you are already subscribed for notifications')) {
-      showToast('error', 'Ви вже підписані на сповіщення для цього товару 😢', response.data?.message);
+      showToast('error', 'toasts.alreadySubscribed', msg);
       return Promise.reject(response.data);
     }
     if (msg.toLowerCase().includes('not enough stock available')) {
-      showToast('error', 'Немає достатньо товару в наявності 😢', response.data?.message);
+      showToast('error', 'toasts.notEnoughStock', msg);
       return Promise.reject(response.data);
     }
 
     switch (response.status) {
       case 400:
-        showToast('error', 'Неправильні дані запиту', response.data?.message);
+        showToast('error', 'toasts.badRequest', msg);
         break;
       case 403:
-        showToast('error', 'У вас недостатньо прав для цієї дії', response.data?.message);
+        showToast('error', 'toasts.forbidden', msg);
         break;
       case 404:
         if (response.config.url.startsWith('/api/')) {
           return Promise.reject(response.data);
         }
-        showToast('info', 'Сторінку не знайдено', response.data?.message);
+        showToast('info', 'toasts.pageNotFound', msg);
         router.push({ name: 'NotFound' });
         return Promise.reject(response.data);
       case 422:
         Object.values(response.data.errors || {}).flat().forEach(m =>
-          showToast('error', m, m)
+          showToast('error', 'toasts.validationError', m)
         );
         break;
       case 500:
         if (msg.toLowerCase().includes('out of range value for column')) {
-          showToast('error', 'Цей товар більше не в наявності 😢', response.data?.message);
+          showToast('error', 'toasts.notEnoughStock', msg);
         } else {
-          showToast('error', 'Сталася помилка на сервері. Спробуйте пізніше', response.data?.message);
+          showToast('error', 'toasts.serverError', msg);
         }
         break;
       default:
-        showToast('error', `Сталася помилка: ${response.status}`, response.data?.message);
+        showToast('error', 'toasts.unknownError', `Error: ${response.status}`);
     }
 
     return Promise.reject(response.data);
@@ -358,8 +367,6 @@ getAdminFilter: async (config = {}) => {
   const { data } = await apiClient.get('/api/admin/product-filter', config)
   return data
 },
-
-
 
   // Reviews
   getProductReviews: async id => {

@@ -8,49 +8,56 @@
       </h2>
       <hr class="flex-grow border-t-2 border-gray-300 dark:border-gray-600" />
     </div>
+<!-- Загальна оцінка -->
+<div class="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+  <div>
+    <div class="flex items-center gap-3">
+      <div class="flex items-center gap-1 text-3xl">
+        <template v-for="n in 5" :key="'star-' + n">
+          <span v-if="n <= Math.floor(rating)" class="text-[#FFA500]">★</span>
+          <svg
+            v-else-if="n - 1 < rating && rating < n"
+            class="w-6 h-6"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <defs>
+              <linearGradient :id="`grad-half-${n}`" x1="0" y1="0" x2="100%" y2="0">
+                <stop offset="50%" stop-color="#FFA500" />
+                <stop offset="50%" stop-color="#E5E7EB" />
+              </linearGradient>
+            </defs>
+            <path
+              :fill="`url(#grad-half-${n})`"
+              d="M12 .587l3.668 7.431 8.2 1.192-5.934 5.782 1.402 8.177L12 18.896 4.664 23.169 6.066 14.992.132 9.21l8.2-1.192z"
+            />
+          </svg>
+          <span v-else class="text-gray-300">★</span>
+        </template>
+      </div>
+      <span class="text-lg text-gray-700">
+  {{ localizedRatingText }}
+</span>
 
-    <!-- Загальна оцінка -->
-    <div class="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-      <div>
-        <div class="flex items-center gap-3">
-          <div class="flex items-center gap-1 text-3xl">
-            <template v-for="n in 5" :key="'star-' + n">
-              <span v-if="n <= Math.floor(rating)" class="text-[#FFA500]">★</span>
-              <svg
-                v-else-if="n - 1 < rating && rating < n"
-                class="w-6 h-6"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <defs>
-                  <linearGradient :id="`grad-half-${n}`" x1="0" y1="0" x2="100%" y2="0">
-                    <stop offset="50%" stop-color="#FFA500" />
-                    <stop offset="50%" stop-color="#E5E7EB" />
-                  </linearGradient>
-                </defs>
-                <path
-                  :fill="`url(#grad-half-${n})`"
-                  d="M12 .587l3.668 7.431 8.2 1.192-5.934 5.782 1.402 8.177L12 18.896 4.664 23.169 6.066 14.992.132 9.21l8.2-1.192z"
-                />
-              </svg>
-              <span v-else class="text-gray-300">★</span>
-            </template>
-          </div>
-          <span class="text-lg text-gray-700">
-            {{ rating.toFixed(1) }} / 5 ({{ reviewCount }} відгуків)
-          </span>
+    </div>
+    <div class="mt-4 space-y-2">
+      <div
+        v-for="i in [5,4,3,2,1]"
+        :key="i"
+        class="flex items-center gap-3"
+      >
+        <span class="w-20 text-sm text-gray-700 text-right">{{ i }} {{ $t('product.stars') }}</span>
+        <div class="flex-1 h-2 bg-gray-200 rounded">
+          <div
+            class="h-2 rounded bg-[#A01212]"
+            :style="{ width: getRatingWidth(i) + '%' }"
+          ></div>
         </div>
-        <div class="mt-4 space-y-2">
-          <div v-for="i in [5,4,3,2,1]" :key="i" class="flex items-center gap-3">
-            <span class="w-20 text-sm text-gray-700">{{ i }} зірок</span>
-            <div class="flex-1 h-2 bg-gray-200 rounded">
-              <div class="h-2 rounded bg-[#A01212]" :style="{ width: getRatingWidth(i) + '%' }"></div>
-            </div>
-            <span class="text-sm text-gray-500 w-6 text-right">{{ ratingsBreakdown[i] || 0 }}</span>
-          </div>
-        </div>
+        <span class="text-sm text-gray-500 w-6 text-right">{{ ratingsBreakdown[i] || 0 }}</span>
       </div>
     </div>
+  </div>
+</div>
 
     <!-- Якщо відгуків немає — повідомлення зліва, кнопка справа -->
     <div v-if="!loading && !reviews.length" class="flex justify-between w-full mb-6 px-4 sm:px-0 max-w-3xl mx-auto">
@@ -139,7 +146,12 @@
               ★
             </span>
           </div>
-          <p class="text-sm text-gray-500">{{ formatReviewDate(review.date) }}</p>
+<p class="text-sm text-gray-500">
+  {{ formatReviewDate(review.date) }}
+</p>
+
+
+
         </div>
 
         <p class="text-base text-gray-700 dark:text-gray-300 mb-3">{{ review.comment }}</p>
@@ -216,6 +228,39 @@ export default {
     };
   },
   computed: {
+     localizedRatingText() {
+    const count = this.reviewCount;
+    const rating = this.rating.toFixed(1);
+
+    // Визначаємо мову
+    const locale = this.$i18n.locale; // 'en' або 'uk'
+
+    // Визначаємо масив форм залежно від мови
+    let forms;
+    if (locale === 'uk') {
+      forms = ['відгук','відгуки','відгуків']; // 1, few, many
+    } else {
+      forms = ['review','reviews'];             // singular, plural
+    }
+
+    // Обчислюємо індекс форми
+    let idx;
+    if (locale === 'uk') {
+      if (count % 10 === 1 && count % 100 !== 11) {
+        idx = 0;
+      } else if ([2,3,4].includes(count % 10) && ![12,13,14].includes(count % 100)) {
+        idx = 1;
+      } else {
+        idx = 2;
+      }
+    } else {
+      idx = count === 1 ? 0 : 1;
+    }
+
+    const word = forms[idx];
+    return `${rating} / 5 (${count} ${word})`;
+  },
+
     pagedReviews() {
       const start = (this.currentPage - 1) * this.reviewsPerPage;
       return this.reviews.slice(start, start + this.reviewsPerPage);
@@ -225,20 +270,20 @@ export default {
     },
   },
   methods: {
-    async fetchReviews() {
-      this.loading = true;
-      try {
-        const resp = await api.getProductReviews(this.productId);
-        this.reviews = (resp.data || []).map(r => ({
-          ...r,
-          replies: r.replies ? r.replies : r.reply ? [r.reply] : [],
-        }));
-      } catch (e) {
-        console.error("Помилка завантаження відгуків:", e);
-      } finally {
-        this.loading = false;
-      }
-    },
+   async fetchReviews() {
+  this.loading = true;
+  try {
+    const resp = await api.getProductReviews(this.productId);
+    this.reviews = (resp.data || []).map(r => ({
+      ...r,
+      replies: r.replies ? r.replies : r.reply ? [r.reply] : [],
+    }));
+  } catch (e) {
+    console.error("Помилка завантаження відгуків:", e);
+  } finally {
+    this.loading = false;
+  }
+},
     async fetchRatingStats() {
       try {
         const { data } = await api.getProduct(this.productId);
@@ -272,6 +317,7 @@ export default {
         this.loading = false;
       }
     },
+    
     toggleReviewForm() {
       this.showReviewForm = !this.showReviewForm;
     },
@@ -302,31 +348,11 @@ export default {
     setRating(val) {
       this.newReview.rating = val;
     },
-    parseDate(dateString) {
-      const iso = new Date(dateString);
-      if (!isNaN(iso)) return iso;
-      const m = dateString.match(/(\d+)\s(\S+)\s(\d{4}),\s(\d{1,2}):(\d{2})/);
-      if (m) {
-        const [_, d, mon, y, h, min] = m;
-        const months = [
-          "січня","лютого","березня","квітня","травня","червня",
-          "липня","серпня","вересня","жовтня","листопада","грудня"
-        ];
-        return new Date(y, months.indexOf(mon.toLowerCase()), d, h, min);
-      }
-      return new Date(NaN);
-    },
     formatReviewDate(str) {
-      try {
-        const dt = this.parseDate(str);
-        return new Intl.DateTimeFormat("uk-UA", {
-          year: "numeric", month: "long", day: "numeric",
-          hour: "2-digit", minute: "2-digit"
-        }).format(dt);
-      } catch {
-        return "Невідома дата";
-      }
-    },
+  // Бекенд уже надсилає локалізовану дату — просто повертаємо
+  return str;
+},
+
   },
   created() {
     this.fetchReviews();

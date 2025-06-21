@@ -19,6 +19,8 @@ export default {
       welcome: "Виберіть вкладку зліва, щоб почати керувати сайтом."
     },
     dashboard: {
+            price: 'Ціна',
+      reviews: 'відгуків',
       title: "Статистика",
       period: "Період",
       customPeriod: "Період вручну",
@@ -33,12 +35,21 @@ export default {
       soldCount: "Продано товарів",
       orderDynamics: "Динаміка замовлень",
       popular: "Популярні товари",
-      latest: "Останні замовлення"
+      latest: "Останні замовлення",
+      chart: {
+        seriesLabel: '',              // можна залишити пусто або задати підпис
+        tooltipDatePrefix: '📅',
+        tooltipValuePrefix: '🔢 Кількість:',
+        xAxisHour: 'Години',
+        xAxisDay: 'Дні',
+        xAxisMonth: 'Місяці',
+        yAxisCount: 'Кількість'
+      },
     },
     clients: {
       title: "Користувачі",
       add: "Додати",
-      search: "Пошук",
+      search: "Пошук користувачів...",
       status: "Статус",
       actions: "Дії",
       banned: "Забанений",
@@ -97,7 +108,7 @@ export default {
       add: "Додати",
       filter: "Фільтр",
       clearAll: "Очистити всі",
-      search: "Пошук",
+      search: "Пошук товарів...",
       price: "Ціна",
       producer: "Виробник",
       edit: "Редагувати",
@@ -108,7 +119,7 @@ export default {
     },
     orders: {
       title: "Замовлення",
-      search: "Пошук",
+      search: "Пошук замовлень...",
       id: "ID",
       date: "Дата",
       status: "Статус",

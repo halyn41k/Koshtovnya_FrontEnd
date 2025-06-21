@@ -17,7 +17,7 @@
         <img
           src="@/assets/icons/search.svg"
           alt="Search"
-          class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 pointer-events-none"
+          class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 pointer-events-none dark:invert"
         />
       </div>
     </div>

@@ -108,7 +108,7 @@
                   :value="v.size"
                   :disabled="!v.is_available"
                 >
-                  {{ v.size }} см {{ !v.is_available ? '(немає)' : '' }}
+                  {{ v.size }} {{ $t('product.sizeUnit') }} {{ !v.is_available ? '(' + $t('product.notAvailable') + ')' : '' }}
                 </option>
               </select>
             </div>

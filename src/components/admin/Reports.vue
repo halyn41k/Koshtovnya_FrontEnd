@@ -9,20 +9,24 @@
     <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
       <!-- Дата -->
       <div class="flex gap-4 items-center">
-        <VueDatePicker
-          v-model="startDate"
-          :placeholder="$t('admin.profitReport.dateFrom')"
-          :locale="locale"
-          teleport
-        />
+      <VueDatePicker
+  :key="$i18n.locale + '-start'"
+  v-model="startDate"
+  :placeholder="$t('admin.profitReport.dateFrom')"
+  :locale="$i18n.locale"
+  :format-locale="formatLocale"
+/>
 
-        <!-- Кінцева дата -->
-        <VueDatePicker
-          v-model="endDate"
-          :placeholder="$t('admin.profitReport.dateTo')"
-          :locale="locale"
-          teleport
-        />
+<VueDatePicker
+  :key="$i18n.locale + '-end'"
+  v-model="endDate"
+  :placeholder="$t('admin.profitReport.dateTo')"
+  :locale="$i18n.locale"
+  :format-locale="formatLocale"
+/>
+
+
+
 
         <button
           @click="fetchIncomeReport()"
@@ -165,8 +169,8 @@ import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import VueDatePicker from '@vuepic/vue-datepicker'
 import '@vuepic/vue-datepicker/dist/main.css'
-import { uk } from 'date-fns/locale';
 import api from '@/services/api';
+import { uk, enUS } from 'date-fns/locale';
 
 export default {
   name: "ProfitReport",
@@ -180,25 +184,31 @@ export default {
       startDate: null,
       endDate: null,
       searchQuery: "",
-      locale: uk,
       // Зчитуємо валюту: 'usd' або 'uah' (грн) з localStorage або за замовчуванням 'uah'
       currency: (localStorage.getItem("currency") || "uah").toLowerCase(),
     };
   },
   computed: {
-    filteredData() {
-      if (!this.searchQuery) return this.incomeData;
-      const q = this.searchQuery.toLowerCase();
-      return this.incomeData.filter((r) =>
-        r.id.toString().includes(q) ||
-        r.date.toLowerCase().includes(q) ||
-        r.revenue.toString().includes(q) ||
-        (r.transaction_number || "").toString().includes(q) ||
-        r.expenses.toString().includes(q) ||
-        r.net_income.toString().includes(q)
-      );
-    }
+    formatLocale() {
+  return this.$i18n.locale === 'uk' ? uk : enUS;
+},
+
+    locale() {
+    return this.$i18n.locale === 'uk' ? uk : enUS;
   },
+  filteredData() {
+    if (!this.searchQuery) return this.incomeData;
+    const q = this.searchQuery.toLowerCase();
+    return this.incomeData.filter((r) =>
+      r.id.toString().includes(q) ||
+      r.date.toLowerCase().includes(q) ||
+      r.revenue.toString().includes(q) ||
+      (r.transaction_number || "").toString().includes(q) ||
+      r.expenses.toString().includes(q) ||
+      r.net_income.toString().includes(q)
+    );
+  }
+},
   mounted() {
     this.fetchIncomeReport("month");
     // Слідкуємо за зміною localStorage валюты, якщо інша частина застосунку змінює currency:
@@ -213,6 +223,7 @@ export default {
         this.currency = (e.newValue || "uah").toLowerCase();
       }
     },
+
     formatDate(date) {
       if (!date || isNaN(new Date(date))) return null;
       const d = new Date(date);

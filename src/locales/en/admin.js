@@ -19,6 +19,8 @@ export default {
       welcome: "Select a tab on the left to start managing the site."
     },
     dashboard: {
+      price: 'Price',
+      reviews: 'reviews',
       title: "Statistics",
       period: "Period",
       customPeriod: "Custom Period",
@@ -33,12 +35,21 @@ export default {
       soldCount: "Products sold",
       orderDynamics: "Order Dynamics",
       popular: "Popular products",
-      latest: "Latest orders"
+      latest: "Latest orders",
+      chart: {
+        seriesLabel: '',              // e.g. 'Transactions'
+        tooltipDatePrefix: '📅',
+        tooltipValuePrefix: '🔢 Count:',
+        xAxisHour: 'Hours',
+        xAxisDay: 'Days',
+        xAxisMonth: 'Months',
+        yAxisCount: 'Count'
+      },
     },
     clients: {
       title: "Users",
       add: "Add",
-      search: "Search",
+      search: "Search users...",
       status: "Status",
       actions: "Actions",
       banned: "Banned",
@@ -103,7 +114,7 @@ export default {
       add: "Add",
       filter: "Filter",
       clearAll: "Clear all",
-      search: "Search",
+      search: "Search products...",
       price: "Price",
       producer: "Producer",
       edit: "Edit",
@@ -114,7 +125,7 @@ export default {
     },
     orders: {
       title: "Orders",
-      search: "Search",
+      search: "Search orders...",
       id: "ID",
       date: "Date",
       status: "Status",

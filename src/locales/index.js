@@ -48,9 +48,18 @@ const messages = {
 };
 
 const i18n = createI18n({
+  legacy: true,
   locale: 'uk',
   fallbackLocale: 'uk',
   messages,
+  dateTimeFormats: {
+    en: {
+      review: { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' }
+    },
+    uk: {
+      review: { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' }
+    }
+  }
 });
 
 export default i18n;

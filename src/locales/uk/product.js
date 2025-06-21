@@ -53,5 +53,20 @@ clearAll: 'Очистити всі',
 nothingFound: 'Нічого не знайдено за заданими фільтрами 😢',
 resetFilters: 'Скинути фільтри',
 Viewotherproducts: 'Перегляньте інші товари',
-  }
+overallRating: 'Загальна оцінка',
+    star: 'зірка',
+    stars: 'зірок',
+      sizeUnit: "см",
+  notAvailable: "немає",
+    reviewForms: ['review', 'reviews'],
+    starRating: '{{count}} зірок',
+    rating5: '5 зірок',
+    rating4: '4 зірки',
+    rating3: '3 зірки',
+    rating2: '2 зірки',
+    rating1: '1 зірка',
+
+    
+  },
+
 }

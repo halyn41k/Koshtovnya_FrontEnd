@@ -28,15 +28,17 @@
             {{ $t('admin.dashboard.customPeriod') }}
           </label>
           <VueDatePicker
-            v-model="dateRange"
-            range
-            format="yyyy-MM-dd"
-            :enable-time-picker="false"
-            :placeholder="$t('admin.dashboard.selectPeriod')"
-            @update:model-value="onDateRangeChange"
-            input-class-name="custom-datepicker-input"
-            locale="uk"
-          />
+  v-model="dateRange"
+  range
+  format="yyyy-MM-dd"
+  :enable-time-picker="false"
+  :placeholder="t('admin.dashboard.selectPeriod')"
+  @update:model-value="onDateRangeChange"
+  input-class-name="custom-datepicker-input"
+  :locale="locale"
+  :format-locale="formatLocale"
+/>
+
         </div>
       </div>
     </div>
@@ -61,7 +63,7 @@ class="flex flex-col justify-center items-center bg-white dark:bg-[#1f2a42] bord
 
     <!-- Популярні товари -->
     <section>
-      <h2 class="text-xl font-semibold mb-4 mt-6">🔥 {{ $t('admin.dashboard.popular') }}</h2>
+      <h2 class="text-xl font-semibold mb-4 mt-6">🔥 {{ t('admin.dashboard.popular') }}</h2>
       <div v-if="popular.length" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
         <div
           v-for="(item, index) in popular"
@@ -78,11 +80,19 @@ class="flex flex-col justify-center items-center bg-white dark:bg-[#1f2a42] bord
             <div>
               <p class="font-semibold text-base leading-5">{{ item.name }}</p>
               <p class="text-sm text-gray-500">Виробник: {{ item.bead_producer_name }}</p>
-              <p class="text-sm text-gray-500">Ціна: {{ item.price }} грн</p>
+              <p class="text-sm text-gray-500">
+           {{ t('admin.dashboard.price') }}:
+          {{ formatPrice(item.price, selectedCurrency) }}
+
+
+
+
+
+        </p>
             </div>
             <div class="text-sm text-gray-600 mt-2 flex gap-3">
               <span>⭐ {{ item.rating ?? 0 }}</span>
-              <span>💬 {{ item.review_count }} відгуків</span>
+              <span>💬 {{ item.review_count }} {{ t('admin.dashboard.reviews') }}</span>
             </div>
           </div>
         </div>
@@ -131,7 +141,17 @@ import api from '@/services/api'
 import OrderChart from '@/components/admin/dashboard/OrderChart.vue'
 import VueDatePicker from '@vuepic/vue-datepicker'
 import '@vuepic/vue-datepicker/dist/main.css'
-import { uk } from 'date-fns/locale'
+import { enUS, uk } from 'date-fns/locale'
+ import { useI18n } from 'vue-i18n'
+ // деструктуруємо t (перекладач) і n (форматер чисел)
+ const { n, t, locale } = useI18n()
+const selectedCurrency = ref(null)
+
+
+const formatLocale = computed(() => {
+  return locale.value === 'uk' ? uk : enUS
+})
+
 import {
   format,
   startOfDay,
@@ -144,9 +164,18 @@ import {
   endOfYear
 } from 'date-fns'
 import Multiselect from 'vue-multiselect'
-import { useI18n } from 'vue-i18n'
+import { unref } from 'vue'
 
-const { t } = useI18n()
+function formatPrice(price, currency) {
+  const val = Number(price)
+  const curr = (unref(currency) || 'UAH').toUpperCase()
+  const localeStr = curr === 'USD' ? 'en-US' : 'uk-UA'
+  return new Intl.NumberFormat(localeStr, {
+    style: 'currency',
+    currency: curr
+  }).format(val)
+}
+
 
 // Опції для вибору періоду
 const periodOptions = computed(() => [
@@ -213,6 +242,11 @@ const getPeriodValue = () => {
   // простий рядок або null
   return p
 }
+
+onMounted(() => {
+  selectedCurrency.value = localStorage.getItem('currency') || 'UAH'
+  loadData()
+})
 
 // Формуємо параметри: або { start_date, end_date }, або { period }
 const getParams = () => {

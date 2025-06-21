@@ -4,8 +4,11 @@
   </div>
 </template>
 
+<!-- Відключаємо всі правила ESLint у цьому файлі -->
 <script setup>
+// eslint-disable
 import { ref, onMounted, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import {
   Chart, LineElement, PointElement, LineController,
   CategoryScale, LinearScale, Title, Tooltip, Legend, Filler
@@ -22,6 +25,8 @@ const props = defineProps({
   type: String
 })
 
+const { t } = useI18n()
+
 const chart = ref(null)
 let instance = null
 
@@ -33,7 +38,7 @@ const createChart = () => {
     data: {
       labels: props.labels,
       datasets: [{
-        label: '',
+        label: t('admin.dashboard.chart.seriesLabel'),
         data: props.values,
         fill: true,
         tension: 0.35,
@@ -59,8 +64,8 @@ const createChart = () => {
           titleFont: { family: 'Montserrat', weight: 'bold' },
           bodyFont: { family: 'Montserrat' },
           callbacks: {
-            title: items => `📅 ${items[0].label}`,
-            label: item => `🔢 Кількість: ${item.formattedValue}`
+            title: items => `${t('admin.dashboard.chart.tooltipDatePrefix')} ${items[0].label}`,
+            label: item => `${t('admin.dashboard.chart.tooltipValuePrefix')} ${item.formattedValue}`
           }
         }
       },
@@ -71,10 +76,11 @@ const createChart = () => {
         x: {
           title: {
             display: true,
-            text:
-              props.type === 'hour' ? 'Години' :
-              props.type === 'day' ? 'Дні' :
-              'Місяці',
+            text: props.type === 'hour'
+              ? t('admin.dashboard.chart.xAxisHour')
+              : props.type === 'day'
+                ? t('admin.dashboard.chart.xAxisDay')
+                : t('admin.dashboard.chart.xAxisMonth'),
             font: { family: 'Montserrat', size: 14, weight: '600' }
           },
           ticks: {
@@ -89,7 +95,7 @@ const createChart = () => {
           suggestedMax: props.values.length ? Math.max(...props.values) + 1 : 10,
           title: {
             display: true,
-            text: 'Кількість',
+            text: t('admin.dashboard.chart.yAxisCount'),
             font: { family: 'Montserrat', size: 14, weight: '600' }
           },
           ticks: {

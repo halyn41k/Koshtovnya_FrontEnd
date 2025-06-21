@@ -13,7 +13,7 @@ home: {
 popularProducts: "Популярні товари",
 newArrivals: "Новинки",
 customerReviews: "Відгуки наших покупців",
-description: "Ювелірні прикраси, створені з любов’ю.",
+description: "Вироби ручної роботи, створені з любов’ю.",
 links: "Посилання",
 userAccount: "Мій кабінет",
 contactUs: "Контакти",

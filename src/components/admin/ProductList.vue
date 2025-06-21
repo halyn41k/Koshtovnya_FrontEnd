@@ -19,7 +19,7 @@
         class="flex items-center gap-2 px-2 py-1 rounded-md hover:bg-gray-200 dark:hover:bg-[#333] transition"
       >
         <span class="text-sm font-semibold text-gray-700 dark:text-gray-200">{{ $t('admin.products.filter') }}</span>
-        <img src="@/assets/icons/filter.svg" alt="Filter icon" class="w-4 h-4" />
+        <img src="@/assets/icons/filter.svg" alt="Filter icon" class="w-4 h-4 dark:invert" />
       </button>
 
       <!-- Активні теги -->
@@ -44,20 +44,22 @@
       </div>
 
       <!-- Поле пошуку -->
-      <div class="w-64 ml-auto">
-        <div
-          class="flex items-center h-8 bg-red-50 dark:bg-[#303b59] rounded-md border border-transparent focus-within:border-black transition overflow-hidden"
-        >
-          <input
-            v-model="searchQuery"
-            @input="onSearch"
-            type="text"
-            :placeholder="$t('admin.products.search')"
-            class="flex-1 px-3 py-1 bg-transparent outline-none text-red-900 dark:text-red-100 text-sm"
-          />
-          <img src="@/assets/icons/search.svg" alt="Search icon" class="w-4 h-4 mr-3 pointer-events-none" />
-        </div>
-      </div>
+<div class="relative w-80 ml-auto">
+  <input
+    v-model="searchQuery"
+    @input="onSearch"
+    type="text"
+    :placeholder="$t('admin.products.search')"
+    class="w-full pl-10 pr-4 py-2 border border-[#E0E0E0] dark:border-[#303b59] dark:bg-[#17223b] dark:text-white rounded focus:outline-none focus:ring focus:ring-pink-200 text-sm"
+  />
+
+  <img
+    src="@/assets/icons/search.svg"
+    alt="Search"
+    class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 pointer-events-none dark:invert"
+  />
+</div>
+
     </div>
 
     <!-- Фільтр праворуч -->
@@ -124,18 +126,17 @@
       </div>
     </div>
 
-    <!-- Якщо немає продуктів -->
-    <div
-      v-else-if="!searchQuery"
+    <div      
+    v-else-if="!searchQuery"
       class="flex items-center justify-center border border-[#E0E0E0] dark:border-[#444] bg-gray-50 dark:bg-[#2a2a2a] rounded-lg mt-10 h-48 font-semibold text-sm text-gray-700 dark:text-gray-300"
     >
-      Поки що не було додано жодного товару.
+      {{ $t('admin.products.noProducts') }}
     </div>
     <div
       v-else
       class="flex items-center justify-center border border-[#E0E0E0] dark:border-[#444] bg-gray-50 dark:bg-[#2a2a2a] rounded-lg mt-10 h-48 font-semibold text-sm text-gray-700 dark:text-gray-300"
     >
-      За запитом «<strong>{{ searchQuery }}</strong>» нічого не знайдено.
+      {{ $t('admin.products.noResults', { query: searchQuery }) }}
     </div>
 
     <!-- Пагінація -->
