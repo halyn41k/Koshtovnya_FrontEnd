@@ -20,6 +20,7 @@ export default {
     },
     dashboard: {
             price: 'Ціна',
+            producer: 'Виробник',
       reviews: 'відгуків',
       title: "Статистика",
       period: "Період",
@@ -77,6 +78,8 @@ export default {
       },
     },
     "userModal": {
+          "createUser": "Створити користувача",
+    "updateUser": "Оновити користувача",
     "firstName": "Ім’я",
     "firstNamePlaceholder": "Введіть ім’я",
     "secondName": "По батькові",
@@ -185,6 +188,8 @@ export default {
       delete: "Видалити"
     },
      settings: {
+  "image": "Зображення",              // / "Image"
+  "actions": "Керування",             // / "Actions"
       chooseFile: "Вибрати файл",
       title: "Налаштування",
       address: "Адреса",

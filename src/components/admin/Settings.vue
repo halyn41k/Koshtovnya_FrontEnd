@@ -77,7 +77,7 @@
         type="submit"
         class="w-full py-2 bg-[#6B1F1F] hover:bg-[#A01212] text-white font-medium rounded text-sm transition"
       >
-        Зберегти
+        {{ $t('admin.settings.save') }}
       </button>
     </form>
 
@@ -102,8 +102,8 @@
               <th class="px-4 py-3">ID</th>
               <th class="px-4 py-3">{{ $t('admin.settings.categoryNameUk') }}</th>
               <th class="px-4 py-3">{{ $t('admin.settings.categoryNameEn') }}</th>
-              <th class="px-4 py-3">Зображення</th>
-              <th class="px-4 py-3 text-right">Керування</th>
+              <th class="px-4 py-3">{{ $t('admin.settings.image') }}</th>
+              <th class="px-4 py-3 text-right">{{ $t('admin.settings.actions') }}</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-200 dark:divide-slate-600 bg-white dark:bg-slate-800">

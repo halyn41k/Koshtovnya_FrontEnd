@@ -4,6 +4,7 @@ export default {
   exclusiveJewelry: 'Exclusive necklaces, bracelets, and more',
   viewProducts: 'View products',
   followInsta: 'Follow us on Instagram, to',
+  dontMissTheMost: 'dont miss the most interesting!',
   aboutDelivery: "Payment | Delivery",
   siteName: "Koshtovnya",
   searchPlaceholder: "Search products...",

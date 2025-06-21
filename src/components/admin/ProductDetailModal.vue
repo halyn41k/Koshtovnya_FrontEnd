@@ -106,7 +106,7 @@
             <strong class="text-gray-700 dark:text-gray-300">
               {{ $t('admin.productModal.rating') }}:
             </strong>
-            <span>{{ product.rating }} ({{ product.review_count }} {{ $t('productModal.reviews') }})</span>
+            <span>{{ product.rating }} ({{ product.review_count }} {{ $t('admin.productModal.reviews') }})</span>
           </p>
         </div>
       </div>

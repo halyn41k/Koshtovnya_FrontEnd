@@ -58,18 +58,19 @@ export default {
       paymentMethodRequired: 'Please select a payment method',
       cardTypeRequired: 'Please select a card type'
     },
+    "orderReview": {
+      "title": "Please review items before placing your order",
+      "unit": "pcs",
+      "quantityLabel": "Quantity",
+      "emptyCart": "Your cart is empty"
+    },
     paymentConfirmed: {
 header: 'Payment confirmed',
 message1: 'You have successfully made a payment. Please wait, you are being redirected...',
 message2: 'If you are not redirected, please follow the link',
 orderHistoryLink: 'Order History'
 },
-orderReview: {
-title: 'Please review your order before paying.',
-unit: 'per piece',
-quantityLabel: 'Quantity',
-emptyCart: 'Your cart is empty.'
-},
+
 orderSummary: {
 header: 'Summary',
 userLabel: 'Username',

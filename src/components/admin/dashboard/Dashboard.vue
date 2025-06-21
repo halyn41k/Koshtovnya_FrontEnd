@@ -79,7 +79,7 @@ class="flex flex-col justify-center items-center bg-white dark:bg-[#1f2a42] bord
           <div class="flex flex-col justify-between">
             <div>
               <p class="font-semibold text-base leading-5">{{ item.name }}</p>
-              <p class="text-sm text-gray-500">Виробник: {{ item.bead_producer_name }}</p>
+              <p class="text-sm text-gray-500">{{ t('admin.dashboard.producer') }}: {{ item.bead_producer_name }}</p>
               <p class="text-sm text-gray-500">
            {{ t('admin.dashboard.price') }}:
           {{ formatPrice(item.price, selectedCurrency) }}

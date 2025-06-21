@@ -7,7 +7,7 @@
   @click="openAddModal"
   class="flex items-center gap-2 bg-[#6B1F1F] hover:bg-[#A01212] text-white px-4 py-2 rounded"
 >
-  <img src="@/assets/icons/plus.svg" alt="Add" class="w-5 h-5 invert dark:invert-0" />
+  <img src="@/assets/icons/plus.svg" alt="Add" class="w-5 h-5" />
   <span class="font-medium">{{ $t('admin.clients.add') }}</span>
 </button>
 
@@ -163,16 +163,16 @@
     >
       Користувач успішно {{ toastAction }}!
     </div>
-     <ClientModal
+    
+  </main>
+
+ <ClientModal
      v-if="showUserModal"
      :user="modalClient"
       :title="modalTitle"
       @close="showUserModal = false"
       @save="handleUserSubmit"
     />
-  </main>
-
-
 </template>
 
 

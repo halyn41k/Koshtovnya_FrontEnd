@@ -20,6 +20,7 @@ export default {
     },
     dashboard: {
       price: 'Price',
+      producer: 'Producer',
       reviews: 'reviews',
       title: "Statistics",
       period: "Period",
@@ -144,6 +145,8 @@ export default {
       }
     },
     settings: {
+"image": "Image", // / "Image"
+"actions": "Control", // / "Actions"
       chooseFile: "Choose file",
       title: "Settings",
       address: "Address",
