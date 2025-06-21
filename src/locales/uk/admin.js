@@ -78,7 +78,7 @@ export default {
       },
     },
     "userModal": {
-          "createUser": "Створити користувача",
+          "createUser": "Додати користувача",
     "updateUser": "Оновити користувача",
     "firstName": "Ім’я",
     "firstNamePlaceholder": "Введіть ім’я",

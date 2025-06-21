@@ -1,32 +1,44 @@
-<template> 
+<template>
   <div class="postal-info font-montserrat text-[14px]">
-    <div class="flex flex-col gap-4 w-full max-w-md px-4 sm:px-0 sm:max-w-none">
+    <div class="flex flex-col gap-4 w-[520px]">
 
       <!-- Спосіб доставки -->
       <div class="relative">
-        <label class="block mb-1 text-sm font-medium text-gray-700">
-          {{ $t('payment.deliveryMethod') }}:
+        <label
+          class="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-200"
+        >
+          {{ $t('payment.deliveryMethod') }}
         </label>
         <Multiselect
           v-model="localData.deliveryType"
           :options="deliveryOptions || []"
           :custom-label="opt => `${opt.label} — ${opt.name}`"
-          :track-by="'id'"
+          track-by="id"
           :placeholder="$t('payment.selectDeliveryMethod')"
           :searchable="true"
           :allow-empty="false"
           @input="onDeliveryTypeChange"
+          class="dark:bg-gray-700 text-gray-900"
         />
-        <span v-if="errors.deliveryType" class="text-red-500 text-xs">{{ errors.deliveryType }}</span>
+        <span v-if="errors.deliveryType" class="text-red-500 text-xs">
+          {{ errors.deliveryType }}
+        </span>
       </div>
 
-      <!-- Місто -->
+      <!-- Місто: інпут завжди світлий -->
       <div v-if="localData.deliveryType && !isStorePickup">
-        <label class="block mb-1 text-sm font-medium text-gray-700">{{ $t('payment.city') }}:</label>
+        <label
+          class="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-200"
+        >
+          {{ $t('payment.city') }}
+        </label>
         <Combobox v-model="selectedCity" as="div" class="relative">
           <div class="relative">
             <ComboboxInput
-              class="block w-full p-2 border border-gray-300 rounded-md text-gray-900 font-normal focus:outline-none focus:ring-2 focus:ring-red-500"
+            
+              class="block w-full p-2 border border-gray-300 rounded-md 
+                     text-gray-900 bg-white font-normal 
+                     focus:outline-none focus:ring-2 focus:ring-red-500"
               :class="{ 'border-red-500': errors.city }"
               @input="handleCitySearch"
               :displayValue="city => city?.city || city"
@@ -34,80 +46,115 @@
             />
             <ComboboxOptions
               v-if="citiesLocal.length"
-              class="absolute z-50 w-full mt-1 max-h-48 overflow-auto rounded bg-white border shadow-lg"
+              class="absolute z-50 w-full mt-1 max-h-48 overflow-auto 
+                     rounded bg-white border border-gray-300 shadow-lg"
             >
               <ComboboxOption
                 v-for="city in citiesLocal"
                 :key="city.Ref"
                 :value="city"
-                class="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                class="px-4 py-2 hover:bg-gray-100 cursor-pointer text-gray-900"
               >
                 {{ city.city }}
               </ComboboxOption>
             </ComboboxOptions>
           </div>
         </Combobox>
-        <p v-if="errors.city" class="text-red-500 text-xs mt-1">{{ errors.city }}</p>
+        <p v-if="errors.city" class="text-red-500 text-xs mt-1">
+          {{ errors.city }}
+        </p>
       </div>
 
       <!-- Вулиця -->
       <div v-if="isCourier">
-        <label class="block mb-1 text-sm font-medium text-gray-700">{{ $t('payment.street') }}:</label>
+        <label
+          class="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-200"
+        >
+          {{ $t('payment.street') }}
+        </label>
         <Combobox v-model="selectedStreet" as="div" class="relative">
           <div class="relative">
             <ComboboxInput
-              class="block w-full p-2 border border-gray-300 rounded-md text-gray-900 font-normal focus:outline-none focus:ring-2 focus:ring-red-500"
+              class="block w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md 
+                     text-gray-900 bg-white dark:bg-gray-700 font-normal 
+                     focus:outline-none focus:ring-2 focus:ring-red-500"
               :class="{ 'border-red-500': errors.street }"
               @input="handleStreetSearch"
               :displayValue="street => street?.Name || street"
               :placeholder="$t('payment.enterStreet')"
             />
-            <ComboboxOptions v-if="streetsLocal.length"
-              class="absolute z-50 w-full mt-1 max-h-48 overflow-auto rounded bg-white border shadow-lg">
-              <ComboboxOption v-for="(street, idx) in streetsLocal" :key="idx" :value="street"
-                class="px-4 py-2 hover:bg-gray-100 cursor-pointer">
+            <ComboboxOptions
+              v-if="streetsLocal.length"
+              class="absolute z-50 w-full mt-1 max-h-48 overflow-auto 
+                     rounded bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 shadow-lg"
+            >
+              <ComboboxOption
+                v-for="(street, idx) in streetsLocal"
+                :key="idx"
+                :value="street"
+                class="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer text-gray-900"
+              >
                 {{ street.Name || street.street }}
               </ComboboxOption>
             </ComboboxOptions>
           </div>
         </Combobox>
-        <p v-if="errors.street" class="text-red-500 text-xs mt-1">{{ errors.street }}</p>
+        <p v-if="errors.street" class="text-red-500 text-xs mt-1">
+          {{ errors.street }}
+        </p>
 
         <div class="mt-4">
-          <label class="block mb-1 text-sm font-medium text-gray-700">{{ $t('payment.houseNumber') }}:</label>
+          <label
+            class="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-200"
+          >
+            {{ $t('payment.houseNumber') }}
+          </label>
           <input
             v-model="houseNumberProxy"
-            class="block w-full p-2 border border-gray-300 rounded-md text-gray-900 font-normal focus:outline-none focus:ring-2 focus:ring-red-500"
-            :class="{ 'border-red-500': errors.houseNumber }"
             @input="updateData"
             :placeholder="$t('payment.houseNumberPlaceholder')"
+            class="block w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md 
+                   text-gray-900 bg-white dark:bg-gray-700 font-normal 
+                   focus:outline-none focus:ring-2 focus:ring-red-500"
+            :class="{ 'border-red-500': errors.houseNumber }"
           />
-          <p v-if="errors.houseNumber" class="text-red-500 text-xs mt-1">{{ errors.houseNumber }}</p>
+          <p v-if="errors.houseNumber" class="text-red-500 text-xs mt-1">
+            {{ errors.houseNumber }}
+          </p>
         </div>
       </div>
 
       <!-- Відділення / Поштомат -->
       <div v-if="showWarehouse">
-        <label class="block mb-1 text-sm font-medium text-gray-700">
-          {{ isPostomat ? $t('payment.postomat') : $t('payment.warehouse') }}:
+        <label
+          class="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-200"
+        >
+          {{ isPostomat ? $t('payment.postomat') : $t('payment.warehouse') }}
         </label>
         <Multiselect
           v-model="localData.warehouse"
           :options="warehousesLocal || []"
-          :label="'name'"
-          :track-by="'id'"
+          label="name"
+          track-by="id"
           :placeholder="$t('payment.selectWarehouse')"
           :searchable="true"
           :allow-empty="false"
           @input="updateData"
+          class="dark:bg-gray-700 text-gray-900"
         />
-        <span v-if="errors.warehouse" class="text-red-500 text-xs mt-1">{{ errors.warehouse }}</span>
+        <span v-if="errors.warehouse" class="text-red-500 text-xs mt-1">
+          {{ errors.warehouse }}
+        </span>
       </div>
 
       <!-- Магазин -->
-      <div v-if="isStorePickup" class="text-sm text-gray-800">
-        <p><strong>{{ $t('payment.city') }}:</strong> {{ $t('payment.storeCity') }}</p>
-        <p><strong>{{ $t('payment.address') }}:</strong> {{ $t('payment.storeAddress') }}</p>
+      <div v-if="isStorePickup" class="text-sm text-gray-800 dark:text-gray-200">
+        <p>
+          <strong>{{ $t('payment.city') }}:</strong> {{ $t('payment.storeCity') }}
+        </p>
+        <p>
+          <strong>{{ $t('payment.address') }}:</strong> {{ $t('payment.storeAddress') }}
+        </p>
       </div>
     </div>
   </div>
@@ -118,7 +165,6 @@
 <script>
 import axios from 'axios';
 import Multiselect from 'vue-multiselect';
-import api from '@/services/api.js';   
 import { Combobox, ComboboxInput, ComboboxOptions, ComboboxOption } from '@headlessui/vue'
 
 export default {
@@ -232,10 +278,9 @@ tempUserAddress: {
     this.fetchCities();
   }
 },
-async handleTempAddress(address) {
+handleTempAddress(address) {
   if (!address || !Array.isArray(this.deliveryOptions)) return;
 
-  // Деструктуруємо дані з API
   const {
     city,
     cityRef,
@@ -247,98 +292,85 @@ async handleTempAddress(address) {
     deliveryCategory
   } = address;
 
-  // Задаємо категорію для фільтрації
   this.selectedDeliveryCategory = deliveryCategory;
 
-  // 1) Шукаємо точний або частковий збіг по назві та типу доставки
-  const nameLower = String(deliveryTypeName).toLowerCase();
-  let matched = this.deliveryOptions.find(opt =>
-    opt.delivery_type === deliveryCategory &&
-    opt.name.toLowerCase().includes(nameLower)
-  );
-
-  // 2) Фолбек на першу опцію з того ж delivery_type
-  if (!matched) {
-    matched = this.deliveryOptions.find(opt =>
-      opt.delivery_type === deliveryCategory
-    );
-  }
+  const matched = this.deliveryOptions.find(opt => opt.name === deliveryTypeName);
   if (matched) {
     this.localData.deliveryType = matched;
   }
 
-  // 3) Заповнюємо місто та референс
-  this.localData.city    = city    || '';
+  this.localData.city = city || '';
   this.localData.cityRef = cityRef || '';
-  this.selectedCity      = city && cityRef
-    ? { city, Ref: cityRef }
-    : null;
+  this.selectedCity = city && cityRef ? { city, Ref: cityRef } : null;
 
-  // 4) Якщо кур’єр — парсимо вулицю і номер будинку
   if (deliveryCategory === 'courier') {
-    const m = street?.match(/(.+?)\s+(\d+\w*)$/);
-    if (m) {
-      const [, streetOnly, numberOnly] = m;
-      this.localData.street       = streetOnly.trim();
-      this.localData.streetSearch = streetOnly.trim();
-      this.$emit('update:modelValue', {
-        ...this.modelValue,
-        street: streetOnly.trim(),
-        streetSearch: streetOnly.trim(),
-        houseNumber: numberOnly.trim()
-      });
-    } else {
-      this.$emit('update:modelValue', {
-        ...this.modelValue,
-        street: street || '',
-        streetSearch: street || '',
-        houseNumber: houseNumber || ''
-      });
-    }
-  }
+  const addressMatch = street?.match(/(.+?)\s+(\d+\w*)$/);
 
-  // 5) Якщо самовивіз — завантажуємо список відділень/поштоматів і обираємо потрібне
-  if (deliveryCategory === 'pickup' && city && cityRef && deliveryTypeName) {
-    const list = await this.fetchWarehouses(city, cityRef, deliveryTypeName);
-    this.warehousesLocal = Array.isArray(list)
-      ? list.map((w,i) => ({ id: i+1, name: w.warehouse }))
-      : [];
-    const foundW = this.warehousesLocal.find(w =>
-      w.name.toLowerCase().includes(String(warehouseName).toLowerCase())
-    );
-    if (foundW) {
-      this.localData.warehouse = foundW;
-    }
-    this.$emit('update:modelValue', { ...this.localData });
+  if (addressMatch) {
+    const [, streetOnly, numberOnly] = addressMatch;
+    this.localData.street = streetOnly.trim();
+    this.localData.streetSearch = streetOnly.trim();
+    // ❌ не this.localData.houseNumber
+    this.$emit('update:modelValue', {
+      ...this.modelValue,
+      street: streetOnly.trim(),
+      streetSearch: streetOnly.trim(),
+      houseNumber: numberOnly.trim()
+    });
   } else {
-    // Інакше — просто віддаємо оновлені дані
+    this.$emit('update:modelValue', {
+      ...this.modelValue,
+      street: street || '',
+      streetSearch: street || '',
+      houseNumber: houseNumber || ''
+    });
+  }
+}
+
+
+  if (deliveryCategory === 'pickup' && city && cityRef && deliveryTypeName) {
+    this.fetchWarehouses(city, cityRef, deliveryTypeName).then(warehouses => {
+      this.warehousesLocal = Array.isArray(warehouses) ? warehouses : [];
+      const match = this.warehousesLocal.find(w => w.name === warehouseName);
+      if (match) {
+        this.localData.warehouse = match;
+      }
+      this.$emit('update:modelValue', { ...this.localData });
+    });
+  } else {
     this.$emit('update:modelValue', { ...this.localData });
   }
 },
 
 
+
+   updateData() {
+  this.$emit('update:modelValue', {
+    ...this.modelValue,
+    ...this.localData
+  });
+},
+
     async fetchDeliveryTypes() {
+      const token = localStorage.getItem('token');
       try {
-       // викликаємо централізований сервіс
-        const response = await api.getDeliveryTypes();
-        // сервіс повертає { data: { pickup: […], courier: […] } }
-        const groups = response.data; 
-        const opts = [];
-        for (const [type, items] of Object.entries(groups)) {
-          const label = type === 'pickup' ? this.$t('payment.delivery') : this.$t('payment.courier'); 
-          // або ж жорстко: type === 'pickup' ? 'Самовивіз' : 'Кур’єр'
-          items.forEach(item => {
-            opts.push({
-              id: item.id,
-             name: item.name,
+        const { data } = await axios.get('https://koshtovnya.api-dev.bmax-edu.website/api/delivery-types', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const result = [];
+        for (const type in data.data) {
+          data.data[type].forEach(option => {
+            result.push({
+              id: option.id,
+              name: option.name,
               delivery_type: type,
-             label
+              label: type === 'pickup' ? 'Самовивіз' : 'Кур’єр'
             });
           });
         }
-        this.deliveryOptions = opts;
-      } catch (err) {
-        console.error('Не вдалося завантажити delivery-types:', err);
+        this.deliveryOptions = result;
+      } catch (error) {
+        console.error('Помилка отримання способів доставки', error);
         this.deliveryOptions = [];
       }
     },

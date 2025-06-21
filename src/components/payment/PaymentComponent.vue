@@ -19,12 +19,11 @@
 
 <main class="flex flex-col lg:flex-row lg:items-start gap-10 relative min-h-[900px]">
 <div class="flex-1 flex flex-col space-y-6">
-  <PaymentSteps
+<PaymentSteps
   ref="paymentSteps"
-   :form-data="formData"
-  @update-form-data="formData = $event"
-  :currentStep="currentStep"
-  @steps-complete="stepsCompleted = $event"
+  @steps-completed-change="stepsCompleted = $event"
+  @steps-complete="stepsCompleted = true"
+  v-model="formData"
 />
 
 
@@ -42,17 +41,13 @@
 <!-- ВСЕРЕДИНІ <main> -->
 <div class="w-full lg:w-[360px] shrink-0 lg:ml-[60px] mt-6 lg:mt-0">
   <div class="sticky top-[100px] z-10">
-   <PaymentSummary
-  ref="paymentSummary"
+   
+<PaymentSummary
   :cart-items="cartItems"
   :city-ref="formData.cityRef"
   :delivery-type="formData.deliveryType"
-  :customer-data="formData"
   :steps-completed="stepsCompleted"
 />
-
-
-
   </div>
 </div>
 
@@ -119,26 +114,15 @@ export default {
     totalAmount: 0,
   };
 },
-   
-  watch: {
-  cartItems: { handler: "calculateTotalAmount", deep: true },
-  deliveryCost: "calculateTotalAmount",
-  currentStep() {
-    this.checkStepsCompletion();
-  },
-  'formData.cityRef'(val) {
-    this.$refs.paymentSummary?.calculateDeliveryCost?.();
-  },
-  'formData.deliveryType'(val) {
-    this.$refs.paymentSummary?.calculateDeliveryCost?.();
-  }
-},
 
+  watch: {
+    cartItems: { handler: "calculateTotalAmount", deep: true },
+    deliveryCost: "calculateTotalAmount",
+    currentStep() {
+    this.checkStepsCompletion();
+  }
+  },
   methods: {
-    updateData(newPartial) {
-      // якщо вам треба зливати часткові оновлення:
-      this.formData = { ...this.formData, ...newPartial };
-    },
     calculateTotalAmount() {
       this.totalAmount =
         this.cartItems.reduce(

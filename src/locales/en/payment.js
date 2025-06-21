@@ -1,6 +1,10 @@
 // locales/en.js
 export default {
   payment: {
+        itemsTotal: 'Items Total',
+
+    freeDeliveryHintStyled: '💡 Free shipping on orders from {thresholdText}',
+    freeDeliveryEligibleStyled: '🎉 You have free shipping! Orders from {thresholdText}',
     paymentTitle: 'Payment',
     title: 'Amount to Pay',
     delivery: 'Delivery',

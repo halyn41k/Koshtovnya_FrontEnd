@@ -12,7 +12,11 @@ const routes = [
     name: 'Home',
     component: () => import('@/components/home/HomePage.vue')
   },
-
+{
+    path: '/fafafa',
+    name: 'PostalInfoManually',
+    component: () => import('@/components/payment/PostalInfoManually.vue')
+  },
 
    {
     path: '/category/:categoryId',

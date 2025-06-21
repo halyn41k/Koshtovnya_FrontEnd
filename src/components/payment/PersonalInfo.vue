@@ -1,4 +1,4 @@
-<template>
+<template>  
   <div class="personal-info">
     <div class="flex flex-col gap-4 w-[400px]">
       <div
@@ -12,7 +12,30 @@
         >
           {{ $t(`payment.fields.${key}.label`) }}
         </label>
+
+        <!-- Phone input with icon -->
+        <div v-if="key === 'phone'" class="relative">
+          <img
+            src="@/assets/icons/phone.svg"
+            alt="Telephone icon"
+            class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 filter dark:invert"
+          />
+          <input
+            :id="key"
+            :type="field.type"
+            v-model="localData[key]"
+            :placeholder="$t(`payment.fields.${key}.placeholder`)"
+            @input="updateData"
+            class="border border-gray-400 dark:border-gray-600 p-2 pl-10 rounded
+                   text-black dark:text-white bg-white dark:bg-gray-800
+                   placeholder-gray-500 dark:placeholder-gray-400
+                   text-[14px] w-full montserrat focus:outline-none focus:ring-2 focus:ring-red-500"
+          />
+        </div>
+
+        <!-- Other inputs -->
         <input
+          v-else
           :id="key"
           :type="field.type"
           v-model="localData[key]"
@@ -23,6 +46,7 @@
                  placeholder-gray-500 dark:placeholder-gray-400
                  text-[14px] w-full montserrat focus:outline-none focus:ring-2 focus:ring-red-500"
         />
+
         <span
           v-if="errors[key]"
           class="text-red-500 dark:text-gray-100 text-xs"
@@ -33,7 +57,6 @@
     </div>
   </div>
 </template>
-
 
 <script>
 import Multiselect from 'vue-multiselect'
@@ -51,7 +74,7 @@ export default {
         firstName:  { type: 'text', placeholder: "Введіть ім'я" },
         lastName: { type: 'text', placeholder: 'Введіть прізвище' },
         secondName: { type: 'text', placeholder: 'Введіть по батькові' },
-        phone:      { type: 'tel',  placeholder: 'Введдіть номер телефону' },
+        phone:      { type: 'tel',  placeholder: 'Введіть номер телефону' },
       },
     };
   },
@@ -62,20 +85,10 @@ export default {
     },
   },
   methods: {
-  updateData() {
-    this.$emit('update:modelValue', this.localData);
+    updateData() {
+      this.$emit('update:modelValue', this.localData);
+    },
   },
-  getLabel(key) {
-    const labels = {
-      firstName: "Ім'я",
-      lastName: "Прізвище",
-      secondName: "По батькові",
-      phone: "Номер телефону",
-    };
-    return labels[key] || key;
-  },
-},
-
 };
 </script>
 

@@ -1,6 +1,10 @@
 // locales/uk.js
 export default {
   payment: {
+        itemsTotal: 'Сума товарів',
+
+freeDeliveryHintStyled: '💡 Безкоштовна доставка при замовленні від {thresholdText}',
+    freeDeliveryEligibleStyled: '🎉 У вас безкоштовна доставка! Замовлення від {thresholdText}',
     paymentTitle: 'Оплата',
     title: 'Сума до оплати',
     delivery: 'Доставка',
