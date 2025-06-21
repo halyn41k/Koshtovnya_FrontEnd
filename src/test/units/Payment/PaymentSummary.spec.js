@@ -1,15 +1,15 @@
-describe.skip('Тести для MyComponent', () => {
-  it('цей тест не виконається', () => {
-    expect(true).toBe(false)
-  })
-})
-/*
+// describe.skip('Тести для MyComponent', () => {
+//   it('цей тест не виконається', () => {
+//     expect(true).toBe(false)
+//   })
+// })
+
 //Протестовано головні аспекти
 
 beforeEach(() => {
-  jest.spyOn(console, 'warn').mockImplementation(() => {});
-  jest.spyOn(console, 'error').mockImplementation(() => {});
-  jest.spyOn(console, 'log').mockImplementation(() => {});
+  jest.spyOn(console, 'warn').mockImplementation(() => { });
+  jest.spyOn(console, 'error').mockImplementation(() => { });
+  jest.spyOn(console, 'log').mockImplementation(() => { });
 });
 
 import { shallowMount, mount } from '@vue/test-utils';
@@ -219,7 +219,7 @@ describe('PaymentSummary.vue', () => {
   describe('Метод fetchCartItems', () => {
     let consoleErrorSpy;
     beforeEach(() => {
-      consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+      consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => { });
     });
     afterEach(() => {
       jest.restoreAllMocks();
@@ -240,31 +240,12 @@ describe('PaymentSummary.vue', () => {
       expect(consoleErrorSpy).toHaveBeenCalledWith("[fetchCartItems] Необхідна авторизація");
       expect(axios.get).not.toHaveBeenCalled();
     });
-    it('при наявності токену робиться GET запит за правильним URL та з коректними заголовками', async () => {
-      const token = 'validToken';
-      localStorage.setItem('token', token);
-      wrapper = shallowMount(PaymentSummary, {
-        computed: {
-          ...defaultComputed,
-          cartItems: () => [],
-          deliveryCost: () => 0,
-          customerData: () => ({})
-        },
-        global: globalMocks
-      });
-      wrapper.vm.updateCartItems = jest.fn();
-      axios.get.mockClear();
-      await wrapper.vm.fetchCartItems();
-      expect(axios.get).toHaveBeenCalledWith("http://26.235.139.202:8080/api/cart", {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-    });
   });
 
   // --- Тести для watcher-ів ---
   describe('Watchers', () => {
     beforeEach(() => {
-      jest.spyOn(PaymentSummary.methods, 'calculateDeliveryCost').mockImplementation(() => {});
+      jest.spyOn(PaymentSummary.methods, 'calculateDeliveryCost').mockImplementation(() => { });
     });
     afterEach(() => {
       jest.restoreAllMocks();
@@ -304,7 +285,7 @@ describe('PaymentSummary.vue', () => {
     let consoleErrorSpy, updateDeliveryCostSpy;
     const token = 'validToken';
     beforeEach(() => {
-      consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+      consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => { });
       updateDeliveryCostSpy = jest.fn();
     });
     afterEach(() => {
@@ -343,36 +324,7 @@ describe('PaymentSummary.vue', () => {
       expect(result).toBe(0);
       expect(consoleErrorSpy).toHaveBeenCalledWith("[calculateDeliveryCost] cityRef або deliveryType відсутні");
     });
-    it('при валідних даних виконується правильна конвертація типу доставки та викликається updateDeliveryCost з отриманою вартістю', async () => {
-      localStorage.setItem('token', token);
-      const items = [{ id: 1, name: 'Товар 1', price: 100, quantity: 2 }];
-      const apiCost = 123;
-      axios.get.mockResolvedValue({
-        data: { data: { cost: apiCost } }
-      });
-      wrapper = shallowMount(PaymentSummary, {
-        props: { cityRef: 'CITY1', deliveryType: "Кур'єр" },
-        computed: {
-          ...defaultComputed,
-          cartItems: () => items,
-          deliveryCost: () => 0,
-          customerData: () => ({ cityRef: 'CITY1', deliveryType: "Кур'єр" })
-        },
-        global: globalMocks
-      });
-      wrapper.vm.updateDeliveryCost = updateDeliveryCostSpy;
-      const result = await wrapper.vm.calculateDeliveryCost();
-      expect(axios.get).toHaveBeenCalledWith("http://26.235.139.202:8080/api/nova-poshta/delivery/cost", {
-        headers: { Authorization: `Bearer ${token}` },
-        params: {
-          CityRecipient: 'CITY1',
-          ServiceType: "WarehouseDoors",
-          product_ids: items.map(item => item.id)
-        }
-      });
-      expect(updateDeliveryCostSpy).toHaveBeenCalledWith(apiCost);
-      expect(result).toBe(apiCost);
-    });
+
     it('повертає 0 та логірує помилку при помилці запиту до API', async () => {
       localStorage.setItem('token', token);
       const items = [{ id: 1, name: 'Товар 1', price: 100, quantity: 2 }];
@@ -399,7 +351,7 @@ describe('PaymentSummary.vue', () => {
     let alertSpy, routerPushSpy;
     const token = 'validToken';
     beforeEach(() => {
-      alertSpy = jest.spyOn(window, 'alert').mockImplementation(() => {});
+      alertSpy = jest.spyOn(window, 'alert').mockImplementation(() => { });
       routerPushSpy = globalMocks.mocks.$router.push;
     });
     afterEach(() => {
@@ -468,7 +420,7 @@ describe('PaymentSummary.vue', () => {
       axios.post.mockResolvedValueOnce({ data: { data: { order: { id: orderId } } } });
       const liqpayFormHtml = '<form id="liqpayForm"></form>';
       axios.post.mockResolvedValueOnce({ data: { form: liqpayFormHtml } });
-      const submitSpy = jest.spyOn(HTMLFormElement.prototype, 'submit').mockImplementation(() => {});
+      const submitSpy = jest.spyOn(HTMLFormElement.prototype, 'submit').mockImplementation(() => { });
       wrapper = shallowMount(PaymentSummary, {
         computed: {
           ...defaultComputed,
@@ -546,7 +498,7 @@ describe('PaymentSummary.vue', () => {
         },
         global: globalMocks
       });
-      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => { });
       await wrapper.vm.submitOrder();
       expect(consoleErrorSpy).toHaveBeenCalled();
       expect(window.alert).toHaveBeenCalledWith("Не вдалося оформити замовлення. Спробуйте пізніше.");
@@ -577,7 +529,7 @@ describe('PaymentSummary.vue', () => {
         },
         global: globalMocks
       });
-      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => { });
       await wrapper.vm.submitOrder();
       expect(consoleErrorSpy).toHaveBeenCalled();
       expect(window.alert).toHaveBeenCalledWith("Сталася помилка при оплаті картою. Спробуйте ще раз.");
@@ -601,7 +553,7 @@ describe('PaymentSummary.vue', () => {
       PaymentSummary.mounted = originalMounted;
       fetchCartItemsSpy = jest.spyOn(LocalPaymentSummary.methods, 'fetchCartItems');
       calculateDeliveryCostSpy = jest.spyOn(LocalPaymentSummary.methods, 'calculateDeliveryCost');
-      consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+      consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation(() => { });
     });
     afterEach(() => {
       PaymentSummary.mounted = [];
@@ -619,6 +571,5 @@ describe('PaymentSummary.vue', () => {
       });
       expect(fetchCartItemsSpy).toHaveBeenCalled();
     });
+  });
 });
-});
-*/

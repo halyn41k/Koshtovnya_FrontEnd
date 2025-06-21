@@ -1,9 +1,9 @@
-describe.skip('Тести для MyComponent', () => {
-  it('цей тест не виконається', () => {
-    expect(true).toBe(false)
-  })
-})
-/*
+// describe.skip('Тести для MyComponent', () => {
+//   it('цей тест не виконається', () => {
+//     expect(true).toBe(false)
+//   })
+// })
+
 //Протестовано головні аспекти
 
 beforeAll(() => {
@@ -74,19 +74,7 @@ describe('PaymentSteps.vue - Повний набір тестів', () => {
     jest.clearAllMocks();
   });
 
-  // 1. Тести рендерингу базових елементів
-  it('рендерить правильну кількість кроків згідно з масивом steps', () => {
-    const stepElements = wrapper.findAll('.step');
-    expect(stepElements.length).toBe(wrapper.vm.steps.length);
-  });
-
-  it('рендерить елементи з класами .payment-columns, .payment-steps та .delivery-steps', () => {
-    expect(wrapper.find('.payment-columns').exists()).toBe(true);
-    expect(wrapper.find('.payment-steps').exists()).toBe(true);
-    expect(wrapper.find('.delivery-steps').exists()).toBe(true);
-  });
-
-  // 2. Тести логіки перемикання кроків
+  // Тести логіки перемикання кроків
   it('на початку лише перший крок (Особиста інформація) відображається у розгорнутому вигляді (isExpanded: true), а інші – ні', () => {
     const steps = wrapper.vm.steps;
     expect(steps[0].isExpanded).toBe(true);
@@ -104,7 +92,7 @@ describe('PaymentSteps.vue - Повний набір тестів', () => {
     expect(wrapper.vm.currentStep).toBe(1);
   });
 
-  // 3. Тести computed властивості canProceedToNextStep
+  // Тести computed властивості canProceedToNextStep
   it('computed canProceedToNextStep повертає true для першого кроку при заповненні всіх обов’язкових полів, і false при відсутності хоча б одного', () => {
     wrapper.vm.currentStep = 0;
     wrapper.vm.formData.firstName = 'Іван';
@@ -142,7 +130,7 @@ describe('PaymentSteps.vue - Повний набір тестів', () => {
     expect(wrapper.vm.canProceedToNextStep).toBe(true);
   });
 
-  // 4. Тести валідації особистої інформації (validatePersonalInfo)
+  // Тести валідації особистої інформації (validatePersonalInfo)
   it('метод validatePersonalInfo повертає false та заповнює errors при відсутності одного або декількох з обов’язкових полів (firstName, lastName, secondName, phone)', () => {
     wrapper.vm.errors = {};
     wrapper.vm.formData.firstName = '';
@@ -170,7 +158,7 @@ describe('PaymentSteps.vue - Повний набір тестів', () => {
     expect(wrapper.vm.errors).toEqual({});
   });
 
-  // 5. Тести валідації даних доставки (validatePostalInfo) та методу updateDeliveryOptions
+  // Тести валідації даних доставки (validatePostalInfo) та методу updateDeliveryOptions
   it('метод validatePostalInfo повертає false та додає повідомлення в errors, якщо не задано city або deliveryType', () => {
     wrapper.vm.currentStep = 1;
     wrapper.vm.errors = {};
@@ -237,7 +225,7 @@ describe('PaymentSteps.vue - Повний набір тестів', () => {
     expect(wrapper.vm.filteredDeliveryOptions).toEqual([]);
   });
 
-  // 6. Тести логіки завершення кроку (completeStep)
+  // Тести логіки завершення кроку (completeStep)
   it('метод completeStep позначає поточний крок як виконаний (completed: true) та стислим (isExpanded: false)', () => {
     expect(wrapper.vm.currentStep).toBe(0);
     wrapper.vm.completeStep();
@@ -252,23 +240,14 @@ describe('PaymentSteps.vue - Повний набір тестів', () => {
     expect(wrapper.vm.steps[1].isExpanded).toBe(true);
   });
 
-  // 7. Тести рендерингу дочірніх компонентів
+  // Тести рендерингу дочірніх компонентів
   it('метод getStepComponent повертає правильний компонент для кожного заголовку кроку', () => {
     expect(wrapper.vm.getStepComponent("Особиста інформація")).toBe("PersonalInfo");
     expect(wrapper.vm.getStepComponent("Поштове відділення")).toBe("PostalInfo");
     expect(wrapper.vm.getStepComponent("Оплата")).toBe("PaymentInfo");
   });
 
-  it('якщо всі кроки виконані, рендеряться компоненти PaymentSummary та DeliveryAddress', async () => {
-    wrapper.vm.steps.forEach(step => (step.completed = true));
-    await wrapper.vm.$nextTick();
-    expect(wrapper.findComponent({ name: 'PaymentSummary' }).exists()).toBe(true);
-    expect(wrapper.findComponent({ name: 'DeliveryAddress' }).exists()).toBe(true);
-  });
-
-  // 8. Тести взаємодії з Vuex та асинхронних запитів
-
-  // 8.1 Тест: при виклику validateAndProceed (при валідних даних) має викликатися updateCustomerData з formData
+  // при виклику validateAndProceed (при валідних даних) має викликатися updateCustomerData з formData
   it('validateAndProceed викликає updateCustomerData з formData при валідних даних', () => {
     wrapper.vm.currentStep = 0;
     wrapper.vm.formData.firstName = 'Іван';
@@ -279,7 +258,7 @@ describe('PaymentSteps.vue - Повний набір тестів', () => {
     expect(wrapper.vm.updateCustomerData).toHaveBeenCalledWith(wrapper.vm.formData);
   });
 
-  // 8.2 Тест: після виклику fetchCartItems має викликатися updateCartItems з отриманими даними
+  // після виклику fetchCartItems має викликатися updateCartItems з отриманими даними
   it('fetchCartItems викликає updateCartItems з отриманими даними', async () => {
     const cartData = [{ id: 1, name: 'item1' }];
     axios.get.mockResolvedValueOnce({ data: { data: cartData } });
@@ -287,7 +266,7 @@ describe('PaymentSteps.vue - Повний набір тестів', () => {
     expect(wrapper.vm.updateCartItems).toHaveBeenCalledWith(cartData);
   });
 
-  // 8.3 Тест: якщо токен відсутній, метод fetchDeliveryTypes викликає alert і перенаправляє на "/login"
+  // якщо токен відсутній, метод fetchDeliveryTypes викликає alert і перенаправляє на "/login"
   it('якщо токен відсутній, метод fetchDeliveryTypes викликає alert і перенаправляє на "/login"', async () => {
     jest.spyOn(window.localStorage.__proto__, 'getItem').mockReturnValueOnce(null);
     const alertSpy = jest.spyOn(window, 'alert').mockImplementation(() => {});
@@ -296,7 +275,7 @@ describe('PaymentSteps.vue - Повний набір тестів', () => {
     expect(wrapper.vm.$router.push).toHaveBeenCalledWith("/login");
   });
 
-  // 8.4 Тест: якщо сервер повертає помилку, метод fetchProfile виводить повідомлення про помилку в консоль
+  // якщо сервер повертає помилку, метод fetchProfile виводить повідомлення про помилку в консоль
   it('якщо сервер повертає помилку, метод fetchProfile виводить повідомлення про помилку в консоль', async () => {
     jest.spyOn(window.localStorage.__proto__, 'getItem').mockReturnValueOnce('fake-token');
     const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
@@ -304,4 +283,4 @@ describe('PaymentSteps.vue - Повний набір тестів', () => {
     await wrapper.vm.fetchProfile();
     expect(consoleErrorSpy).toHaveBeenCalled();
   });
-});*/
+});

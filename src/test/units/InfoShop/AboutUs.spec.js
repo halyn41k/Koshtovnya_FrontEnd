@@ -1,11 +1,16 @@
-describe.skip('Тести для MyComponent', () => {
-  it('цей тест не виконається', () => {
-    expect(true).toBe(false)
-  })
-})
-/*
+// describe.skip('Тести для MyComponent', () => {
+//   it('цей тест не виконається', () => {
+//     expect(true).toBe(false)
+//   })
+// })
+
 //Протестовано головні аспекти
 
+beforeEach(() => {
+  jest.spyOn(console, 'warn').mockImplementation(() => {});
+  jest.spyOn(console, 'error').mockImplementation(() => {});
+  jest.spyOn(console, 'log').mockImplementation(() => {});
+});
 
 import { shallowMount } from '@vue/test-utils';
 import AboutUs from '@/components/InfoShop/AboutUs.vue';
@@ -13,228 +18,108 @@ import AboutUs from '@/components/InfoShop/AboutUs.vue';
 describe('AboutUs.vue', () => {
   let wrapper;
 
-  // Мокаємо IntersectionObserver, window.alert та console.log
-  beforeAll(() => {
-    global.IntersectionObserver = jest.fn(() => ({
-      observe: jest.fn(),
-      unobserve: jest.fn(),
-      disconnect: jest.fn(),
-    }));
-    window.alert = jest.fn();
-    jest.spyOn(console, 'log').mockImplementation(() => {});
-  });
-
   beforeEach(() => {
-    // Перед монтуванням компонента додаємо глобальний мок для $t
-    wrapper = shallowMount(AboutUs, {
-      global: {
-        mocks: {
-          $t: (msg) => msg, // повертаємо ключ перекладу як значення
-        },
-      },
-    });
-    jest.spyOn(console, 'error').mockImplementation(() => {});
-    jest.spyOn(console, 'log').mockImplementation(() => {});
+    // Простий мок IntersectionObserver
+    global.IntersectionObserver = class {
+      constructor(cb) { this.cb = cb; }
+      observe() {}
+      unobserve() {}
+      disconnect() {}
+    };
+    window.alert = jest.fn();
+    wrapper = shallowMount(AboutUs);
   });
 
   afterEach(() => {
-    if (wrapper && wrapper.unmount) {
-      wrapper.unmount();
-    }
+    wrapper.unmount();
     jest.clearAllMocks();
   });
 
-  it('повинен встановлювати document.title як "Про нас" після монтування', () => {
-    expect(document.title).toBe("Про нас");
+  it('рендерить заголовок "Наша історія"', () => {
+    const header = wrapper.find('h2.text-3xl');
+    expect(header.exists()).toBe(true);
+    expect(header.text()).toBe('Наша історія');
   });
 
-  it('повинен відображати головний заголовок', () => {
-    const mainTitle = wrapper.find('.section-title-container .main-title');
-    expect(mainTitle.exists()).toBe(true);
-    // Згідно з новою розміткою: заголовок містить текст з історією заснування "Коштовня
-    expect(mainTitle.text()).toBe('Історія заснування "Коштовня');
-  });
-
-  it('повинен відображати заголовок FAQ секції', () => {
-    const faqTitle = wrapper.find('.faq-title');
-    expect(faqTitle.exists()).toBe(true);
-    expect(faqTitle.text()).toContain('Часті запитання');
-  });
-
-  it('повинен відображати три FAQ елементи', () => {
-    const faqItems = wrapper.findAll('.faq-item');
-    expect(faqItems.length).toBe(3);
-  });
-
-  it('повинен розгортати відповідь FAQ при натисканні', async () => {
-    const faqButtons = wrapper.findAll('.faq-question');
-    // Спочатку перевіримо, що відповіді немає (залежно від розмітки FAQ-відповідь рендериться умовно)
-    expect(wrapper.find('.faq-answer').exists()).toBe(false);
-    
-    // Натискаємо першу кнопку FAQ
-    await faqButtons.at(0).trigger('click');
-    expect(wrapper.vm.faqOpen[0]).toBe(true);
-    
-    const faqAnswer = wrapper.find('.faq-answer');
-    expect(faqAnswer.exists()).toBe(true);
-    expect(faqAnswer.text()).toContain('Дорожчий бісер часто відрізняється якістю');
-  });
-
-  it('повинен очищувати форму після успішного сабміту', async () => {
-    const emailInput = wrapper.find('#email');
-    const messageInput = wrapper.find('#message');
-
-    await emailInput.setValue('test@example.com');
-    await messageInput.setValue('Це тестове повідомлення, яке містить достатньо символів.');
-
-    expect(wrapper.vm.form.email).toBe('test@example.com');
-    expect(wrapper.vm.form.message).toBe('Це тестове повідомлення, яке містить достатньо символів.');
-
-    await wrapper.find('form').trigger('submit.prevent');
-
-    expect(wrapper.vm.form.email).toBe('');
-    expect(wrapper.vm.form.message).toBe('');
-    expect(window.alert).toHaveBeenCalledWith(
-      'Дякуємо за ваше повідомлення! Ми зв’яжемося з вами найближчим часом.'
-    );
-  });
-
-  it('повинен показувати повідомлення про помилку, якщо повідомлення коротше 10 символів', async () => {
-    const emailInput = wrapper.find('#email');
-    const messageInput = wrapper.find('#message');
-
-    await emailInput.setValue('test@example.com');
-    await messageInput.setValue('Коротке');
-
-    await wrapper.find('form').trigger('submit.prevent');
-
+  it('Contact Form: валідація довжини повідомлення', async () => {
+    wrapper.vm.form.email = 'a@b.com';
+    wrapper.vm.form.message = 'short';
+    wrapper.vm.handleSubmit();
     expect(wrapper.vm.errorMessage).toBe('Повідомлення має містити від 10 до 200 символів.');
+    expect(window.alert).not.toHaveBeenCalled();
   });
 
-  it('повинен показувати помилку при сабміті форми з некоректною електронною поштою', async () => {
-    const emailInput = wrapper.find('#email');
-    const messageInput = wrapper.find('#message');
-
-    await emailInput.setValue('vitalii');
-    await messageInput.setValue('Це тестове повідомлення, яке містить достатньо символів.');
-
-    await wrapper.find('form').trigger('submit.prevent');
-
-    // При некоректній валідації email (якщо браузер нативно блокує сабміт), очікуємо, що значення очищаються
+  it('Contact Form: успішний сабміт очищає форму і викликає alert', async () => {
+    wrapper.vm.form.email = 'user@example.com';
+    wrapper.vm.form.message = 'This is a valid message long enough.';
+    wrapper.vm.handleSubmit();
+    expect(wrapper.vm.errorMessage).toBe('');
     expect(wrapper.vm.form.email).toBe('');
     expect(wrapper.vm.form.message).toBe('');
+    expect(window.alert).toHaveBeenCalledWith('Дякуємо за ваше повідомлення!');
   });
 
-  it('повинен приймати електронні адреси з доменами, що містять крапку', async () => {
-    const emailInput = wrapper.find('#email');
-    const messageInput = wrapper.find('#message');
-
-    await emailInput.setValue('example.name@mail.co.uk');
-    await messageInput.setValue('Це тестове повідомлення, яке містить достатньо символів.');
-
-    await wrapper.find('form').trigger('submit.prevent');
-
-    expect(window.alert).toHaveBeenCalledWith(
-      'Дякуємо за ваше повідомлення! Ми зв’яжемося з вами найближчим часом.'
-    );
-    expect(wrapper.vm.form.email).toBe('');
-    expect(wrapper.vm.form.message).toBe('');
-  });
-
-  it('змінює колір кнопки "Надіслати" при наведенні', async () => {
-    const submitButton = wrapper.find('.form-submit');
-
-    jest.spyOn(window, 'getComputedStyle').mockImplementation((element) => {
-      if (element === submitButton.element) {
-        return { backgroundColor: 'rgb(142, 14, 14)' };
-      }
-      return {};
-    });
-
-    await submitButton.trigger('mouseenter');
-    expect(getComputedStyle(submitButton.element).backgroundColor).toBe('rgb(142, 14, 14)');
-
-    jest.restoreAllMocks();
-  });
-
-  it('змінює стиль поля введення email при фокусуванні', async () => {
-    const emailInput = wrapper.find('#email');
-
-    jest.spyOn(window, 'getComputedStyle').mockImplementation((element) => {
-      if (element === emailInput.element) {
-        return { borderWidth: '2px', borderColor: 'rgb(99, 2, 2)' };
-      }
-      return {};
-    });
-
-    await emailInput.trigger('focus');
-    expect(getComputedStyle(emailInput.element).borderWidth).toBe('2px');
-    expect(getComputedStyle(emailInput.element).borderColor).toBe('rgb(99, 2, 2)');
-
-    jest.restoreAllMocks();
-  });
-
-  it('змінює стиль поля введення message при фокусуванні', async () => {
-    const messageInput = wrapper.find('#message');
-
-    jest.spyOn(window, 'getComputedStyle').mockImplementation((element) => {
-      if (element === messageInput.element) {
-        return { borderWidth: '2px', borderColor: 'rgb(99, 2, 2)' };
-      }
-      return {};
-    });
-
-    await messageInput.trigger('focus');
-    expect(getComputedStyle(messageInput.element).borderWidth).toBe('2px');
-    expect(getComputedStyle(messageInput.element).borderColor).toBe('rgb(99, 2, 2)');
-
-    jest.restoreAllMocks();
-  });
-
-  // Тести для IntersectionObserver
-  it('повинен додавати клас "show" елементам після перетину з областю видимості', async () => {
-    // Створюємо тестовий елемент та додаємо його в документ
-    const testElement = document.createElement('div');
-    testElement.classList.add('fade-in');
-    document.body.appendChild(testElement);
-
-    // Викликаємо метод observeElements
-    wrapper.vm.observeElements();
-    // Отримуємо callback з першого виклику IntersectionObserver
-    const observerCallback = global.IntersectionObserver.mock.calls[0][0];
-
-    // Симулюємо, що елемент потрапив у viewport
-    observerCallback([{ target: testElement, isIntersecting: true }]);
-    expect(testElement.classList.contains('show')).toBe(true);
-
-    document.body.removeChild(testElement);
-  });
-
-  it('повинен викликати метод disconnect IntersectionObserver', () => {
-    const disconnectMock = jest.fn();
-    const observerMock = {
-      observe: jest.fn(),
-      unobserve: jest.fn(),
-      disconnect: disconnectMock,
-    };
-    global.IntersectionObserver = jest.fn(() => observerMock);
-
-    wrapper.vm.observeElements();
-    observerMock.disconnect();
-    expect(disconnectMock).toHaveBeenCalled();
-  });
-
-  // FAQ: перевірка початкового стану та перемикання
-  it('повинен мати всі FAQ відповіді закритими за замовчуванням', () => {
-    expect(wrapper.vm.faqOpen).toEqual([false, false, false]);
-  });
-
-  it('повинен закривати/відкривати FAQ відповідь при повторному натисканні', async () => {
-    const faqButtons = wrapper.findAll('.faq-question');
-    await faqButtons.at(0).trigger('click');
-    expect(wrapper.vm.faqOpen[0]).toBe(true);
-    await faqButtons.at(0).trigger('click');
-    expect(wrapper.vm.faqOpen[0]).toBe(false);
-  });
+it('має контейнер з класом .parallax-bg і ref="parallaxBg"', () => {
+  const bg = wrapper.find('.parallax-bg');
+  expect(bg.exists()).toBe(true);
+  expect(wrapper.vm.parallaxBg).not.toBeNull();
 });
-*/
+
+it('елементи з директивою v-fade спочатку мають opacity-0 та translate-y-10', () => {
+  const fadeEls = wrapper.findAll('.opacity-0.translate-y-10');
+  // повинно бути мінімум 4 елементи: заголовок, кожен timeline item, FAQ секція, Contact секція
+  expect(fadeEls.length).toBeGreaterThanOrEqual(4);
+});
+
+it('поля форми мають required і відповідні атрибути type/placeholder', () => {
+  const email = wrapper.find('input#email');
+  expect(email.attributes('required')).toBeDefined();
+  expect(email.attributes('type')).toBe('email');
+  expect(email.attributes('placeholder')).toBe('Ваша електронна адреса');
+
+  const textarea = wrapper.find('textarea#message');
+  expect(textarea.attributes('required')).toBeDefined();
+  expect(textarea.attributes('placeholder')).toBe('Ваше повідомлення');
+});
+
+it('toggleFAQ повертає правильне значення faqOpen після кількох викликів', () => {
+  wrapper.vm.toggleFAQ(0);
+  expect(wrapper.vm.faqOpen[0]).toBe(true);
+  wrapper.vm.toggleFAQ(0);
+  expect(wrapper.vm.faqOpen[0]).toBe(false);
+});
+
+it('handleSubmit для надто довгого повідомлення (>200 символів) показує помилку', () => {
+  wrapper.vm.form.email = 'test@test.com';
+  wrapper.vm.form.message = 'a'.repeat(201);
+  wrapper.vm.handleSubmit();
+  expect(wrapper.vm.errorMessage).toBe('Повідомлення має містити від 10 до 200 символів.');
+});
+
+it('натискання кнопки "Надіслати" викликає handleSubmit', async () => {
+  const btn = wrapper.find('button[type="submit"]');
+  const spy = jest.spyOn(wrapper.vm, 'handleSubmit');
+  await btn.trigger('submit.prevent');
+  expect(spy).toHaveBeenCalled();
+});
+
+it('submit кнопка має класи transition-colors і duration-300', () => {
+  const btn = wrapper.find('button[type="submit"]');
+  expect(btn.classes()).toEqual(expect.arrayContaining(['transition-colors', 'duration-300']));
+});
+
+it('після успішного submit errorMessage повертається в порожній рядок', () => {
+  wrapper.vm.form.email = 'a@b.com';
+  wrapper.vm.form.message = 'Valid message.';
+  wrapper.vm.handleSubmit();
+  expect(wrapper.vm.errorMessage).toBe('');
+});
+
+it('FAQ секція має фон #faf4f4 та клас rounded-lg', () => {
+  const faqSection = wrapper.findAll('section').at(1);
+  expect(faqSection.classes()).toContain('rounded-lg');
+  // перевіримо в inline-класі bg color
+  expect(faqSection.attributes('class')).toContain('bg-[#faf4f4]');
+});
+
+});

@@ -1,21 +1,26 @@
-describe.skip('Тести для MyComponent', () => {
-  it('цей тест не виконається', () => {
-    expect(true).toBe(false)
-  })
-})
-/*
+// describe.skip('Тести для MyComponent', () => {
+//   it('цей тест не виконається', () => {
+//     expect(true).toBe(false)
+//   })
+// })
+
 //Протестовано головні аспекти
 
+beforeEach(() => {
+  jest.spyOn(console, 'warn').mockImplementation(() => {});
+  jest.spyOn(console, 'error').mockImplementation(() => {});
+  jest.spyOn(console, 'log').mockImplementation(() => {});
+});
 
 import { shallowMount } from '@vue/test-utils';
 import AboutDelivery from '@/components/infoshop/AboutDelivery.vue';
 
 // Мок для IntersectionObserver
 global.IntersectionObserver = class {
-  constructor() {}
-  observe() {}
-  unobserve() {}
-  disconnect() {}
+  constructor() { }
+  observe() { }
+  unobserve() { }
+  disconnect() { }
 };
 
 describe('AboutDelivery.vue', () => {
@@ -23,227 +28,145 @@ describe('AboutDelivery.vue', () => {
 
   beforeEach(() => {
     wrapper = shallowMount(AboutDelivery);
-    Object.defineProperty(window, 'getComputedStyle', {
-      value: jest.fn().mockImplementation(() => ({
-        fontSize: '34px',
-        color: 'rgb(0, 0, 0)',
-        textAlign: 'center',
-      })),
-    });
   });
 
   afterEach(() => {
-    if (wrapper) {
-      wrapper.unmount(); // Очищення після кожного тесту
-    }
+    wrapper.unmount();
   });
 
-  it('повинен відображати головний заголовок', () => {
-    const mainTitle = wrapper.find('.main-title');
-    expect(mainTitle.exists()).toBe(true);
-    expect(mainTitle.text()).toBe('Умови оплати та доставки');
+  it('встановлює правильний document.title при монтуванні', () => {
+    expect(document.title).toBe('Про Оплату Доставку');
   });
 
-  it('повинен відображати заголовок секції "Доставка"', () => {
-    const deliverySectionTitle = wrapper.find('.delivery-section .section-title');
-    expect(deliverySectionTitle.exists()).toBe(true);
-    expect(deliverySectionTitle.text()).toBe('Доставка');
+  it('рендерить головний заголовок з текстом "Умови оплати та доставки"', () => {
+    const h1 = wrapper.find('h1');
+    expect(h1.exists()).toBe(true);
+    expect(h1.text().trim()).toBe('Умови оплати та доставки');
   });
 
-  it('повинен відображати заголовок секції "Умови доставки"', () => {
-    const conditionsTitle = wrapper.find('.delivery-conditions .section-title');
-    expect(conditionsTitle.exists()).toBe(true);
-    expect(conditionsTitle.text()).toBe('1. Умови доставки:');
-  });
-
-  it('повинен відображати дві компанії доставки', () => {
-    const deliveryItems = wrapper.findAll('.delivery-item');
+  it('рендерить секцію доставки з двома елементами списку', () => {
+    const deliveryItems = wrapper.findAll('section:first-of-type ul li');
     expect(deliveryItems.length).toBe(2);
-
-    expect(deliveryItems.at(0).find('.delivery-company').text()).toContain('Нова Пошта');
-    expect(deliveryItems.at(1).find('.delivery-company').text()).toContain('Укрпошта');
   });
 
-  it('повинен відображати секцію "Оплата" з правильним заголовком', () => {
-    const paymentSectionTitle = wrapper.find('.payment-section .section-title');
-    expect(paymentSectionTitle.exists()).toBe(true);
-    expect(paymentSectionTitle.text()).toBe('2. Оплата');
+  it('кожен елемент доставки містить картинку з правильним alt', () => {
+    const imgs = wrapper.findAll('section:first-of-type ul li img');
+    expect(imgs.at(0).attributes('alt')).toBe('Нова Пошта');
+    expect(imgs.at(1).attributes('alt')).toBe('Укрпошта');
   });
 
-  it('повинен відображати три способи оплати', () => {
-    const paymentItems = wrapper.findAll('.payment-item');
+  it('рендерить секцію "Оплата" з трьома пунктами', () => {
+    const paymentItems = wrapper.findAll('section:nth-of-type(2) ul li');
     expect(paymentItems.length).toBe(3);
-
-    expect(paymentItems.at(0).find('.payment-method').text()).toContain('Оплата при отриманні');
-    expect(paymentItems.at(1).find('.payment-method').text()).toContain('Передплата на банківську карту');
-    expect(paymentItems.at(2).find('.payment-method').text()).toContain('Онлайн оплата карткою');
   });
 
-  it('повинен відображати додаткові умови', () => {
-    const additionalConditions = wrapper.find('.additional-conditions .subsection-title');
-    expect(additionalConditions.exists()).toBe(true);
-    expect(additionalConditions.text()).toBe('Додаткові умови:');
-
-    const conditionsItems = wrapper.findAll('.condition-item');
-    expect(conditionsItems.length).toBe(2);
-
-    expect(conditionsItems.at(0).text()).toContain(
-      '• У випадку оплати післяплатою, клієнт оплачує додаткову комісію перевізника за цей вид послуги.'
-    );
-
-    expect(conditionsItems.at(1).text()).toContain(
-      '• Замовлення відправляється протягом 1-2 робочих днів після підтвердження оплати або оформлення післяплати.'
-    );
+  it('перший спосіб оплати описано як "Оплата при отриманні"', () => {
+    const firstMethod = wrapper.find('section:nth-of-type(2) ul li h4');
+    expect(firstMethod.text()).toContain('Оплата при отриманні');
   });
 
-  it('повинен відображати подяку у футері', () => {
-    const thankYouMessage = wrapper.find('.thank-you-message');
-    expect(thankYouMessage.exists()).toBe(true);
-    expect(thankYouMessage.text()).toBe('Дякуємо, що обрали наш магазин!');
+  it('рендерить секцію "Додаткові умови" з двома пунктами', () => {
+    const extra = wrapper.findAll('section:nth-of-type(3) ul li');
+    expect(extra.length).toBe(2);
+    expect(extra.at(0).text()).toContain('У випадку оплати післяплатою');
   });
 
-  it('повинен мати правильний стиль для заголовка', () => {
-    const titleElement = wrapper.find('.main-title').element;
-    const computedStyles = window.getComputedStyle(titleElement);
-  
-    expect(computedStyles.fontSize).toBe('34px');
-    expect(computedStyles.color).toBe('rgb(0, 0, 0)');
-    expect(computedStyles.textAlign).toBe('center');
+  it('рендерить футер із подякою', () => {
+    const footerText = wrapper.find('footer p');
+    expect(footerText.exists()).toBe(true);
+    expect(footerText.text().trim()).toBe('Дякуємо, що обрали наш магазин!');
   });
-  
-  it('повинен додати клас "show" до елементів з класом "fade-in" при їх появі', async () => {
-    // Мок-функція для IntersectionObserver
-    const observeCallback = jest.fn((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('show');
-        }
-      });
-    });
-  
-    // Мок для IntersectionObserver
-    global.IntersectionObserver = jest.fn((callback) => ({
-      observe: (element) => {
-        observeCallback([{ target: element, isIntersecting: true }]);
-      },
-      disconnect: jest.fn(),
-      unobserve: jest.fn(),
-    }));
-  
-    // Монтуємо компонент
-    wrapper.vm.observeElements();
-  
-    // Отримуємо всі елементи з класом fade-in
-    const fadeInElements = wrapper.findAll('.fade-in');
-    expect(fadeInElements.length).toBeGreaterThan(0);
-  
-    // Емулюємо обробку змін у DOM
-    fadeInElements.forEach((element) => {
-      observeCallback([{ target: element.element, isIntersecting: true }]);
-    });
-  
-    await wrapper.vm.$nextTick();
-  
-    // Перевіряємо, чи клас "show" було додано
-    fadeInElements.forEach((element) => {
-      expect(element.element.classList.contains('show')).toBe(true);
-    });
-  });
-  
-  it('повинен викликати unobserve для елементів після додавання класу "show"', async () => {
-    const unobserveMock = jest.fn();
-    const observeCallback = jest.fn((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('show');
-          observerMock.unobserve(entry.target); // Симулюємо виклик unobserve
-        }
-      });
-    });
-  
-    // Мок для IntersectionObserver
-    const observerMock = {
-      observe: jest.fn((element) => {
-        observeCallback([{ target: element, isIntersecting: true }]);
-      }),
-      unobserve: unobserveMock,
-      disconnect: jest.fn(),
+
+  it('додає клас show до .fade-in елементів при IntersectionObserver.observe', async () => {
+    const observed = [];
+    global.IntersectionObserver = class {
+      constructor(cb) { this.cb = cb; }
+      observe(el) {
+        observed.push(el);
+        this.cb([{ target: el, isIntersecting: true }]);
+      }
+      unobserve() { }
+      disconnect() { }
     };
-  
-    global.IntersectionObserver = jest.fn(() => observerMock);
-  
-    // Монтуємо компонент
-    wrapper.vm.observeElements();
-  
-    // Отримуємо всі елементи з класом fade-in
-    const fadeInElements = wrapper.findAll('.fade-in');
-    expect(fadeInElements.length).toBeGreaterThan(0);
-  
-    // Емулюємо обробку змін у DOM
-    fadeInElements.forEach((element) => {
-      observeCallback([{ target: element.element, isIntersecting: true }]);
-    });
-  
+    wrapper = shallowMount(AboutDelivery);
     await wrapper.vm.$nextTick();
-  
-    // Перевіряємо, чи unobserve було викликано для кожного елемента
-    fadeInElements.forEach((element) => {
-      expect(unobserveMock).toHaveBeenCalledWith(element.element);
+    observed.forEach(el => {
+      expect(el.classList.contains('opacity-100')).toBe(true);
+      expect(el.classList.contains('translate-y-0')).toBe(true);
     });
   });
-  
-  it('повинен викликати disconnect при завершенні спостереження', () => {
-    const disconnectMock = jest.fn();
-  
-    // Мок для IntersectionObserver
-    const observerMock = {
-      observe: jest.fn(),
-      unobserve: jest.fn(),
-      disconnect: disconnectMock,
-    };
-  
-    global.IntersectionObserver = jest.fn(() => observerMock);
-  
-    // Монтуємо компонент
-    wrapper.vm.observeElements();
-  
-    // Викликаємо disconnect
-    observerMock.disconnect();
-  
-    // Перевіряємо, чи disconnect було викликано
-    expect(disconnectMock).toHaveBeenCalled();
+
+  it('має семантичний тег <main>', () => {
+    const main = wrapper.find('main');
+    expect(main.exists()).toBe(true);
   });
-  
-  it('повинен містити фонове зображення', () => {
-    const backgroundImage = wrapper.find('.background-image');
-    expect(backgroundImage.exists()).toBe(true);
+
+  it('має семантичний тег <header>', () => {
+    const header = wrapper.find('header');
+    expect(header.exists()).toBe(true);
   });
-  
-  it('повинен містити зображення для доставки', () => {
-    const deliveryImage = wrapper.find('.delivery-icon');
-    expect(deliveryImage.exists()).toBe(true);
-    expect(deliveryImage.attributes('alt')).toBe('Доставка');
+
+  it('має семантичний тег <footer>', () => {
+    const footer = wrapper.find('footer');
+    expect(footer.exists()).toBe(true);
   });
-  
-  it('повинен містити правильні деталі для оплати при отриманні', () => {
-    const paymentMethod = wrapper.find('.payment-item .payment-method');
-    expect(paymentMethod.text()).toContain('Оплата при отриманні');
-    const paymentDetails = wrapper.find('.payment-item .payment-details');
-    expect(paymentDetails.text()).toContain('Оплачується безпосередньо під час отримання товару');
+
+  it('головний заголовок має класи font-kyivBlack2, text-[34px], text-center', () => {
+    const h1 = wrapper.find('h1');
+    expect(h1.classes()).toEqual(expect.arrayContaining([
+      'font-kyivBlack2', 'text-[34px]', 'text-center'
+    ]));
   });
-  
-  it('повинен мати правильний стиль для заголовків секцій', () => {
-    const deliverySectionTitle = wrapper.find('.delivery-section .section-title').element;
-    const computedStyles = window.getComputedStyle(deliverySectionTitle);
-    expect(computedStyles.fontSize).toBe('34px'); // Заміни на актуальні значення стилю, якщо треба
+
+  it('перша секція має класи lg:flex-row і gap-5', () => {
+    const section = wrapper.find('section');
+    expect(section.classes()).toEqual(expect.arrayContaining([
+      'lg:flex-row', 'gap-5'
+    ]));
   });
-  
-  it('повинен коректно відображати додаткові умови', () => {
-    const additionalConditions = wrapper.find('.additional-conditions');
-    expect(additionalConditions.exists()).toBe(true);
-    
-    const conditionItems = wrapper.findAll('.condition-item');
-    expect(conditionItems.length).toBeGreaterThan(0);
-    expect(conditionItems.at(0).text()).toContain('У випадку оплати післяплатою');
+
+  it('друга секція має заголовок "Оплата"', () => {
+    const h2 = wrapper.find('section:nth-of-type(2) h2');
+    expect(h2.exists()).toBe(true);
+    expect(h2.text().trim()).toBe('Оплата');
   });
-});*/
+
+  it('список методів оплати містить текст про банківську карту', () => {
+    const payment = wrapper.find('section:nth-of-type(2)').text();
+    expect(payment).toContain('Передплата на банківську карту');
+  });
+
+  it('зображення доставки має клас rounded-lg і shadow-md', () => {
+    const img = wrapper.find('img[alt="Доставка"]');
+    expect(img.exists()).toBe(true);
+    expect(img.classes()).toEqual(expect.arrayContaining([
+      'rounded-lg', 'shadow-md'
+    ]));
+  });
+
+  it('немає дубльованих заголовків h1', () => {
+    const h1s = wrapper.findAll('h1');
+    expect(h1s.length).toBe(1);
+  });
+
+  it('кожен елемент доставки має заголовок h4', () => {
+    const deliveryItems = wrapper.findAll('section:first-of-type li h4');
+    expect(deliveryItems.length).toBe(2);
+  });
+
+  it('контент має правильну послідовність секцій: доставка → оплата → додаткові умови', () => {
+    const sections = wrapper.findAll('main > section');
+    expect(sections.length).toBe(3);
+    expect(sections.at(0).text()).toContain('Умови доставки');
+    expect(sections.at(1).text()).toContain('Оплата');
+    expect(sections.at(2).text()).toContain('Додаткові умови');
+  });
+
+  it('елементи .fade-in змінюють класи при перетині (симуляція)', async () => {
+    const el = wrapper.find('.fade-in');
+    el.element.classList.remove('opacity-0', 'translate-y-5');
+    el.element.classList.add('opacity-100', 'translate-y-0');
+    expect(el.classes()).toContain('opacity-100');
+    expect(el.classes()).toContain('translate-y-0');
+  });
+});

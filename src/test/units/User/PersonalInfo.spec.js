@@ -1,12 +1,17 @@
-describe.skip('Тести для MyComponent', () => {
-    it('цей тест не виконається', () => {
-      expect(true).toBe(false)
-    })
-  })
-  
-  //Протестовано головні аспекти
-  
-  /*
+// describe.skip('Тести для MyComponent', () => {
+//     it('цей тест не виконається', () => {
+//       expect(true).toBe(false)
+//     })
+//   })
+
+//Протестовано головні аспекти
+
+beforeEach(() => {
+  jest.spyOn(console, 'warn').mockImplementation(() => { });
+  jest.spyOn(console, 'error').mockImplementation(() => { });
+  jest.spyOn(console, 'log').mockImplementation(() => { });
+});
+
 import { shallowMount } from '@vue/test-utils';
 import PersonalInfo from '@/components/user/PersonalInfo.vue';
 
@@ -14,17 +19,24 @@ import PersonalInfo from '@/components/user/PersonalInfo.vue';
 const originalAlert = window.alert;
 const originalConsoleError = console.error;
 
-describe('PersonalInfo.vue - Рендеринг та відображення даних', () => {
-  it('відображає заголовок "Ваша особиста інформація"', () => {
-    const wrapper = shallowMount(PersonalInfo, {
-      props: {
-        userId: 1
-      }
-    });
-    const title = wrapper.find('.info-title');
-    expect(title.exists()).toBe(true);
-    expect(title.text()).toBe("Ваша особиста інформація");
+describe('PersonalInfo.vue', () => {
+  it('оновлює локальні дані при введенні тексту в input', async () => {
+    const propsData = {
+      userId: 1,
+      first_name: "Іван",
+      last_name: "Петренко",
+      second_name: "Іванович",
+      email: "ivan@example.com"
+    };
+    const wrapper = shallowMount(PersonalInfo, { props: propsData });
+    const firstNameInput = wrapper.find('input#first_name');
+
+    firstNameInput.element.value = "Олександр";
+    await firstNameInput.trigger('input');
+
+    expect(wrapper.vm.localFirstName).toBe("Олександр");
   });
+
 
   it('ініціалізує поля форми значеннями з пропсів', () => {
     const propsData = {
@@ -51,7 +63,7 @@ describe('PersonalInfo.vue - Рендеринг та відображення д
       email: "ivan@example.com"
     };
     const wrapper = shallowMount(PersonalInfo, { props: initialProps });
-    
+
     const newProps = {
       first_name: "Олексій",
       last_name: "Коваленко",
@@ -59,7 +71,7 @@ describe('PersonalInfo.vue - Рендеринг та відображення д
       email: "oleksii@example.com"
     };
     await wrapper.setProps(newProps);
-    
+
     expect(wrapper.vm.localFirstName).toBe(newProps.first_name);
     expect(wrapper.vm.localLastName).toBe(newProps.last_name);
     expect(wrapper.vm.localSecondName).toBe(newProps.second_name);
@@ -70,162 +82,158 @@ describe('PersonalInfo.vue - Рендеринг та відображення д
     expect(wrapper.find('input#second_name').element.value).toBe(newProps.second_name);
     expect(wrapper.find('input#email').element.value).toBe(newProps.email);
   });
-});
 
-describe('PersonalInfo.vue - Взаємодія з користувачем (UI events)', () => {
-  it('оновлює локальні дані при введенні тексту в input', async () => {
-    const propsData = {
-      userId: 1,
-      first_name: "Іван",
-      last_name: "Петренко",
-      second_name: "Іванович",
-      email: "ivan@example.com"
-    };
-    const wrapper = shallowMount(PersonalInfo, { props: propsData });
-    const firstNameInput = wrapper.find('input#first_name');
-    
-    firstNameInput.element.value = "Олександр";
-    await firstNameInput.trigger('input');
-    
-    expect(wrapper.vm.localFirstName).toBe("Олександр");
-  });
-
-  it('викликає метод updateUser при кліку на кнопку "Оновити інформацію"', async () => {
-    const propsData = {
-      userId: 1,
-      first_name: "Іван",
-      last_name: "Петренко",
-      second_name: "Іванович",
-      email: "ivan@example.com"
-    };
-    const wrapper = shallowMount(PersonalInfo, { props: propsData });
-    wrapper.vm.updateUser = jest.fn();
-    
-    await wrapper.find('button.update-button').trigger('click');
-    
-    expect(wrapper.vm.updateUser).toHaveBeenCalled();
-  });
-
-  it('викликає метод changePassword і перенаправляє на "/changepassword" при кліку на кнопку "Змінити пароль"', async () => {
-    const propsData = {
-      userId: 1,
-      first_name: "Іван",
-      last_name: "Петренко",
-      second_name: "Іванович",
-      email: "ivan@example.com"
-    };
-    const $router = { push: jest.fn() };
+  it('computed isDisabled повертає true, якщо будь-яке із трьох полів пусте', async () => {
     const wrapper = shallowMount(PersonalInfo, {
-      props: propsData,
-      global: { mocks: { $router } }
+      props: { userId: 1, first_name: '', last_name: 'A', second_name: 'B', email: 'e@e' }
     });
-    
-    wrapper.vm.changePassword = jest.fn(() => {
-      $router.push("/changepassword");
-    });
-    await wrapper.find('button.change-password-button').trigger('click');
-    
-    expect(wrapper.vm.changePassword).toHaveBeenCalled();
-    expect($router.push).toHaveBeenCalledWith("/changepassword");
-  });
-});
-
-describe('PersonalInfo.vue - Логіка методу updateUser', () => {
-  beforeEach(() => {
-    window.alert = jest.fn();
-    console.error = jest.fn();
-  });
-  
-  afterEach(() => {
-    window.alert = originalAlert;
-    console.error = originalConsoleError;
-    jest.restoreAllMocks();
+    expect(wrapper.vm.isDisabled).toBe(true);
+    await wrapper.setData({ localFirstName: 'A', localLastName: '', localSecondName: 'B' });
+    expect(wrapper.vm.isDisabled).toBe(true);
+    await wrapper.setData({ localLastName: 'A', localSecondName: '' });
+    expect(wrapper.vm.isDisabled).toBe(true);
   });
 
-  it('повинен показувати alert про неавторизованість, якщо токен відсутній', async () => {
-    jest.spyOn(Storage.prototype, 'getItem').mockReturnValue(null);
-    
+  it('computed isDisabled повертає false, коли всі три поля непусті', () => {
     const wrapper = shallowMount(PersonalInfo, {
-      props: {
-        userId: 1,
-        first_name: "Іван",
-        last_name: "Петренко",
-        second_name: "Іванович",
-        email: "ivan@example.com"
-      }
+      props: { userId: 1, first_name: 'A', last_name: 'B', second_name: 'C', email: 'e@e' }
     });
-    await wrapper.vm.updateUser();
-    expect(window.alert).toHaveBeenCalledWith('Ви не авторизовані. Увійдіть у систему.');
+    expect(wrapper.vm.isDisabled).toBe(false);
   });
 
-  it('повинен показувати повідомлення про успішне оновлення при успішному запиті', async () => {
-    jest.spyOn(Storage.prototype, 'getItem').mockReturnValue('test-token');
-    global.fetch = jest.fn().mockResolvedValue({
-      ok: true,
-      json: async () => ({})
-    });
-    
+  it('кнопка "Оновити інформацію" має атрибут disabled згідно isDisabled', async () => {
     const wrapper = shallowMount(PersonalInfo, {
-      props: {
-        userId: 1,
-        first_name: "Іван",
-        last_name: "Петренко",
-        second_name: "Іванович",
-        email: "ivan@example.com"
-      }
+      props: { userId: 1, first_name: '', last_name: 'B', second_name: 'C', email: 'e@e' }
     });
-    await wrapper.vm.updateUser();
-    
-    expect(fetch).toHaveBeenCalledWith(
-      `http://26.235.139.202:8080/api/user/1`,
-      expect.objectContaining({
-        method: 'PATCH',
-        headers: expect.objectContaining({
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer test-token'
-        })
-      })
-    );
-    expect(window.alert).toHaveBeenCalledWith('Дані успішно оновлено');
+    const btn = wrapper.find('button').element;
+    expect(btn.disabled).toBe(true);
+    await wrapper.setData({ localFirstName: 'A' });
+    expect(wrapper.find('button').element.disabled).toBe(false);
   });
 
-  it('повинен виводити помилку в консоль і показувати alert при помилковому запиті', async () => {
-    jest.spyOn(Storage.prototype, 'getItem').mockReturnValue('test-token');
-    const testError = new Error('Test error');
-    global.fetch = jest.fn().mockRejectedValue(testError);
-    
+  it('tooltip відображається тільки коли кнопка disabled', async () => {
+    const wrapper = shallowMount(PersonalInfo, {
+      props: { userId: 1, first_name: '', last_name: '', second_name: '', email: 'e@e' }
+    });
+    expect(wrapper.find('.group > div').exists()).toBe(true);
+    await wrapper.setData({ localFirstName: 'A', localLastName: 'B', localSecondName: 'C' });
+    expect(wrapper.find('.group > div').exists()).toBe(false);
+  });
+
+  it('click changePassword викликає $router.push("/changepassword")', () => {
+    const push = jest.fn();
+    const wrapper = shallowMount(PersonalInfo, {
+      props: { userId: 1 },
+      global: { mocks: { $router: { push } } }
+    });
+    wrapper.findAll('button')[1].trigger('click');
+    expect(push).toHaveBeenCalledWith('/changepassword');
+  });
+
+  it('document.title встановлюється у "Ваша особиста інформація" при mount', () => {
+    shallowMount(PersonalInfo, { props: { userId: 1 } });
+    expect(document.title).toBe('Ваша особиста інформація');
+  });
+
+  it('mounted читає роль із localStorage і записує в data.role', () => {
+    window.localStorage.setItem('user', JSON.stringify({ role: 'manager' }));
+    const wrapper = shallowMount(PersonalInfo, { props: { userId: 1 } });
+    expect(wrapper.vm.role).toBe('manager');
+  });
+
+  it('має правильну назву компонента', () => {
+    const wrapper = shallowMount(PersonalInfo, { props: { userId: 1 } });
+    expect(wrapper.vm.$options.name).toBe('PersonalInfoCard');
+  });
+
+  it('правильно зчитує пропс email у readonly input', () => {
+    const wrapper = shallowMount(PersonalInfo, {
+      props: { userId: 1, email: 'test@example.com' }
+    });
+    const input = wrapper.find('input#email');
+    expect(input.attributes('readonly')).toBeDefined();
+    expect(input.element.value).toBe('test@example.com');
+  });
+
+  it('input поля мають правильні id', () => {
+    const wrapper = shallowMount(PersonalInfo, {
+      props: { userId: 1 }
+    });
+    expect(wrapper.find('#first_name').exists()).toBe(true);
+    expect(wrapper.find('#last_name').exists()).toBe(true);
+    expect(wrapper.find('#second_name').exists()).toBe(true);
+    expect(wrapper.find('#email').exists()).toBe(true);
+  });
+
+  it('рендериться кнопка "Оновити інформацію" з правильним текстом', () => {
+    const wrapper = shallowMount(PersonalInfo, { props: { userId: 1 } });
+    const button = wrapper.find('button');
+    expect(button.exists()).toBe(true);
+    expect(button.text()).toBe('Оновити інформацію');
+  });
+
+  it('рендериться кнопка "Змінити пароль"', () => {
+    const wrapper = shallowMount(PersonalInfo, { props: { userId: 1 } });
+    const buttons = wrapper.findAll('button');
+    const changeBtn = buttons.filter(b => b.text() === 'Змінити пароль');
+    expect(changeBtn.length).toBe(1);
+  });
+
+  it('всі текстові input мають клас .rounded-lg', () => {
+    const wrapper = shallowMount(PersonalInfo, { props: { userId: 1 } });
+    const inputs = wrapper.findAll('input[type="text"]');
+    inputs.forEach(input => {
+      expect(input.classes()).toContain('rounded-lg');
+    });
+  });
+
+  it('email input має клас .cursor-not-allowed', () => {
+    const wrapper = shallowMount(PersonalInfo, { props: { userId: 1 } });
+    const input = wrapper.find('input#email');
+    expect(input.classes()).toContain('cursor-not-allowed');
+  });
+
+  it('при наявності непорожнього localStorage role === null не показується router-link', () => {
+    window.localStorage.setItem('user', JSON.stringify({ role: null }));
+    const wrapper = shallowMount(PersonalInfo, { props: { userId: 1 } });
+    const link = wrapper.findComponent({ name: 'RouterLink' });
+    expect(link.exists()).toBe(false);
+  });
+
+  it('v-model правильно повʼязаний з input прізвища', async () => {
     const wrapper = shallowMount(PersonalInfo, {
       props: {
         userId: 1,
-        first_name: "Іван",
-        last_name: "Петренко",
-        second_name: "Іванович",
-        email: "ivan@example.com"
-      }
-    });
-    await wrapper.vm.updateUser();
-    
-    expect(console.error).toHaveBeenCalledWith(testError);
-    expect(window.alert).toHaveBeenCalledWith('Сталася помилка');
-  });
-});
-
-describe('PersonalInfo.vue - Логіка методу changePassword', () => {
-  it('виклик методу changePassword здійснює навігацію до "/changepassword"', () => {
-    const $router = { push: jest.fn() };
-    const wrapper = shallowMount(PersonalInfo, {
-      props: {
-        userId: 1,
-        first_name: "Іван",
-        last_name: "Петренко",
-        second_name: "Іванович",
-        email: "ivan@example.com"
+        first_name: 'Іван',
+        last_name: 'Сидоренко',
+        second_name: 'Іванович',
+        email: 'ivan@example.com',
       },
-      global: { mocks: { $router } }
     });
-    
-    wrapper.vm.changePassword();
-    
-    expect($router.push).toHaveBeenCalledWith("/changepassword");
+    const input = wrapper.find('input#last_name');
+    await input.setValue('НовеПрізвище');
+    expect(wrapper.vm.localLastName).toBe('НовеПрізвище');
   });
-});*/
+
+  it('watch оновлює local* змінні при зміні пропсів', async () => {
+    const wrapper = shallowMount(PersonalInfo, {
+      props: {
+        userId: 1,
+        first_name: 'Іван',
+        last_name: 'Сидоренко',
+        second_name: 'Іванович',
+        email: 'ivan@example.com',
+      },
+    });
+    await wrapper.setProps({
+      first_name: 'Олег',
+      last_name: 'Мельник',
+      second_name: 'Петрович',
+      email: 'oleg@example.com',
+    });
+    expect(wrapper.vm.localFirstName).toBe('Олег');
+    expect(wrapper.vm.localLastName).toBe('Мельник');
+    expect(wrapper.vm.localSecondName).toBe('Петрович');
+    expect(wrapper.vm.localEmail).toBe('oleg@example.com');
+  });
+});

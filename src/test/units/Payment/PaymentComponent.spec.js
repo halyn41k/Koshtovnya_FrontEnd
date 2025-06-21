@@ -1,14 +1,10 @@
-// PaymentComponent.spec.js
+// describe.skip('Тести для MyComponent', () => {
+//   it('цей тест не виконається', () => {
+//     expect(true).toBe(false);
+//   });
+// });
 
-
-
-describe.skip('Тести для MyComponent', () => {
-  it('цей тест не виконається', () => {
-    expect(true).toBe(false);
-  });
-});
-/*
-// Замокання axios
+//Замокання axios
 jest.mock("axios", () => ({
   get: jest.fn(() =>
     Promise.resolve({
@@ -19,7 +15,7 @@ jest.mock("axios", () => ({
 
 // Приглушення попереджень Vue
 beforeAll(() => {
-  jest.spyOn(console, 'warn').mockImplementation(() => {});
+  jest.spyOn(console, 'warn').mockImplementation(() => { });
 });
 
 import { shallowMount } from '@vue/test-utils';
@@ -65,20 +61,6 @@ describe('PaymentComponent.vue', () => {
 
   afterEach(() => {
     wrapper.unmount();
-  });
-
-  describe('Рендеринг', () => {
-    it('має коректну розмітку: секція з класом "payment"', () => {
-      expect(wrapper.classes()).toContain('payment');
-    });
-
-    it('рендериться заголовок з текстом "Оплата" та header lines', () => {
-      const header = wrapper.find('.payment-header');
-      expect(header.exists()).toBe(true);
-      expect(header.text()).toContain('Оплата');
-      const headerLines = wrapper.findAll('.header-line');
-      expect(headerLines.length).toBeGreaterThanOrEqual(2);
-    });
   });
 
   describe('Логіка компонента', () => {
@@ -130,20 +112,92 @@ describe('PaymentComponent.vue', () => {
       expect(wrapper.vm.totalAmount).not.toBeNull();
     });
   });
+  // Рендеринг структури
 
-  describe('Метод updateCustomerDetails', () => {
-    it('оновлює customerDetails, зливаючи нові дані з поточними', async () => {
-      // Переконайтеся, що у компоненті в data оголошено customerDetails
-      await wrapper.setData({
-        customerDetails: { email: 'old@example.com', phone: '111111' },
-      });
-      wrapper.vm.updateCustomerDetails({ phone: '222222', name: 'Іван' });
-      expect(wrapper.vm.customerDetails).toEqual({
-        email: 'old@example.com',
-        phone: '222222',
-        name: 'Іван',
-      });
+  it('рендерить дочірні компоненти в правильному порядку', () => {
+    const steps = wrapper.findComponent({ name: 'PaymentSteps' });
+    const review = wrapper.findComponent({ name: 'OrderReview' });
+    const address = wrapper.findComponent({ name: 'DeliveryAddress' });
+    expect(steps.exists()).toBe(true);
+    expect(review.exists()).toBe(true);
+    expect(address.exists()).toBe(true);
+    // PaymentSummary тільки в великому розмірі viewport, перевіримо його stub
+    const summary = wrapper.findComponent({ name: 'PaymentSummary' });
+    expect(summary.exists()).toBe(true);
+  });
+
+  // Логіка обчислення totalAmount у watch
+  it('при зміні cartItems через setData автоматично оновлює totalAmount', async () => {
+    await wrapper.setData({
+      cartItems: [
+        { price: 10, quantity: 3 },
+        { price: 5, quantity: 2 },
+      ],
+      deliveryCost: 7,
     });
+    await wrapper.vm.$nextTick();
+    // 10*3 + 5*2 + 7 = 30 + 10 + 7 = 47
+    expect(wrapper.vm.totalAmount).toBe(47);
+  });
+
+  it('при зміні deliveryCost через setData автоматично оновлює totalAmount', async () => {
+    await wrapper.setData({
+      cartItems: [{ price: 20, quantity: 1 }],
+      deliveryCost: 0,
+    });
+    await wrapper.vm.$nextTick();
+    expect(wrapper.vm.totalAmount).toBe(20);
+
+    await wrapper.setData({ deliveryCost: 15 });
+    await wrapper.vm.$nextTick();
+    expect(wrapper.vm.totalAmount).toBe(35);
+  });
+
+  // Метод calculateTotalAmount
+  it('calculateTotalAmount відкидає старі значення й рахує правильно без помилок', () => {
+    wrapper.setData({
+      cartItems: [
+        { price: 2, quantity: 5 },
+      ],
+      deliveryCost: 3,
+      totalAmount: 999, // якийсь мусор
+    });
+    wrapper.vm.calculateTotalAmount();
+    expect(wrapper.vm.totalAmount).toBe(13);
+  });
+
+  it('checkStepsCompletion встановлює stepsCompleted=false, якщо є незавершений крок', async () => {
+    wrapper.vm.$refs.paymentSteps = { steps: [{ completed: true }, { completed: false }] };
+    await wrapper.setData({ currentStep: 2 });
+    expect(wrapper.vm.stepsCompleted).toBe(false);
+  });
+
+  // lifecycle
+  it('mounted() встановлює document.title="Оплата"', () => {
+    // створимо ще один інстанс
+    const local = shallowMount(PaymentComponent, {
+      stubs: {
+        PaymentSteps: PaymentStepsStub,
+        OrderReview: OrderReviewStub,
+        DeliveryAddress: DeliveryAddressStub,
+        PaymentSummary: PaymentSummaryStub,
+      }
+    });
+    expect(document.title).toBe('Оплата');
+  });
+
+  // перевіряємо, що calculateTotalAmount викликається в mounted
+  it('calculateTotalAmount викликається один раз при mount', () => {
+    const spy = jest.spyOn(PaymentComponent.methods, 'calculateTotalAmount');
+    shallowMount(PaymentComponent, {
+      stubs: {
+        PaymentSteps: PaymentStepsStub,
+        OrderReview: OrderReviewStub,
+        DeliveryAddress: DeliveryAddressStub,
+        PaymentSummary: PaymentSummaryStub,
+      }
+    });
+    expect(spy).toHaveBeenCalled();
+    spy.mockRestore();
   });
 });
-*/

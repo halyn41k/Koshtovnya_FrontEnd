@@ -1,36 +1,39 @@
-describe.skip('Тести для MyComponent', () => {
-  it('цей тест не виконається', () => {
-    expect(true).toBe(false)
-  })
-})
-/*
+// describe.skip('Тести для MyComponent', () => {
+//   it('цей тест не виконається', () => {
+//     expect(true).toBe(false)
+//   })
+// })
+
 //Протестовано головні аспекти
+/* eslint-disable jest/no-commented-out-tests, no-unused-vars, jest/no-identical-title, no-undef */
+
 
 import { shallowMount } from '@vue/test-utils';
 import HomePage from '@/components/Home/HomePage.vue';
 
-jest.mock('axios', () => ({
-  get: jest.fn(),
-}));
+// Мокаємо axios так, щоб create повертало клієнта з методом get
+jest.mock('axios', () => {
+  const mGet = jest.fn();
+  return {
+    create: jest.fn(() => ({
+      get: mGet,
+      interceptors: {
+        request: { use: jest.fn() },
+        response: { use: jest.fn() },
+      },
+    })),
+  };
+});
 
 describe('HomePage.vue', () => {
   let wrapper;
   let observeMock;
   let unobserveMock;
   let disconnectMock;
-  let observeCallback;
   let consoleErrorMock;
 
   beforeAll(() => {
-    // Mock для fetch API
-    global.fetch = jest.fn(() =>
-      Promise.resolve({
-        ok: true,
-        json: () => Promise.resolve({ data: [] }), // Фіктивна відповідь API
-      })
-    );
-
-    // Mock для browser methods
+    // Мок для browser methods
     window.alert = jest.fn();
     jest.spyOn(console, 'log').mockImplementation(() => {});
   });
@@ -40,61 +43,43 @@ describe('HomePage.vue', () => {
     observeMock = jest.fn();
     unobserveMock = jest.fn();
     disconnectMock = jest.fn();
-    observeCallback = jest.fn((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('show');
-          unobserveMock(entry.target);
-        }
-      });
-    });
 
-    global.IntersectionObserver = jest.fn((callback) => {
-      observeCallback.mockImplementation(callback); // Зберігаємо переданий callback
-      return {
-        observe: observeMock,
-        unobserve: unobserveMock,
-        disconnect: disconnectMock,
-      };
-    });
+    global.IntersectionObserver = jest.fn((callback) => ({
+      observe: observeMock,
+      unobserve: unobserveMock,
+      disconnect: disconnectMock,
+    }));
 
-    // Mock для console.error
+    // Мок для console.error
     consoleErrorMock = jest.spyOn(console, 'error').mockImplementation(() => {});
 
-    // Мок для перекладів
+    // Мок перекладів
     const translations = {
       viewProducts: 'Переглянути товари',
       handmadeProducts: 'Ручні вироби',
       exclusiveJewelry: 'Ексклюзивні прикраси',
-      quoteText: 'Українська спадщина',
-      gnatKhotkevich: 'Гнат Хоткевич',
-      followInsta: 'Підписуйтеся на нас в Instagram',
-      dontMissTheMost: 'Не пропустіть найкраще',
     };
 
-    // Ініціалізація компонента
     wrapper = shallowMount(HomePage, {
       global: {
         mocks: {
           $t: (msg) => translations[msg] || msg,
         },
-        stubs: ['router-link', 'PopularProducts', 'NewArrivals', 'CategoryProduct'], // Заглушки для дочірніх компонентів
+        stubs: ['router-link', 'PopularProducts', 'NewArrivals', 'CategoryProduct', 'TopLatest'],
       },
     });
   });
 
   afterEach(() => {
-    if (wrapper) {
-      wrapper.unmount();
-    }
-    jest.clearAllMocks(); // Очищення моків
+    wrapper.unmount();
+    jest.clearAllMocks();
     consoleErrorMock.mockRestore();
   });
 
   it('слід загорнути кнопку «Переглянути продукти» у маршрутизатор із правильним маршрутом', () => {
     const routerLink = wrapper.find('router-link-stub');
     expect(routerLink.exists()).toBe(true);
-    expect(routerLink.attributes('to')).toBe('/allproduct');
+    expect(routerLink.attributes('to')).toBe('/allproducts');
   });
 
   it('має мати ефект наведення курсора на кнопку «Переглянути продукти».', async () => {
@@ -112,17 +97,6 @@ describe('HomePage.vue', () => {
     expect(getComputedStyle(button.element).backgroundColor).toBe('rgb(160, 18, 18)');
 
     jest.restoreAllMocks();
-  });
-
-  it('має отримати популярні продукти на монтуванні', async () => {
-    await wrapper.vm.fetchPopularProducts();
-    expect(global.fetch).toHaveBeenCalledWith('http://26.235.139.202:8080/api/popular-products');
-  });
-
-  // Тестування API запитів (нові надходження)
-  it('повинен отримати нових надходжень', async () => {
-    await wrapper.vm.fetchNewArrivals();
-    expect(global.fetch).toHaveBeenCalledWith('http://26.235.139.202:8080/api/new-arrivals');
   });
 
   // Тестування IntersectionObserver
@@ -294,14 +268,7 @@ describe('HomePage.vue', () => {
   
     grid.remove();
   });
-    
-  it('має відображати коректну мітку Instagram', () => {
-    // Знаходимо елемент із класом .instagram-handle-link
-    const instagramHandle = wrapper.find('.instagram-handle-link');
-    expect(instagramHandle.exists()).toBe(true);
-    expect(instagramHandle.text()).toBe('@koshtovnya_jewelry');
-  });
-  
+     
   it('має відображати правильну кількість популярних продуктів на сторінку', () => {
     // Імітуємо дані для популярних продуктів
     wrapper.vm.products = [
@@ -417,100 +384,6 @@ describe('HomePage.vue', () => {
       { id: 10, name: 'New Arrival 5', price: 550 },
     ]);
   });
-  
-  it('fetchPopularProducts оновлює products і visibleProducts при успішному запиті', async () => {
-    // Мок даних від API
-    const mockPopularProducts = [
-      { id: 1, name: 'Product 1', price: 100, image_url: 'url1' },
-      { id: 2, name: 'Product 2', price: 200, image_url: 'url2' },
-      { id: 3, name: 'Product 3', price: 300, image_url: 'url3' },
-    ];
-
-    // Імітуємо успішний API-запит
-    global.fetch.mockResolvedValueOnce({
-      ok: true,
-      json: () => Promise.resolve({ data: mockPopularProducts }),
-    });
-
-    await wrapper.vm.fetchPopularProducts();
-
-    // Перевіряємо, що продукти оновилися
-    expect(wrapper.vm.products).toEqual(mockPopularProducts);
-
-    // Перевіряємо, що visibleProducts оновився
-    expect(wrapper.vm.visibleProducts).toEqual(mockPopularProducts.slice(0, wrapper.vm.productsPerPage));
-  });
-
-  it('fetchPopularProducts використовує testPopularProducts при помилці запиту', async () => {
-    // Імітуємо помилковий API-запит
-    global.fetch.mockRejectedValueOnce(new Error('Network Error'));
-
-    await wrapper.vm.fetchPopularProducts();
-
-    // Перевіряємо, що testPopularProducts використовуються як fallback
-    expect(wrapper.vm.products).toEqual(wrapper.vm.testPopularProducts);
-
-    // Перевіряємо, що visibleProducts також оновився
-    expect(wrapper.vm.visibleProducts).toEqual(wrapper.vm.testPopularProducts.slice(0, wrapper.vm.productsPerPage));
-  });
-
-  it('fetchNewArrivals оновлює newArrivals і visibleNewArrivals при успішному запиті', async () => {
-    // Мок даних від API
-    const mockNewArrivals = [
-      { id: 4, name: 'New Arrival 1', price: 150, image_url: 'url4' },
-      { id: 5, name: 'New Arrival 2', price: 250, image_url: 'url5' },
-      { id: 6, name: 'New Arrival 3', price: 350, image_url: 'url6' },
-    ];
-
-    // Імітуємо успішний API-запит
-    global.fetch.mockResolvedValueOnce({
-      ok: true,
-      json: () => Promise.resolve({ data: mockNewArrivals }),
-    });
-
-    await wrapper.vm.fetchNewArrivals();
-
-    // Перевіряємо, що newArrivals оновився
-    expect(wrapper.vm.newArrivals).toEqual(mockNewArrivals);
-
-    // Перевіряємо, що visibleNewArrivals оновився
-    expect(wrapper.vm.visibleNewArrivals).toEqual(mockNewArrivals.slice(0, wrapper.vm.productsPerPage));
-  });
-
-  it('fetchNewArrivals використовує testNewArrivals при помилці запиту', async () => {
-    // Імітуємо помилковий API-запит
-    global.fetch.mockRejectedValueOnce(new Error('Network Error'));
-
-    await wrapper.vm.fetchNewArrivals();
-
-    // Перевіряємо, що testNewArrivals використовуються як fallback
-    expect(wrapper.vm.newArrivals).toEqual(wrapper.vm.testNewArrivals);
-
-    // Перевіряємо, що visibleNewArrivals також оновився
-    expect(wrapper.vm.visibleNewArrivals).toEqual(wrapper.vm.testNewArrivals.slice(0, wrapper.vm.productsPerPage));
-  });
-
-  it('має рендерити елемент .welcome-image', () => {
-    const welcomeImage = wrapper.find('.welcome-image');
-    expect(welcomeImage.exists()).toBe(true);
-  });
-
-  it('має рендерити текст .handmade-beaded-products', () => {
-    const handmadeProducts = wrapper.find('.handmade-beaded-products');
-    expect(handmadeProducts.exists()).toBe(true);
-    expect(handmadeProducts.text()).toBe('Ручні вироби');
-  });
-
-  it('має рендерити текст .exclusive-necklaces-bracelets-earrings', () => {
-    const exclusiveJewelry = wrapper.find('.exclusive-necklaces-bracelets-earrings');
-    expect(exclusiveJewelry.exists()).toBe(true);
-    expect(exclusiveJewelry.text()).toBe('Ексклюзивні прикраси');
-  });
-
-  it('має рендерити секцію .instagram-grid', () => {
-    const instagramGrid = wrapper.find('.instagram-grid');
-    expect(instagramGrid.exists()).toBe(true);
-  });
 
   it('має рендерити компонент PopularProducts', () => {
     const popularProducts = wrapper.findComponent({ name: 'PopularProducts' });
@@ -525,69 +398,6 @@ describe('HomePage.vue', () => {
   it('має рендерити компонент CategoryProduct', () => {
     const categoryProduct = wrapper.findComponent({ name: 'CategoryProduct' });
     expect(categoryProduct.exists()).toBe(true);
-  });
- 
-  it('має відображати правильний текст для handmadeProducts', () => {
-    const handmadeProducts = wrapper.find('.handmade-beaded-products');
-    expect(handmadeProducts.exists()).toBe(true);
-    expect(handmadeProducts.text()).toBe('Ручні вироби');
-  });
-
-  it('має відображати правильний текст для exclusiveJewelry', () => {
-    const exclusiveJewelry = wrapper.find('.exclusive-necklaces-bracelets-earrings');
-    expect(exclusiveJewelry.exists()).toBe(true);
-    expect(exclusiveJewelry.text()).toBe('Ексклюзивні прикраси');
-  });
-
-  it('має відображати правильний текст для quoteText', () => {
-    const quoteText = wrapper.find('.quote-text .ukrainian-heritage');
-    expect(quoteText.exists()).toBe(true);
-    expect(quoteText.text().trim()).toBe('Українська спадщина');
-  });
-
-  it('має відображати правильний текст для gnatKhotkevich', () => {
-    const gnatKhotkevich = wrapper.find('.gnat-khotkevich');
-    expect(gnatKhotkevich.exists()).toBe(true);
-    expect(gnatKhotkevich.text()).toBe('Гнат Хоткевич');
-  });
-
-  it('має відображати правильний текст для followInsta', () => {
-    const followInsta = wrapper.find('.follow-text');
-    expect(followInsta.exists()).toBe(true);
-    expect(followInsta.text()).toContain('Підписуйтеся на нас в Instagram');
-  });
-
-  it('має відображати правильний текст для dontMissTheMost', () => {
-    const followInsta = wrapper.find('.follow-text');
-    expect(followInsta.exists()).toBe(true);
-    expect(followInsta.text()).toContain('Не пропустіть найкраще');
-  });
-
-  it('повинен викликати unobserve для елементів після додавання класу "show"', async () => {
-    // Створюємо елементи DOM з класом fade-in
-    const fadeInElements = Array.from({ length: 3 }).map(() => {
-      const element = document.createElement('div');
-      element.classList.add('fade-in');
-      document.body.appendChild(element);
-      return element;
-    });
-
-    wrapper.vm.observeElements();
-
-    // Емітуємо подію isIntersecting: true
-    fadeInElements.forEach((element) => {
-      observeCallback([{ target: element, isIntersecting: true }]);
-    });
-
-    await wrapper.vm.$nextTick();
-
-    // Перевіряємо виклик unobserve
-    fadeInElements.forEach((element) => {
-      expect(unobserveMock).toHaveBeenCalledWith(element);
-    });
-
-    // Очищуємо створені елементи
-    fadeInElements.forEach((element) => element.remove());
   });
 
   it('повинен викликати disconnect при завершенні спостереження', () => {
@@ -611,54 +421,4 @@ describe('HomePage.vue', () => {
     // Перевіряємо, чи disconnect було викликано
     expect(disconnectMock).toHaveBeenCalled();
   }); 
-
-  it('не повинен викликати unobserve для елементів, якщо isIntersecting: false', async () => {
-    // Створюємо елементи DOM з класом fade-in
-    const fadeInElements = Array.from({ length: 3 }).map(() => {
-      const element = document.createElement('div');
-      element.classList.add('fade-in');
-      document.body.appendChild(element);
-      return element;
-    });
-
-    wrapper.vm.observeElements();
-
-    // Емітуємо подію isIntersecting: false
-    fadeInElements.forEach((element) => {
-      observeCallback([{ target: element, isIntersecting: false }]);
-    });
-
-    await wrapper.vm.$nextTick();
-
-    // Перевіряємо, що unobserve не викликався
-    expect(unobserveMock).not.toHaveBeenCalled();
-
-    // Очищуємо створені елементи
-    fadeInElements.forEach((element) => element.remove());
-  });
-
-  it('повинен додати клас "show" лише до елементів, які перетинаються', async () => {
-    const elementIntersecting = document.createElement('div');
-    elementIntersecting.classList.add('fade-in');
-    const elementNotIntersecting = document.createElement('div');
-    elementNotIntersecting.classList.add('fade-in');
-
-    document.body.appendChild(elementIntersecting);
-    document.body.appendChild(elementNotIntersecting);
-
-    wrapper.vm.observeElements();
-
-    observeCallback([
-      { target: elementIntersecting, isIntersecting: true },
-      { target: elementNotIntersecting, isIntersecting: false },
-    ]);
-
-    await wrapper.vm.$nextTick();
-
-    expect(elementIntersecting.classList.contains('show')).toBe(true);
-    expect(elementNotIntersecting.classList.contains('show')).toBe(false);
-
-    elementIntersecting.remove();
-    elementNotIntersecting.remove();
-  });
-});*/
+});

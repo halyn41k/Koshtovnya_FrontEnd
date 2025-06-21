@@ -1,18 +1,33 @@
-describe.skip('Тести для MyComponent', () => {
-  it('цей тест не виконається', () => {
-    expect(true).toBe(false)
-  })
-})
-/*
+// describe.skip('Тести для MyComponent', () => {
+//   it('цей тест не виконається', () => {
+//     expect(true).toBe(false)
+//   })
+// })
+
 //Протестовано головні аспекти
 
+beforeEach(() => {
+  jest.spyOn(console, 'warn').mockImplementation(() => {});
+  jest.spyOn(console, 'error').mockImplementation(() => {});
+  jest.spyOn(console, 'log').mockImplementation(() => {});
+});
 
 import { mount } from '@vue/test-utils';
 import ViewOtherProduct from '@/components/product/ViewOtherProduct.vue';
 
-jest.mock('axios', () => ({
-  get: jest.fn(),
-}));
+jest.mock('axios', () => {
+  const mAxios = {
+    get: jest.fn(),
+    post: jest.fn(),
+    delete: jest.fn(),
+    interceptors: {
+      request: { use: jest.fn() },
+      response: { use: jest.fn() },
+    },
+  };
+  mAxios.create = jest.fn(() => mAxios);
+  return mAxios;
+});
 
 describe('ViewOtherProduct.vue - Тестування іконки сердечка та стану наведення', () => {
   let wrapper;
@@ -60,112 +75,6 @@ describe('ViewOtherProduct.vue - Тестування іконки сердеч�
     wrapper.unmount();
   });
 
-  it('Рендерить заголовок із локалізованим текстом', () => {
-    const title = wrapper.find('.specifications-title');
-    expect(title.exists()).toBe(true);
-    expect(title.text()).toBe('Перегляньте інші товари');
-  });
-
-  it('Кнопки навігації мають відповідні класи', () => {
-    const leftArrow = wrapper.find('.left-arrow');
-    const rightArrow = wrapper.find('.right-arrow');
-
-    expect(leftArrow.exists()).toBe(true);
-    expect(leftArrow.classes()).toContain('left-arrow');
-
-    expect(rightArrow.exists()).toBe(true);
-    expect(rightArrow.classes()).toContain('right-arrow');
-  });
-
-  it('Продукти мають відповідні класи', async () => {
-    wrapper.setData({
-      visibleProducts: [
-        { id: 1, name: 'Product 1', price: 100, image_url: 'test-url-1', bead_producer_name: 'Producer 1', is_in_wishlist: false },
-        { id: 2, name: 'Product 2', price: 200, image_url: 'test-url-2', bead_producer_name: 'Producer 2', is_in_wishlist: true },
-      ],
-    });
-    await wrapper.vm.$nextTick();
-
-    const productCards = wrapper.findAll('.product-card');
-    expect(productCards.length).toBe(2);
-
-    const firstProduct = productCards.at(0);
-    expect(firstProduct.classes()).toContain('product-card');
-
-    const buyButton = firstProduct.find('.buy-button');
-    expect(buyButton.classes()).toContain('buy-button');
-  });
-
-  it('Перевіряє, чи правильно завантажуються зображення продуктів', async () => {
-    wrapper.setData({
-      visibleProducts: [
-        { id: 1, name: 'Product 1', price: 100, image_url: 'test-url-1', bead_producer_name: 'Producer 1', is_in_wishlist: false },
-        { id: 2, name: 'Product 2', price: 200, image_url: '', bead_producer_name: 'Producer 2', is_in_wishlist: true }, // Продукт без зображення
-      ],
-    });
-    await wrapper.vm.$nextTick();
-
-    const productCards = wrapper.findAll('.product-card');
-    expect(productCards.length).toBe(2);
-
-    // Перевіряємо перший продукт із зображенням
-    const firstImage = productCards.at(0).find('img');
-    expect(firstImage.exists()).toBe(true);
-    expect(firstImage.attributes('src')).toBe('test-url-1'); // URL зображення
-    expect(firstImage.attributes('alt')).toBe('Product 1'); // Альтернативний текст
-
-    // Перевіряємо другий продукт без зображення
-    const secondImage = productCards.at(1).find('img');
-    expect(secondImage.exists()).toBe(true);
-    expect(secondImage.attributes('src')).toBe(''); // Порожній URL
-    expect(secondImage.attributes('alt')).toBe('Product 2'); // Альтернативний текст
-  });
-
-  it('Перевіряє, чи відображається альтернативний текст, якщо зображення відсутнє', async () => {
-    wrapper.setData({
-      visibleProducts: [
-        { id: 2, name: 'Product 2', price: 200, image_url: '', bead_producer_name: 'Producer 2', is_in_wishlist: true }, // Продукт без зображення
-      ],
-    });
-    await wrapper.vm.$nextTick();
-
-    const productCard = wrapper.find('.product-card');
-    const image = productCard.find('img');
-    expect(image.exists()).toBe(true);
-    expect(image.attributes('src')).toBe(''); // URL відсутній
-    expect(image.attributes('alt')).toBe('Product 2'); // Альтернативний текст використовується
-  });
-
-  it('Логує попередження, якщо користувач не авторизований', async () => {
-    await wrapper.vm.fetchWishlist();
-    expect(console.warn).toHaveBeenCalledWith('Користувач не авторизований');
-  });
-
-  it('Перевіряє стилі іконки сердечка (заповнена/порожня)', async () => {
-    wrapper.setData({
-      visibleProducts: [
-        { id: 1, name: 'Product 1', price: 100, image_url: 'test-url-1', bead_producer_name: 'Producer 1', is_in_wishlist: false },
-        { id: 2, name: 'Product 2', price: 200, image_url: '', bead_producer_name: 'Producer 2', is_in_wishlist: true },
-      ],
-    });
-    await wrapper.vm.$nextTick();
-
-    const productCards = wrapper.findAll('.product-card');
-    expect(productCards.length).toBe(2);
-
-    // Перевіряємо перший продукт (порожнє сердечко)
-    const firstWishlistIcon = productCards.at(0).find('.wishlist-icon');
-    expect(firstWishlistIcon.exists()).toBe(true);
-    const firstHeart = firstWishlistIcon.find('.empty-heart');
-    expect(firstHeart.exists()).toBe(true); // Сердечко порожнє
-
-    // Перевіряємо другий продукт (заповнене сердечко)
-    const secondWishlistIcon = productCards.at(1).find('.wishlist-icon');
-    expect(secondWishlistIcon.exists()).toBe(true);
-    const secondHeart = secondWishlistIcon.find('.filled-heart');
-    expect(secondHeart.exists()).toBe(true); // Сердечко заповнене
-  });
-
   it('Перевіряє, чи викликається метод fetchProducts при монтуванні компонента', () => {
     // Створюємо шпигун для методу fetchProducts
     const fetchProductsSpy = jest.spyOn(ViewOtherProduct.methods, 'fetchProducts');
@@ -190,226 +99,7 @@ describe('ViewOtherProduct.vue - Тестування іконки сердеч�
     // Очищуємо шпигун
     fetchProductsSpy.mockRestore();
   });
-  
-  it('Перевіряє перенаправлення на сторінку логіну, якщо користувач не авторизований', async () => {
-    // Мок для $router.push
-    const pushMock = jest.fn();
-    wrapper = mount(ViewOtherProduct, {
-      global: {
-        mocks: {
-          $t: (msg) => msg,
-          $router: { push: pushMock }, // Мокаємо $router
-        },
-        stubs: {
-          'router-link': {
-            template: '<a><slot /></a>',
-          },
-        },
-      },
-    });
-  
-    // Додаємо продукт для перевірки взаємодії
-    wrapper.setData({
-      visibleProducts: [
-        { id: 1, name: 'Product 1', price: 100, image_url: 'test-url-1', bead_producer_name: 'Producer 1', is_in_wishlist: false },
-      ],
-    });
-    await wrapper.vm.$nextTick();
-  
-    const productCard = wrapper.find('.product-card');
-    const wishlistIcon = productCard.find('.wishlist-icon');
-  
-    // Мокаємо localStorage.getItem, щоб повертав null
-    jest.spyOn(window.localStorage.__proto__, 'getItem').mockReturnValue(null);
-  
-    // Викликаємо toggleWishlist
-    await wishlistIcon.trigger('click');
-  
-    // Перевіряємо, чи було перенаправлення на логін
-    expect(pushMock).toHaveBeenCalledWith('/login');
-  
-    // Очищуємо моки
-    jest.restoreAllMocks();
-  });
 
-  it('Перевіряє поведінку компонента без токена', async () => {
-    // Мокаємо localStorage.getItem, щоб повертав null
-    jest.spyOn(window.localStorage.__proto__, 'getItem').mockReturnValue(null);
-  
-    // Викликаємо метод fetchWishlist
-    await wrapper.vm.fetchWishlist();
-  
-    // Перевіряємо, чи було згенеровано попередження
-    expect(console.warn).toHaveBeenCalledWith('Користувач не авторизований');
-  
-    // Перевіряємо, що список бажаного порожній
-    expect(wrapper.vm.wishlist).toEqual([]);
-  
-    // Очищуємо моки
-    jest.restoreAllMocks();
-  });
-
-  it('Перевіряє кількість точок у dots-container та активну точку', async () => {
-    // Мокаємо продукти, щоб було кілька сторінок
-    wrapper.setData({
-      products: Array.from({ length: 10 }, (_, i) => ({
-        id: i + 1,
-        name: `Product ${i + 1}`,
-        price: (i + 1) * 100,
-        image_url: `test-url-${i + 1}`,
-        bead_producer_name: `Producer ${i + 1}`,
-        is_in_wishlist: false,
-      })),
-      currentPage: 1, // Встановлюємо поточну сторінку
-      productsPerPage: 3, // Кількість продуктів на сторінку
-    });
-    
-    // Оновлюємо totalPages вручну
-    wrapper.setData({
-      totalPages: Math.ceil(wrapper.vm.products.length / wrapper.vm.productsPerPage),
-    });
-    
-    await wrapper.vm.$nextTick();
-  
-    // Розраховуємо загальну кількість сторінок
-    const totalPages = wrapper.vm.totalPages;
-  
-    // Перевіряємо кількість точок
-    const dots = wrapper.findAll('.dot');
-    expect(dots.length).toBe(totalPages);
-  
-    // Перевіряємо, чи активна точка відповідає currentPage
-    dots.forEach((dot, index) => {
-      if (index === wrapper.vm.currentPage) {
-        expect(dot.classes()).toContain('dark'); // Активна точка має клас 'dark'
-      } else {
-        expect(dot.classes()).toContain('light'); // Неактивна точка має клас 'light'
-      }
-    });
-  });
-
-  it('Перевіряє, чи здійснюється запит на правильний URL', async () => {
-    // Мокаємо глобальний fetch
-    const mockFetch = jest.fn(() =>
-      Promise.resolve({
-        ok: true,
-        json: () => Promise.resolve({ data: [] }),
-      })
-    );
-    global.fetch = mockFetch;
-
-    await wrapper.vm.fetchProducts();
-
-    expect(mockFetch).toHaveBeenCalledWith('http://26.235.139.202:8080/api/popular-products?page=1');
-    expect(mockFetch).toHaveBeenCalledTimes(1);
-
-    // Очищення мока
-    global.fetch.mockRestore();
-  });
-
-  it('Перевіряє, чи надсилається правильний токен у заголовку при запиті до /api/wishlist', async () => {
-    // Мокаємо axios.get
-    const axiosMock = require('axios');
-    const token = 'test-token';
-  
-    jest.spyOn(window.localStorage.__proto__, 'getItem').mockImplementation((key) => {
-      if (key === 'token') return token; // Симулюємо наявність токена
-      return null;
-    });
-  
-    axiosMock.get.mockResolvedValueOnce({
-      data: {
-        products: [
-          { id: 1, name: 'Product 1' },
-          { id: 2, name: 'Product 2' },
-        ],
-      },
-    });
-  
-    await wrapper.vm.fetchWishlist();
-  
-    // Перевіряємо, що запит виконувався з правильними заголовками
-    expect(axiosMock.get).toHaveBeenCalledWith('http://26.235.139.202:8080/api/wishlist', {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-  
-    // Очищуємо моки
-    jest.restoreAllMocks();
-  });
-
-  it('Перевіряє, чи синхронізується wishlist зі списком продуктів', async () => {
-    // Мокаємо axios.get
-    const axiosMock = require('axios');
-  
-    jest.spyOn(window.localStorage.__proto__, 'getItem').mockImplementation((key) => {
-      if (key === 'token') return 'test-token'; // Симулюємо наявність токена
-      return null;
-    });
-  
-    // Мокаємо список бажаного
-    axiosMock.get.mockResolvedValueOnce({
-      data: {
-        products: [
-          { id: 1, name: 'Product 1' }, // Продукт із wishlist
-        ],
-      },
-    });
-  
-    // Мокаємо продукти
-    wrapper.setData({
-      products: [
-        { id: 1, name: 'Product 1', is_in_wishlist: false }, // Має бути в wishlist
-        { id: 2, name: 'Product 2', is_in_wishlist: false }, // Не має бути в wishlist
-      ],
-    });
-  
-    await wrapper.vm.fetchWishlist();
-  
-    // Перевіряємо синхронізацію стану wishlist
-    expect(wrapper.vm.wishlist).toEqual([1]); // ID продукту у wishlist
-    expect(wrapper.vm.products[0].is_in_wishlist).toBe(true); // Продукт 1 має бути позначений у wishlist
-    expect(wrapper.vm.products[1].is_in_wishlist).toBe(false); // Продукт 2 не має бути позначений у wishlist
-  
-    // Очищуємо моки
-    jest.restoreAllMocks();
-  });
-
-  it('Перевіряє, чи правильно передається product_id у запиті POST до /api/wishlist', async () => {
-    // Мокаємо axios.post
-    const axiosMock = require('axios');
-    axiosMock.post = jest.fn().mockResolvedValueOnce({}); // Успішна відповідь на POST
-  
-    // Мокаємо localStorage
-    const token = 'test-token';
-    jest.spyOn(window.localStorage.__proto__, 'getItem').mockImplementation((key) => {
-      if (key === 'token') return token;
-      return null;
-    });
-  
-    // Додаємо продукт до wishlist
-    const product = { id: 1, name: 'Product 1', is_in_wishlist: false };
-    await wrapper.vm.toggleWishlist(product);
-  
-    // Перевіряємо, чи був викликаний POST із правильними параметрами
-    expect(axiosMock.post).toHaveBeenCalledWith(
-      'http://26.235.139.202:8080/api/wishlist',
-      { product_id: 1 }, // product_id має бути переданий
-      {
-        headers: {
-          Authorization: `Bearer ${token}`, // Заголовок з токеном
-        },
-      }
-    );
-  
-    // Перевіряємо, що продукт оновлений як доданий до wishlist
-    expect(product.is_in_wishlist).toBe(true);
-  
-    // Очищуємо моки
-    jest.restoreAllMocks();
-  }); 
-  
   it('Перевіряє, чи зникає кнопка, коли немає продуктів', async () => {
     wrapper.setData({
       visibleProducts: [],
@@ -423,68 +113,129 @@ describe('ViewOtherProduct.vue - Тестування іконки сердеч�
     expect(buyButton.exists()).toBe(false); // Перевірка відсутності кнопки
   });
 
-  it('Перевіряє відображення повідомлення про відсутність зображення у продукту', async () => {
-    wrapper.setData({
-      visibleProducts: [
-        { id: 1, name: 'Product 1', price: 100, image_url: '', bead_producer_name: 'Producer 1', is_in_wishlist: false },
-      ],
+   it('goToProduct викликає $router.push з правильним шляхом', async () => {
+    const pushMock = jest.fn();
+    wrapper = mount(ViewOtherProduct, {
+      global: {
+        mocks: { $router: { push: pushMock }, $t: msg => msg },
+        stubs: { 'router-link': true },
+      },
     });
-  
+    wrapper.setData({ visibleProducts: [{ id: 42 }] });
     await wrapper.vm.$nextTick();
-  
-    const productCard = wrapper.find('.product-card');
-    const image = productCard.find('img');
-    expect(image.attributes('src')).toBe(''); // Перевірка на відсутність зображення
+    const card = wrapper.find('article');
+    await card.trigger('click');
+    expect(pushMock).toHaveBeenCalledWith('/productpage/42');
   });
 
-  it('Перевіряє логіку pagination, коли немає більше сторінок', async () => {
-    wrapper.setData({
-      currentPage: 0,
-      products: Array.from({ length: 3 }, (_, i) => ({
-        id: i + 1,
-        name: `Product ${i + 1}`,
-        price: (i + 1) * 100,
-        image_url: `test-url-${i + 1}`,
-        bead_producer_name: `Producer ${i + 1}`,
-        is_in_wishlist: false,
-      })),
-      productsPerPage: 3,
-      totalPages: 1,
-    });
-  
-    await wrapper.vm.$nextTick();
-  
-    const rightArrow = wrapper.find('.right-arrow');
-    await rightArrow.trigger('click');
-    expect(wrapper.vm.currentPage).toBe(0); // Кількість сторінок 1, тому не можна перейти на наступну
+ it('рендерить заголовок секції', () => {
+    const title = wrapper.find('h2');
+    expect(title.exists()).toBe(true);
+    expect(title.text()).toBe('Перегляньте інші товари');
   });
 
-  it('Перевіряє відсутність кнопки "Buy" для продуктів у списку бажаного', async () => {
-    wrapper.setData({
-      visibleProducts: [
-        { id: 1, name: 'Product 1', price: 100, image_url: 'test-url-1', bead_producer_name: 'Producer 1', is_in_wishlist: true },
-      ],
-    });
-  
-    await wrapper.vm.$nextTick();
-  
-    const productCard = wrapper.find('.product-card');
-    const buyButton = productCard.find('.buy-button');
-    expect(buyButton.exists()).toBe(true); // Кнопка buy повинна бути доступною
+  it('рендерить ліву та праву стрілки зі стандартними класами', () => {
+    const buttons = wrapper.findAll('button');
+    // перша та остання кнопки — це стрілки
+    expect(buttons.at(0).classes()).toContain('hidden');
+    expect(buttons.at(buttons.length - 1).classes()).toContain('hidden');
   });
-  
-  it('Перевіряє правильність відображення ціни продукту', async () => {
+
+  it('рендерить продукт у visibleProducts як article з правильним вмістом', async () => {
     wrapper.setData({
       visibleProducts: [
-        { id: 1, name: 'Product 1', price: 100, image_url: 'test-url-1', bead_producer_name: 'Producer 1', is_in_wishlist: false },
+        { id: 123, name: 'Test Product', price: 999, image_url: 'url', bead_producer_name: 'Brand', rating: 4, review_count: 10, is_in_wishlist: false },
       ],
     });
-  
     await wrapper.vm.$nextTick();
-  
-    const productCard = wrapper.find('.product-card');
-    const price = productCard.find('.product-price');
-    expect(price.text()).toBe('100 грн'); // Перевірка правильності ціни
+    const article = wrapper.find('article');
+    expect(article.exists()).toBe(true);
+    expect(article.find('h3').text()).toContain('Test Product');
+    expect(article.find('p.text-xl').text()).toBe('999 грн');
+  });
+
+  it('goToProduct викликає $router.push при кліці на article', async () => {
+    const pushMock = jest.fn();
+    wrapper = mount(ViewOtherProduct, {
+      global: { mocks: { $router: { push: pushMock }, $t: msg => msg }, stubs: ['router-link'] }
+    });
+    wrapper.setData({ visibleProducts: [{ id: 77 }] });
+    await wrapper.vm.$nextTick();
+    const art = wrapper.find('article');
+    await art.trigger('click');
+    expect(pushMock).toHaveBeenCalledWith('/productpage/77');
+  });
+
+  it('має контейнер з класом "relative"', () => {
+    expect(wrapper.find('div.relative').exists()).toBe(true);
+  });
+
+  it('рендерить контейнер для товарів з класом "overflow-x-auto"', () => {
+    expect(wrapper.find('div.overflow-x-auto').exists()).toBe(true);
+  });
+
+  it('рендерить <img> з правильним alt та src для продукту', async () => {
+    wrapper.setData({
+      visibleProducts: [{ id: 5, name: 'Name', image_url: 'img-url', price: 10, bead_producer_name: 'Brand', rating: 3, review_count: 1, is_in_wishlist: false }]
+    });
+    await wrapper.vm.$nextTick();
+    const img = wrapper.find('article img');
+    expect(img.attributes('src')).toBe('img-url');
+    expect(img.attributes('alt')).toBe('Name');
+  });
+
+  it('рендерить назву бренду у спані', async () => {
+    wrapper.setData({
+      visibleProducts: [{ bead_producer_name: 'Maker' }]
+    });
+    await wrapper.vm.$nextTick();
+    expect(wrapper.find('article span.text-base').text()).toBe('Maker');
+  });
+
+  it('рендерить review_count у тексті "(count)"', async () => {
+    wrapper.setData({
+      visibleProducts: [{ id:1, name:'N', image_url:'', price:0, bead_producer_name:'B', rating:0, review_count:7, is_in_wishlist:false }]
+    });
+    await wrapper.vm.$nextTick();
+    expect(wrapper.find('span.text-sm').text()).toBe('(7)');
+  });
+
+  it('Math.round(product.rating) керує заповненням зірок', async () => {
+    wrapper.setData({
+      visibleProducts: [{ rating: 2.4 }]
+    });
+    await wrapper.vm.$nextTick();
+    const filled = wrapper.findAll('svg[fill="#FFD700"]');
+    expect(filled.length).toBe(2); 
+  });
+
+  it('updateVisibleProducts не видаляє продукти за межами currentPage', () => {
+    const items = [{},{},{},{},{}];
+    wrapper = mount(ViewOtherProduct, { global:{ mocks:{ $t:msg=>msg }, stubs:['router-link'] } });
+    wrapper.setData({ products: items, productsPerPage: 2, currentPage: 0 });
+    wrapper.vm.updateVisibleProducts();
+    expect(wrapper.vm.visibleProducts.length).toBe(2);
+    wrapper.setData({ currentPage: 2 });
+    wrapper.vm.updateVisibleProducts();
+    expect(wrapper.vm.visibleProducts.length).toBe(1);
+  });
+
+  it('showNextProducts не змінює currentPage якщо totalPages = 0', () => {
+    wrapper.setData({ totalPages: 0, currentPage: 0 });
+    wrapper.vm.showNextProducts();
+    expect(wrapper.vm.currentPage).toBe(0);
+  });
+
+  it('showPreviousProducts не змінює currentPage якщо currentPage = 0', () => {
+    wrapper.setData({ currentPage: 0 });
+    wrapper.vm.showPreviousProducts();
+    expect(wrapper.vm.currentPage).toBe(0);
+  });
+
+  it('mounted додає слухача на resize', () => {
+    const spy = jest.spyOn(window, 'addEventListener');
+    mount(ViewOtherProduct, { global:{ mocks:{ $t:msg=>msg }, stubs:['router-link'] } });
+    expect(spy).toHaveBeenCalledWith('resize', expect.any(Function));
+    spy.mockRestore();
   });
 });
-*/
