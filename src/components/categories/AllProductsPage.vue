@@ -55,10 +55,10 @@ class="px-3 py-1 bg-gray-200 dark:bg-[#303b59] text-gray-800 dark:text-gray-100 
 >
 </div>
       <div
-        v-if="filterVisible && isMobile"
-        class="fixed top-0 right-0 w-[350px] h-screen bg-[#fff7f6] z-50 shadow-lg transition-transform duration-300 transform"
-        :class="{ 'translate-x-0': filterVisible, 'translate-x-full': !filterVisible }"
-      >
+  v-if="filterVisible && isMobile"
+  class="fixed top-0 right-0 w-[350px] h-screen bg-[#fff7f6] dark:bg-[#17223b] z-50 shadow-lg transition-transform duration-300 transform"
+  :class="{ 'translate-x-0': filterVisible, 'translate-x-full': !filterVisible }"
+>
         <div class="h-full overflow-y-auto px-4 py-6">
           <FilterComponent
             :initial-filters="filters"
@@ -347,11 +347,10 @@ formatCurrencyIntl(price, currency) {
       const raw = toRaw(filters);
 const params = { page };
 
-if (Array.isArray(raw.availability) && raw.availability.length > 0) {
-  const values = [];
-  if (raw.availability.includes('В наявності')) values.push(1);
-  if (raw.availability.includes('Немає в наявності')) values.push(0);
-  if (values.length > 0) params.is_available = values;
+// новий простий блок — беремо тільки те, що нам прислав FilterComponent
+console.log('🛠 RAW filters.is_available:', raw.is_available);
+if (Array.isArray(raw.is_available) && raw.is_available.length) {
+  params.is_available = raw.is_available;
 }
 
 

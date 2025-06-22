@@ -88,6 +88,7 @@
 </template>
 
 <script>
+import bus from '@/eventBus';
 import PersonalInfo from './PersonalInfo.vue';
 import Addresses from './UserAddresses.vue';
 import OrderHistory from './OrderHistory.vue';
@@ -132,7 +133,9 @@ export default {
     async onMenuItemClick(i) {
       if (i === 4) {
          try {
+          
         await api.logout();            // якщо є ендпоінт на бекенді
+        
       } catch (e) {
         console.warn('Помилка logout:', e);
       }
@@ -168,6 +171,7 @@ export default {
     async fetchProfile() {
       try {
         const { user } = await api.getProfile();
+        bus.emit('cart-updated');
         this.userId = user.id;
         this.first_name = user.first_name || '';
         this.last_name = user.last_name || '';

@@ -111,9 +111,11 @@
 import eyeOpenIcon from "@/assets/eye-hide-svgrepo-com.svg";
 import eyeClosedIcon from "@/assets/eye-1-svgrepo-com.svg";
 import api from '@/services/api';
+import bus from '@/eventBus';
 
 export default {
   name: 'LoginComponent',
+  
   data() {
     return {
       email: '',
@@ -125,6 +127,7 @@ export default {
       eyeClosedIcon,
     };
   },
+  
   methods: {
     redirectToGoogle() {
       window.location.href = "http://koshtovnya.api-dev.bmax-edu.website/auth/google/redirect";
@@ -181,7 +184,7 @@ export default {
   
   mounted() {
   localStorage.removeItem('token'); // очистка при відкритті логіну
-
+    bus.emit('cart-updated'); 
   document.title = this.$t('authorization.titleLogin');
   const query = new URLSearchParams(window.location.search);
   const token = query.get('token');

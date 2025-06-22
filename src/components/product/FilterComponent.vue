@@ -10,21 +10,16 @@
           {{ $t('product.availabilityTitle') }}
         </h2>
         <div class="space-y-3">
-          <label
-            v-for="item in availabilityOptions"
-            :key="item.name"
-            class="flex items-center space-x-3"
-          >
-            <input
-              type="checkbox"
-              :value="item.name"
-              v-model="filters.availability"
-              class="custom-checkbox"
-            />
-            <span class="text-base text-gray-700 dark:text-gray-100">
-              {{ item.name }} ({{ item.count }})
-            </span>
-          </label>
+          <label v-for="item in availabilityOptions" :key="item.display" class="flex items-center space-x-3">
+  <input type="checkbox"
+         :value="item.value"
+         v-model="filters.availability"
+         class="custom-checkbox" />
+  <span>
+    {{ item.display }} ({{ item.count }})
+  </span>
+</label>
+
         </div>
       </div>
 
@@ -204,10 +199,8 @@
   </div>
 </template>
 
-
 <script>
-import { ref, reactive, watch, onMounted, computed, watchEffect} from 'vue'
-
+import { ref, reactive, watch, onMounted, computed, watchEffect } from 'vue'
 import Slider from '@vueform/slider'
 import api from '@/services/api'
 
@@ -215,92 +208,104 @@ export default {
   name: 'FilterComponent',
   components: { Slider },
   props: {
-  initialFilters: { type: Object, default: () => ({}) },
-  hideCategory: { type: Boolean, default: false },
-  categoryId: { type: [Number, String], default: null } // ← додай це
-},
-
-
+    initialFilters: { type: Object, default: () => ({}) },
+    hideCategory:    { type: Boolean, default: false },
+    categoryId:      { type: [Number, String], default: null }
+  },
   emits: ['apply', 'close'],
   setup(props, { emit }) {
-const selectedCurrency = ref(localStorage.getItem('currency')?.toUpperCase() || 'UAH')
-
-// слідкуй за змінами currency у localStorage
-watchEffect(() => {
-  selectedCurrency.value = localStorage.getItem('currency')?.toUpperCase() || 'UAH'
-})
-
-    const loading = ref(true)
-
-    const filters = reactive({
-      availability: [],
-      size: [0, 100],
-      weight: [0, 1000],
-      price: [0, 10000],
-      color: '',
-      beadTypes: [],
-      producers: [],
-      category: [],
-      rating: []
+    // обрана валюта
+    const selectedCurrency = ref(localStorage.getItem('currency')?.toUpperCase() || 'UAH')
+    watchEffect(() => {
+      selectedCurrency.value = localStorage.getItem('currency')?.toUpperCase() || 'UAH'
     })
 
+    const loading = ref(true)
+    const filters = reactive({
+      availability: [],
+      size:         [0, 100],
+      weight:       [0, 1000],
+      price:        [0, 10000],
+      color:        '',
+      beadTypes:    [],
+      producers:    [],
+      category:     [],
+      rating:       []
+    })
+
+    // мапа для англ→укр значень доступності
+    const availabilityMapEnToUk = {
+      Available:   'В наявності',
+      Unavailable: 'Немає в наявності'
+    }
+    // мапа для бек: укр → англ
+    const availabilityMapUkToEn = Object.fromEntries(
+      Object.entries(availabilityMapEnToUk).map(([en, uk]) => [uk, en])
+    )
+
+    // опції для UI-фільтра доступності
     const availabilityOptions = ref([])
-    const sizeOptions = reactive({ min: 0, max: 100 })
-    const weightOptions = reactive({ min: 0, max: 1000 })
-    const priceOptions = reactive({ min: 0, max: 10000 })
-    const colorOptions = ref([])
-    const beadTypeOptions = ref([])
+
+    const sizeOptions         = reactive({ min: 0,   max: 100 })
+    const weightOptions       = reactive({ min: 0,   max: 1000 })
+    const priceOptions        = reactive({ min: 0,   max: 10000 })
+    const colorOptions        = ref([])
+    const beadTypeOptions     = ref([])
     const beadProducerOptions = ref([])
-    const categoryOptions = ref([])
+    const categoryOptions     = ref([])
 
     const sortedColorOptions = computed(() =>
       [...colorOptions.value].sort((a, b) => a.localeCompare(b))
     )
 
+    // застосувати початкові фільтри з пропсів
     const applyInitialFilters = () => {
       const init = props.initialFilters
       if (init.availability) filters.availability = [...init.availability]
-      if (init.size?.length === 2) filters.size = [...init.size]
-      if (init.weight?.length === 2) filters.weight = [...init.weight]
-      if (init.price?.length === 2) filters.price = [...init.price]
-      if (init.color) filters.color = init.color
-      if (init.rating) filters.rating = [...init.rating]
-      if (init.beadTypes) filters.beadTypes = [...init.beadTypes]
-      if (init.producers) filters.producers = [...init.producers]
-      if (init.category) filters.category = [...init.category]
+      if (init.size?.length === 2) filters.size       = [...init.size]
+      if (init.weight?.length === 2) filters.weight   = [...init.weight]
+      if (init.price?.length === 2) filters.price     = [...init.price]
+      if (init.color)               filters.color     = init.color
+      if (init.rating)              filters.rating    = [...init.rating]
+      if (init.beadTypes)           filters.beadTypes = [...init.beadTypes]
+      if (init.producers)           filters.producers = [...init.producers]
+      if (init.category)            filters.category  = [...init.category]
     }
 
-const loadFilters = async () => {
-  try {
-    const params = {
-      currency: selectedCurrency.value.toLowerCase()
-    }
-    if (props.categoryId) params.category_id = props.categoryId
+    // завантажити дані фільтрів із бекенду
+    const loadFilters = async () => {
+      try {
+        const params = { currency: selectedCurrency.value.toLowerCase() }
+        if (props.categoryId) params.category_id = props.categoryId
 
-    const data = await api.getFilter({ params })
-        availabilityOptions.value = data['Доступність'] || []
+        const data = await api.getFilter({ params })
 
+        // перетворюємо масив доступності на структуру { display, value, count }
+        const rawAvail = data['Доступність'] || []
+        availabilityOptions.value = rawAvail.map(item => ({
+          display: item.name,
+          value:   availabilityMapEnToUk[item.name] || item.name,
+          count:   item.count
+        }))
+
+        // інші опції
         const sz = data['Розмір'] || { min: '0', max: '150' }
-        sizeOptions.min = +sz.min
-        sizeOptions.max = +sz.max
-
+        sizeOptions.min = +sz.min;    sizeOptions.max = +sz.max
         if (!props.initialFilters.size ||
             (props.initialFilters.size[0] === 0 && props.initialFilters.size[1] === 100)) {
           filters.size = [+sz.min, +sz.max]
         }
 
         const wt = data['Вага'] || { min: '0', max: '1000' }
-        weightOptions.min = +wt.min
-        weightOptions.max = +wt.max
+        weightOptions.min = +wt.min;  weightOptions.max = +wt.max
 
         const pr = data['Ціна'] || { min: '0', max: '10000' }
-        priceOptions.min = +pr.min
-        priceOptions.max = +pr.max
+        priceOptions.min = +pr.min;   priceOptions.max = +pr.max
 
-        colorOptions.value = data['Колір'] || []
-        beadTypeOptions.value = data['Тип бісеру'] || []
+        colorOptions.value        = data['Колір']       || []
+        beadTypeOptions.value     = data['Тип бісеру']  || []
         beadProducerOptions.value = data['Виробник бісеру'] || []
-        categoryOptions.value = data['Категорія'] || []
+        categoryOptions.value     = data['Категорія']   || []
 
         applyInitialFilters()
       } catch (e) {
@@ -310,45 +315,45 @@ const loadFilters = async () => {
       }
     }
 
+    // збираємо й відправляємо обрані фільтри в батьківський компонент
     const applyFilters = () => {
+      console.log('>> sending availability filter:', filters.availability)
+
       const cleaned = {}
 
-      if (filters.availability.length) cleaned.availability = [...filters.availability]
-      if (filters.rating.length) cleaned.rating = [...filters.rating]
-      if (filters.beadTypes.length) cleaned.type_of_bead = [...filters.beadTypes]
-      if (filters.producers.length) cleaned.bead_producer = [...filters.producers]
-      if (filters.category.length) cleaned.category = [...filters.category]
-      if (props.categoryId) cleaned.category_id = props.categoryId
-
-      if (filters.color) cleaned.color = filters.color
-
-      if (filters.size[0] > sizeOptions.min || filters.size[1] < sizeOptions.max)
-        cleaned.size = [...filters.size]
-
-      if (filters.weight[0] > weightOptions.min || filters.weight[1] < weightOptions.max)
+      if (filters.availability.length) {
+    cleaned.is_available = filters.availability.map(v =>
+      v === 'Available' || v === 'В наявності' ? 1 : 0
+    );
+  }
+      if (filters.rating.length)       cleaned.rating        = [...filters.rating]
+      if (filters.beadTypes.length)    cleaned.type_of_bead  = [...filters.beadTypes]
+      if (filters.producers.length)    cleaned.bead_producer = [...filters.producers]
+      if (filters.category.length)     cleaned.category      = [...filters.category]
+      if (props.categoryId)            cleaned.category_id   = props.categoryId
+      if (filters.color)               cleaned.color         = filters.color
+      if (filters.size[0] > sizeOptions.min ||
+          filters.size[1] < sizeOptions.max)
+        cleaned.size   = [...filters.size]
+      if (filters.weight[0] > weightOptions.min ||
+          filters.weight[1] < weightOptions.max)
         cleaned.weight = [...filters.weight]
-
-      if (filters.price[0] > priceOptions.min || filters.price[1] < priceOptions.max)
-        cleaned.price = [...filters.price]
+      if (filters.price[0] > priceOptions.min ||
+          filters.price[1] < priceOptions.max)
+        cleaned.price  = [...filters.price]
 
       window.scrollTo({ top: 0, behavior: 'smooth' })
+      console.log('>> cleaned payload:', cleaned)
       emit('apply', cleaned)
     }
 
-    watch(() => props.initialFilters, () => {
-      applyInitialFilters()
-    }, { deep: true })
-
+    // слідкуємо за зміною початкових фільтрів або id категорії
+    watch(() => props.initialFilters, applyInitialFilters, { deep: true })
     watch(() => props.categoryId, (newId, oldId) => {
-  if (newId !== oldId) {
-    loadFilters()
-  }
-})
-
-
-    onMounted(() => {
-      loadFilters()
+      if (newId !== oldId) loadFilters()
     })
+
+    onMounted(loadFilters)
 
     return {
       loading,
@@ -365,9 +370,10 @@ const loadFilters = async () => {
       categoryOptions,
       applyFilters
     }
-  },
+  }
 }
 </script>
+
 
 
 
