@@ -186,13 +186,17 @@
               {{ $t('admin.settings.chooseFile') }}
             </button>
             <input
-              ref="catInput"
-              type="file"
-              accept="image/*"
-              class="hidden"
-              @change="e => newCategory.image = e.target.files[0]"
-            />
+  ref="catInput"
+  type="file"
+  accept="image/*"
+  class="hidden"
+  @change="onCatImageSelected($event.target.files)"
+/>
+
           </div>
+<div v-if="newCategory.preview" class="mt-2">
+  <img :src="newCategory.preview" alt="Preview" class="w-24 h-24 object-contain rounded" />
+</div>
 
           <button
             @click="createCategory"
@@ -216,7 +220,7 @@ export default {
     return {
       settings: { address: '', phone: '', email: '', logo: null },
       logoPreview: null,
-      newCategory: { name: { uk: '', en: '' }, image: null },
+      newCategory: { name: { uk: '', en: '' }, image: null, preview: null },
       showAddModal: false,
       categories: []
     };
@@ -228,6 +232,13 @@ export default {
         this.logoPreview = URL.createObjectURL(file);
       }
     },
+    onCatImageSelected(files) {
+    const file = files[0];
+    if (file && file.type.startsWith('image/')) {
+      this.newCategory.image = file;
+      this.newCategory.preview = URL.createObjectURL(file);
+    }
+  },
     async fetchSettings() {
       const toast = useToast();
       try {
@@ -287,7 +298,7 @@ export default {
         await api.createCategory(fd);
         toast.success('Категорію додано');
         this.showAddModal = false;
-        this.newCategory = { name: { uk: '', en: '' }, image: null };
+        this.newCategory = { name: { uk: '', en: '' }, image: null, preview: null };
         await this.fetchCategories();
       } catch {
         useToast().error('Не вдалося створити категорію');

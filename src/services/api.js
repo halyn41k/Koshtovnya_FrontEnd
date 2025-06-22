@@ -538,9 +538,19 @@ getAdminFilter: async (config = {}) => {
     return data;
   },
   createCategory: async formData => {
-    const { data } = await apiClient.post("/api/admin/categories", formData);
-    return data;
-  },
+  const { data } = await apiClient.post(
+    "/api/admin/categories",
+    formData,
+    {
+      headers: {
+        // Примусово multipart
+        "Content-Type": "multipart/form-data"
+      }
+    }
+  );
+  return data;
+},
+
   updateCategory: async (id, formData) => {
     const { data } = await apiClient.post(`/api/admin/categories/${id}`, formData);
     return data;
