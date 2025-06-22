@@ -339,7 +339,7 @@ export default {
     },
     activeTags() {
       const tags = [];
-
+      
       for (const [key, val] of Object.entries(this.filters)) {
   if (key === 'category' || key === 'category_id') continue;
 

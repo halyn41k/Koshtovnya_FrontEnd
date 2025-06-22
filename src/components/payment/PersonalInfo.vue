@@ -1,10 +1,12 @@
-<template>  
+<template>
   <div class="personal-info">
-    <div class="flex flex-col gap-4 w-full max-w-[400px] overflow-x-auto">
+    <div
+      class="flex flex-col gap-4 w-full max-w-full sm:max-w-[400px] min-w-0"
+    >
       <div
         v-for="(field, key) in fields"
         :key="key"
-        class="flex flex-col gap-1"
+        class="flex flex-col gap-1 min-w-0"
       >
         <label
           :for="key"
@@ -14,7 +16,7 @@
         </label>
 
         <!-- Phone input with icon -->
-        <div v-if="key === 'phone'" class="relative">
+        <div v-if="key === 'phone'" class="relative min-w-0">
           <img
             src="@/assets/icons/phone.svg"
             alt="Telephone icon"
@@ -29,7 +31,7 @@
             class="border border-gray-400 dark:border-gray-600 p-2 pl-10 rounded
                    text-black dark:text-white bg-white dark:bg-gray-800
                    placeholder-gray-500 dark:placeholder-gray-400
-                   text-[14px] w-full montserrat focus:outline-none focus:ring-2 focus:ring-red-500"
+                   text-[14px] w-full montserrat focus:outline-none focus:ring-2 focus:ring-red-500 min-w-0"
           />
         </div>
 
@@ -44,7 +46,7 @@
           class="border border-gray-400 dark:border-gray-600 p-2 rounded
                  text-black dark:text-white bg-white dark:bg-gray-800
                  placeholder-gray-500 dark:placeholder-gray-400
-                 text-[14px] w-full montserrat focus:outline-none focus:ring-2 focus:ring-red-500"
+                 text-[14px] w-full montserrat focus:outline-none focus:ring-2 focus:ring-red-500 min-w-0"
         />
 
         <span
@@ -57,6 +59,7 @@
     </div>
   </div>
 </template>
+
 
 <script>
 import Multiselect from 'vue-multiselect'

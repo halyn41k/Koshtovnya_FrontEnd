@@ -304,7 +304,7 @@
           @click="toggleCategories"
           class="w-full flex justify-between items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all duration-200"
         >
-          Категорії
+          {{ $t('home.categories') }}
           <svg
             :class="{ 'rotate-180': isCategoriesOpen }"
             class="w-4 h-4 transform transition-transform"

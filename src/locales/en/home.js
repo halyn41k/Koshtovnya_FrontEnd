@@ -18,6 +18,7 @@ links: "Links",
 userAccount: "My Account",
 contactUs: "Contact Us",
 followUs: "Follow Us",
+categories: "Categories",
 shopByCategory: "Shop by category",
 recentlyViewed: "Recently Viewed Products",
     loading: "Loading",            // ← новий ключ

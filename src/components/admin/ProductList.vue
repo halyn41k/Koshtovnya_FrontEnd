@@ -65,7 +65,10 @@
     <!-- Фільтр праворуч -->
     <div v-if="showFilter" class="fixed inset-0 z-[9998]" @click.self="closeFilter">
       <FilterProduct
-        class="fixed top-0 right-0 bottom-0 z-[9999] bg-[#fff7f6] dark:bg-[#2b2b2b] w-[350px] shadow-xl"
+           class="fixed top-0 right-0 bottom-0 z-[9999]
+          bg-[#fff7f6] dark:bg-[#17223b] 
+          text-black dark:text-white     
+          w-[350px] shadow-xl"
         :initialFilters="currentFilters"
         @applyFilters="applyFilters"
         @closeFilter="closeFilter"
@@ -194,6 +197,8 @@ import EditProductModal from './EditProductModal.vue'
 import DeleteProductModal from './DeleteProductModal.vue'
 import ProductDetailModal from './ProductDetailModal.vue'
 import api from '@/services/api';
+import { ref, reactive, watch, onMounted, computed, watchEffect } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 export default {
   name: 'ProductList',
@@ -208,6 +213,7 @@ export default {
     return {
       filtersKey: 0,
       products: [],
+      rawFilters: {},
       showDetailModal: false,
       productDetails: null,
       searchQuery: '',
@@ -249,7 +255,7 @@ export default {
         // Виклик через сервіс: повертає { data, meta, links }
         const resp = await api.getAdminProducts({ params: paramsObj })
         this.products = resp.data || []
-        this.meta = null
+        this.meta = resp.meta || null
       } catch (err) {
         console.error('❌ Помилка запиту товарів:', err)
         this.products = []
@@ -360,54 +366,49 @@ export default {
     openFilter() { this.showFilter = true },
     closeFilter() { this.showFilter = false },
 
-    applyFilters(rawFilters) {
-      const adapted = {}
-      if (rawFilters.availability?.length) {
-        const map = { 'В наявності': 1, 'Немає в наявності': 0 }
-        adapted.is_available = rawFilters.availability.map(a => map[a]).filter(v => v !== undefined)
-      }
-      if (rawFilters.rating?.length) adapted.rating = rawFilters.rating
-      if (rawFilters.color) adapted.color = rawFilters.color
-      if (rawFilters.producers?.length) adapted.bead_producer = rawFilters.producers
-      else if (rawFilters.bead_producer?.length) adapted.bead_producer = rawFilters.bead_producer
-      if (rawFilters.beadTypes?.length) adapted.type_of_bead = rawFilters.beadTypes
-      if (rawFilters.category?.length) adapted.category = rawFilters.category
-      if (rawFilters.size && Array.isArray(rawFilters.size)) {
-        adapted.size_from = rawFilters.size[0]
-        adapted.size_to = rawFilters.size[1]
-      }
-      if (rawFilters.weight && Array.isArray(rawFilters.weight)) {
-        adapted.weight_from = rawFilters.weight[0]
-        adapted.weight_to = rawFilters.weight[1]
-      }
-      if (rawFilters.price && Array.isArray(rawFilters.price)) {
-        adapted.price_from = rawFilters.price[0]
-        adapted.price_to = rawFilters.price[1]
-      }
-      this.currentFilters = adapted
-      sessionStorage.setItem('admin-filters', JSON.stringify(adapted))
-      this.fetchFilteredProducts(adapted)
-      this.closeFilter()
-    },
+    applyFilters(raw) {
+    this.currentFilters = { ...raw }
+    this.fetchFilteredProducts(this.currentFilters)
+    this.closeFilter()
+  },
+  removeTag(tag) {
+    // 1) зробити копію сирих фільтрів
+    const nf = { ...this.rawFilters }
 
-    removeTag(tag) {
-      const nf = { ...this.currentFilters }
-      const val = nf[tag.key]
-      if (Array.isArray(val)) {
-        if (val.length === 2 && typeof val[0] === 'number') delete nf[tag.key]
-        else nf[tag.key] = val.filter(v => v !== tag.value)
-      } else {
-        delete nf[tag.key]
-      }
-      this.applyFilters(nf)
-    },
+    // 2) якщо це повзунок (size/weight/price) — видалити всю пару
+    if (['size','weight','price'].includes(tag.key)) {
+      delete nf[tag.key]
+    }
+    // 3) якщо це чекбокси (доступність, рейтинг, beadTypes, producers, category) — прибрати тільки одне значення
+    else if (Array.isArray(nf[tag.key])) {
+      nf[tag.key] = nf[tag.key].filter(v => v !== tag.value)
+      if (nf[tag.key].length === 0) delete nf[tag.key]
+    }
+    // 4) якщо це одиничне (color тощо) — просто видалити
+    else {
+      delete nf[tag.key]
+    }
+
+    // 5) заново застосувати фільтри без перезавантаження модалки
+    this.applyFilters(nf)
+  },
+
 
     clearAllFilters() {
-      this.currentFilters = {}
-      this.filtersKey++
-      sessionStorage.removeItem('admin-filters')
-      this.fetchProducts()
-    },
+    // 1) Очистити обидва стани
+    this.rawFilters = {}
+    this.currentFilters = {}
+
+    // 2) Збільшити key, щоб перезавантажити FilterProduct через :key (якщо потрібно)
+    this.filtersKey++
+
+    // 3) Запросити продукти без фільтрів
+    // Якщо ви хочете, щоб кнопка просто знімала всі фільтри _плюс_ ховала модалку:
+    this.applyFilters({})
+
+    // або, якщо без модалки:
+    // this.fetchFilteredProducts({})
+  },
 
     openAddModal() { this.showAddModal = true },
     closeAddModal() { this.showAddModal = false },
@@ -441,21 +442,33 @@ export default {
     }
   },
   computed: {
-    activeTags() {
-      const tags = []
-      for (const [key, val] of Object.entries(this.currentFilters)) {
-        if (Array.isArray(val)) {
-          if (val.length === 2 && typeof val[0] === 'number') {
-            tags.push({ key, value: val, label: `${val[0]} – ${val[1]}` })
-          } else {
-            tags.push(...val.map(v => ({ key, value: v, label: `${v}` })))
-          }
-        } else if (val) {
-          tags.push({ key, value: val, label: `${val}` })
+     activeTags() {
+    const tags = []
+    for (const [key, val] of Object.entries(this.rawFilters)) {
+      // пропустити, якщо ніби базова категорія
+      if (key === 'category' || key === 'category_id') continue
+
+      if (Array.isArray(val)) {
+        // Повзунки: один тег "мін–макс"
+        if (['size','weight','price'].includes(key) && val.length === 2) {
+          tags.push({ key, value: val, label: `${val[0]} – ${val[1]}` })
+        }
+        // чекбокси: по одному тегу на кожен елемент
+        else {
+          val.forEach(v => {
+            tags.push({ key, value: v, label: String(v) })
+          })
         }
       }
-      return tags
+      // одиночні значення
+      else if (val !== '' && val != null) {
+        tags.push({ key, value: val, label: String(val) })
+      }
     }
+    return tags
   }
+
+}  
 }
+
 </script>

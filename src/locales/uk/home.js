@@ -19,6 +19,7 @@ userAccount: "Мій кабінет",
 contactUs: "Контакти",
 followUs: "Слідкуйте за нами",
 shopByCategory: "Купуйте за категорією",
+categories: "Категорії",
 recentlyViewed: "Останні переглянуті товари",
     loading: "Завантаження",            // ← новий ключ
     noResults: "Нічого не знайдено" 

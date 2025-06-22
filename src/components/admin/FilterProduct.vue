@@ -331,17 +331,14 @@ export default {
       window.scrollTo({ top: 0, behavior: 'smooth' })
       emit('applyFilters', cleaned) 
     }
+    
+    onMounted(loadFilters)
 
-    watch(() => props.initialFilters, () => {
-      applyInitialFilters()
-    }, { deep: true })
-
-    watch(() => props.categoryId, (newId, oldId) => {
-  if (newId !== oldId) {
-    loadFilters()
-  }
-})
-
+     watch(() => props.categoryId, (newId, oldId) => {
+    if (newId !== oldId) {
+      loadFilters()
+    }
+  })
 
     onMounted(() => {
       loadFilters()
