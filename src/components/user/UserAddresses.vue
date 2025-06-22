@@ -196,7 +196,7 @@
     <div v-else-if="addressAvailable && !loading && !showForm" class="bg-[#fff7f6] dark:bg-[#17223b] rounded-2xl shadow-lg p-6 space-y-4">
       <h2 class="text-2xl font-semibold text-gray-800 dark:text-white">{{ $t('user.yourAddress') }}</h2>
       <p class="text-gray-800 dark:text-gray-100"><strong>{{ $t('user.phone') }}:</strong> {{ phoneNumber }}</p>
-      <p class="text-gray-800 dark:text-gray-100"><strong>{{ $t('user.deliveryType') }}:</strong> {{ formData.deliveryName }}</p>
+      <p class="text-gray-800 dark:text-gray-100"><strong>{{ $t('user.deliveryType') }}:</strong> {{ displayDeliveryName }}</p>
 
       <template v-if="formData.deliveryType?.value === 'courier'">
         <p class="text-gray-700 whitespace-nowrap">
@@ -249,13 +249,14 @@ export default {
   },
   data() {
     return {
-          isEditingExisting: false,
-
+      isEditingExisting: false,
       selectedCity: null,
       selectedStreet: null,
       addressAvailable: false,
       showForm: false,
       savedDeliveryAddress: '',
+      savedDeliveryName: '',
+      savedDeliveryType: '',
       phoneNumber: "",
       formData: {
         city: "",
@@ -281,14 +282,52 @@ export default {
       deliveryOptions: []
     };
   },
-  created() {
-    this.fetchDeliveryTypes().then(() => this.fetchUserAddress());
-    if (!this.addressAvailable) {
-      this.fetchUserPhoneNumber();
-    }
-    this.debouncedFetchCities = this.debounce(this.fetchCities.bind(this), 300);
-  },
+  async created() {
+  await this.fetchDeliveryTypes();
+  await this.fetchUserAddress();
+  
+  if (!this.addressAvailable) {
+    this.fetchUserPhoneNumber();
+    
+    
+  }
+  
+  this.debouncedFetchCities = this.debounce(this.fetchCities.bind(this), 300);
+},
   methods: {
+
+    isStorePickupByName(name) {
+  if (!name || typeof name !== 'string') return false;
+  
+  const nameLower = name.toLowerCase().trim();
+  
+  // Exact matches for store pickup
+  const storePickupPatterns = [
+    'pickup from our stores',
+    'store pickup', 
+    'самовивіз з наших магазинів',
+    'pickup from stores',
+    'our stores pickup',
+    'магазин самовивіз'
+  ];
+  
+  // Direct exact match
+  if (storePickupPatterns.includes(nameLower)) {
+    return true;
+  }
+  
+  // Pattern matching for store pickup
+  const storePickupRegexes = [
+    /^pickup.*our.*stores?$/i,
+    /^store.*pickup$/i,
+    /^самовивіз.*наш.*магазин/i,
+    /^our.*stores?.*pickup$/i,
+    /магазин.*самовивіз/i,
+    /самовивіз.*магазин/i
+  ];
+  
+  return storePickupRegexes.some(regex => regex.test(nameLower));
+},
     formatPhoneNumber(e) {
       this.phoneNumber = e.target.value.replace(/\D/g, '').slice(0, 10);
     },
@@ -299,42 +338,151 @@ export default {
         timeout = setTimeout(() => func.apply(this, args), wait);
       };
     },
-    updateDeliveryOptions() {
-      const nameLower = (this.formData.deliveryType?.name || '').toLowerCase();
-      const value = this.formData.deliveryType?.value;
-
-      if (!this.addressAvailable) {
-        this.formData.selectedDeliveryMethod = this.formData.deliveryType;
-        this.formData.cityRef = '';
-        this.formData.streetSearch = '';
-        this.selectedCity = null;
-        this.selectedStreet = null;
-        this.deliveryAddress = { street: '', number: '', branch: '', postomat: '', warehouse: '' };
-        this.streets = [];
-        this.cities = [];
-        this.warehouses = [];
+    
+findDeliveryTypeByName(deliveryName) {
+  if (!deliveryName) return null;
+  
+  const nameLower = deliveryName.trim().toLowerCase();
+  
+  // EXACT MATCH first (case-insensitive)
+  let foundType = this.deliveryOptions.find(opt =>
+    opt.name.trim().toLowerCase() === nameLower
+  );
+  
+  if (foundType) {
+    console.log('[findDeliveryTypeByName] exact match found:', foundType);
+    return foundType;
+  }
+  
+  // Enhanced store pickup detection
+  if (this.isStorePickupByName(deliveryName)) {
+    foundType = this.deliveryOptions.find(opt => 
+      opt.isStorePickup === true || this.isStorePickupByName(opt.name)
+    );
+    if (foundType) {
+      console.log('[findDeliveryTypeByName] store pickup match:', foundType);
+      return foundType;
+    }
+  }
+  
+  // ВИПРАВЛЕННЯ: Покращена логіка пошуку з правильним маппінгом
+  const searchPatterns = [
+    // Кур'єр patterns - Ukrainian to standard
+    { 
+      pattern: /^кур.*пошт/i, 
+      finder: () => this.deliveryOptions.find(opt => opt.value === 'courier')
+    },
+    { 
+      pattern: /courier.*nova/i, 
+      finder: () => this.deliveryOptions.find(opt => opt.value === 'courier')
+    },
+    
+    // Pickup patterns with better specificity
+    { 
+      exact: 'самовивіз з нової пошти', 
+      finder: () => this.deliveryOptions.find(opt => 
+        opt.value === 'pickup' && 
+        !this.isStorePickupByName(opt.name) &&
+        (opt.name.toLowerCase().includes('nova poshta') || 
+         opt.name.toLowerCase().includes('нов') ||
+         opt.name.toLowerCase().includes('pickup'))
+      )
+    },
+    
+    // Postomat patterns
+    { 
+      pattern: /поштомат|postomat|post office/i, 
+      finder: () => this.deliveryOptions.find(opt => {
+        const optName = opt.name.toLowerCase();
+        return optName.includes('postomat') || 
+               optName.includes('post office') || 
+               optName.includes('поштомат');
+      })
+    },
+    
+    // Ukrposhta patterns
+    { 
+      pattern: /укрпошт|ukrpost/i, 
+      finder: () => this.deliveryOptions.find(opt => {
+        const optName = opt.name.toLowerCase();
+        return optName.includes('укрпошт') || optName.includes('ukrpost');
+      })
+    }
+  ];
+  
+  // Перевіряємо patterns
+  for (const { exact, pattern, finder } of searchPatterns) {
+    if (exact && nameLower === exact) {
+      foundType = finder();
+      if (foundType) {
+        console.log('[findDeliveryTypeByName] exact pattern match:', foundType);
+        return foundType;
       }
+    }
+    
+    if (pattern && pattern.test(nameLower)) {
+      foundType = finder();
+      if (foundType) {
+        console.log('[findDeliveryTypeByName] pattern match:', foundType);
+        return foundType;
+      }
+    }
+  }
+  
+  // Partial search as final fallback
+  foundType = this.deliveryOptions.find(opt => 
+    opt.name.toLowerCase().includes(nameLower) ||
+    nameLower.includes(opt.name.toLowerCase())
+  );
+  
+  if (foundType) {
+    console.log('[findDeliveryTypeByName] partial match:', foundType);
+  }
+  
+  return foundType;
+},
 
-      // Спецвипадок: самовивіз з наших магазинів / Pickup from our stores
-      if (this.formData.deliveryType?.value === 'pickup' && this.formData.deliveryType.isStorePickup) {
-  // Якщо нова адреса і користувач обрав саме “store pickup”
-  if (!this.addressAvailable ) {
+    updateDeliveryOptions() {
+  const value = this.formData.deliveryType?.value;
+  
+  console.log('[updateDeliveryOptions] called with value:', value);
+  console.log('[updateDeliveryOptions] current city:', this.formData.city);
+  console.log('[updateDeliveryOptions] isEditingExisting:', this.isEditingExisting);
+
+  // ВИПРАВЛЕННЯ: При редагуванні НЕ очищуємо дані!
+  if (!this.isEditingExisting && !this.addressAvailable) {
+    this.formData.selectedDeliveryMethod = this.formData.deliveryType;
+    this.formData.cityRef = '';
+    this.formData.streetSearch = '';
+    this.selectedCity = null;
+    this.selectedStreet = null;
+    this.deliveryAddress = { street: '', number: '', branch: '', postomat: '', warehouse: '' };
+    this.streets = [];
+    this.cities = [];
+    this.warehouses = [];
+  }
+
+  // Спецвипадок: самовивіз з наших магазинів
+  if (this.isStorePickup) {
+    // ВИПРАВЛЕННЯ: При store pickup ЗАВЖДИ встановлюємо Коломию
     this.formData.city = "Коломия";
     this.formData.cityRef = "db5c891f-391c-11dd-90d9-001a92567626";
+    this.selectedCity = { city: "Коломия", Ref: "db5c891f-391c-11dd-90d9-001a92567626" };
+    console.log('[updateDeliveryOptions] Set Kolomyia for store pickup');
+    return;
   }
-  return;
-}
 
+  // Завантажуємо дані для інших типів доставки
+  if (this.formData.city && this.formData.cityRef) {
+    if (value === 'pickup') this.fetchWarehouses();
+    if (value === 'courier') this.fetchStreets();
+  }
 
-      if (this.formData.city && this.formData.cityRef) {
-        if (value === 'pickup') this.fetchWarehouses();
-        if (value === 'courier') this.fetchStreets();
-      }
-
-      if (!this.formData.city && value === 'pickup') {
-        this.fetchCities();
-      }
-    },
+  if (!this.formData.city && value === 'pickup') {
+    this.fetchCities();
+  }
+},
+    
     onCitySearch(query) {
       this.formData.city = query;
       if (query.length < 2) {
@@ -356,6 +504,7 @@ export default {
         this.cities = [];
       });
     },
+    
     async fetchCities() {
       const token = localStorage.getItem("token");
       if (!this.formData.city) return;
@@ -379,6 +528,7 @@ export default {
         this.cities = [];
       }
     },
+    
     async fetchStreets() {
       if (!this.formData.city || !this.formData.cityRef) {
         this.streets = [];
@@ -403,6 +553,7 @@ export default {
         this.streets = [];
       }
     },
+    
     handleStreetSearch(event) {
       const value = event?.target?.value || '';
       this.formData.streetSearch = value;
@@ -412,6 +563,7 @@ export default {
       }
       this.fetchStreets();
     },
+    
     selectStreet(street) {
       this.selectedStreet = street;
       const streetName = street.street || street.Name;
@@ -419,217 +571,207 @@ export default {
       this.formData.streetSearch = streetName;
       this.streets = [];
     },
-     async fetchWarehouses() {
-    if (!this.formData.cityRef) {
-      this.warehouses = [];
-      return;
-    }
-    const token = localStorage.getItem("token");
-    try {
-      const response = await axios.get(
-        "https://koshtovnya.api-dev.bmax-edu.website/api/nova-poshta/ware-houses",
-        {
-          headers: { Authorization: `Bearer ${token}` },
-          params: {
-            city: this.formData.city,
-            Ref: this.formData.cityRef,
-            delivery_type: this.formData.deliveryType?.value
+    
+    async fetchWarehouses() {
+      if (!this.formData.cityRef) {
+        this.warehouses = [];
+        return;
+      }
+      const token = localStorage.getItem("token");
+      try {
+        const response = await axios.get(
+          "https://koshtovnya.api-dev.bmax-edu.website/api/nova-poshta/ware-houses",
+          {
+            headers: { Authorization: `Bearer ${token}` },
+            params: {
+              city: this.formData.city,
+              Ref: this.formData.cityRef,
+              delivery_type: this.formData.deliveryType?.value
+            }
           }
+        );
+        if (response.status === 200 && Array.isArray(response.data?.data)) {
+          const filtered = response.data.data.filter(w => {
+            const nameLower = (w.warehouse || '').toLowerCase();
+            if (this.isPostomatPickup) {
+              return (
+                nameLower.includes('поштомат') ||
+                nameLower.includes('postomat') ||
+                nameLower.includes('post office')
+              );
+            }
+            if (this.isBranchPickup) {
+              return (
+                !nameLower.includes('поштомат') &&
+                !nameLower.includes('postomat') &&
+                !nameLower.includes('post office')
+              );
+            }
+            return false;
+          });
+          this.warehouses = filtered.map((item, i) => ({
+            id: i + 1,
+            name: item.warehouse
+          }));
+        } else {
+          this.warehouses = [];
         }
-      );
-      if (response.status === 200 && Array.isArray(response.data?.data)) {
-        const filtered = response.data.data.filter(w => {
-          const nameLower = (w.warehouse || '').toLowerCase();
-          if (this.isPostomatPickup) {
-            return (
-              nameLower.includes('поштомат') ||
-              nameLower.includes('postomat') ||
-              nameLower.includes('post office')
-            );
-          }
-          if (this.isBranchPickup) {
-            return (
-              !nameLower.includes('поштомат') &&
-              !nameLower.includes('postomat') &&
-              !nameLower.includes('post office')
-            );
-          }
-          return false;
-        });
-        this.warehouses = filtered.map((item, i) => ({
-          id: i + 1,
-          name: item.warehouse
-        }));
-      } else {
+      } catch {
         this.warehouses = [];
       }
-    } catch {
-      this.warehouses = [];
-    }
-  },
+    },
+
    async fetchUserAddress() {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      this.$router.push("/login");
-      return;
-    }
-    this.loading = true;
-    try {
-      const response = await axios.get("https://koshtovnya.api-dev.bmax-edu.website/api/user-address", {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      console.log('[fetchUserAddress] response.data:', response.data);
-      if (response.data && response.data.data) {
-        const address = response.data.data;
-        console.log('[fetchUserAddress] address from API:', address);
+  const token = localStorage.getItem("token");
+  if (!token) {
+    this.$router.push("/login");
+    return;
+  }
+  this.loading = true;
+  try {
+    const response = await axios.get("https://koshtovnya.api-dev.bmax-edu.website/api/user-address", {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    
+    console.log('[fetchUserAddress] response.data:', response.data);
+    
+    if (response.data && response.data.data) {
+      const address = response.data.data;
+      console.log('[fetchUserAddress] address from API:', address);
 
-        // 1) Телефон
-        this.savedDeliveryAddress = address.delivery_address || '';
-        this.phoneNumber = address.phone_number || "";
-        console.log('[fetchUserAddress] phoneNumber set to:', this.phoneNumber);
+      // Зберігаємо оригінальні дані
+      this.savedDeliveryAddress = address.delivery_address || '';
+      this.savedDeliveryName = address.delivery_name || '';
+      this.savedDeliveryType = address.delivery_type || '';
+      this.phoneNumber = address.phone_number || "";
+      this.addressId = address.id;
 
-        // 2) DeliveryType: match по назві першочергово, потім по value
-        let foundType = null;
-        if (address.delivery_name) {
-          const nameLower = address.delivery_name.trim().toLowerCase();
-          foundType = this.deliveryOptions.find(opt =>
-            opt.name.trim().toLowerCase() === nameLower
-          );
-          console.log('[fetchUserAddress] try match deliveryType by name:', address.delivery_name, '=>', foundType);
-        }
-        if (!foundType) {
-          foundType = this.deliveryOptions.find(opt => opt.value === address.delivery_type);
-          console.log('[fetchUserAddress] fallback match deliveryType by value:', address.delivery_type, '=>', foundType);
-        }
-        this.formData.deliveryType = foundType || null;
-        this.formData.selectedDeliveryMethod = foundType || null;
-        console.log('[fetchUserAddress] formData.deliveryType after set:', this.formData.deliveryType);
+      // ВИПРАВЛЕННЯ: Спочатку очищуємо formData
+      this.formData = {
+        city: "",
+        cityRef: "",
+        deliveryType: null,
+        selectedDeliveryMethod: null,
+        deliveryName: "",
+        streetSearch: ""
+      };
+      this.deliveryAddress = { street: "", number: "", branch: "", postomat: "", warehouse: "" };
+      this.selectedCity = null;
+      this.selectedStreet = null;
 
-        // Після встановлення deliveryType можна викликати updateDeliveryOptions, щоб підготувати поля
-        await this.$nextTick();
-        console.log('[fetchUserAddress] calling updateDeliveryOptions...');
-        const maybe = this.updateDeliveryOptions();
-        if (maybe instanceof Promise) {
-          await maybe;
-        }
-        console.log('[fetchUserAddress] after updateDeliveryOptions:', {
-          isStore: this.isStorePickup,
-          isBranch: this.isBranchPickup,
-          isPostomat: this.isPostomatPickup
-        });
+      // Знаходимо відповідний deliveryType
+      let foundType = null;
+      
+      if (address.delivery_name) {
+        foundType = this.findDeliveryTypeByName(address.delivery_name);
+        console.log('[fetchUserAddress] found by name:', foundType);
+      }
+      
+      if (!foundType && address.delivery_type) {
+        foundType = this.deliveryOptions.find(opt => opt.value === address.delivery_type);
+        console.log('[fetchUserAddress] found by value:', foundType);
+      }
+      
+      if (!foundType && (address.delivery_type || address.delivery_name)) {
+        console.warn('[fetchUserAddress] Could not find delivery type, creating fallback');
+        foundType = {
+          id: 'fallback',
+          value: address.delivery_type || 'unknown',
+          name: address.delivery_name || 'Невідомий тип доставки',
+          label: address.delivery_type === 'pickup' ? this.$t('payment.delivery') : this.$t('payment.courier'),
+          isStorePickup: this.isStorePickupByName(address.delivery_name)
+        };
+      }
+      
+      // КРИТИЧНЕ ВИПРАВЛЕННЯ: Встановлюємо deliveryType ПІСЛЯ того як знайшли
+      if (foundType) {
+        this.formData.deliveryType = foundType;
+        this.formData.selectedDeliveryMethod = foundType;
+        this.formData.deliveryName = foundType.name;
+      }
 
-        // 3) City / cityRef
-        this.formData.city = address.city || "";
-        this.addressId = address.id;
-        // Якщо API повернув city_ref — використовуємо його напряму
-        if (address.city_ref) {
-          this.formData.cityRef = address.city_ref;
-          this.selectedCity = { city: address.city, Ref: address.city_ref };
-          console.log('[fetchUserAddress] using API city_ref:', address.city_ref);
-        } else if (address.city) {
-          // Якщо немає city_ref, пробуємо знайти по назві
-          this.formData.city = address.city;
-          console.log('[fetchUserAddress] city_ref empty, fetching cities by name:', address.city);
-          await this.fetchCities();
-          console.log('[fetchUserAddress] cities after fetchCities:', this.cities);
-          const matchByName = this.cities.find(c =>
-            c.city.trim().toLowerCase() === address.city.trim().toLowerCase()
-          );
-          if (matchByName) {
-            this.selectedCity = matchByName;
-            this.formData.city = matchByName.city;
-            this.formData.cityRef = matchByName.Ref;
-            console.log('[fetchUserAddress] matched city by name:', matchByName);
-          } else {
-            console.warn('[fetchUserAddress] Не знайшли місто за назвою у списку cities:', this.cities.map(c=>c.city));
-            // Якщо не знайшли — залишаємо тільки рядок this.formData.city, але Combobox може не відобразити як вибір
-          }
-        }
+      // ВИПРАВЛЕННЯ: Встановлюємо місто ПІСЛЯ deliveryType
+      if (address.city) {
+        this.formData.city = address.city;
+      }
+      if (address.city_ref) {
+        this.formData.cityRef = address.city_ref;
+        // ВАЖЛИВО: Створюємо selectedCity після встановлення formData.city
+        this.selectedCity = { 
+          city: address.city || this.formData.city, 
+          Ref: address.city_ref 
+        };
+      }
 
-        // 4) deliveryAddress
-        this.deliveryAddress = { street: "", number: "", branch: "", postomat: "", warehouse: "" };
-
-        if (address.delivery_type === "pickup") {
-          // Якщо є cityRef — fetchWarehouses
+      // Обробляємо адресу залежно від типу доставки
+      if (address.delivery_type === "pickup") {
+        const deliveryAddr = address.delivery_address || '';
+        const deliveryName = address.delivery_name || '';
+        
+        // Перевіряємо чи це store pickup
+        if (this.isStorePickupByName(deliveryName) || this.isStorePickupByName(foundType?.name)) {
+          // ВИПРАВЛЕННЯ: Для store pickup ЗАВЖДИ встановлюємо Коломию
+          this.formData.city = 'Коломия';
+          this.formData.cityRef = 'db5c891f-391c-11dd-90d9-001a92567626';
+          this.selectedCity = { city: 'Коломия', Ref: 'db5c891f-391c-11dd-90d9-001a92567626' };
+        } else {
+          // Для інших pickup завантажуємо warehouses
           if (this.formData.cityRef) {
-            console.log('[fetchUserAddress] fetching warehouses with cityRef:', this.formData.cityRef);
             await this.fetchWarehouses();
-            console.log('[fetchUserAddress] warehouses:', this.warehouses);
-            const addrStr = address.delivery_address || '';
-            // Спробуємо точний match
-            let matchWh = this.warehouses.find(w => w.name === addrStr);
-            if (!matchWh) {
-              // Спроба часткового match
-              matchWh = this.warehouses.find(w => addrStr.includes(w.name) || w.name.includes(addrStr));
-            }
-            if (matchWh) {
-              if (this.isPostomatPickup) {
-                this.deliveryAddress.postomat = matchWh.name;
-              } else {
-                this.deliveryAddress.branch = matchWh.name;
-              }
-              console.log('[fetchUserAddress] matched warehouse entry:', matchWh);
+            
+            const isPostomat = deliveryAddr.toLowerCase().includes('поштомат') || 
+                              deliveryAddr.toLowerCase().includes('postomat') || 
+                              deliveryAddr.toLowerCase().includes('post office') ||
+                              deliveryName.toLowerCase().includes('postomat') ||
+                              deliveryName.toLowerCase().includes('поштомат');
+            
+            if (isPostomat) {
+              this.deliveryAddress.postomat = deliveryAddr;
             } else {
-              console.warn('[fetchUserAddress] No matching warehouse for:', addrStr);
+              this.deliveryAddress.branch = deliveryAddr;
             }
           }
-          // Якщо немає cityRef і не вдалось знайти — пропускаємо
         }
-        else if (address.delivery_type === "courier") {
-          // Завантажуємо вулиці
-          console.log('[fetchUserAddress] courier: fetching streets...');
+      } else if (address.delivery_type === "courier") {
+        // Обробка кур'єрської доставки
+        if (this.formData.cityRef) {
           await this.fetchStreets();
-          console.log('[fetchUserAddress] streets after fetchStreets:', this.streets);
-
-          // Розбиваємо address.delivery_address на street/number
-          const full = address.delivery_address || '';
-          let streetPart = '', numberPart = '';
-          if (full.includes(' ')) {
-            const parts = full.trim().split(' ');
-            numberPart = parts.pop();
-            streetPart = parts.join(' ');
-          } else {
-            streetPart = full;
-          }
-          console.log('[fetchUserAddress] parsed streetPart, numberPart:', streetPart, numberPart);
-
-          // Спроба точного match в списку this.streets
+        }
+        
+        const fullAddress = address.delivery_address || '';
+        if (fullAddress.includes(' ')) {
+          const parts = fullAddress.trim().split(' ');
+          const numberPart = parts.pop();
+          const streetPart = parts.join(' ');
+          
+          this.deliveryAddress.street = streetPart;
+          this.deliveryAddress.number = numberPart;
+          this.formData.streetSearch = streetPart;
+          
           const matchStreet = this.streets.find(s => {
             const name = s.street || s.Name;
             return name === streetPart;
           });
-          console.log('[fetchUserAddress] matched street:', matchStreet);
+          
           if (matchStreet) {
             this.selectedStreet = matchStreet;
           } else {
-            console.warn('[fetchUserAddress] No exact match for street; streets list names:', this.streets.map(s=>s.street||s.Name));
-            // Можна створити об’єкт для відображення:
             this.selectedStreet = { street: streetPart };
           }
-          this.deliveryAddress.street = streetPart;
-          this.deliveryAddress.number = numberPart;
-          this.formData.streetSearch = streetPart;
         }
-
-        this.addressAvailable = true;
-        console.log('[fetchUserAddress] final formData:', {
-          deliveryType: this.formData.deliveryType,
-          city: this.formData.city,
-          cityRef: this.formData.cityRef,
-          selectedCity: this.selectedCity,
-          deliveryAddress: this.deliveryAddress,
-          selectedStreet: this.selectedStreet
-        });
-      } else {
-        this.addressAvailable = false;
       }
-    } catch (error) {
-      console.error("[fetchUserAddress] Помилка отримання адреси:", error);
+
+      this.addressAvailable = true;
+    } else {
       this.addressAvailable = false;
-    } finally {
-      this.loading = false;
     }
-  },
+  } catch (error) {
+    console.error("[fetchUserAddress] Помилка отримання адреси:", error);
+    this.addressAvailable = false;
+  } finally {
+    this.loading = false;
+  }
+},
 
 
     async fetchUserPhoneNumber() {
@@ -654,12 +796,12 @@ export default {
         for (const [type, items] of Object.entries(groups)) {
           const label = type === 'pickup' ? this.$t('payment.delivery') : this.$t('payment.courier');
           items.forEach(item => {
-            opts.push({
+           opts.push({
   id: item.id,
-  value: item.delivery_type, // 'pickup'
-  name: item.name,           // наприклад 'Pickup from our stores' або інша назва
+  value: item.delivery_type,
+  name: item.name,
   label,
-  isStorePickup: item.name === 'Pickup from our stores' // або інша умова
+  isStorePickup: this.isStorePickupByName(item.name) // нова функція
 });
           });
         }
@@ -668,62 +810,80 @@ export default {
         toast.error(this.$t('user.loadDeliveryError'));
       }
     },
-    async submitAddress() {
-      if (!this.validateForm()) {
-        toast.error(this.$t('user.fillRequiredFields') || 'Будь ласка, заповніть усі обовʼязкові поля');
-        return;
-      }
-      const token = localStorage.getItem("token");
-      if (!token) {
-        this.$router.push("/login");
-        return;
-      }
-      let deliveryAddressValue = '';
-      const method = this.formData.selectedDeliveryMethod || this.formData.deliveryType;
-      if (this.formData.deliveryType?.value === "courier") {
-        deliveryAddressValue = `${this.deliveryAddress.street} ${this.deliveryAddress.number}`;
-      } else if (this.formData.deliveryType?.value === "pickup") {
-        if (this.isStorePickup) {
-          deliveryAddressValue = "вул. Степана Бандери 22, Коломия";
-        } else if (this.isPostomatPickup) {
-          deliveryAddressValue = this.deliveryAddress.postomat;
-        } else {
-          deliveryAddressValue = this.deliveryAddress.branch;
-        }
-      }
-      const deliveryName = this.formData.deliveryType?.value === "courier"
-        ? "Кур'єр Нової Пошти"
-        : (method?.name || this.formData.deliveryType?.name);
-      const postData = {
-        phone_number: this.phoneNumber?.trim(),
-        city: this.formData.city?.trim(),
-        city_ref: this.formData.cityRef,
-        delivery_type: this.formData.deliveryType?.value,
-        delivery_name: deliveryName?.trim(),
-        delivery_address: deliveryAddressValue?.trim()
-      };
-      try {
-        let response;
-        if (this.addressAvailable) {
-          response = await axios.patch(
-            `https://koshtovnya.api-dev.bmax-edu.website/api/user-address/${this.addressId}`,
-            postData,
-            { headers: { Authorization: `Bearer ${token}` } }
-          );
-        } else {
-          response = await axios.post(
-            "https://koshtovnya.api-dev.bmax-edu.website/api/user-address",
-            postData,
-            { headers: { Authorization: `Bearer ${token}` } }
-          );
-        }
-        toast.success(this.$t('user.addressSaved') || 'Адресу успішно збережено');
-        this.fetchUserAddress();
-        this.showForm = false;
-      } catch {
-        toast.error(this.$t('user.saveAddressError') || 'Не вдалося зберегти адресу');
-      }
-    },
+  async submitAddress() {
+  if (!this.validateForm()) {
+    toast.error(this.$t('user.fillRequiredFields') || 'Будь ласка, заповніть усі обов\'язкові поля');
+    return;
+  }
+  
+  const token = localStorage.getItem("token");
+  if (!token) {
+    this.$router.push("/login");
+    return;
+  }
+  
+  let deliveryAddressValue = '';
+  const method = this.formData.selectedDeliveryMethod || this.formData.deliveryType;
+  
+  if (this.formData.deliveryType?.value === "courier") {
+    deliveryAddressValue = `${this.deliveryAddress.street} ${this.deliveryAddress.number}`;
+  } else if (this.formData.deliveryType?.value === "pickup") {
+    if (this.isStorePickup) {
+      deliveryAddressValue = "вул. Степана Бандери 22, Коломия";
+    } else if (this.isPostomatPickup) {
+      deliveryAddressValue = this.deliveryAddress.postomat;
+    } else {
+      deliveryAddressValue = this.deliveryAddress.branch;
+    }
+  }
+  
+  // ВИПРАВЛЕННЯ: Правильно формуємо назву доставки
+  let deliveryName;
+  if (this.formData.deliveryType?.value === "courier") {
+    deliveryName = "Кур'єр Нової Пошти";
+  } else {
+    // Для pickup використовуємо оригінальну назву з опцій
+    deliveryName = this.formData.deliveryType?.name;
+  }
+  
+  const postData = {
+    phone_number: this.phoneNumber?.trim(),
+    city: this.formData.city?.trim(),
+    city_ref: this.formData.cityRef,
+    delivery_type: this.formData.deliveryType?.value,
+    delivery_name: deliveryName?.trim(),
+    delivery_address: deliveryAddressValue?.trim()
+  };
+  
+  console.log('[submitAddress] Sending data:', postData);
+  
+  try {
+    let response;
+    if (this.addressAvailable) {
+      response = await axios.patch(
+        `https://koshtovnya.api-dev.bmax-edu.website/api/user-address/${this.addressId}`,
+        postData,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+    } else {
+      response = await axios.post(
+        "https://koshtovnya.api-dev.bmax-edu.website/api/user-address",
+        postData,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+    }
+    
+    toast.success(this.$t('user.addressSaved') || 'Адресу успішно збережено');
+    
+    // ВИПРАВЛЕННЯ: Оновлюємо дані після збереження
+    this.showForm = false;
+    await this.fetchUserAddress(); // Це оновить всі дані з сервера
+    
+  } catch (error) {
+    console.error('Error saving address:', error);
+    toast.error(this.$t('user.saveAddressError') || 'Не вдалося зберегти адресу');
+  }
+},
     resetAddressForm() {
       this.phoneNumber = "";
       this.formData.city = "";
@@ -782,95 +942,173 @@ export default {
         toast.error(this.$t('user.deleteAddressError') || 'Не вдалося видалити адресу');
       }
     },
-    editAddress() {
-      this.showForm = true;
-      this.formData.selectedDeliveryMethod = this.formData.deliveryType;
-      const deliveryType = this.formData.deliveryType?.value;
-      if (this.formData.city && this.formData.cityRef) {
-        this.selectedCity = { city: this.formData.city, Ref: this.formData.cityRef };
-      }
-      if (deliveryType === 'courier') {
-        if (this.savedDeliveryAddress) {
-          const full = this.savedDeliveryAddress.trim();
-          const split = full.split(' ');
-          const number = split.pop();
-          const street = split.join(' ');
-          this.deliveryAddress.street = street;
-          this.deliveryAddress.number = number;
-          this.formData.streetSearch = street;
-          this.selectedStreet = { street };
-        }
-      }
-      if (deliveryType === 'pickup') {
-        const lower = this.savedDeliveryAddress?.toLowerCase() || '';
-        if (this.isStorePickup) {
-          this.formData.city = 'Коломия';
-          this.formData.cityRef = 'db5c891f-391c-11dd-90d9-001a92567626';
-        } else if (lower.includes('поштомат') || lower.includes('postomat') || lower.includes('post office')) {
-          this.deliveryAddress.postomat = this.savedDeliveryAddress;
-        } else if (lower.includes('відділення') || lower.includes('post office')) {
-          this.deliveryAddress.branch = this.savedDeliveryAddress;
-        } else {
-          this.deliveryAddress.branch = this.savedDeliveryAddress;
-        }
-      }
-      this.$nextTick(async () => {
-        await this.updateDeliveryOptions();
-        this.formData.selectedDeliveryMethod = this.formData.deliveryType;
-        if (deliveryType === 'courier') {
-          await this.fetchStreets();
-        }
-        if (deliveryType === 'pickup') {
-          await this.fetchWarehouses();
-        }
-        this.$nextTick(() => {
-          this.selectedCity = { city: this.formData.city, Ref: this.formData.cityRef };
-          if (this.deliveryAddress.street) {
-            this.selectedStreet = { street: this.deliveryAddress.street };
-          }
-        });
-      });
-    },
-      openForm() {
-    this.isEditingExisting = false;
-    this.showForm = true;
-    this.resetAddressForm();
-    if (!this.phoneNumber) this.fetchUserPhoneNumber();
-  },
+ async editAddress() {
+  this.showForm = true;
+  this.isEditingExisting = true;
+  
+  // ВИПРАВЛЕННЯ: НЕ очищуємо formData при редагуванні!
+  // Дані вже встановлені в fetchUserAddress
+  
+  console.log('[editAddress] Current formData:', this.formData);
+  console.log('[editAddress] Current selectedCity:', this.selectedCity);
+  console.log('[editAddress] Current deliveryType:', this.formData.deliveryType);
+  
+  // Встановлюємо selectedDeliveryMethod
+  if (this.formData.deliveryType) {
+    this.formData.selectedDeliveryMethod = this.formData.deliveryType;
+  }
+  
+  const deliveryType = this.formData.deliveryType?.value;
+  
+  // ВИПРАВЛЕННЯ: Переконуємося що selectedCity встановлено
+  if (this.formData.city && this.formData.cityRef && !this.selectedCity) {
+    this.selectedCity = { city: this.formData.city, Ref: this.formData.cityRef };
+  }
+  
+  // Завантажуємо необхідні дані асинхронно
+  this.$nextTick(async () => {
+    // Спочатку оновлюємо опції доставки
+    await this.updateDeliveryOptions();
+    
+    // Завантажуємо дані залежно від типу доставки
+    if (deliveryType === 'courier' && this.formData.cityRef) {
+      await this.fetchStreets();
+    }
+    
+    if (deliveryType === 'pickup' && !this.isStorePickup && this.formData.cityRef) {
+      await this.fetchWarehouses();
+    }
+    
+    // Переконуємося що всі значення встановлені правильно
+    this.$nextTick(() => {
+      console.log('[editAddress] After async loading:');
+      console.log('- formData.city:', this.formData.city);
+      console.log('- selectedCity:', this.selectedCity);
+      console.log('- deliveryType:', this.formData.deliveryType);
+      console.log('- isStorePickup:', this.isStorePickup);
+    });
+  });
+},
+  openForm() {
+  this.isEditingExisting = false;
+  this.showForm = true;
+  
+  // ВИПРАВЛЕННЯ: Правильно очищуємо форму тільки для нової адреси
+  this.formData = {
+    city: "",
+    cityRef: "",
+    deliveryType: null,
+    selectedDeliveryMethod: null,
+    deliveryName: "",
+    streetSearch: ""
+  };
+  this.deliveryAddress = { street: "", number: "", branch: "", postomat: "", warehouse: "" };
+  this.selectedCity = null;
+  this.selectedStreet = null;
+  this.addressId = null;
+  
+  if (!this.phoneNumber) {
+    this.fetchUserPhoneNumber();
+  }
+},
 
-    cancelEdit() {
-      this.showForm = false;
+   cancelEdit() {
+  this.showForm = false;
+  this.isEditingExisting = false;
+  
+  // ВИПРАВЛЕННЯ: При скасуванні редагування відновлюємо дані з сервера
+  if (this.addressAvailable) {
+    this.fetchUserAddress();
+  }
     }
   },
   computed: {
-    displayAddress() {
-      if (this.formData.deliveryType?.value === 'courier') {
-        return this.deliveryAddress.street && this.deliveryAddress.number
-          ? `${this.deliveryAddress.street} ${this.deliveryAddress.number}`
-          : this.savedDeliveryAddress || '(не вказано)';
-      }
-      if (this.formData.deliveryType?.value === 'pickup') {
-        if (this.deliveryAddress.branch) return this.deliveryAddress.branch;
-        if (this.deliveryAddress.postomat) return this.deliveryAddress.postomat;
-      }
-      return this.savedDeliveryAddress || '(не вказано)';
-    },
-      isStorePickup() {
-    return this.formData.deliveryType?.value === 'pickup'
-      && this.formData.deliveryType.isStorePickup === true;
+     isPostomatPickup() {
+    const currentName = (this.formData.deliveryType?.name || '').toLowerCase();
+    const savedName = (this.savedDeliveryName || '').toLowerCase();
+    
+    // ВИПРАВЛЕННЯ: Перевіряємо також поточну адресу
+    const currentAddress = (this.deliveryAddress.postomat || '').toLowerCase();
+    const savedAddress = (this.savedDeliveryAddress || '').toLowerCase();
+    
+    return currentName.includes('поштомат') ||
+           currentName.includes('postomat') ||
+           currentName.includes('post office') ||
+           savedName.includes('поштомат') ||
+           savedName.includes('postomat') ||
+           savedName.includes('post office') ||
+           currentAddress.includes('поштомат') ||
+           currentAddress.includes('postomat') ||
+           savedAddress.includes('поштомат') ||
+           savedAddress.includes('postomat');
   },
-    isPostomatPickup() {
-      const name = (this.formData.deliveryType?.name || '').toLowerCase();
-      return name.includes('поштомат')
-          || name.includes('postomat')
-          || name.includes('post office');
-    },
-    isBranchPickup() {
-      // будь-який pickup не store та не postomat вважаємо branch
-      if (this.formData.deliveryType?.value !== 'pickup') return false;
-      return !this.isStorePickup && !this.isPostomatPickup;
-    },
-    isNovaPoshtaPickup() {
+  
+  isStorePickup() {
+    if (this.formData.deliveryType?.value !== 'pickup') return false;
+    
+    return this.formData.deliveryType.isStorePickup === true ||
+           this.isStorePickupByName(this.formData.deliveryType?.name) ||
+           this.isStorePickupByName(this.savedDeliveryName);
+  },
+  
+  displayDeliveryName() {
+    // ВИПРАВЛЕННЯ: Використовуємо актуальні дані з formData
+    const currentType = this.formData.deliveryType;
+    const deliveryType = currentType?.value || this.savedDeliveryType;
+    
+    if (deliveryType === 'courier') {
+      return this.$t('user.delivery.courierNovaPoshta') || 'Кур\'єр Нової Пошти';
+    }
+    
+    if (deliveryType === 'pickup') {
+      const currentName = currentType?.name;
+      const savedName = this.savedDeliveryName;
+      
+      // Перевіряємо store pickup
+      if (this.isStorePickup) {
+        return this.$t('user.delivery.storePickup') || 'Самовивіз з наших магазинів';
+      }
+      
+      // Перевіряємо postomat
+      if (this.isPostomatPickup) {
+        return this.$t('user.delivery.postomat') || 'Поштомат';
+      }
+      
+      // Повертаємо поточну назву або збережену
+      return currentName || savedName || this.$t('payment.delivery');
+    }
+    
+    return currentType?.name || this.savedDeliveryName || '(тип доставки не вказано)';
+  },
+  
+  displayAddress() {
+    if (this.formData.deliveryType?.value === 'courier') {
+      return this.deliveryAddress.street && this.deliveryAddress.number
+        ? `${this.deliveryAddress.street} ${this.deliveryAddress.number}`
+        : this.savedDeliveryAddress || '(не вказано)';
+    }
+    
+    if (this.formData.deliveryType?.value === 'pickup') {
+      if (this.isStorePickup) {
+        return this.$t('user.pickupAddress') || 'вул. Степана Бандери 22, Коломия';
+      }
+      
+      // ВИПРАВЛЕННЯ: Правильно показуємо відповідну адресу
+      if (this.isPostomatPickup) {
+        return this.deliveryAddress.postomat || this.savedDeliveryAddress || '(не вказано)';
+      } else {
+        return this.deliveryAddress.branch || this.savedDeliveryAddress || '(не вказано)';
+      }
+    }
+    
+    return this.savedDeliveryAddress || '(не вказано)';
+  },
+
+   isBranchPickup() {
+    if (this.formData.deliveryType?.value !== 'pickup') return false;
+    return !this.isStorePickup && !this.isPostomatPickup;
+  },
+   isNovaPoshtaPickup() {
       const name = this.formData.deliveryType?.name || '';
       return name === 'Самовивіз з Нової Пошти'
           || name.toLowerCase().includes('nova poshta');

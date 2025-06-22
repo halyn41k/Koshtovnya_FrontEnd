@@ -3,6 +3,7 @@ import router from '@/router';
 import i18n from '@/i18n';              // ваш Vue I18n–екземпляр
 import { createToastInterface } from 'vue-toastification';
 import 'vue-toastification/dist/index.css';
+import qs    from 'qs'
 
 const toast = createToastInterface({
   position: 'top-right',
@@ -17,7 +18,7 @@ const toast = createToastInterface({
 function showToast(type, ukMessageKey, originalMessage = '') {
   const storedLang = localStorage.getItem('language');
   const currentLang = storedLang || i18n.global.locale.value || 'uk';
-  const msg = i18n.t(ukMessageKey);
+  const msg = i18n.global.t(ukMessageKey);
   // якщо бек повернув свою тексту, показуємо її у оригінальному вигляді
   const detail = originalMessage || msg;
   toast[type](detail);

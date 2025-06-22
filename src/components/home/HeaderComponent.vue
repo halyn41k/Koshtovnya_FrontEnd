@@ -200,11 +200,11 @@
                    max-h-[400px] overflow-y-auto font-base"
           >
             <div v-if="loading" class="p-4 text-center text-gray-600">
-              Завантаження<span class="loading-dots"></span>
+              {{ $t('home.loading') }}<span class="loading-dots"></span>
             </div>
             <div v-else>
               <div v-if="results.length === 0" class="p-4 text-center text-gray-500">
-                Нічого не знайдено
+                {{ $t('home.noResults') }}
               </div>
               <ul v-else>
                 <li

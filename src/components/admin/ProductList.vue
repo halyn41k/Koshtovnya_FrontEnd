@@ -44,31 +44,27 @@
       </div>
 
       <!-- Поле пошуку -->
-<div class="relative w-80 ml-auto">
-  <input
-    v-model="searchQuery"
-    @input="onSearch"
-    type="text"
-    :placeholder="$t('admin.products.search')"
-    class="w-full pl-10 pr-4 py-2 border border-[#E0E0E0] dark:border-[#303b59] dark:bg-[#17223b] dark:text-white rounded focus:outline-none focus:ring focus:ring-pink-200 text-sm"
-  />
+      <div class="relative w-80 ml-auto">
+        <input
+          v-model="searchQuery"
+          @input="onSearch"
+          type="text"
+          :placeholder="$t('admin.products.search')"
+          class="w-full pl-10 pr-4 py-2 border border-[#E0E0E0] dark:border-[#303b59] dark:bg-[#17223b] dark:text-white rounded focus:outline-none focus:ring focus:ring-pink-200 text-sm"
+        />
 
-  <img
-    src="@/assets/icons/search.svg"
-    alt="Search"
-    class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 pointer-events-none dark:invert"
-  />
-</div>
-
+        <img
+          src="@/assets/icons/search.svg"
+          alt="Search"
+          class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 pointer-events-none dark:invert"
+        />
+      </div>
     </div>
 
     <!-- Фільтр праворуч -->
     <div v-if="showFilter" class="fixed inset-0 z-[9998]" @click.self="closeFilter">
       <FilterProduct
-           class="fixed top-0 right-0 bottom-0 z-[9999]
-          bg-[#fff7f6] dark:bg-[#17223b] 
-          text-black dark:text-white     
-          w-[350px] shadow-xl"
+        class="fixed top-0 right-0 bottom-0 z-[9999] bg-[#fff7f6] dark:bg-[#17223b] text-black dark:text-white w-[350px] shadow-xl"
         :initialFilters="currentFilters"
         @applyFilters="applyFilters"
         @closeFilter="closeFilter"
@@ -120,17 +116,17 @@
             <img :src="product.image_url" alt="Product image" class="w-26 h-14 object-cover rounded-md" />
           </div>
           <div class="flex flex-col gap-1">
-<div class="text-base font-semibold text-red-900 dark:text-red-200">
-  {{ formatPrice(product.price, product.currency) }}
-</div>
+            <div class="text-base font-semibold text-red-900 dark:text-red-200">
+              {{ formatPrice(product.price, product.currency) }}
+            </div>
             <div class="text-sm text-gray-700 dark:text-gray-400">{{ product.bead_producer_name }}</div>
           </div>
         </div>
       </div>
     </div>
 
-    <div      
-    v-else-if="!searchQuery"
+    <div
+      v-else-if="!searchQuery"
       class="flex items-center justify-center border border-[#E0E0E0] dark:border-[#444] bg-gray-50 dark:bg-[#2a2a2a] rounded-lg mt-10 h-48 font-semibold text-sm text-gray-700 dark:text-gray-300"
     >
       {{ $t('admin.products.noProducts') }}
@@ -172,22 +168,21 @@
         &gt;
       </button>
     </div>
-
-    
   </main>
+
   <!-- Модалки -->
-    <AddProductModal v-if="showAddModal" @close="closeAddModal" @product-added="onProductAdded" />
-    <EditProductModal v-if="showEditModal" :product="selectedProduct" @close="closeEditModal" @product-updated="onProductUpdated" />
-    <DeleteProductModal v-if="showDeleteModal" :product="selectedProduct" @close="closeDeleteModal" @product-deleted="onProductDeleted" />
-    <ProductDetailModal
-      v-if="showDetailModal && productDetails"
-      :product="productDetails"
-      :visible="showDetailModal"
-      @close="showDetailModal = false"
-      @edit="openUpdateModal"
-      @delete="deleteProduct"
-      @restore="restoreProduct"
-    />
+  <AddProductModal v-if="showAddModal" @close="closeAddModal" @product-added="onProductAdded" />
+  <EditProductModal v-if="showEditModal" :product="selectedProduct" @close="closeEditModal" @product-updated="onProductUpdated" />
+  <DeleteProductModal v-if="showDeleteModal" :product="selectedProduct" @close="closeDeleteModal" @product-deleted="onProductDeleted" />
+  <ProductDetailModal
+    v-if="showDetailModal && productDetails"
+    :product="productDetails"
+    :visible="showDetailModal"
+    @close="showDetailModal = false"
+    @edit="openUpdateModal"
+    @delete="deleteProduct"
+    @restore="restoreProduct"
+  />
 </template>
 
 <script>
@@ -197,8 +192,6 @@ import EditProductModal from './EditProductModal.vue'
 import DeleteProductModal from './DeleteProductModal.vue'
 import ProductDetailModal from './ProductDetailModal.vue'
 import api from '@/services/api';
-import { ref, reactive, watch, onMounted, computed, watchEffect } from 'vue'
-import { useI18n } from 'vue-i18n'
 
 export default {
   name: 'ProductList',
@@ -227,7 +220,6 @@ export default {
     }
   },
   methods: {
-    // Відкрити деталі через api
     async openProductDetails(productId) {
       try {
         const base = this.products.find(p => p.id === productId)
@@ -241,19 +233,12 @@ export default {
 
     goToPage(url) {
       if (!url || this.searchQuery.trim()) return;
-      // Викликаємо fetchProducts, передавши повний URL
       this.fetchProducts(url, null)
     },
 
-    // Фільтрація
     async fetchFilteredProducts(filters) {
       try {
-        const paramsObj = {}
-        Object.entries(filters).forEach(([key, val]) => {
-          paramsObj[key] = val
-        })
-        // Виклик через сервіс: повертає { data, meta, links }
-        const resp = await api.getAdminProducts({ params: paramsObj })
+        const resp = await api.getAdminProducts({ params: filters })
         this.products = resp.data || []
         this.meta = resp.meta || null
       } catch (err) {
@@ -263,30 +248,25 @@ export default {
       }
     },
 
-    // Завантажити сторінку товарів (пагінація, пошук, фільтри)
     async fetchProducts(url = null, page = 1) {
       try {
         const paramsObj = { ...this.currentFilters }
-        if (this.searchQuery.trim()) {
-          paramsObj.search = this.searchQuery.trim()
-        }
-        if (page != null) {
-          paramsObj.page = page
-        }
+        if (this.searchQuery.trim()) paramsObj.search = this.searchQuery.trim()
+        if (page != null) paramsObj.page = page
+
         let resp
         if (url) {
-          // Якщо передано повний URL, витягуємо відносний шлях + пошуковий рядок
           try {
             const u = new URL(url)
             const relative = u.pathname + u.search
             resp = await api.getAdminProducts({ url: relative, params: paramsObj })
-          } catch (e) {
-            // Якщо не вдалося розпарсити як URL, передаємо його як відносний
+          } catch {
             resp = await api.getAdminProducts({ url, params: paramsObj })
           }
         } else {
           resp = await api.getAdminProducts({ params: paramsObj })
         }
+
         this.products = resp.data || []
         this.meta = this.searchQuery.trim() ? null : (resp.meta || null)
       } catch (error) {
@@ -305,11 +285,8 @@ export default {
     onSearch() {
       clearTimeout(this.searchTimeout);
       this.searchTimeout = setTimeout(() => {
-        if (this.searchQuery.trim()) {
-          this.fetchSearchedProducts(this.searchQuery)
-        } else {
-          this.fetchProducts()
-        }
+        if (this.searchQuery.trim()) this.fetchSearchedProducts(this.searchQuery)
+        else this.fetchProducts()
       }, 400);
     },
 
@@ -318,12 +295,7 @@ export default {
       if (!search) return this.fetchProducts()
       try {
         const resp = await api.searchProducts(search)
-        let list = []
-        if (Array.isArray(resp)) {
-          list = resp
-        } else if (resp.data && Array.isArray(resp.data)) {
-          list = resp.data
-        }
+        const list = Array.isArray(resp) ? resp : (Array.isArray(resp.data) ? resp.data : [])
         this.products = list.sort((a, b) => b.id - a.id)
         this.meta = null
       } catch (error) {
@@ -333,16 +305,15 @@ export default {
       }
     },
 
-  formatPrice(price, currency) {
-    const val = Number(price)
-    const curr = (currency || 'UAH').toUpperCase()
-    const locale = curr === 'USD' ? 'en-US' : 'uk-UA'
-
-    return new Intl.NumberFormat(locale, {
-      style: 'currency',
-      currency: curr
-    }).format(val)
-  },
+    formatPrice(price, currency) {
+      const val = Number(price)
+      const curr = (currency || 'UAH').toUpperCase()
+      const locale = curr === 'USD' ? 'en-US' : 'uk-UA'
+      return new Intl.NumberFormat(locale, {
+        style: 'currency',
+        currency: curr
+      }).format(val)
+    },
 
     paginationLinks() {
       if (!this.meta || this.meta.last_page <= 1) return []
@@ -352,7 +323,6 @@ export default {
         active: this.meta.current_page === i + 1
       }))
     },
-    
 
     async restoreProduct(id) {
       try {
@@ -366,49 +336,65 @@ export default {
     openFilter() { this.showFilter = true },
     closeFilter() { this.showFilter = false },
 
-    applyFilters(raw) {
-    this.currentFilters = { ...raw }
-    this.fetchFilteredProducts(this.currentFilters)
+   applyFilters(rawFilters) {
+    const adapted = {}
+    this.rawFilters = { ...rawFilters }
+
+    // Ось тут ми дивимося на вже числові 0/1 в rawFilters.availability
+    if (Array.isArray(rawFilters.availability) && rawFilters.availability.length) {
+      // Laravel чекає масив рядків, тому toString()
+      adapted.is_available = rawFilters.availability.map(v => v.toString())
+    }
+
+    // Інші фільтри
+    if (rawFilters.rating?.length)    adapted.rating        = rawFilters.rating
+    if (rawFilters.color)             adapted.color         = rawFilters.color
+    if (rawFilters.producers?.length) adapted.bead_producer = rawFilters.producers
+    if (rawFilters.type_of_bead?.length) adapted.type_of_bead = rawFilters.type_of_bead
+    if (rawFilters.category?.length)  adapted.category      = rawFilters.category
+
+    // Діапазони
+    if (rawFilters.size) {
+      adapted.size_from = rawFilters.size[0]
+      adapted.size_to   = rawFilters.size[1]
+    }
+    if (rawFilters.weight) {
+      adapted.weight_from = rawFilters.weight[0]
+      adapted.weight_to   = rawFilters.weight[1]
+    }
+    if (rawFilters.price) {
+      adapted.price_from = rawFilters.price[0]
+      adapted.price_to   = rawFilters.price[1]
+    }
+
+    console.log('🔎 Payload to API:', adapted)
+    this.currentFilters = adapted
+    sessionStorage.setItem('admin-filters', JSON.stringify(adapted))
+    this.fetchFilteredProducts(adapted)
     this.closeFilter()
   },
-  removeTag(tag) {
-    // 1) зробити копію сирих фільтрів
-    const nf = { ...this.rawFilters }
 
-    // 2) якщо це повзунок (size/weight/price) — видалити всю пару
-    if (['size','weight','price'].includes(tag.key)) {
-      delete nf[tag.key]
-    }
-    // 3) якщо це чекбокси (доступність, рейтинг, beadTypes, producers, category) — прибрати тільки одне значення
-    else if (Array.isArray(nf[tag.key])) {
-      nf[tag.key] = nf[tag.key].filter(v => v !== tag.value)
-      if (nf[tag.key].length === 0) delete nf[tag.key]
-    }
-    // 4) якщо це одиничне (color тощо) — просто видалити
-    else {
-      delete nf[tag.key]
-    }
 
-    // 5) заново застосувати фільтри без перезавантаження модалки
-    this.applyFilters(nf)
-  },
 
+    removeTag(tag) {
+      const nf = { ...this.rawFilters }
+      if (['size','weight','price'].includes(tag.key)) {
+        delete nf[tag.key]
+      } else if (Array. isArray(nf[tag.key])) {
+        nf[tag.key] = nf[tag.key].filter(v => v !== tag.value)
+        if (nf[tag.key].length === 0) delete nf[tag.key]
+      } else {
+        delete nf[tag.key]
+      }
+      this.applyFilters(nf)
+    },
 
     clearAllFilters() {
-    // 1) Очистити обидва стани
-    this.rawFilters = {}
-    this.currentFilters = {}
-
-    // 2) Збільшити key, щоб перезавантажити FilterProduct через :key (якщо потрібно)
-    this.filtersKey++
-
-    // 3) Запросити продукти без фільтрів
-    // Якщо ви хочете, щоб кнопка просто знімала всі фільтри _плюс_ ховала модалку:
-    this.applyFilters({})
-
-    // або, якщо без модалки:
-    // this.fetchFilteredProducts({})
-  },
+      this.rawFilters = {}
+      this.currentFilters = {}
+      this.filtersKey++
+      this.applyFilters({})
+    },
 
     openAddModal() { this.showAddModal = true },
     closeAddModal() { this.showAddModal = false },
@@ -440,6 +426,7 @@ export default {
     } else {
       await this.fetchProducts()
     }
+    
   },
   computed: {
      activeTags() {

@@ -67,5 +67,13 @@ clearWishlist: "Clear wishlist",
    status_delivered: "Delivered",
    status_cancelled: "Cancelled",
 
+    "delivery": {
+    "courierNovaPoshta": "Courier Nova Poshta",
+    "storePickup": "Pickup from our stores", 
+    "postomat": "Postomat",
+    "novaPoshtaPickup": "Nova Poshta pickup",
+    "ukrposhtaPickup": "Ukrposhta pickup"
+
+}
 }
 };

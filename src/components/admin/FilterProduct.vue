@@ -10,17 +10,13 @@
           {{ $t('product.availabilityTitle') }}
         </h2>
         <div class="space-y-3">
-          <label
-            v-for="item in availabilityOptions"
-            :key="item.name"
-            class="flex items-center space-x-3"
-          >
-            <input
-              type="checkbox"
-              :value="item.name"
-              v-model="filters.availability"
-              class="custom-checkbox"
-            />
+          <label v-for="item in availabilityOptions" :key="item.value" class="flex items-center space-x-3">
+      <input
+       type="checkbox"
+        :value="item.value"     
+        v-model="filters.availability"
+        class="custom-checkbox"
+      />
             <span class="text-base text-gray-700 dark:text-gray-300">
               {{ item.name }} ({{ item.count }})
             </span>
@@ -115,21 +111,17 @@
           {{ $t('product.beadTypeTitle') }}
         </h3>
         <div class="space-y-3">
-          <label
-            v-for="item in beadTypeOptions"
-            :key="item.name"
-            class="flex items-center space-x-3"
-          >
-            <input
-              type="checkbox"
-              :value="item.name"
-              v-model="filters.beadTypes"
-              class="custom-checkbox"
-            />
-            <span class="text-base text-gray-700 dark:text-gray-300">
-              {{ item.name }} ({{ item.count }})
-            </span>
-          </label>
+        +     <!-- Правильно: ітеруємо beadTypeOptions, біндимо на filters.beadTypes -->
+     <label v-for="item in beadTypeOptions" :key="item.name" class="flex items-center space-x-3">
+       <input
+         type="checkbox"
+         :value="item.name"         
+         v-model="filters.beadTypes"
+         class="custom-checkbox"
+       />
+       <span>{{ item.name }} ({{ item.count }})</span>    
+      </label>
+
         </div>
       </div>
 
@@ -276,7 +268,14 @@ export default {
 
       const data = await api.getAdminFilter({ params })
 
-      availabilityOptions.value = data['Доступність'] || []
+     // Після отримання `data['Доступність']`
+availabilityOptions.value = (data['Доступність'] || []).map(item => ({
+  // назва як є
+  name: item.name,
+  // приводимо до числа: якщо API віддає рядок "1"/"0" або бул
+  value: Number(item.value ?? item.is_available ?? 0),
+  count: item.count
+}))
 
       const sz = data['Розмір'] || { min: '0', max: '150' }
       sizeOptions.min = +sz.min
@@ -418,10 +417,3 @@ export default {
 
 </style>
 
-<style scoped>
-.subsection-title {
-  text-align: center;
-  font-weight: 600;
-  margin-bottom: 0.5rem;
-}
-</style>

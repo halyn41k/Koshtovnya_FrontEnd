@@ -66,5 +66,14 @@ clearWishlist: "Очистити список",
    status_sent:      "Відправлено",
    status_delivered: "Доставлено",
    status_cancelled: "Скасовано",
+
+
+    "delivery": {
+    "courierNovaPoshta": "Кур'єр Нової Пошти",
+    "storePickup": "Самовивіз з наших магазинів",
+    "postomat": "Поштомат", 
+    "novaPoshtaPickup": "Самовивіз з Нової Пошти",
+    "ukrposhtaPickup": "Самовивіз з Укрпошти"
+  },
 }
 };
