@@ -72,13 +72,19 @@ const routes = [
     name: 'AccountInfo',
     component: () => import('@/components/user/AccountInfo.vue'),
     beforeEnter: (to, from, next) => {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        next({ name: 'Login' });
-      } else {
-        next();
-      }
-    },
+  const token = localStorage.getItem('token');
+  console.log('🔍 Router guard - checking token:', token ? 'EXISTS' : 'MISSING');
+  console.log('🔍 Router guard - from:', from.name);
+  console.log('🔍 Router guard - to:', to.name);
+  
+  if (!token) {
+    console.log('❌ No token found, redirecting to login');
+    next({ name: 'Login' });
+  } else {
+    console.log('✅ Token found, allowing access');
+    next();
+  }
+},
   },
   {
     path: '/cart',

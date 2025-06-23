@@ -403,10 +403,11 @@ export default {
     deleteProduct(id) { this.selectedProduct = this.products.find(p => p.id === id); this.showDeleteModal = true },
     closeDeleteModal() { this.showDeleteModal = false; this.selectedProduct = null },
 
-    onProductAdded(p) {
-      this.products.unshift(p)
-      this.closeAddModal()
-    },
+    async onProductAdded(p) {
+     this.closeAddModal()
+     // перезавантажуємо список — тоді точно будуть всі поля
+     await this.fetchProducts()
+   },
     onProductUpdated(u) {
       const i = this.products.findIndex(p => p.id === u.id)
       if (i !== -1) this.products[i] = u

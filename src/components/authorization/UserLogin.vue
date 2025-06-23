@@ -130,8 +130,83 @@ export default {
   
   methods: {
     redirectToGoogle() {
-      window.location.href = "http://koshtovnya.api-dev.bmax-edu.website/auth/google/redirect";
-    },
+    console.log('🔍 Redirecting to Google auth...');
+    const googleUrl = "http://koshtovnya.api-dev.bmax-edu.website/auth/google/redirect";
+    console.log('🔍 Google URL:', googleUrl);
+    
+    // Перевірте чи URL доступний
+    fetch(googleUrl, { method: 'HEAD' })
+      .then(response => {
+        console.log('🔍 Google auth endpoint status:', response.status);
+        if (response.ok) {
+          window.location.href = googleUrl;
+        } else {
+          console.error('❌ Google auth endpoint недоступний');
+          alert('Google авторизація тимчасово недоступна');
+        }
+      })
+      .catch(error => {
+        console.error('❌ Помилка перевірки Google endpoint:', error);
+        // Все одно спробуємо редірект
+        window.location.href = googleUrl;
+      });
+  },
+   async testGoogleCallback() {
+    // Цей метод можна викликати з консолі браузера для тестування
+    const testToken = 'test_token';
+    const testUser = { id: 1, email: 'test@gmail.com', name: 'Test User', role: 'user', is_banned: false };
+    
+    console.log('🧪 Testing callback with test data...');
+    
+    localStorage.setItem('token', testToken);
+    localStorage.setItem('user', JSON.stringify(testUser));
+    
+    console.log('✅ Test data saved to localStorage');
+    this.$router.push('/account');
+  },
+ handleGoogleCallback(token, userJson) {
+  try {
+    console.log('🔍 Raw userJson:', userJson);
+    const user = JSON.parse(decodeURIComponent(userJson));
+    console.log('✅ Parsed user:', user);
+    
+    if (user?.is_banned) {
+      alert(this.$t('authorization.bannedMessage') || 'Ваш акаунт заблоковано.');
+      this.$router.replace('/login');
+      return;
+    }
+
+    // Зберігаємо дані
+    localStorage.setItem('token', token);
+    localStorage.setItem('user', JSON.stringify(user));
+    console.log('✅ Data saved to localStorage');
+    console.log('✅ Stored token:', localStorage.getItem('token'));
+    console.log('✅ Stored user:', localStorage.getItem('user'));
+    
+    // Очищаємо URL параметри
+    const cleanUrl = window.location.pathname;
+    window.history.replaceState({}, '', cleanUrl);
+    console.log('✅ URL cleaned');
+    
+    // Використовуємо nextTick для гарантії що DOM оновився
+    this.$nextTick(() => {
+      const role = user?.role;
+      if (['admin', 'superadmin', 'manager'].includes(role)) {
+        console.log('➡️ Redirecting to /admin');
+        this.$router.replace('/admin');
+      } else {
+        console.log('➡️ Redirecting to /account');
+        this.$router.replace('/account');
+      }
+    });
+    
+  } catch (e) {
+    console.error('❌ Parse error:', e);
+    console.error('❌ Original userJson:', userJson);
+    alert(this.$t('authorization.googleError') || 'Помилка Google авторизації');
+    this.$router.replace('/login');
+  }
+},
     validateEmail() {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       this.emailError = emailRegex.test(this.email) ? '' : this.$t('authorization.emailInvalid');

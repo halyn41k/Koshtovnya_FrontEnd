@@ -288,57 +288,126 @@ export default {
       }
     },
     validatePersonalInfo(silent = false) {
-      if (!silent) this.errors = {};
-      let valid = true;
-      if (!this.formData.firstName) {
-        if (!silent) this.errors.firstName = this.$t("payment.fields.firstName.label") + ' ' + this.$t("payment.errors.required", { field: this.$t("payment.fields.firstName.label") }) || "Ім'я обов'язкове";
+    if (!silent) this.errors = {};
+    let valid = true;
+
+    // Ім'я
+    if (!this.formData.firstName) {
+      if (!silent) {
+        this.errors.firstName = this.$t("payment.errors.required", {
+          fieldsValid: this.$t("payment.fieldsValid.firstName.label")
+        });
+      }
+      valid = false;
+    }
+
+    // Прізвище
+    if (!this.formData.lastName) {
+      if (!silent) {
+        this.errors.lastName = this.$t("payment.errors.required", {
+          fieldsValid: this.$t("payment.fieldsValid.lastName.label")
+        });
+      }
+      valid = false;
+    }
+
+    // По батькові
+    if (!this.formData.secondName) {
+      if (!silent) {
+        this.errors.secondName = this.$t("payment.errors.required", {
+          fieldsValid: this.$t("payment.fieldsValid.secondName.label")
+        });
+      }
+      valid = false;
+    }
+
+   const phoneLabel = this.$t("payment.fieldsValid.phone.label");
+    const phone = this.formData.phone;
+    const phoneRegex = /^[0-9]{10}$/;  // будь-які 10 цифр від 0 до 9
+
+    if (!phone) {
+      if (!silent) {
+        this.errors.phone = this.$t("payment.errors.required", {
+          fieldsValid: phoneLabel
+        });
+      }
+      valid = false;
+    }
+    else if (!phoneRegex.test(phone)) {
+      if (!silent) {
+        this.errors.phone = this.$t("payment.errors.invalid", {
+          fieldsValid: phoneLabel
+        });
+      }
+      valid = false;
+    }
+
+
+    return valid;
+  },
+
+  validatePostalInfo(silent = false) {
+    if (!silent) this.errors = {};
+    let valid = true;
+
+    // Спосіб доставки
+    if (!this.formData.deliveryType || !this.formData.deliveryType.name) {
+      if (!silent) {
+        this.errors.deliveryType = this.$t("payment.errors.required", {
+          fieldsValid: this.$t("payment.fieldsValid.deliveryType.label")
+        });
+      }
+      valid = false;
+    }
+
+    if (!this.isStorePickupSelected) {
+      // Місто
+      if (!this.formData.city) {
+        if (!silent) {
+          this.errors.city = this.$t("payment.errors.required", {
+            fieldsValid: this.$t("payment.fieldsValid.city.label")
+          });
+        }
         valid = false;
       }
-      if (!this.formData.lastName) {
-        if (!silent) this.errors.lastName = this.$t("payment.fields.lastName.label") + ' ' + this.$t("payment.errors.required", { field: this.$t("payment.fields.lastName.label") }) || "Прізвище обов'язкове";
-        valid = false;
-      }
-      if (!this.formData.secondName) {
-        if (!silent) this.errors.secondName = this.$t("payment.fields.secondName.label") + ' ' + this.$t("payment.errors.required", { field: this.$t("payment.fields.secondName.label") }) || "По батькові обов'язкове";
-        valid = false;
-      }
-      if (!this.formData.phone) {
-        if (!silent) this.errors.phone = this.$t("payment.fields.phone.label") + ' ' + this.$t("payment.errors.required", { field: this.$t("payment.fields.phone.label") }) || "Номер телефону обов'язковий";
-        valid = false;
-      }
-      return valid;
-    },
-    validatePostalInfo(silent = false) {
-      if (!silent) this.errors = {};
-      let valid = true;
-      if (!this.formData.deliveryType || !this.formData.deliveryType.name) {
-        if (!silent) this.errors.deliveryType = this.$t("payment.deliveryMethod") + ' ' + this.$t("payment.errors.required", { field: this.$t("payment.deliveryMethod") }) || "Спосіб доставки обов'язковий";
-        valid = false;
-      }
-      if (!this.isStorePickupSelected) {
-        if (!this.formData.city) {
-          if (!silent) this.errors.city = this.$t("payment.city") + ' ' + this.$t("payment.errors.required", { field: this.$t("payment.city") }) || "Місто обов'язкове";
+
+      // Кур'єрська доставка
+      if (this.selectedDeliveryCategory === "courier") {
+        // Вулиця
+        if (!this.formData.street) {
+          if (!silent) {
+            this.errors.street = this.$t("payment.errors.select", {
+              fieldsValid: this.$t("payment.fieldsValid.street.label")
+            });
+          }
           valid = false;
         }
-        if (this.selectedDeliveryCategory === "courier") {
-          if (!this.formData.street) {
-            if (!silent) this.errors.street = this.$t("payment.street") + ' ' + this.$t("payment.errors.required", { field: this.$t("payment.street") }) || "Виберіть вулицю";
-            valid = false;
+        // Номер будинку
+        if (!this.formData.houseNumber) {
+          if (!silent) {
+            this.errors.houseNumber = this.$t("payment.errors.enter", {
+              fieldsValid: this.$t("payment.fieldsValid.houseNumber.label")
+            });
           }
-          if (!this.formData.houseNumber) {
-            if (!silent) this.errors.houseNumber = this.$t("payment.houseNumber") + ' ' + this.$t("payment.errors.required", { field: this.$t("payment.houseNumber") }) || "Введіть номер будинку";
-            valid = false;
-          }
-        }
-        if (this.selectedDeliveryCategory === "pickup") {
-          if (!this.formData.warehouse) {
-            if (!silent) this.errors.warehouse = this.$t("payment.warehouse") + ' ' + this.$t("payment.errors.required", { field: this.$t("payment.warehouse") }) || "Відділення обов'язкове";
-            valid = false;
-          }
+          valid = false;
         }
       }
-      return valid;
-    },
+
+      // Відділення
+      if (this.selectedDeliveryCategory === "pickup") {
+        if (!this.formData.warehouse) {
+          if (!silent) {
+            this.errors.warehouse = this.$t("payment.errors.select", {
+              fieldsValid: this.$t("payment.fieldsValid.warehouse.label")
+            });
+          }
+          valid = false;
+        }
+      }
+    }
+
+    return valid;
+  },
     setCities(newCities) {
       this.cities = newCities;
     },

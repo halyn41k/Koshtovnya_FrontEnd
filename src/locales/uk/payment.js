@@ -26,6 +26,8 @@ freeDeliveryHintStyled: '💡 Безкоштовна доставка при з�
     storeCity: 'Коломия',
     address: 'Адреса',
     storeAddress: 'вул. Степана Бандери 22',
+
+
     steps: {
       personalInfo: 'Особиста інформація',
       delivery: 'Поштове відділення',
@@ -34,6 +36,7 @@ freeDeliveryHintStyled: '💡 Безкоштовна доставка при з�
       finish: 'Завершити',
     },
     fields: {
+      
       firstName: {
         label: "Ім'я",
         placeholder: "Введіть ім'я"
@@ -51,6 +54,18 @@ freeDeliveryHintStyled: '💡 Безкоштовна доставка при з�
         placeholder: 'Введіть номер телефону'
       }
     },
+    fieldsValid: {
+     "firstName":   { "label": "Ім'я" },
+      "lastName":    { "label": "Прізвище" },
+      "secondName":  { "label": "По батькові" },
+      "phone":       { "label": "Номер телефону" },
+      "deliveryType":{ "label": "Спосіб доставки" },
+      "city":        { "label": "Місто" },
+      "street":      { "label": "Вулиця" },
+      "houseNumber": { "label": "Номер будинку" },
+      "warehouse":   { "label": "Відділення" }
+      
+    },
     methodsTitle: 'Спосіб оплати',
     paymentOptions: {
       postPayment: 'Післяоплата',
@@ -58,10 +73,16 @@ freeDeliveryHintStyled: '💡 Безкоштовна доставка при з�
     },
     cardTypeLabel: 'Тип картки',
     cardTypePlaceholder: 'Оберіть тип картки',
+    
     errors: {
+            "required": "Поле «{fieldsValid}» обов'язкове",
+            invalid:  "Неправильний формат поля «{fieldsValid}»",
+      "select": "Оберіть «{fieldsValid}»",
+      "enter": "Введіть «{fieldsValid}»",
       paymentMethodRequired: 'Оберіть спосіб оплати',
       cardTypeRequired: 'Оберіть тип картки'
     },
+    
      paymentConfirmed: {
     header: 'Оплата підтверджена',
     message1: 'Ви успішно здійснили оплату. Зачекайте, будь ласка, вас перенаправляють...',

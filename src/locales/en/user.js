@@ -74,6 +74,27 @@ clearWishlist: "Clear wishlist",
     "novaPoshtaPickup": "Nova Poshta pickup",
     "ukrposhtaPickup": "Ukrposhta pickup"
 
-}
+},
+// loading errors
+loadPhoneNumberError: 'Failed to load phone number',
+loadDeliveryError: 'Failed to load delivery methods',
+
+// phone verification
+invalidPhone: 'Enter a valid phone number (10 digits)',
+
+// courier
+selectStreet: 'Select a street',
+
+// pickup
+cityRequired: 'City is required',
+
+
+// save / update
+addressSaved: 'Address successfully saved',
+saveAddressError: 'Failed to save address',
+
+// delete
+addressDeleted: 'Address successfully deleted',
+deleteAddressError: 'Failed to delete address',
 }
 };

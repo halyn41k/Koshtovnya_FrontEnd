@@ -56,13 +56,30 @@ export default {
       postPayment: 'Cash on Delivery',
       cardPayment: 'Card Payment'
     },
+    fieldsValid: {
+"firstName": { "label": "First name" },
+"lastName": { "label": "Last name" },
+"secondName": { "label": "Patronymic" },
+"phone": { "label": "Phone number" },
+"deliveryType":{ "label": "Delivery method" },
+"city": { "label": "City" },
+"street": { "label": "Street" },
+"houseNumber": { "label": "House number" },
+"warehouse": { "label": "Department" }
+
+},
     cardTypeLabel: 'Card Type',
     cardTypePlaceholder: 'Select card type',
     errors: {
+            "required": "The field «{fieldsValid}» is required",
+      "select": "Select «{fieldsValid}»",
+      "enter": "Enter «{fieldsValid}»",
+      invalid: "Invalid format of field «{fieldsValid}»",
       paymentMethodRequired: 'Please select a payment method',
       cardTypeRequired: 'Please select a card type'
     },
     "orderReview": {
+      
       "title": "Please review items before placing your order",
       "unit": "pcs",
       "quantityLabel": "Quantity",

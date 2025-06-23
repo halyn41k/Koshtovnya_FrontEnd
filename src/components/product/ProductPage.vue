@@ -166,6 +166,26 @@
           </div>
         </section>
 
+         <!-- SPECIFICATIONS -->
+    <section>
+      <div class="hidden md:flex items-center mb-4">
+        <hr class="flex-grow border-t-2 border-gray-300 dark:border-gray-600" />
+      <h2 class="mx-4 text-2xl font-bold text-gray-900 dark:invert">Характеристики</h2>
+      <hr class="flex-grow border-t-2 border-gray-300 dark:border-gray-600" />
+      </div>
+      <h2 class="md:hidden text-2xl font-bold text-gray-900 text-center mb-4 dark:invert">Характеристики</h2>
+      <div class="w-full">
+        <div
+          v-for="(val, key) in formattedCharacteristics"
+          :key="key"
+          class="grid grid-cols-2 gap-4 py-2 border-b border-gray-200"
+        >
+          <dt class="font-medium">{{ key }}</dt>
+<dd class="text-gray-700 dark:text-gray-300">{{ val }}</dd>
+        </div>
+      </div>
+    </section>
+
         <!-- REVIEWS & RELATED -->
     <Suspense>
       <template #default>

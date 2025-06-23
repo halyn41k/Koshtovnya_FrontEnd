@@ -989,37 +989,18 @@ findDeliveryTypeByName(deliveryName) {
     });
   });
 },
-  openForm() {
+    openForm() {
   this.isEditingExisting = false;
   this.showForm = true;
+  this.resetAddressForm();
   
-  // ВИПРАВЛЕННЯ: Правильно очищуємо форму тільки для нової адреси
-  this.formData = {
-    city: "",
-    cityRef: "",
-    deliveryType: null,
-    selectedDeliveryMethod: null,
-    deliveryName: "",
-    streetSearch: ""
-  };
-  this.deliveryAddress = { street: "", number: "", branch: "", postomat: "", warehouse: "" };
-  this.selectedCity = null;
-  this.selectedStreet = null;
-  this.addressId = null;
+ 
   
-  if (!this.phoneNumber) {
-    this.fetchUserPhoneNumber();
-  }
+  if (!this.phoneNumber) this.fetchUserPhoneNumber();
 },
 
-   cancelEdit() {
-  this.showForm = false;
-  this.isEditingExisting = false;
-  
-  // ВИПРАВЛЕННЯ: При скасуванні редагування відновлюємо дані з сервера
-  if (this.addressAvailable) {
-    this.fetchUserAddress();
-  }
+    cancelEdit() {
+      this.showForm = false;
     }
   },
   computed: {

@@ -1,6 +1,6 @@
 <template>
   <div class="postal-info font-montserrat text-[14px]">
-    <div class="flex flex-col gap-4 w-full max-w-[520px] overflow-x-auto">
+    <div class="flex flex-col gap-4 w-full max-w-[520px] overflow-visible">
 
       <!-- Спосіб доставки -->
       <div class="relative">
@@ -46,6 +46,7 @@
               :placeholder="$t('payment.enterCity')"
             />
             <ComboboxOptions
+            static
               v-if="citiesLocal.length"
               class="absolute z-50 w-full mt-1 max-h-48 overflow-auto 
                      rounded bg-white border border-gray-300 shadow-lg"
@@ -85,6 +86,7 @@
               :placeholder="$t('payment.enterStreet')"
             />
             <ComboboxOptions
+            static
               v-if="streetsLocal.length"
               class="absolute z-50 w-full mt-1 max-h-48 overflow-auto 
                      rounded bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 shadow-lg"

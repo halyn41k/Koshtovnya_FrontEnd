@@ -15,7 +15,7 @@
           {{ $t(`payment.fields.${key}.label`) }}
         </label>
 
-        <!-- Phone input with icon -->
+        <!-- Phone input with icon + digit-only logic -->
         <div v-if="key === 'phone'" class="relative min-w-0">
           <img
             src="@/assets/icons/phone.svg"
@@ -23,11 +23,13 @@
             class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 filter dark:invert"
           />
           <input
-            :id="key"
-            :type="field.type"
-            v-model="localData[key]"
+            id="phone"
+            type="text"
+            inputmode="numeric"
+            maxlength="10"
+            v-model="localData.phone"
+            @input="onPhoneInput"
             :placeholder="$t(`payment.fields.${key}.placeholder`)"
-            @input="updateData"
             class="border border-gray-400 dark:border-gray-600 p-2 pl-10 rounded
                    text-black dark:text-white bg-white dark:bg-gray-800
                    placeholder-gray-500 dark:placeholder-gray-400
@@ -35,14 +37,14 @@
           />
         </div>
 
-        <!-- Other inputs -->
+        <!-- Інші поля -->
         <input
           v-else
           :id="key"
           :type="field.type"
           v-model="localData[key]"
-          :placeholder="$t(`payment.fields.${key}.placeholder`)"
           @input="updateData"
+          :placeholder="$t(`payment.fields.${key}.placeholder`)"
           class="border border-gray-400 dark:border-gray-600 p-2 rounded
                  text-black dark:text-white bg-white dark:bg-gray-800
                  placeholder-gray-500 dark:placeholder-gray-400
@@ -60,7 +62,6 @@
   </div>
 </template>
 
-
 <script>
 import Multiselect from 'vue-multiselect'
 
@@ -75,7 +76,7 @@ export default {
       localData: { ...this.modelValue },
       fields: {
         firstName:  { type: 'text', placeholder: "Введіть ім'я" },
-        lastName: { type: 'text', placeholder: 'Введіть прізвище' },
+        lastName:   { type: 'text', placeholder: 'Введіть прізвище' },
         secondName: { type: 'text', placeholder: 'Введіть по батькові' },
         phone:      { type: 'tel',  placeholder: 'Введіть номер телефону' },
       },
@@ -91,6 +92,12 @@ export default {
     updateData() {
       this.$emit('update:modelValue', this.localData);
     },
+    onPhoneInput(event) {
+      // Фільтруємо: залишаємо тільки цифри, обмежуємо довжину 10
+      let digits = event.target.value.replace(/\D/g, '').slice(0, 10);
+      this.localData.phone = digits;
+      this.$emit('update:modelValue', this.localData);
+    },
   },
 };
 </script>
@@ -99,7 +106,7 @@ export default {
 /* Імпортуємо Montserrat Medium */
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@500&display=swap');
 
-/* Применяємо до полей */
+/* Застосовуємо до полів */
 .montserrat {
   font-family: 'Montserrat', sans-serif;
   font-weight: 500;
