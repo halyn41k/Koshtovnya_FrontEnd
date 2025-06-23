@@ -130,27 +130,29 @@ export default {
   
   methods: {
     redirectToGoogle() {
-    console.log('🔍 Redirecting to Google auth...');
-    const googleUrl = "http://koshtovnya.api-dev.bmax-edu.website/auth/google/redirect";
-    console.log('🔍 Google URL:', googleUrl);
-    
-    // Перевірте чи URL доступний
-    fetch(googleUrl, { method: 'HEAD' })
-      .then(response => {
-        console.log('🔍 Google auth endpoint status:', response.status);
-        if (response.ok) {
-          window.location.href = googleUrl;
-        } else {
-          console.error('❌ Google auth endpoint недоступний');
-          alert('Google авторизація тимчасово недоступна');
-        }
-      })
-      .catch(error => {
-        console.error('❌ Помилка перевірки Google endpoint:', error);
-        // Все одно спробуємо редірект
+  console.log('🔍 Redirecting to Google auth...');
+  
+  // Використовуйте HTTPS замість HTTP
+  const googleUrl = "https://koshtovnya.api-dev.bmax-edu.website/auth/google/redirect";
+  console.log('🔍 Google URL:', googleUrl);
+  
+  // Перевірте чи URL доступний
+  fetch(googleUrl, { method: 'HEAD' })
+    .then(response => {
+      console.log('🔍 Google auth endpoint status:', response.status);
+      if (response.ok) {
         window.location.href = googleUrl;
-      });
-  },
+      } else {
+        console.error('❌ Google auth endpoint недоступний');
+        alert('Google авторизація тимчасово недоступна');
+      }
+    })
+    .catch(error => {
+      console.error('❌ Помилка перевірки Google endpoint:', error);
+      // Все одно спробуємо редірект
+      window.location.href = googleUrl;
+    });
+},
    async testGoogleCallback() {
     // Цей метод можна викликати з консолі браузера для тестування
     const testToken = 'test_token';
