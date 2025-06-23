@@ -336,58 +336,69 @@ export default {
     openFilter() { this.showFilter = true },
     closeFilter() { this.showFilter = false },
 
-   applyFilters(rawFilters) {
-    const adapted = {}
-    this.rawFilters = { ...rawFilters }
+ // У ProductList.vue - applyFilters з дебагом
+applyFilters(rawFilters) {
+  const adapted = {}
+  this.rawFilters = { ...rawFilters }
 
-    // Ось тут ми дивимося на вже числові 0/1 в rawFilters.availability
-    if (Array.isArray(rawFilters.availability) && rawFilters.availability.length) {
-      // Laravel чекає масив рядків, тому toString()
-      adapted.is_available = rawFilters.availability.map(v => v.toString())
-    }
+  console.log('🔍 Отримали фільтри з FilterComponent:', rawFilters)
 
-    // Інші фільтри
-    if (rawFilters.rating?.length)    adapted.rating        = rawFilters.rating
-    if (rawFilters.color)             adapted.color         = rawFilters.color
-    if (rawFilters.producers?.length) adapted.bead_producer = rawFilters.producers
-    if (rawFilters.type_of_bead?.length) adapted.type_of_bead = rawFilters.type_of_bead
-    if (rawFilters.category?.length)  adapted.category      = rawFilters.category
+  // Доступність
+  if (Array.isArray(rawFilters.is_available) && rawFilters.is_available.length) {
+    adapted.is_available = rawFilters.is_available
+    console.log('✅ Встановлюємо is_available:', adapted.is_available)
+  }
 
-    // Діапазони
-    if (rawFilters.size) {
-      adapted.size_from = rawFilters.size[0]
-      adapted.size_to   = rawFilters.size[1]
-    }
-    if (rawFilters.weight) {
-      adapted.weight_from = rawFilters.weight[0]
-      adapted.weight_to   = rawFilters.weight[1]
-    }
-    if (rawFilters.price) {
-      adapted.price_from = rawFilters.price[0]
-      adapted.price_to   = rawFilters.price[1]
-    }
+  // Інші фільтри
+  if (rawFilters.rating?.length)    adapted.rating        = rawFilters.rating
+  if (rawFilters.color)             adapted.color         = rawFilters.color
+  if (rawFilters.bead_producer?.length) adapted.bead_producer = rawFilters.bead_producer
+  if (rawFilters.type_of_bead?.length) adapted.type_of_bead = rawFilters.type_of_bead
+  if (rawFilters.category?.length)  adapted.category      = rawFilters.category
 
-    console.log('🔎 Payload to API:', adapted)
-    this.currentFilters = adapted
-    sessionStorage.setItem('admin-filters', JSON.stringify(adapted))
-    this.fetchFilteredProducts(adapted)
-    this.closeFilter()
-  },
+  // Діапазони
+  if (rawFilters.size) {
+    adapted.size_from = rawFilters.size[0]
+    adapted.size_to   = rawFilters.size[1]
+  }
+  if (rawFilters.weight) {
+    adapted.weight_from = rawFilters.weight[0]
+    adapted.weight_to   = rawFilters.weight[1]
+  }
+  if (rawFilters.price) {
+    adapted.price_from = rawFilters.price[0]
+    adapted.price_to   = rawFilters.price[1]
+  }
 
+  console.log('🔎 Фінальний запит до API:', adapted)
+  this.currentFilters = adapted
+  sessionStorage.setItem('admin-filters', JSON.stringify(adapted))
+  this.fetchFilteredProducts(adapted)
+  this.closeFilter()
+},
 
 
     removeTag(tag) {
-      const nf = { ...this.rawFilters }
-      if (['size','weight','price'].includes(tag.key)) {
-        delete nf[tag.key]
-      } else if (Array. isArray(nf[tag.key])) {
-        nf[tag.key] = nf[tag.key].filter(v => v !== tag.value)
-        if (nf[tag.key].length === 0) delete nf[tag.key]
-      } else {
-        delete nf[tag.key]
-      }
-      this.applyFilters(nf)
-    },
+  const nf = { ...this.rawFilters }
+  
+  if (['size','weight','price'].includes(tag.key)) {
+    delete nf[tag.key]
+  } 
+  // ВИПРАВЛЕННЯ: Обробляємо is_available правильно
+  else if (tag.key === 'is_available' && Array.isArray(nf[tag.key])) {
+    nf[tag.key] = nf[tag.key].filter(v => v !== tag.value)
+    if (nf[tag.key].length === 0) delete nf[tag.key]
+  }
+  else if (Array.isArray(nf[tag.key])) {
+    nf[tag.key] = nf[tag.key].filter(v => v !== tag.value)
+    if (nf[tag.key].length === 0) delete nf[tag.key]
+  } 
+  else {
+    delete nf[tag.key]
+  }
+  
+  this.applyFilters(nf)
+},
 
     clearAllFilters() {
       this.rawFilters = {}
@@ -430,33 +441,35 @@ export default {
     
   },
   computed: {
-     activeTags() {
+    activeTags() {
     const tags = []
     for (const [key, val] of Object.entries(this.rawFilters)) {
-      // пропустити, якщо ніби базова категорія
       if (key === 'category' || key === 'category_id') continue
 
       if (Array.isArray(val)) {
-        // Повзунки: один тег "мін–макс"
         if (['size','weight','price'].includes(key) && val.length === 2) {
           tags.push({ key, value: val, label: `${val[0]} – ${val[1]}` })
         }
-        // чекбокси: по одному тегу на кожен елемент
+        // ВИПРАВЛЕННЯ: Спеціальна обробка для is_available
+        else if (key === 'is_available') {
+          val.forEach(v => {
+            const label = v === 1 ? 'В наявності' : 'Немає в наявності'
+            tags.push({ key, value: v, label })
+          })
+        }
         else {
           val.forEach(v => {
             tags.push({ key, value: v, label: String(v) })
           })
         }
       }
-      // одиночні значення
       else if (val !== '' && val != null) {
         tags.push({ key, value: val, label: String(val) })
       }
     }
     return tags
   }
-
-}  
+}
 }
 
 </script>

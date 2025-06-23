@@ -259,18 +259,43 @@ export default {
     )
 
     // застосувати початкові фільтри з пропсів
-    const applyInitialFilters = () => {
-      const init = props.initialFilters
-      if (init.availability) filters.availability = [...init.availability]
-      if (init.size?.length === 2) filters.size       = [...init.size]
-      if (init.weight?.length === 2) filters.weight   = [...init.weight]
-      if (init.price?.length === 2) filters.price     = [...init.price]
-      if (init.color)               filters.color     = init.color
-      if (init.rating)              filters.rating    = [...init.rating]
-      if (init.beadTypes)           filters.beadTypes = [...init.beadTypes]
-      if (init.producers)           filters.producers = [...init.producers]
-      if (init.category)            filters.category  = [...init.category]
-    }
+   const applyInitialFilters = () => {
+  const init = props.initialFilters
+  console.log('🔄 Applying initial filters:', init)
+  
+  // Доступність - зберігаємо як масив значень
+  if (init.is_available) {
+    filters.availability = init.is_available.map(val => 
+      val === 1 ? 'В наявності' : 'Немає в наявності'
+    )
+  }
+  
+  // Рейтинг
+  if (init.rating) filters.rating = [...init.rating]
+  
+  // Розміри
+  if (init.size?.length === 2) filters.size = [...init.size]
+  
+  // Вага
+  if (init.weight?.length === 2) filters.weight = [...init.weight]
+  
+  // Ціна
+  if (init.price?.length === 2) filters.price = [...init.price]
+  
+  // Колір
+  if (init.color) filters.color = init.color
+  
+  // Тип бісеру - використовуємо правильний ключ
+  if (init.type_of_bead) filters.beadTypes = [...init.type_of_bead]
+  
+  // Виробник бісеру - використовуємо правильний ключ
+  if (init.bead_producer) filters.producers = [...init.bead_producer]
+  
+  // Категорія
+  if (init.category) filters.category = [...init.category]
+  
+  console.log('✅ Applied filters:', { ...filters })
+}
 
     // завантажити дані фільтрів із бекенду
     const loadFilters = async () => {

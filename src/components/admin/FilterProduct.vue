@@ -268,14 +268,42 @@ export default {
 
       const data = await api.getAdminFilter({ params })
 
-     // Після отримання `data['Доступність']`
-availabilityOptions.value = (data['Доступність'] || []).map(item => ({
-  // назва як є
-  name: item.name,
-  // приводимо до числа: якщо API віддає рядок "1"/"0" або бул
-  value: Number(item.value ?? item.is_available ?? 0),
-  count: item.count
-}))
+availabilityOptions.value = (data['Доступність'] || []).map((item, index) => {
+  // Визначаємо value на основі назви
+  let value = 0; // за замовчуванням "немає в наявності"
+  
+  const itemNameLower = item.name.toLowerCase();
+  
+  // Перевіряємо чи це "в наявності"
+  const isAvailable = 
+    itemNameLower.includes('в наявності') ||
+    itemNameLower.includes('available') ||
+    itemNameLower.includes('in stock') ||
+    (itemNameLower.includes('stock') && !itemNameLower.includes('out')) ||
+    (itemNameLower.includes('наявн') && !itemNameLower.includes('немає'));
+  
+  // Перевіряємо чи це "немає в наявності"  
+  const isNotAvailable = 
+    itemNameLower.includes('немає в наявності') ||
+    itemNameLower.includes('not available') ||
+    itemNameLower.includes('out of stock') ||
+    itemNameLower.includes('немає');
+  
+  if (isAvailable && !isNotAvailable) {
+    value = 1; // В наявності
+  } else if (isNotAvailable) {
+    value = 0; // Немає в наявності
+  }
+  
+  console.log(`Item: "${item.name}" -> value: ${value}`); // для дебагу
+  
+  return {
+    name: item.name,
+    value: `${value}_${index}`, // унікальний ключ
+    originalValue: value, // оригінальне значення для API
+    count: item.count
+  };
+});
 
       const sz = data['Розмір'] || { min: '0', max: '150' }
       sizeOptions.min = +sz.min
@@ -306,30 +334,47 @@ availabilityOptions.value = (data['Доступність'] || []).map(item => (
     }
   }
 
-    const applyFilters = () => {
-      const cleaned = {}
+   const applyFilters = () => {
+  const cleaned = {}
 
-      if (filters.availability.length) cleaned.availability = [...filters.availability]
-      if (filters.rating.length) cleaned.rating = [...filters.rating]
-      if (filters.beadTypes.length) cleaned.type_of_bead = [...filters.beadTypes]
-      if (filters.producers.length) cleaned.bead_producer = [...filters.producers]
-      if (filters.category.length) cleaned.category = [...filters.category]
-      if (props.categoryId) cleaned.category_id = props.categoryId
+  if (filters.availability.length) {
+    console.log('🔍 Вибрані availability фільтри:', filters.availability);
+    
+    // Конвертуємо унікальні значення назад до оригінальних
+    const originalValues = filters.availability.map(uniqueValue => {
+      const item = availabilityOptions.value.find(opt => opt.value === uniqueValue);
+      console.log(`Шукаємо ${uniqueValue} -> знайшли:`, item);
+      return item ? item.originalValue : 0;
+    });
+    
+    console.log('🔍 Оригінальні значення:', originalValues);
+    
+    cleaned.is_available = [...new Set(originalValues)]; // Видаляємо дублікати
+    console.log('🔍 Фінальний is_available:', cleaned.is_available);
+  }
+  
+  if (filters.rating.length) cleaned.rating = [...filters.rating]
+  if (filters.beadTypes.length) cleaned.type_of_bead = [...filters.beadTypes]
+  if (filters.producers.length) cleaned.bead_producer = [...filters.producers]
+  if (filters.category.length) cleaned.category = [...filters.category]
+  if (props.categoryId) cleaned.category_id = props.categoryId
 
-      if (filters.color) cleaned.color = filters.color
+  if (filters.color) cleaned.color = filters.color
 
-      if (filters.size[0] > sizeOptions.min || filters.size[1] < sizeOptions.max)
-        cleaned.size = [...filters.size]
+  if (filters.size[0] > sizeOptions.min || filters.size[1] < sizeOptions.max)
+    cleaned.size = [...filters.size]
 
-      if (filters.weight[0] > weightOptions.min || filters.weight[1] < weightOptions.max)
-        cleaned.weight = [...filters.weight]
+  if (filters.weight[0] > weightOptions.min || filters.weight[1] < weightOptions.max)
+    cleaned.weight = [...filters.weight]
 
-      if (filters.price[0] > priceOptions.min || filters.price[1] < priceOptions.max)
-        cleaned.price = [...filters.price]
+  if (filters.price[0] > priceOptions.min || filters.price[1] < priceOptions.max)
+    cleaned.price = [...filters.price]
 
-      window.scrollTo({ top: 0, behavior: 'smooth' })
-      emit('applyFilters', cleaned) 
-    }
+  console.log('🔎 Відправляємо всі фільтри:', cleaned);
+  
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+  emit('applyFilters', cleaned) 
+}
     
     onMounted(loadFilters)
 
